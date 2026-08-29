@@ -1,0 +1,1 @@
+import{t as e}from"./jsx-runtime-KJkY8l8U.js";import{r as t}from"./index-D9AWHfBv.js";import{t as n}from"./ShopPage-lgmp7ogO.js";var r=e(),i=()=>{let{slug:e}=t.useParams(),i=t.useLoaderData();return(0,r.jsx)(n,{overrideCategorySlug:e,initialCategories:i.categories,initialProducts:i.products})};export{i as component};
