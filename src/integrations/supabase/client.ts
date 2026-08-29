@@ -20,7 +20,18 @@ function createSupabaseClient() {
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
-      storage: typeof window !== 'undefined' ? localStorage : undefined,
+      storage: (() => {
+        if (typeof window === 'undefined') return undefined;
+        try {
+          const testKey = '__storage_test__';
+          window.localStorage.setItem(testKey, testKey);
+          window.localStorage.removeItem(testKey);
+          return window.localStorage;
+        } catch (e) {
+          console.warn("localStorage not available, likely due to iframe restrictions. Falling back to memory storage.");
+          return undefined;
+        }
+      })(),
       persistSession: true,
       autoRefreshToken: true,
     },
