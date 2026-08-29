@@ -1,0 +1,48 @@
+{
+  "source": "FALLBACK",
+  "error": "Error: Unregistered API key",
+  "rows": [
+    {
+      "slug": "all-products",
+      "name": "All Products",
+      "image": "/src/assets/hero-products.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "honey",
+      "name": "Honey",
+      "image": "/src/assets/hero-honey.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "beeswax",
+      "name": "Beeswax",
+      "image": "/src/assets/prod-honeycomb.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "bee-pollen",
+      "name": "Bee Pollen",
+      "image": "/src/assets/mortar-herbs.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "beeswax-candle",
+      "name": "Beeswax Candles",
+      "image": "/src/assets/honeycomb-bees.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "beeswax-products",
+      "name": "Beeswax Products",
+      "image": "/src/assets/prod-giftpack.jpg",
+      "hasCustomImage": false
+    },
+    {
+      "slug": "beauty-products",
+      "name": "Beauty Products",
+      "image": "/src/assets/prod-lychee.jpg",
+      "hasCustomImage": false
+    }
+  ]
+}
