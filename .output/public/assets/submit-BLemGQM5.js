@@ -1,1 +1,0 @@
-import{t as e}from"./client-CScxguia.js";async function t(t){let n={...t,meta:t.meta??{}},{error:r}=await e.from(`form_submissions`).insert(n);if(r)throw r;return fetch(`/api/public/submissions`,{method:`POST`,headers:{"Content-Type":`application/json`},body:JSON.stringify(t),keepalive:!0}).catch(()=>{}),{ok:!0}}export{t};

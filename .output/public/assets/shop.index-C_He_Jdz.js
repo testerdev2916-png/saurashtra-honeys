@@ -1,1 +1,0 @@
-import{t as e}from"./jsx-runtime-KJkY8l8U.js";import{i as t}from"./index-D9AWHfBv.js";import{t as n}from"./ShopPage-lgmp7ogO.js";var r=e(),i=()=>{let e=t.useLoaderData();return(0,r.jsx)(n,{initialCategories:e.categories,initialProducts:e.products})};export{i as component};
