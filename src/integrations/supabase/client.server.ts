@@ -41,7 +41,12 @@ function createSupabaseAdminClient() {
       storage: undefined,
       persistSession: false,
       autoRefreshToken: false,
-    }
+    },
+    global: {
+      fetch: (url, options) => {
+        return fetch(url, { ...options, signal: options?.signal || AbortSignal.timeout(8000) });
+      },
+    },
   });
 }
 

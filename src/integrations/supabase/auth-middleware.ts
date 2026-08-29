@@ -60,7 +60,8 @@ export const requireSupabaseAuth = createMiddleware({ type: 'function' }).server
           fetch: (url, options) => {
             const headers = new Headers(options?.headers);
             headers.set('Authorization', `Bearer ${token}`);
-            return fetch(url, { ...options, headers });
+            const signal = options?.signal || AbortSignal.timeout(8000);
+            return fetch(url, { ...options, headers, signal });
           },
         },
         auth: {
