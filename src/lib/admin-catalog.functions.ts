@@ -72,14 +72,11 @@ const productSchema = z.object({
   is_bestseller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
   show_on_homepage: z.boolean().default(false),
-  images: z.array(z.string().max(2000)).default([]),
-  additional_images: z.array(z.string().max(2000)).default([]).optional(),
   video_url: z.string().max(2000).nullable().optional(),
   meta_title: z.string().max(200).nullable().optional(),
   meta_description: z.string().max(400).nullable().optional(),
   meta_keywords: z.string().max(400).nullable().optional(),
   canonical_url: z.string().max(2000).nullable().optional(),
-  attributes: z.record(z.string(), z.any()).optional(),
 });
 
 export const upsertProduct = createServerFn({ method: "POST" })
@@ -125,7 +122,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
     // Fetch product to clean up relations and storage
     const { data: product, error: fetchErr } = await context.supabase
       .from("products")
-      .select("slug, image_url, images, attributes")
+      .select("*")
       .eq("id", data.id)
       .single();
       
@@ -134,14 +131,15 @@ export const deleteProduct = createServerFn({ method: "POST" })
     }
     
     if (product) {
+      const p: any = product;
       // 1. Clean up images from storage
       const allImages = new Set<string>();
-      if (product.image_url) allImages.add(product.image_url);
-      if (Array.isArray(product.images)) {
-        product.images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
+      if (p.image_url) allImages.add(p.image_url);
+      if (Array.isArray(p.images)) {
+        p.images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
       }
-      if (product.attributes && Array.isArray((product.attributes as any).additional_images)) {
-        (product.attributes as any).additional_images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
+      if (p.attributes && Array.isArray((p.attributes as any).additional_images)) {
+        (p.attributes as any).additional_images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
       }
       
       const pathsToRemove = Array.from(allImages)
@@ -154,8 +152,8 @@ export const deleteProduct = createServerFn({ method: "POST" })
       }
 
       // 2. Clean up related non-FK records (reviews, wishlists) safely
-      await context.supabase.from("reviews").delete().eq("product_slug", product.slug);
-      await context.supabase.from("wishlists").delete().eq("product_slug", product.slug);
+      await context.supabase.from("reviews").delete().eq("product_slug", p.slug);
+      await context.supabase.from("wishlists").delete().eq("product_slug", p.slug);
     }
 
     // 3. True Permanent Delete

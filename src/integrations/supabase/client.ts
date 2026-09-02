@@ -37,6 +37,10 @@ function createSupabaseClient() {
     },
     global: {
       fetch: (url, options) => {
+        // Do not apply the strict 8-second timeout to storage uploads, as large videos take longer
+        if (typeof url === "string" && url.includes("/storage/v1/object")) {
+          return fetch(url, options);
+        }
         return fetch(url, { ...options, signal: options?.signal || AbortSignal.timeout(8000) });
       },
     },

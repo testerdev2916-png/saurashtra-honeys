@@ -14,6 +14,7 @@ import {
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
+import { useSiteSettings } from "@/lib/site-settings";
 import { toast } from "sonner";
 import { submitForm } from "@/lib/submit";
 import { z } from "zod";
@@ -60,6 +61,7 @@ const contactSchema = z.object({
 });
 
 function ContactPage() {
+  const settings = useSiteSettings();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -105,31 +107,31 @@ function ContactPage() {
   const contactChannels = [
     {
       title: "Call Us",
-      value: "+91 96873 28404",
+      value: settings.contact?.phone || "+91 96873 28404",
       subtext: "Mon – Sat: 9:00 AM – 6:00 PM",
       Icon: PhoneCall,
-      href: "tel:+919687328404",
+      href: `tel:${settings.contact?.phone?.replace(/\D/g, "") || "+919687328404"}`,
     },
     {
       title: "Email Us",
-      value: "hello@saurastrahoney.com",
+      value: settings.contact?.email || "hello@saurastrahoney.com",
       subtext: "We reply within 24 hours",
       Icon: Mail,
-      href: "mailto:hello@saurastrahoney.com",
+      href: `mailto:${settings.contact?.email || "hello@saurastrahoney.com"}`,
     },
     {
       title: "Visit Us",
-      value: "Saurashtra Honey Bee Farm,",
-      subtext: "Saurashtra, Gujarat, India",
+      value: settings.contact?.address || "Saurashtra Honey Bee Farm, Saurashtra, Gujarat, India",
+      subtext: "Our apiary & dispatch center",
       Icon: MapPin,
-      href: "https://www.google.com/maps/search/?api=1&query=22.9914292,71.4663753",
+      href: "https://www.google.com/maps",
     },
     {
       title: "WhatsApp Us",
-      value: "+91 96873 28404",
+      value: settings.contact?.whatsapp || "+91 96873 28404",
       subtext: "Quick response on WhatsApp",
       Icon: MessageCircle,
-      href: "https://wa.me/919687328404",
+      href: `https://wa.me/${settings.contact?.whatsapp?.replace(/\D/g, "") || "919687328404"}`,
     },
   ];
 

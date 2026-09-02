@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { SectionEyebrow } from "@/components/site/Layout";
+import { ShoppableReelViewer } from "./ShoppableReelViewer";
 
 export type ShoppableVideoCarouselProps = {
   eyebrow?: string;
@@ -33,6 +34,14 @@ function ShoppableVideoCard({
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVideoInView, setIsVideoInView] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
+  const [duration, setDuration] = useState(0);
+
+  const formatDuration = (sec: number) => {
+    if (!sec || isNaN(sec) || !isFinite(sec)) return "";
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${s.toString().padStart(2, "0")}`;
+  };
 
   // Play video only when this specific card is within the viewport
   useEffect(() => {
@@ -89,7 +98,6 @@ function ShoppableVideoCard({
     return () => clearTimeout(t);
   }, []);
 
-  const toUrl = product ? `/product/${product.slug}` : item.link_url || "/shop";
   const displayTitle = item.title || product?.name || "Saurashtra Honey";
   const displaySubtitle = item.subtitle || product?.tagline || product?.category || "";
 
@@ -115,7 +123,17 @@ function ShoppableVideoCard({
         transitionDelay: hasLoaded ? "0ms" : `${index * 40}ms`,
       }}
     >
-      <Link to={toUrl as never} className="absolute inset-0 z-30 outline-none" aria-label={`View ${displayTitle}`} />
+      <Link 
+        search={(prev: any) => ({ ...prev, reel: item.id })}
+        className="absolute inset-0 z-30 outline-none" 
+        aria-label={`View ${displayTitle}`} 
+      />
+
+      {duration > 0 && (
+        <div className="absolute top-3 right-3 z-40 bg-black/50 backdrop-blur-md px-2 py-1 rounded-md text-white text-[11px] font-semibold tracking-wide pointer-events-none shadow-sm">
+          {formatDuration(duration)}
+        </div>
+      )}
 
       {/* Hover scale effect wrapper for video */}
       <div 
@@ -131,6 +149,9 @@ function ShoppableVideoCard({
             playsInline
             muted
             loop
+            onLoadedMetadata={() => {
+              if (videoRef.current) setDuration(videoRef.current.duration);
+            }}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
             style={{ transition: `transform ${customDuration} ${customBezier}` }}
           />
@@ -144,46 +165,31 @@ function ShoppableVideoCard({
         )}
       </div>
 
-      {/* Dark gradient overlay for text readability */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none z-10" />
-
-      {/* BOTTOM OVERLAY INFO */}
-      <div className="absolute bottom-0 inset-x-0 p-3 sm:p-5 z-20 flex items-center gap-2 sm:gap-3">
-        {/* Left: Product Thumbnail */}
-        {product && (
-          <div className="shrink-0 size-10 sm:size-14 rounded-xl border border-white/20 bg-cream/10 backdrop-blur-md overflow-hidden shadow-sm">
-            <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-cover" />
+      {/* FLOATING PRODUCT CARD */}
+      {product && (
+        <div className="absolute z-20 w-[76%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2.5 sm:p-3 flex flex-col items-center justify-center pointer-events-none">
+          <div className="w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] bg-white/60 border border-white/60 flex items-center justify-center mb-1.5 shadow-sm shrink-0 rounded-sm">
+             <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-contain p-0.5" />
           </div>
-        )}
-        
-        {/* Center: Info */}
-        <div className="flex-1 min-w-0 flex flex-col justify-center text-white">
-          <h3 className="font-serif font-bold text-sm sm:text-base truncate drop-shadow-sm">
+          <h3 className="font-semibold text-black text-center text-[12px] sm:text-[13px] leading-tight mb-0.5 px-1">
             {displayTitle}
           </h3>
-          
-          {product && (
-            <div className="flex items-baseline gap-1.5 mt-0.5 drop-shadow-sm">
-              <span className="font-bold text-sm">
+          <div className="text-black font-bold text-[12px] sm:text-[13px]">
+            {product.priceMax ? (
+              <>₹{product.price.toLocaleString("en-IN")} - ₹{product.priceMax.toLocaleString("en-IN")}</>
+            ) : (
+              <>
                 ₹{product.price.toLocaleString("en-IN")}
-              </span>
-              {product.mrp && product.mrp > product.price && (
-                <span className="text-[10px] sm:text-[11px] text-white/70 line-through">
-                  ₹{product.mrp.toLocaleString("en-IN")}
-                </span>
-              )}
-            </div>
-          )}
+                {product.mrp && product.mrp > product.price && (
+                  <span className="text-black/60 line-through font-medium ml-1 text-[11px]">
+                    ₹{product.mrp.toLocaleString("en-IN")}
+                  </span>
+                )}
+              </>
+            )}
+          </div>
         </div>
-
-        {/* Right: Circular arrow button */}
-        <div className="shrink-0 size-8 sm:size-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white flex items-center justify-center group-hover:bg-burnt-orange group-hover:border-burnt-orange transition-colors">
-          <ArrowRight 
-            className="size-4 sm:size-5 group-hover:translate-x-1" 
-            style={{ transition: `transform ${customDuration} ${customBezier}` }} 
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -201,11 +207,15 @@ export function ShoppableVideoCarousel({
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
 
+  const search = useSearch({ strict: false }) as any;
+  const navigate = useNavigate({ strict: false });
+  const activeReelId = search?.reel;
+
+  const handleCloseViewer = useCallback(() => {
+    navigate({ search: (prev: any) => { const { reel, ...rest } = prev; return rest; }, replace: true });
+  }, [navigate]);
+
   const sectionRef = useRef<HTMLElement>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
-  let isDown = false;
-  let startX: number;
-  let scrollLeft: number;
 
   useEffect(() => {
     let mounted = true;
@@ -282,58 +292,7 @@ export function ShoppableVideoCarousel({
     return () => obs.unobserve(el);
   }, []);
 
-  const handleNextSlide = useCallback(() => {
-    const track = carouselRef.current;
-    if (track) {
-      const cardWidth = track.children[0]?.clientWidth || 300;
-      track.scrollBy({ left: cardWidth + 24, behavior: "smooth" });
-    }
-  }, []);
 
-  const handlePrevSlide = useCallback(() => {
-    const track = carouselRef.current;
-    if (track) {
-      const cardWidth = track.children[0]?.clientWidth || 300;
-      track.scrollBy({ left: -(cardWidth + 24), behavior: "smooth" });
-    }
-  }, []);
-
-  // Mouse drag functionality for desktop
-  const onMouseDown = (e: React.MouseEvent) => {
-    const track = carouselRef.current;
-    if (!track) return;
-    isDown = true;
-    track.classList.add('cursor-grabbing');
-    track.classList.remove('snap-mandatory');
-    startX = e.pageX - track.offsetLeft;
-    scrollLeft = track.scrollLeft;
-  };
-  
-  const onMouseLeave = () => {
-    const track = carouselRef.current;
-    if (!track) return;
-    isDown = false;
-    track.classList.remove('cursor-grabbing');
-    track.classList.add('snap-mandatory');
-  };
-  
-  const onMouseUp = () => {
-    const track = carouselRef.current;
-    if (!track) return;
-    isDown = false;
-    track.classList.remove('cursor-grabbing');
-    track.classList.add('snap-mandatory');
-  };
-  
-  const onMouseMove = (e: React.MouseEvent) => {
-    if (!isDown) return;
-    e.preventDefault();
-    const track = carouselRef.current;
-    if (!track) return;
-    const x = e.pageX - track.offsetLeft;
-    const walk = (x - startX) * 2; 
-    track.scrollLeft = scrollLeft - walk;
-  };
 
   if (sortedVideos.length === 0) return null;
 
@@ -355,46 +314,49 @@ export function ShoppableVideoCarousel({
 
         </div>
 
-        {/* Carousel Track */}
-        <div className="relative group">
-          <button
-            type="button"
-            onClick={handlePrevSlide}
-            aria-label="Previous slide"
-            className="absolute left-2 sm:-left-6 top-[40%] -translate-y-1/2 z-20 size-12 rounded-full border border-border/80 bg-white hover:bg-cream-deep hover:border-burnt-orange text-espresso flex items-center justify-center transition-all shadow-sm hover:scale-105 opacity-0 group-hover:opacity-100 hidden sm:flex"
-          >
-            <ChevronLeft className="size-5" />
-          </button>
-          <button
-            type="button"
-            onClick={handleNextSlide}
-            aria-label="Next slide"
-            className="absolute right-2 sm:-right-6 top-[40%] -translate-y-1/2 z-20 size-12 rounded-full border border-border/80 bg-white hover:bg-cream-deep hover:border-burnt-orange text-espresso flex items-center justify-center transition-all shadow-sm hover:scale-105 opacity-0 group-hover:opacity-100 hidden sm:flex"
-          >
-            <ChevronRight className="size-5" />
-          </button>
-        <div
-          ref={carouselRef}
-          onMouseDown={onMouseDown}
-          onMouseLeave={onMouseLeave}
-          onMouseUp={onMouseUp}
-          onMouseMove={onMouseMove}
-          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar snap-x snap-mandatory pb-10 pt-4 px-[15vw] sm:px-0 -mx-4 sm:mx-0 cursor-grab active:cursor-grabbing"
-          style={{ scrollBehavior: 'smooth' }}
+      </div>
+
+      {/* Full-width Carousel Track Marquee */}
+      <div className="w-full overflow-hidden ticker-wrap pb-10 pt-4 flex">
+        <div 
+          className="flex w-max animate-ticker hover:[animation-play-state:paused]"
+          style={{ animationDuration: '600s' }}
         >
-          {sortedVideos.map((item, idx) => (
-            <ShoppableVideoCard
-              key={item.id}
-              item={item}
-              product={allProducts.find((p) => p.slug === item.product_slug)}
-              index={idx}
-              isVisible={isSectionVisible}
-            />
-          ))}
-          {/* Duplicate cards for infinite loop effect optionally, but CSS snap + momentum is smoother natively. For clean code, native scroll is used. */}
-        </div>
+          {/* First set of duplicated videos */}
+          <div className="flex gap-4 sm:gap-6 pr-4 sm:pr-6">
+            {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
+              <ShoppableVideoCard
+                key={`set1-${item.id}-${idx}`}
+                item={item}
+                product={allProducts.find((p) => p.slug === item.product_slug)}
+                index={idx}
+                isVisible={isSectionVisible}
+              />
+            ))}
+          </div>
+          {/* Second identical set for seamless looping */}
+          <div className="flex gap-4 sm:gap-6 pr-4 sm:pr-6">
+            {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
+              <ShoppableVideoCard
+                key={`set2-${item.id}-${idx}`}
+                item={item}
+                product={allProducts.find((p) => p.slug === item.product_slug)}
+                index={idx}
+                isVisible={isSectionVisible}
+              />
+            ))}
+          </div>
         </div>
       </div>
+
+      {activeReelId && sortedVideos.length > 0 && (
+        <ShoppableReelViewer 
+          videos={sortedVideos}
+          allProducts={allProducts}
+          initialReelId={activeReelId}
+          onClose={handleCloseViewer}
+        />
+      )}
     </section>
   );
 }

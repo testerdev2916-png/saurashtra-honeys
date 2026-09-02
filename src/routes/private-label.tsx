@@ -13,6 +13,7 @@ import ajwainImg from "@/assets/prod-ajwain.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 
 export const Route = createFileRoute("/private-label")({
   head: () => ({
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/private-label")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: () => fetchPageSections("private-label"),
   component: PrivateLabelPage,
 });
 
@@ -44,6 +46,9 @@ const schema = z.object({
 });
 
 function PrivateLabelPage() {
+  const sections = Route.useLoaderData();
+  const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", company: "", country: "", estimated_volume: "", services: "", message: "",
@@ -95,13 +100,13 @@ function PrivateLabelPage() {
         <div className="container-page max-w-5xl mx-auto flex flex-col md:flex-row gap-12 items-center">
           <div className="flex-1 space-y-6">
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
-              White Label Manufacturing
+              {introSettings.eyebrow || "White Label Manufacturing"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight">
-              Your Brand. Our Pure Honey.
+            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+              {introSettings.heading || "Your Brand. Our Pure Honey."}
             </h2>
-            <p className="text-[#6B6257] leading-relaxed text-[16px]">
-              Building a premium food brand requires a partner you can completely trust. We provide fully certified OEM/White Label manufacturing services, empowering entrepreneurs and established brands to launch world-class honey products without the hassle of setting up a facility.
+            <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
+              {introSettings.description || "Building a premium food brand requires a partner you can completely trust. We provide fully certified OEM/White Label manufacturing services, empowering entrepreneurs and established brands to launch world-class honey products without the hassle of setting up a facility."}
             </p>
             <ul className="space-y-4 pt-4">
               {['End-to-End Contract Manufacturing', 'NABL Certified Quality Control', 'Custom Bottle & Jar Sourcing', 'Global Export Support'].map((item, i) => (
@@ -112,7 +117,7 @@ function PrivateLabelPage() {
             </ul>
           </div>
           <div className="flex-1 w-full relative aspect-[4/5] rounded-[24px] overflow-hidden shadow-lg border border-[#D97706]/10">
-            <img src={heroProductsImg} alt="Private Label Manufacturing" className="w-full h-full object-cover" />
+            <img src={introSettings.image || heroProductsImg} alt="Private Label Manufacturing" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>

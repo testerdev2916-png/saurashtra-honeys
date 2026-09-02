@@ -11,8 +11,8 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
-
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 
 // Assets matching the Our Story photographic language
 import heroHoneyImg from "@/assets/hero-honey.jpg";
@@ -46,12 +46,17 @@ export const Route = createFileRoute("/our-story")({
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: () => fetchPageSections("our-story"),
   component: OurStory,
 });
 
 
 
 function OurStory() {
+  const sections = Route.useLoaderData();
+  const heroSettings = sections.find((s) => s.section_key === "hero")?.settings || {};
+  const founderSettings = sections.find((s) => s.section_key === "founder")?.settings || {};
+
   // Simple fade-in animation hook
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -136,17 +141,16 @@ function OurStory() {
 
           {/* BOTTOM: Text Content */}
           <div className="container-page text-center max-w-[800px] mx-auto reveal-on-scroll opacity-0 translate-y-8" style={{ animationDelay: '500ms' }}>
-            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-8 text-[#2B2118]">The Beginning</h2>
+            <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl font-bold mb-8 text-[#2B2118]">
+              {heroSettings.heading || "The Beginning"}
+            </h2>
             
-            <p className="text-lg md:text-xl leading-relaxed text-[#2B2118]/80 mb-6 font-light">
-              Saurashtra Honey was born from a deep respect for nature and a simple belief: the best honey comes from healthy bees living in a healthy environment.
-            </p>
-            <p className="text-lg md:text-xl leading-relaxed text-[#2B2118]/80 mb-10 font-light">
-              Nestled in the rich, diverse landscapes of Saurashtra, our journey started with a commitment to pure, ethical beekeeping. We don't just harvest honey; we nurture the ecosystem that makes it possible.
+            <p className="text-lg md:text-xl leading-relaxed text-[#2B2118]/80 mb-6 font-light whitespace-pre-wrap">
+              {heroSettings.description || "Saurashtra Honey was born from a deep respect for nature and a simple belief: the best honey comes from healthy bees living in a healthy environment."}
             </p>
             
-            <Link
-              to="#our-bees"
+            <a
+              href="#our-bees"
               className="inline-flex items-center justify-center bg-transparent border border-[#A6610E] text-[#A6610E] px-8 py-3.5 rounded-full font-bold text-[12px] tracking-[0.15em] hover:bg-[#A6610E] hover:text-white transition-all duration-400 mt-4"
               onClick={(e) => {
                 e.preventDefault();
@@ -154,7 +158,7 @@ function OurStory() {
               }}
             >
               OUR JOURNEY &rarr;
-            </Link>
+            </a>
           </div>
 
         </section>

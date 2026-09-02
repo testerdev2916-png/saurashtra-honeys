@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useCompanyLogoUrl } from "@/lib/company-settings";
+import { useSiteSettings } from "@/lib/site-settings";
 
 function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
   return (
@@ -14,7 +14,8 @@ function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
 
 export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink-0" }: { className?: string }) {
   const [srcIndex, setSrcIndex] = useState(0);
-  const logoUrl = useCompanyLogoUrl();
+  const settings = useSiteSettings();
+  const logoUrl = settings.company?.logo_url;
   const sources = logoUrl ? [logoUrl, "/saurashtra-honey-logo-complete.png"] : ["/saurashtra-honey-logo-complete.png"];
 
   if (srcIndex >= sources.length) {
@@ -43,7 +44,8 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
 
 export function BrandMark() {
   const [srcIndex, setSrcIndex] = useState(0);
-  const logoUrl = useCompanyLogoUrl();
+  const settings = useSiteSettings();
+  const logoUrl = settings.company?.logo_url;
   const sources = logoUrl ? [logoUrl, "/saurashtra-honey-logo-complete.png"] : ["/saurashtra-honey-logo-complete.png"];
 
   if (srcIndex >= sources.length) {

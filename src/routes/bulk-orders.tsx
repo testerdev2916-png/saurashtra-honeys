@@ -12,6 +12,7 @@ import { z } from "zod";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 
 export const Route = createFileRoute("/bulk-orders")({
   head: () => ({
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/bulk-orders")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: () => fetchPageSections("bulk-orders"),
   component: BulkOrdersPage,
 });
 
@@ -42,6 +44,9 @@ const schema = z.object({
 });
 
 function BulkOrdersPage() {
+  const sections = Route.useLoaderData();
+  const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "",
@@ -113,13 +118,13 @@ function BulkOrdersPage() {
         <div className="container-page max-w-5xl mx-auto flex flex-col md:flex-row gap-12 items-center">
           <div className="flex-1 space-y-6">
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
-              Trusted Supply Partner
+              {introSettings.eyebrow || "Trusted Supply Partner"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight">
-              Uncompromising Quality at Scale
+            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+              {introSettings.heading || "Uncompromising Quality at Scale"}
             </h2>
-            <p className="text-[#6B6257] leading-relaxed text-[16px]">
-              When you partner with Saurashtra Honey, you are guaranteed 100% pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time.
+            <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
+              {introSettings.description || "When you partner with Saurashtra Honey, you are guaranteed 100% pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
             </p>
             <ul className="space-y-4 pt-4">
               {['Low Minimum Order Quantities (MOQ)', 'Customizable Packaging Sizes', 'NABL Lab Certified Purity', 'Dedicated Account Manager'].map((item, i) => (
@@ -130,7 +135,7 @@ function BulkOrdersPage() {
             </ul>
           </div>
           <div className="flex-1 w-full relative aspect-square rounded-[24px] overflow-hidden">
-            <img src={beeFarmImg} alt="Honey farm" className="w-full h-full object-cover" />
+            <img src={introSettings.image || beeFarmImg} alt="Honey farm" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>

@@ -18,6 +18,8 @@ export function PageHeader({ title, subtitle, actions }: { title: string; subtit
   );
 }
 
+export * from "./ImageUpload";
+
 export function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return <div className={`bg-white border border-border rounded-2xl ${className}`}>{children}</div>;
 }

@@ -8,10 +8,10 @@ import { toast } from "sonner";
 import { submitForm } from "@/lib/submit";
 import { z } from "zod";
 
-// Photographic assets
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 
 export const Route = createFileRoute("/corporate-gifting")({
   head: () => ({
@@ -28,6 +28,7 @@ export const Route = createFileRoute("/corporate-gifting")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: () => fetchPageSections("corporate-gifting"),
   component: CorporateGiftingPage,
 });
 
@@ -42,6 +43,9 @@ const schema = z.object({
 });
 
 function CorporateGiftingPage() {
+  const sections = Route.useLoaderData();
+  const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", company: "", quantity: "", occasion: "", message: "",
@@ -92,17 +96,17 @@ function CorporateGiftingPage() {
       <section className="py-20 bg-[#FDFBF7]">
         <div className="container-page max-w-5xl mx-auto flex flex-col md:flex-row gap-12 items-center">
           <div className="flex-1 w-full relative aspect-square rounded-[24px] overflow-hidden">
-            <img src={giftPackImg} alt="Corporate Gifting" className="w-full h-full object-cover" />
+            <img src={introSettings.image || giftPackImg} alt="Corporate Gifting" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 space-y-6">
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
-              A Gift of Health
+              {introSettings.eyebrow || "A Gift of Health"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight">
-              Gifts That Leave a Lasting Impression
+            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+              {introSettings.heading || "Gifts That Leave a Lasting Impression"}
             </h2>
-            <p className="text-[#6B6257] leading-relaxed text-[16px]">
-              Corporate gifting should be more than just a formality. At Saurashtra Honey, we craft premium, health-conscious gifts that reflect your company's values and genuine appreciation. From Diwali to work anniversaries, our pure honey hampers stand out.
+            <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
+              {introSettings.description || "Corporate gifting should be more than just a formality. At Saurashtra Honey, we craft premium, health-conscious gifts that reflect your company's values and genuine appreciation. From Diwali to work anniversaries, our pure honey hampers stand out."}
             </p>
             <ul className="space-y-4 pt-4">
               {['100% Pure, Healthy & Meaningful', 'Fully Customizable Branding', 'Premium Luxury Packaging', 'Hassle-Free Doorstep Delivery'].map((item, i) => (

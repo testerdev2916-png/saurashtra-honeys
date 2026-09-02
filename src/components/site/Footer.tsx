@@ -14,8 +14,8 @@ import {
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { subscribeNewsletter } from "@/lib/newsletter.functions";
-import { fetchPublicSiteSettings } from "@/lib/homepage-cms.functions";
 import { BrandMark } from "./BeeLogo";
+import { useSiteSettings } from "@/lib/site-settings";
 import {
   DEFAULT_SHOP_CATEGORIES,
   fetchShopCategories,
@@ -43,7 +43,8 @@ export function Footer() {
   const [shopCategories, setShopCategories] = useState<ShopCategory[]>(
     DEFAULT_SHOP_CATEGORIES,
   );
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  
+  const settings = useSiteSettings();
 
   useEffect(() => {
     void fetchShopCategories().then((res) => {
@@ -51,8 +52,6 @@ export function Footer() {
         setShopCategories(res);
       }
     });
-    
-    void fetchPublicSiteSettings().then(setSettings);
 
     const handleScroll = () => {
       setShowTopBtn(window.scrollY > 300);
@@ -137,7 +136,7 @@ export function Footer() {
               <div className="space-y-6">
                 <BrandMark />
                 <p className="text-[14px] sm:text-[15px] text-[#2B1D14]/80 max-w-[280px] leading-relaxed font-serif italic">
-                  "{settings?.company?.tagline || "Handcrafted honey from the heart of Saurashtra.\nPure. Natural. Honest."}"
+                  "{settings.company?.tagline || "Handcrafted honey from the heart of Saurashtra.\nPure. Natural. Honest."}"
                 </p>
               </div>
               <div className="flex items-center gap-4">

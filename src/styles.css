@@ -64,6 +64,8 @@
   --color-forest: #253C27;
   --color-forest-dark: #1A2D1B;
   --color-honey: #D9651E;
+  
+  --color-announcement: #B57420;
 
   --shadow-soft: 0 4px 24px rgba(73, 48, 31, 0.05);
   --shadow-lift: 0 16px 40px -10px rgba(73, 48, 31, 0.12);

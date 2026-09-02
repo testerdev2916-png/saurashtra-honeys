@@ -9,7 +9,7 @@ import {
   logAudit,
   type HomepageSection,
 } from "@/lib/homepage-cms.functions";
-import { Card, PageHeader, StatusPill, BtnPrimary, BtnGhost, Field, inp } from "@/components/admin/ui";
+import { Card, PageHeader, StatusPill, BtnPrimary, BtnGhost, Field, inp, ImageUpload } from "@/components/admin/ui";
 import {
   ArrowUp,
   ArrowDown,
@@ -22,7 +22,7 @@ import {
   Save,
   Plus,
   Trash2,
-} from "lucide-react";
+} from "lucide-react"; // Force cache bust
 
 export const Route = createFileRoute("/admin/homepage")({ component: HomepageManagement });
 
@@ -30,6 +30,7 @@ export const Route = createFileRoute("/admin/homepage")({ component: HomepageMan
 type FieldDef =
   | { type: "text"; key: string; label: string; placeholder?: string }
   | { type: "textarea"; key: string; label: string; placeholder?: string }
+  | { type: "image"; key: string; label: string; bucket?: string; folder?: string }
   | { type: "stats"; key: "stats"; label: string };
 
 const SECTION_CONFIG: Record<
@@ -80,31 +81,48 @@ const SECTION_CONFIG: Record<
     desc: "9:16 vertical video reels from the hive.",
     link: "/admin/stories",
     fields: [
+      { type: "text", key: "marquee_text", label: "Marquee Strip Text", placeholder: "FROM THE HIVE • PURE BY NATURE" },
       { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "FROM THE HIVE" },
       { type: "text", key: "heading", label: "Heading", placeholder: "Stories from the Hive" },
       { type: "textarea", key: "description", label: "Description" },
     ],
   },
-  why_choose: {
+  heritage_video: {
     title: "Our Heritage / Why Choose Us",
-    desc: "Our story and purity guarantee section.",
+    desc: "Our story, video, and illustrated section.",
+    link: "/admin/heritage",
     fields: [
-      { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "OUR HERITAGE" },
-      { type: "text", key: "heading", label: "Heading", placeholder: "Where Purity Begins" },
-      { type: "textarea", key: "description", label: "Description" },
-      { type: "text", key: "cta_text", label: "CTA Button Text", placeholder: "KNOW MORE ABOUT US" },
-      { type: "text", key: "cta_url", label: "CTA URL", placeholder: "/our-story" },
+      { type: "text", key: "eyebrow", label: "Video Eyebrow text", placeholder: "OUR HERITAGE" },
+      { type: "text", key: "heading", label: "Video Heading", placeholder: "Where Purity Begins" },
+      { type: "text", key: "illus_eyebrow", label: "Illustration Eyebrow", placeholder: "FROM THE HIVE" },
+      { type: "text", key: "illus_cta_text", label: "Illustration CTA Text", placeholder: "Explore our story ->" },
+      { type: "text", key: "illus_cta_url", label: "Illustration CTA URL", placeholder: "/our-story" },
+      { type: "image", key: "illus_left_img", label: "Left Illustration (Beekeeper)", folder: "homepage" },
+      { type: "image", key: "illus_right_img", label: "Right Illustration (Flowers)", folder: "homepage" },
     ],
   },
   farm_banner: {
-    title: "Farm / Beekeeping Banner",
-    desc: "Full width decorative farm image section.",
+    title: "Our Journey (Farm Banner)",
+    desc: "The main journey section showing the beekeeper and story illustrations.",
     fields: [
-      { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "BEEKEEPING" },
-      { type: "text", key: "heading", label: "Heading", placeholder: "The Art of Beekeeping" },
+      { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "OUR JOURNEY" },
+      { type: "text", key: "heading", label: "Heading", placeholder: "The Journey Behind Every Drop" },
       { type: "textarea", key: "description", label: "Description" },
       { type: "text", key: "cta_text", label: "CTA Button Text", placeholder: "LEARN ABOUT OUR FARMS" },
       { type: "text", key: "cta_url", label: "CTA URL", placeholder: "/bee-farming" },
+      { type: "image", key: "cinematic_image", label: "Main Cinematic Image", folder: "homepage" },
+      { type: "text", key: "point1_title", label: "Story Point 1 - Title", placeholder: "From Hive to Home" },
+      { type: "textarea", key: "point1_desc", label: "Story Point 1 - Description" },
+      { type: "image", key: "point1_icon", label: "Story Point 1 - Icon", folder: "homepage" },
+      { type: "text", key: "point2_title", label: "Story Point 2 - Title" },
+      { type: "textarea", key: "point2_desc", label: "Story Point 2 - Description" },
+      { type: "image", key: "point2_icon", label: "Story Point 2 - Icon", folder: "homepage" },
+      { type: "text", key: "point3_title", label: "Story Point 3 - Title" },
+      { type: "textarea", key: "point3_desc", label: "Story Point 3 - Description" },
+      { type: "image", key: "point3_icon", label: "Story Point 3 - Icon", folder: "homepage" },
+      { type: "text", key: "point4_title", label: "Story Point 4 - Title" },
+      { type: "textarea", key: "point4_desc", label: "Story Point 4 - Description" },
+      { type: "image", key: "point4_icon", label: "Story Point 4 - Icon", folder: "homepage" },
     ],
   },
   stats_strip: {
@@ -263,6 +281,20 @@ function SectionSettingsPanel({
                     onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
                     className={`${inp} resize-none`}
                     placeholder={f.placeholder}
+                  />
+                </Field>
+              </div>
+            );
+          }
+          if (f.type === "image") {
+            return (
+              <div key={f.key} className="md:col-span-2">
+                <Field label={f.label}>
+                  <ImageUpload
+                    value={form[f.key] as string || null}
+                    onChange={(url) => setForm({ ...form, [f.key]: url })}
+                    bucket={f.bucket}
+                    folder={f.folder}
                   />
                 </Field>
               </div>

@@ -57,7 +57,7 @@ export function TopBar() {
 
   return (
     <div
-      className="bg-[#B57420] w-full max-w-[100vw] text-white border-b border-white/10 py-2.5 px-4 text-xs sm:text-sm font-bold tracking-wide select-none overflow-hidden relative flex items-center"
+      className="bg-announcement w-full max-w-[100vw] text-white border-b border-white/10 py-2.5 px-4 text-xs sm:text-sm font-bold tracking-wide select-none overflow-hidden relative flex items-center"
       role="region"
       aria-label="Announcement bar"
     >

@@ -24,6 +24,7 @@ import {
 } from "@/lib/category-catalog";
 import { track, toItem } from "@/lib/analytics";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
+import { IllustratedBrandSection } from "@/components/site/IllustratedBrandSection";
 
 // Assets for Shop Hero and Discover By Shop collections
 import heroProductsImg from "@/assets/hero-products.jpg";
@@ -144,13 +145,13 @@ export function ShopPage({
   const updateUrlWithoutScrolling = useCallback(
     (newSort: typeof sort, newQ: string) => {
       navigate({
-        search: (prev: any) => ({
+        search: (prev: Record<string, unknown>) => ({
           ...prev,
           sort: newSort !== "popular" ? newSort : undefined,
           q: newQ.trim() || undefined,
         }),
         replace: true,
-      });
+      } as any);
     },
     [navigate],
   );
@@ -368,8 +369,8 @@ export function ShopPage({
       {/* =========================================================================
           PROMOTIONAL MARQUEE
          ========================================================================= */}
-      <div className="w-full bg-brand-orange py-2.5 sm:py-3 overflow-hidden ticker-wrap border-y border-brand-orange-hover">
-        <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '30s' }}>
+      <div className="w-full bg-announcement py-2.5 sm:py-3 overflow-hidden ticker-wrap border-y border-white/10">
+        <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '55s' }}>
           {[1, 2].map((group) => (
             <div key={group} className="flex items-center whitespace-nowrap text-white text-[13px] sm:text-[14px] font-medium tracking-wide">
               <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Pure & Unfiltered Honey</span></span>
@@ -471,7 +472,7 @@ export function ShopPage({
                   onClick={() => {
                     setCat("All Products");
                     setQ("");
-                    updateUrlWithoutScrolling("All Products", "", sort);
+                    updateUrlWithoutScrolling(sort, "");
                   }}
                   className="mt-6 inline-flex items-center gap-2 bg-brand-orange text-white px-7 py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-brand-orange-hover transition-colors shadow-sm"
                 >
@@ -514,50 +515,12 @@ export function ShopPage({
         </div>
       </section>
 
-
       {/* =========================================================================
           6. ILLUSTRATED BRAND SECTION
          ========================================================================= */}
       <section className="bg-cream py-16 md:py-24 overflow-hidden border-t border-border/40">
-        <div className="container-page px-6 md:px-12 lg:px-20">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-12 md:gap-8 max-w-[1400px] mx-auto">
-            
-            {/* Left Illustration */}
-            <div className="w-full md:w-[35%] flex justify-center md:justify-end animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both" style={{ animationDelay: "100ms" }}>
-              <img 
-                src="/images/heritage/illus_beekeeping.png" 
-                alt="Heritage Beekeeping" 
-                className="w-[260px] sm:w-[320px] md:w-full max-w-[420px] object-contain opacity-90 mix-blend-multiply" 
-                loading="lazy" 
-              />
-            </div>
-
-            {/* Center CTA */}
-            <div className="w-full md:w-[30%] flex flex-col items-center text-center px-4 shrink-0 animate-in fade-in zoom-in-95 duration-1000 ease-out fill-mode-both" style={{ animationDelay: "300ms" }}>
-              <span className="text-xs uppercase tracking-widest text-brand-orange font-semibold mb-5">FROM THE HIVE</span>
-              <Link
-                to="/about"
-                className="inline-flex items-center justify-center bg-brand-orange text-white px-8 sm:px-10 py-3.5 sm:py-4 rounded-full font-bold text-sm hover:bg-brand-orange-hover transition-all duration-400 shadow-[0_8px_20px_rgba(166,97,14,0.15)] hover:shadow-[0_12px_25px_rgba(166,97,14,0.25)] hover:-translate-y-1 whitespace-nowrap"
-              >
-                Explore our story &rarr;
-              </Link>
-            </div>
-
-            {/* Right Illustration */}
-            <div className="w-full md:w-[35%] flex justify-center md:justify-start animate-in fade-in slide-in-from-bottom-8 duration-1000 ease-out fill-mode-both" style={{ animationDelay: "500ms" }}>
-              <img 
-                src="/images/heritage/illus_wildflower.png" 
-                alt="Wildflowers" 
-                className="w-[260px] sm:w-[320px] md:w-full max-w-[420px] object-contain opacity-90 mix-blend-multiply" 
-                loading="lazy" 
-              />
-            </div>
-            
-          </div>
-        </div>
+        <IllustratedBrandSection />
       </section>
-
-
       {/* QUICK VIEW MODAL */}
       <QuickView product={quick} onClose={() => setQuick(null)} />
 

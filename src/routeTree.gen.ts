@@ -38,6 +38,7 @@ import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminHeritageRouteImport } from './routes/admin.heritage'
 import { Route as AdminHeroRouteImport } from './routes/admin.hero'
 import { Route as AdminHomepageRouteImport } from './routes/admin.homepage'
 import { Route as AdminInstagramRouteImport } from './routes/admin.instagram'
@@ -48,6 +49,7 @@ import { Route as AdminMediaRouteImport } from './routes/admin.media'
 import { Route as AdminMigrateCatalogRouteImport } from './routes/admin.migrate-catalog'
 import { Route as AdminNewsletterRouteImport } from './routes/admin.newsletter'
 import { Route as AdminOrdersRouteImport } from './routes/admin.orders'
+import { Route as AdminPagesRouteImport } from './routes/admin.pages'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminRedirectsRouteImport } from './routes/admin.redirects'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
@@ -67,7 +69,9 @@ import { Route as ShopSlugRouteImport } from './routes/shop.$slug'
 import { Route as AdminHomepageAnnouncementsRouteImport } from './routes/admin.homepage_.announcements'
 import { Route as AdminHomepageCategoriesRouteImport } from './routes/admin.homepage_.categories'
 import { Route as AdminHomepageProductsRouteImport } from './routes/admin.homepage_.products'
+import { Route as AdminHomepageStoriesRouteImport } from './routes/admin.homepage_.stories'
 import { Route as AdminHomepageTrustRouteImport } from './routes/admin.homepage_.trust'
+import { Route as AdminPagesPageSlugRouteImport } from './routes/admin.pages.$pageSlug'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicSubmissionsRouteImport } from './routes/api/public/submissions'
 import { Route as NewsletterConfirmTokenRouteImport } from './routes/newsletter.confirm.$token'
@@ -218,6 +222,11 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHeritageRoute = AdminHeritageRouteImport.update({
+  id: '/heritage',
+  path: '/heritage',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminHeroRoute = AdminHeroRouteImport.update({
   id: '/hero',
   path: '/hero',
@@ -266,6 +275,11 @@ const AdminNewsletterRoute = AdminNewsletterRouteImport.update({
 const AdminOrdersRoute = AdminOrdersRouteImport.update({
   id: '/orders',
   path: '/orders',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPagesRoute = AdminPagesRouteImport.update({
+  id: '/pages',
+  path: '/pages',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
@@ -364,10 +378,20 @@ const AdminHomepageProductsRoute = AdminHomepageProductsRouteImport.update({
   path: '/homepage/products',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHomepageStoriesRoute = AdminHomepageStoriesRouteImport.update({
+  id: '/homepage_/stories',
+  path: '/homepage/stories',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminHomepageTrustRoute = AdminHomepageTrustRouteImport.update({
   id: '/homepage_/trust',
   path: '/homepage/trust',
   getParentRoute: () => AdminRoute,
+} as any)
+const AdminPagesPageSlugRoute = AdminPagesPageSlugRouteImport.update({
+  id: '/$pageSlug',
+  path: '/$pageSlug',
+  getParentRoute: () => AdminPagesRoute,
 } as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
@@ -420,6 +444,7 @@ export interface FileRoutesByFullPath {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/instagram': typeof AdminInstagramRoute
@@ -430,6 +455,7 @@ export interface FileRoutesByFullPath {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -450,7 +476,9 @@ export interface FileRoutesByFullPath {
   '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage/trust': typeof AdminHomepageTrustRoute
+  '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -483,6 +511,7 @@ export interface FileRoutesByTo {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/instagram': typeof AdminInstagramRoute
@@ -493,6 +522,7 @@ export interface FileRoutesByTo {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -513,7 +543,9 @@ export interface FileRoutesByTo {
   '/admin/homepage/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage/trust': typeof AdminHomepageTrustRoute
+  '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -549,6 +581,7 @@ export interface FileRoutesById {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
+  '/admin/heritage': typeof AdminHeritageRoute
   '/admin/hero': typeof AdminHeroRoute
   '/admin/homepage': typeof AdminHomepageRoute
   '/admin/instagram': typeof AdminInstagramRoute
@@ -559,6 +592,7 @@ export interface FileRoutesById {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
+  '/admin/pages': typeof AdminPagesRouteWithChildren
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -579,7 +613,9 @@ export interface FileRoutesById {
   '/admin/homepage_/announcements': typeof AdminHomepageAnnouncementsRoute
   '/admin/homepage_/categories': typeof AdminHomepageCategoriesRoute
   '/admin/homepage_/products': typeof AdminHomepageProductsRoute
+  '/admin/homepage_/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage_/trust': typeof AdminHomepageTrustRoute
+  '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -616,6 +652,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/heritage'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/instagram'
@@ -626,6 +663,7 @@ export interface FileRouteTypes {
     | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
+    | '/admin/pages'
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
@@ -646,7 +684,9 @@ export interface FileRouteTypes {
     | '/admin/homepage/announcements'
     | '/admin/homepage/categories'
     | '/admin/homepage/products'
+    | '/admin/homepage/stories'
     | '/admin/homepage/trust'
+    | '/admin/pages/$pageSlug'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -679,6 +719,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/heritage'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/instagram'
@@ -689,6 +730,7 @@ export interface FileRouteTypes {
     | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
+    | '/admin/pages'
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
@@ -709,7 +751,9 @@ export interface FileRouteTypes {
     | '/admin/homepage/announcements'
     | '/admin/homepage/categories'
     | '/admin/homepage/products'
+    | '/admin/homepage/stories'
     | '/admin/homepage/trust'
+    | '/admin/pages/$pageSlug'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -744,6 +788,7 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/coupons'
     | '/admin/customers'
+    | '/admin/heritage'
     | '/admin/hero'
     | '/admin/homepage'
     | '/admin/instagram'
@@ -754,6 +799,7 @@ export interface FileRouteTypes {
     | '/admin/migrate-catalog'
     | '/admin/newsletter'
     | '/admin/orders'
+    | '/admin/pages'
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
@@ -774,7 +820,9 @@ export interface FileRouteTypes {
     | '/admin/homepage_/announcements'
     | '/admin/homepage_/categories'
     | '/admin/homepage_/products'
+    | '/admin/homepage_/stories'
     | '/admin/homepage_/trust'
+    | '/admin/pages/$pageSlug'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -1021,6 +1069,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/heritage': {
+      id: '/admin/heritage'
+      path: '/heritage'
+      fullPath: '/admin/heritage'
+      preLoaderRoute: typeof AdminHeritageRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/hero': {
       id: '/admin/hero'
       path: '/hero'
@@ -1089,6 +1144,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/admin/orders'
       preLoaderRoute: typeof AdminOrdersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pages': {
+      id: '/admin/pages'
+      path: '/pages'
+      fullPath: '/admin/pages'
+      preLoaderRoute: typeof AdminPagesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/products': {
@@ -1224,12 +1286,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomepageProductsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/homepage_/stories': {
+      id: '/admin/homepage_/stories'
+      path: '/homepage/stories'
+      fullPath: '/admin/homepage/stories'
+      preLoaderRoute: typeof AdminHomepageStoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/homepage_/trust': {
       id: '/admin/homepage_/trust'
       path: '/homepage/trust'
       fullPath: '/admin/homepage/trust'
       preLoaderRoute: typeof AdminHomepageTrustRouteImport
       parentRoute: typeof AdminRoute
+    }
+    '/admin/pages/$pageSlug': {
+      id: '/admin/pages/$pageSlug'
+      path: '/$pageSlug'
+      fullPath: '/admin/pages/$pageSlug'
+      preLoaderRoute: typeof AdminPagesPageSlugRouteImport
+      parentRoute: typeof AdminPagesRoute
     }
     '/api/public/health': {
       id: '/api/public/health'
@@ -1262,12 +1338,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminPagesRouteChildren {
+  AdminPagesPageSlugRoute: typeof AdminPagesPageSlugRoute
+}
+
+const AdminPagesRouteChildren: AdminPagesRouteChildren = {
+  AdminPagesPageSlugRoute: AdminPagesPageSlugRoute,
+}
+
+const AdminPagesRouteWithChildren = AdminPagesRoute._addFileChildren(
+  AdminPagesRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
+  AdminHeritageRoute: typeof AdminHeritageRoute
   AdminHeroRoute: typeof AdminHeroRoute
   AdminHomepageRoute: typeof AdminHomepageRoute
   AdminInstagramRoute: typeof AdminInstagramRoute
@@ -1278,6 +1367,7 @@ interface AdminRouteChildren {
   AdminMigrateCatalogRoute: typeof AdminMigrateCatalogRoute
   AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
+  AdminPagesRoute: typeof AdminPagesRouteWithChildren
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRedirectsRoute: typeof AdminRedirectsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -1290,6 +1380,7 @@ interface AdminRouteChildren {
   AdminHomepageAnnouncementsRoute: typeof AdminHomepageAnnouncementsRoute
   AdminHomepageCategoriesRoute: typeof AdminHomepageCategoriesRoute
   AdminHomepageProductsRoute: typeof AdminHomepageProductsRoute
+  AdminHomepageStoriesRoute: typeof AdminHomepageStoriesRoute
   AdminHomepageTrustRoute: typeof AdminHomepageTrustRoute
 }
 
@@ -1299,6 +1390,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
+  AdminHeritageRoute: AdminHeritageRoute,
   AdminHeroRoute: AdminHeroRoute,
   AdminHomepageRoute: AdminHomepageRoute,
   AdminInstagramRoute: AdminInstagramRoute,
@@ -1309,6 +1401,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMigrateCatalogRoute: AdminMigrateCatalogRoute,
   AdminNewsletterRoute: AdminNewsletterRoute,
   AdminOrdersRoute: AdminOrdersRoute,
+  AdminPagesRoute: AdminPagesRouteWithChildren,
   AdminProductsRoute: AdminProductsRoute,
   AdminRedirectsRoute: AdminRedirectsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
@@ -1321,6 +1414,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHomepageAnnouncementsRoute: AdminHomepageAnnouncementsRoute,
   AdminHomepageCategoriesRoute: AdminHomepageCategoriesRoute,
   AdminHomepageProductsRoute: AdminHomepageProductsRoute,
+  AdminHomepageStoriesRoute: AdminHomepageStoriesRoute,
   AdminHomepageTrustRoute: AdminHomepageTrustRoute,
 }
 

@@ -2,6 +2,8 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { supabase } from "@/integrations/supabase/client";
 
 export type SiteSettings = {
+  company: { name: string; tagline: string; logo_url: string; favicon_url: string };
+  contact: { email: string; phone: string; whatsapp: string; address: string };
   seo: { default_title: string; default_description: string; default_keywords: string; default_og_image: string };
   analytics: { ga4_measurement_id: string; meta_pixel_id: string; clarity_id: string; gsc_verification: string };
   social: { instagram: string; facebook: string; youtube: string; linkedin: string; x: string; pinterest: string };
@@ -14,6 +16,8 @@ export type SiteSettings = {
 };
 
 const DEFAULTS: SiteSettings = {
+  company: { name: "Saurashtra Honey", tagline: "Raw, unfiltered honey.", logo_url: "", favicon_url: "/favicon.ico" },
+  contact: { email: "hello@saurastrahoney.com", phone: "+91-96873-28404", whatsapp: "+91-96873-28404", address: "" },
   seo: { default_title: "Saurashtra Honey", default_description: "Raw, unfiltered honey from Saurashtra.", default_keywords: "", default_og_image: "" },
   analytics: { ga4_measurement_id: "", meta_pixel_id: "", clarity_id: "", gsc_verification: "" },
   social: { instagram: "", facebook: "", youtube: "", linkedin: "", x: "", pinterest: "" },
@@ -33,11 +37,14 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.from("app_settings").select("data").eq("id", 1).maybeSingle();
-      if (!cancelled && data?.data) {
+      const { data } = await supabase.from("site_settings").select("key, value");
+      if (!cancelled && data) {
         const merged = { ...DEFAULTS } as SiteSettings;
-        for (const k of Object.keys(DEFAULTS) as (keyof SiteSettings)[]) {
-          (merged as Record<string, unknown>)[k] = { ...(DEFAULTS[k] as object), ...((data.data as Record<string, object>)[k] ?? {}) };
+        for (const row of data) {
+          const k = row.key as keyof SiteSettings;
+          if (merged[k]) {
+            (merged as Record<string, unknown>)[k] = { ...(DEFAULTS[k] as object), ...(row.value as object) };
+          }
         }
         setS(merged);
       }

@@ -182,42 +182,42 @@ export function Navbar() {
       <div className="bg-cream/95 backdrop-blur-xl border-b border-border/80 shadow-soft transition-all">
         <div className="container-page">
         {/* Mobile row: MENU + LOGO | SEARCH + CART */}
-        <div className="flex items-center justify-between h-[80px] px-2 lg:hidden w-full relative">
+        <div className="flex items-center justify-between h-[64px] px-4 lg:hidden w-full relative">
           {/* Left group: Hamburger */}
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center min-w-0 z-10">
             <button
               type="button"
               aria-label="Open menu"
               onClick={() => setMobileOpen(true)}
-              className="p-3 active:scale-95 transition-transform text-[#2B2118] hover:text-[#D97706] min-h-[48px] min-w-[48px] flex items-center justify-center shrink-0"
+              className="p-2 -ml-2 active:scale-95 transition-transform text-[#2B2118] hover:text-[#D97706] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
             >
-              <Menu className="size-[26px] stroke-[1.5]" />
+              <Menu className="size-[24px] stroke-[1.5]" />
             </button>
           </div>
 
-          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 flex items-center min-w-0 shrink-0 top-1/2 -translate-y-1/2">
+          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 flex items-center min-w-0 shrink-0 top-1/2 -translate-y-1/2 z-0">
             <BrandMark />
           </Link>
 
           {/* Right group: Search + Cart */}
-          <div className="flex items-center gap-1 shrink-0 text-[#2B2118]">
+          <div className="flex items-center gap-0.5 shrink-0 text-[#2B2118] z-10 -mr-2">
             <button
               type="button"
               aria-label="Search"
               onClick={() => setSearchOpen((s) => !s)}
-              className="p-3 active:scale-95 transition-transform hover:text-[#D97706] min-h-[48px] min-w-[48px] flex items-center justify-center shrink-0"
+              className="p-2 active:scale-95 transition-transform hover:text-[#D97706] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0"
             >
-              <Search className="size-[22px] stroke-[1.5]" />
+              <Search className="size-[20px] stroke-[1.5]" />
             </button>
             <button
               type="button"
               aria-label="Cart"
               onClick={() => setCartOpen(true)}
-              className="p-3 active:scale-95 transition-transform hover:text-[#D97706] min-h-[48px] min-w-[48px] flex items-center justify-center shrink-0 relative"
+              className="p-2 active:scale-95 transition-transform hover:text-[#D97706] min-h-[44px] min-w-[44px] flex items-center justify-center shrink-0 relative"
             >
-              <ShoppingBag className="size-[22px] stroke-[1.5]" />
+              <ShoppingBag className="size-[20px] stroke-[1.5]" />
               {count > 0 && (
-                <span className="absolute top-1.5 right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[#D97706] text-white text-[10px] font-bold flex items-center justify-center shadow-sm">
+                <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-[#D97706] text-white text-[9px] font-bold flex items-center justify-center shadow-sm">
                   {count}
                 </span>
               )}

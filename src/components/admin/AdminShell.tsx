@@ -33,6 +33,7 @@ import {
   Film,
   Layers,
   Instagram,
+  Video,
 } from "lucide-react";
 
 type NavItem = {
@@ -46,34 +47,39 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  { label: "Products", to: "/admin/products", icon: Package, perm: "products.manage" },
+  
+  // ── Catalog ──
+  { label: "Products", to: "/admin/products", icon: Package, perm: "products.manage", dividerBefore: "CATALOG" },
   { label: "Categories", to: "/admin/categories", icon: Tags, perm: "categories.manage" },
   { label: "Inventory", to: "/admin/inventory", icon: Boxes, perm: "products.manage" },
-  { label: "Orders", to: "/admin/orders", icon: ShoppingBag, perm: "orders.manage" },
+  
+  // ── Sales & Customers ──
+  { label: "Orders", to: "/admin/orders", icon: ShoppingBag, perm: "orders.manage", dividerBefore: "SALES" },
   { label: "Customers", to: "/admin/customers", icon: Users },
   { label: "Reviews", to: "/admin/reviews", icon: Star, perm: "reviews.moderate" },
   { label: "Coupons", to: "/admin/coupons", icon: Ticket, perm: "coupons.manage" },
-  { label: "Blog", to: "/admin/blog", icon: FileText, perm: "blog.manage" },
-  { label: "Media", to: "/admin/media", icon: ImageIcon, perm: "media.manage" },
-  // ── Homepage group ──
-  { label: "Homepage Management", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "HOMEPAGE" },
+  
+  // ── CMS (Content Management) ──
+  { label: "Homepage", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "CMS" },
   { label: "↳ Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
   { label: "↳ Videos & Stories", to: "/admin/stories", icon: Film, perm: "settings.manage", indent: true },
-  // ── Other ──
-  {
-    label: "Who We Supply",
-    to: "/admin/who-we-supply",
-    icon: Store,
-    perm: "settings.manage",
-    dividerBefore: "OTHER",
-  },
+  { label: "↳ Customer Stories", to: "/admin/homepage/stories", icon: Video, perm: "settings.manage", indent: true },
+  { label: "↳ Heritage Video", to: "/admin/heritage", icon: Video, perm: "settings.manage", indent: true },
+  
+  { label: "Information Pages", to: "/admin/pages?group=info", icon: FileText, perm: "settings.manage" },
+  { label: "B2B / Partnerships", to: "/admin/pages?group=b2b", icon: Store, perm: "settings.manage" },
+  
+  { label: "Blog", to: "/admin/blog", icon: FileText, perm: "blog.manage" },
+  { label: "Media Library", to: "/admin/media", icon: ImageIcon, perm: "media.manage" },
+
+  // ── Site Settings & Marketing ──
+  { label: "Site Settings", to: "/admin/settings", icon: Settings, perm: "settings.manage", dividerBefore: "SITE SETTINGS" },
   { label: "Submissions", to: "/admin/submissions", icon: MessageSquare },
   { label: "Newsletter", to: "/admin/newsletter", icon: Mail, perm: "settings.manage" },
   { label: "Loyalty & Rewards", to: "/admin/loyalty", icon: Award, perm: "settings.manage" },
   { label: "Marketing & SEO", to: "/admin/marketing", icon: Megaphone, perm: "settings.manage" },
   { label: "Instagram Integration", to: "/admin/instagram", icon: Instagram, perm: "settings.manage" },
   { label: "Redirects", to: "/admin/redirects", icon: ArrowLeftRight, perm: "settings.manage" },
-  { label: "Site Settings", to: "/admin/settings", icon: Settings, perm: "settings.manage" },
   { label: "Users & Roles", to: "/admin/users", icon: ShieldCheck, perm: "users.manage" },
   { label: "Audit Logs", to: "/admin/audit", icon: ClipboardList, perm: "audit.read" },
 ];
