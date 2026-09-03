@@ -2,12 +2,17 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+// Public Supabase credentials (anon key — NOT a secret, protected by RLS)
+const FALLBACK_SUPABASE_URL = "https://lxdkcqdkfuuqjudsysrr.supabase.co";
+const FALLBACK_SUPABASE_KEY = "sb_publishable_E3rv2tJCU_jTt1wL_TyWDQ_u1_9ztgY";
+
 function createSupabaseClient() {
   // Use import.meta.env for client-side (Vite build-time replacement)
   // Fall back to window.__ENV for runtime injection, then process.env for SSR
+  // Final fallback: hardcoded public values (safe — these are publishable, protected by RLS)
   const envSource = typeof window !== 'undefined' ? (window as any).__ENV || {} : {};
-  const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || envSource.SUPABASE_URL || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || envSource.SUPABASE_PUBLISHABLE_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_PUBLISHABLE_KEY : undefined);
+  const SUPABASE_URL = import.meta.env?.VITE_SUPABASE_URL || envSource.SUPABASE_URL || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined) || FALLBACK_SUPABASE_URL;
+  const SUPABASE_PUBLISHABLE_KEY = import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY || envSource.SUPABASE_PUBLISHABLE_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_PUBLISHABLE_KEY : undefined) || FALLBACK_SUPABASE_KEY;
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
     const missing = [
