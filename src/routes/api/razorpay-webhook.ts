@@ -1,6 +1,6 @@
 // @ts-ignore - Route file that is currently resolving fine but typescript complains
 import { createAPIFileRoute } from "@tanstack/react-start/api";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseAdmin as supabase } from "@/integrations/supabase/client.server";
 
 export const APIRoute = createAPIFileRoute("/api/razorpay-webhook")({
   POST: async ({ request }: { request: Request }) => {
