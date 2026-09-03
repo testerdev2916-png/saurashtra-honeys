@@ -50,7 +50,7 @@ function AdminPagesGroup() {
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {config.pages.map((p) => (
-          <Link key={p.slug} to={`/admin/pages/${p.slug}`} className="block group">
+          <Link key={p.slug} to={`/admin/pages/${p.slug}` as any} className="block group">
             <Card className="p-6 hover:border-gold-deep/50 hover:shadow-lg transition-all h-full flex flex-col justify-between group-hover:bg-cream/20">
               <div>
                 <div className="w-12 h-12 bg-cream rounded-xl flex items-center justify-center text-brand-orange mb-4 group-hover:scale-110 transition-transform">

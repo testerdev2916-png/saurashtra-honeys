@@ -471,7 +471,7 @@ function PageEditor() {
                 <div>
                   <h3 className="font-bold text-lg text-forest-dark flex items-center gap-2">
                     {sConf.title}
-                    <StatusPill status={isEnabled ? "published" : "draft"} />
+                    <StatusPill s={isEnabled ? "published" : "draft"} />
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">{sConf.description}</p>
                 </div>

@@ -17,7 +17,7 @@ export function ShoppableReelViewer({ videos, allProducts, initialReelId, onClos
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMuted, setIsMuted] = useState(true);
   const [activeReelId, setActiveReelId] = useState<string>(initialReelId);
-  const navigate = useNavigate({ strict: false });
+  const navigate = useNavigate();
 
   // Handle ESC to close
   useEffect(() => {
@@ -37,7 +37,7 @@ export function ShoppableReelViewer({ videos, allProducts, initialReelId, onClos
   // Update URL silently when active reel changes
   useEffect(() => {
     if (activeReelId) {
-      navigate({ search: (prev: any) => ({ ...prev, reel: activeReelId }), replace: true });
+      navigate({ search: { reel: activeReelId } as any, replace: true } as any);
     }
   }, [activeReelId, navigate]);
 
@@ -394,7 +394,7 @@ function ReelSection({ item, index, product, isActive, setActiveReelId, isMuted,
                   <ShoppingBag className="size-[18px]" /> Add to Cart
                 </button>
                 <Link 
-                  to={`/product/${product.slug}`}
+                  to={`/product/${product.slug}` as any}
                   onClick={onClose}
                   className="w-full h-[52px] rounded-[16px] border border-black/10 text-espresso font-semibold text-[13px] tracking-wide flex items-center justify-center gap-2 hover:bg-black/5 active:scale-[0.98] transition-all"
                 >
