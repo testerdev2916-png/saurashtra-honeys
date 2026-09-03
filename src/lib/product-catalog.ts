@@ -148,31 +148,23 @@ async function fetchAllVariantsMap(): Promise<Map<string, VariantRow[]> | undefi
 
 export async function fetchProducts(): Promise<Product[]> {
   try {
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Supabase fetchProducts timeout")), 6000)
-    );
-
-    const fetchPromise = (async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
-        .eq("status", "published")
-        .order("sort_order", { ascending: true });
-      
-      if (error) {
-        console.error("[fetchProducts] Supabase error:", error);
-        throw error;
-      }
-      
-      if (!data || data.length === 0) {
-        console.warn("[fetchProducts] No products found in Supabase. Returning empty array.");
-        return [];
-      }
-      const varMap = await fetchAllVariantsMap();
-      return (data as unknown as Row[]).map((r) => toProduct(r, varMap));
-    })();
-
-    return await Promise.race([fetchPromise, timeoutPromise]);
+    const { data, error } = await supabase
+      .from("products")
+      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
+      .eq("status", "published")
+      .order("sort_order", { ascending: true });
+    
+    if (error) {
+      console.error("[fetchProducts] Supabase error:", error);
+      throw error;
+    }
+    
+    if (!data || data.length === 0) {
+      console.warn("[fetchProducts] No products found in Supabase. Returning empty array.");
+      return [];
+    }
+    const varMap = await fetchAllVariantsMap();
+    return (data as unknown as Row[]).map((r) => toProduct(r, varMap));
   } catch (err) {
     console.error("[fetchProducts] Exception:", err);
     throw err;

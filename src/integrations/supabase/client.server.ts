@@ -44,7 +44,10 @@ function createSupabaseAdminClient() {
     },
     global: {
       fetch: (url, options) => {
-        return fetch(url, { ...options, signal: options?.signal || AbortSignal.timeout(8000) });
+        const strictSignal = options?.signal
+          ? AbortSignal.any([options.signal, AbortSignal.timeout(8000)])
+          : AbortSignal.timeout(8000);
+        return fetch(url, { ...options, signal: strictSignal });
       },
     },
   });
