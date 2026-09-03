@@ -75,13 +75,33 @@ function applySecurityHeaders(response: Response): Response {
     headers,
   });
 }
+// Inject public Supabase env vars into HTML so the client JS bundle can find them,
+// even if the bundle was compiled without VITE_ env vars at build time.
+async function injectEnvIntoHtml(response: Response): Promise<Response> {
+  const ct = response.headers.get("content-type") || "";
+  if (!ct.includes("text/html")) return response;
+
+  const html = await response.text();
+  const envScript = `<script>window.__ENV={SUPABASE_URL:${JSON.stringify(process.env.SUPABASE_URL || "https://lxdkcqdkfuuqjudsysrr.supabase.co")},SUPABASE_PUBLISHABLE_KEY:${JSON.stringify(process.env.SUPABASE_PUBLISHABLE_KEY || "sb_publishable_E3rv2tJCU_jTt1wL_TyWDQ_u1_9ztgY")}}</script>`;
+  const patched = html.replace("<head>", `<head>${envScript}`);
+
+  const headers = new Headers(response.headers);
+  headers.set("content-length", String(Buffer.byteLength(patched, "utf-8")));
+  return new Response(patched, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return applySecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      const safe = await normalizeCatastrophicSsrResponse(response);
+      const injected = await injectEnvIntoHtml(safe);
+      return applySecurityHeaders(injected);
     } catch (error) {
       console.error(error);
       return applySecurityHeaders(new Response(renderErrorPage(), {
