@@ -83,6 +83,37 @@ export function heroRowToSlide(r: HeroRow): HeroSlide {
 }
 
 export function getDefaultHeroSlides(p: string = "home"): HeroSlide[] {
+  if (p === "shop") {
+    return [
+      {
+        image: heroHoneyImg,
+        eyebrow: "Wildflower Honey from Saurashtra, Gujarat",
+        title: "Wildflowers of Saurashtra.",
+        description: "Honey made from the nectar of diverse wildflowers across Saurashtra.",
+        features: ["100% Pure & Natural", "Rich Taste", "Wildflower Honey"],
+        ctaText: "DISCOVER OUR HONEY \u2192",
+        ctaTo: "/shop",
+      },
+      {
+        image: honeycombBeesImg,
+        eyebrow: "BEESWAX",
+        title: "CRAFTED BY BEES.\nMADE FOR YOUR HOME.",
+        description: "Natural beeswax, thoughtfully crafted.",
+        features: ["100% Pure Beeswax", "Hand-Poured", "Clean Burning"],
+        ctaText: "EXPLORE BEESWAX \u2192",
+        ctaTo: "/shop/beeswax-candles",
+      },
+      {
+        image: heroProductsImg,
+        eyebrow: "BEE PRODUCTS",
+        title: "NATURE HAS\nMORE TO OFFER.",
+        description: "Discover our collection, inspired by the hive.",
+        features: ["Raw Bee Pollen", "Pure Honeycomb", "Natural Skincare"],
+        ctaText: "EXPLORE COLLECTION \u2192",
+        ctaTo: "/shop",
+      },
+    ];
+  }
   return []; // Return empty array for unknown pages or errors to avoid leaking old data
 }
 

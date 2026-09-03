@@ -61,7 +61,8 @@ const NAV: NavItem[] = [
   
   // ── CMS (Content Management) ──
   { label: "Homepage", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "CMS" },
-  { label: "↳ Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
+  { label: "↳ Main Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
+  { label: "↳ Category Hero", to: "/admin/category-hero", icon: Layers, perm: "settings.manage", indent: true },
   { label: "↳ Videos & Stories", to: "/admin/stories", icon: Film, perm: "settings.manage", indent: true },
   { label: "↳ Customer Stories", to: "/admin/homepage/stories", icon: Video, perm: "settings.manage", indent: true },
   { label: "↳ Heritage Video", to: "/admin/heritage", icon: Video, perm: "settings.manage", indent: true },

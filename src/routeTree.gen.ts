@@ -36,6 +36,7 @@ import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AdminAuditRouteImport } from './routes/admin.audit'
 import { Route as AdminBlogRouteImport } from './routes/admin.blog'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCategoryHeroRouteImport } from './routes/admin.category-hero'
 import { Route as AdminCouponsRouteImport } from './routes/admin.coupons'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminHeritageRouteImport } from './routes/admin.heritage'
@@ -71,7 +72,7 @@ import { Route as AdminHomepageCategoriesRouteImport } from './routes/admin.home
 import { Route as AdminHomepageProductsRouteImport } from './routes/admin.homepage_.products'
 import { Route as AdminHomepageStoriesRouteImport } from './routes/admin.homepage_.stories'
 import { Route as AdminHomepageTrustRouteImport } from './routes/admin.homepage_.trust'
-import { Route as AdminPagesPageSlugRouteImport } from './routes/admin.pages.$pageSlug'
+import { Route as AdminPagesPageSlugRouteImport } from './routes/admin.pages_.$pageSlug'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicSubmissionsRouteImport } from './routes/api/public/submissions'
 import { Route as NewsletterConfirmTokenRouteImport } from './routes/newsletter.confirm.$token'
@@ -210,6 +211,11 @@ const AdminBlogRoute = AdminBlogRouteImport.update({
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoryHeroRoute = AdminCategoryHeroRouteImport.update({
+  id: '/category-hero',
+  path: '/category-hero',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCouponsRoute = AdminCouponsRouteImport.update({
@@ -389,9 +395,9 @@ const AdminHomepageTrustRoute = AdminHomepageTrustRouteImport.update({
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPagesPageSlugRoute = AdminPagesPageSlugRouteImport.update({
-  id: '/$pageSlug',
-  path: '/$pageSlug',
-  getParentRoute: () => AdminPagesRoute,
+  id: '/pages_/$pageSlug',
+  path: '/pages/$pageSlug',
+  getParentRoute: () => AdminRoute,
 } as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
@@ -442,6 +448,7 @@ export interface FileRoutesByFullPath {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-hero': typeof AdminCategoryHeroRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/heritage': typeof AdminHeritageRoute
@@ -455,7 +462,7 @@ export interface FileRoutesByFullPath {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
-  '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/pages': typeof AdminPagesRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -509,6 +516,7 @@ export interface FileRoutesByTo {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-hero': typeof AdminCategoryHeroRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/heritage': typeof AdminHeritageRoute
@@ -522,7 +530,7 @@ export interface FileRoutesByTo {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
-  '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/pages': typeof AdminPagesRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -579,6 +587,7 @@ export interface FileRoutesById {
   '/admin/audit': typeof AdminAuditRoute
   '/admin/blog': typeof AdminBlogRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-hero': typeof AdminCategoryHeroRoute
   '/admin/coupons': typeof AdminCouponsRoute
   '/admin/customers': typeof AdminCustomersRoute
   '/admin/heritage': typeof AdminHeritageRoute
@@ -592,7 +601,7 @@ export interface FileRoutesById {
   '/admin/migrate-catalog': typeof AdminMigrateCatalogRoute
   '/admin/newsletter': typeof AdminNewsletterRoute
   '/admin/orders': typeof AdminOrdersRoute
-  '/admin/pages': typeof AdminPagesRouteWithChildren
+  '/admin/pages': typeof AdminPagesRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -615,7 +624,7 @@ export interface FileRoutesById {
   '/admin/homepage_/products': typeof AdminHomepageProductsRoute
   '/admin/homepage_/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage_/trust': typeof AdminHomepageTrustRoute
-  '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
+  '/admin/pages_/$pageSlug': typeof AdminPagesPageSlugRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -650,6 +659,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/blog'
     | '/admin/categories'
+    | '/admin/category-hero'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/heritage'
@@ -717,6 +727,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/blog'
     | '/admin/categories'
+    | '/admin/category-hero'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/heritage'
@@ -786,6 +797,7 @@ export interface FileRouteTypes {
     | '/admin/audit'
     | '/admin/blog'
     | '/admin/categories'
+    | '/admin/category-hero'
     | '/admin/coupons'
     | '/admin/customers'
     | '/admin/heritage'
@@ -822,7 +834,7 @@ export interface FileRouteTypes {
     | '/admin/homepage_/products'
     | '/admin/homepage_/stories'
     | '/admin/homepage_/trust'
-    | '/admin/pages/$pageSlug'
+    | '/admin/pages_/$pageSlug'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -1053,6 +1065,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/category-hero': {
+      id: '/admin/category-hero'
+      path: '/category-hero'
+      fullPath: '/admin/category-hero'
+      preLoaderRoute: typeof AdminCategoryHeroRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/coupons': {
@@ -1300,12 +1319,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminHomepageTrustRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/pages/$pageSlug': {
-      id: '/admin/pages/$pageSlug'
-      path: '/$pageSlug'
+    '/admin/pages_/$pageSlug': {
+      id: '/admin/pages_/$pageSlug'
+      path: '/pages/$pageSlug'
       fullPath: '/admin/pages/$pageSlug'
       preLoaderRoute: typeof AdminPagesPageSlugRouteImport
-      parentRoute: typeof AdminPagesRoute
+      parentRoute: typeof AdminRoute
     }
     '/api/public/health': {
       id: '/api/public/health'
@@ -1338,22 +1357,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AdminPagesRouteChildren {
-  AdminPagesPageSlugRoute: typeof AdminPagesPageSlugRoute
-}
-
-const AdminPagesRouteChildren: AdminPagesRouteChildren = {
-  AdminPagesPageSlugRoute: AdminPagesPageSlugRoute,
-}
-
-const AdminPagesRouteWithChildren = AdminPagesRoute._addFileChildren(
-  AdminPagesRouteChildren,
-)
-
 interface AdminRouteChildren {
   AdminAuditRoute: typeof AdminAuditRoute
   AdminBlogRoute: typeof AdminBlogRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCategoryHeroRoute: typeof AdminCategoryHeroRoute
   AdminCouponsRoute: typeof AdminCouponsRoute
   AdminCustomersRoute: typeof AdminCustomersRoute
   AdminHeritageRoute: typeof AdminHeritageRoute
@@ -1367,7 +1375,7 @@ interface AdminRouteChildren {
   AdminMigrateCatalogRoute: typeof AdminMigrateCatalogRoute
   AdminNewsletterRoute: typeof AdminNewsletterRoute
   AdminOrdersRoute: typeof AdminOrdersRoute
-  AdminPagesRoute: typeof AdminPagesRouteWithChildren
+  AdminPagesRoute: typeof AdminPagesRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRedirectsRoute: typeof AdminRedirectsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -1382,12 +1390,14 @@ interface AdminRouteChildren {
   AdminHomepageProductsRoute: typeof AdminHomepageProductsRoute
   AdminHomepageStoriesRoute: typeof AdminHomepageStoriesRoute
   AdminHomepageTrustRoute: typeof AdminHomepageTrustRoute
+  AdminPagesPageSlugRoute: typeof AdminPagesPageSlugRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
   AdminAuditRoute: AdminAuditRoute,
   AdminBlogRoute: AdminBlogRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCategoryHeroRoute: AdminCategoryHeroRoute,
   AdminCouponsRoute: AdminCouponsRoute,
   AdminCustomersRoute: AdminCustomersRoute,
   AdminHeritageRoute: AdminHeritageRoute,
@@ -1401,7 +1411,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMigrateCatalogRoute: AdminMigrateCatalogRoute,
   AdminNewsletterRoute: AdminNewsletterRoute,
   AdminOrdersRoute: AdminOrdersRoute,
-  AdminPagesRoute: AdminPagesRouteWithChildren,
+  AdminPagesRoute: AdminPagesRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminRedirectsRoute: AdminRedirectsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
@@ -1416,6 +1426,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHomepageProductsRoute: AdminHomepageProductsRoute,
   AdminHomepageStoriesRoute: AdminHomepageStoriesRoute,
   AdminHomepageTrustRoute: AdminHomepageTrustRoute,
+  AdminPagesPageSlugRoute: AdminPagesPageSlugRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

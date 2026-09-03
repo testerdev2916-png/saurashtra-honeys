@@ -9,12 +9,14 @@ export function ImageUpload({
   bucket = "media",
   folder = "homepage",
   className = "",
+  mediaType = "image",
 }: {
   value: string | null;
   onChange: (url: string | null) => void;
   bucket?: string;
   folder?: string;
   className?: string;
+  mediaType?: "image" | "video";
 }) {
   const [uploading, setUploading] = useState(false);
 
@@ -52,11 +54,21 @@ export function ImageUpload({
     <div className={`flex flex-col gap-2 ${className}`}>
       {value ? (
         <div className="relative group rounded-md overflow-hidden border border-border/50 bg-muted/20 flex items-center justify-center">
-          <img 
-            src={value} 
-            alt="Uploaded media" 
-            className="w-full h-auto max-h-[200px] object-contain"
-          />
+          {mediaType === "video" ? (
+            <video 
+              src={value} 
+              autoPlay 
+              muted 
+              loop 
+              className="w-full h-auto max-h-[200px] object-contain"
+            />
+          ) : (
+            <img 
+              src={value} 
+              alt="Uploaded media" 
+              className="w-full h-auto max-h-[200px] object-contain"
+            />
+          )}
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
             <button
               type="button"
@@ -77,14 +89,16 @@ export function ImageUpload({
               <Upload className="w-8 h-8 mb-3 text-muted-foreground/50" />
             )}
             <p className="mb-2 text-sm font-semibold">
-              {uploading ? "Uploading..." : "Click to upload image"}
+              {uploading ? "Uploading..." : `Click to upload ${mediaType}`}
             </p>
-            <p className="text-xs opacity-70">PNG, JPG, WEBP (Max 5MB)</p>
+            <p className="text-xs opacity-70">
+              {mediaType === "video" ? "MP4, WebM (Max 20MB)" : "PNG, JPG, WEBP (Max 5MB)"}
+            </p>
           </div>
           <input 
             type="file" 
             className="hidden" 
-            accept="image/png, image/jpeg, image/webp" 
+            accept={mediaType === "video" ? "video/mp4, video/webm" : "image/png, image/jpeg, image/webp"} 
             onChange={handleUpload}
             disabled={uploading}
           />

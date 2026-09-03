@@ -263,32 +263,32 @@ export function HomeShopByCategory({
         </div>
       </div>
 
-      <div className="w-full max-w-[1696px] mx-auto relative group px-4">
-        {/* Unified Mobile and Desktop View */}
-        {/* Navigation Arrows (Visible on all sizes, optimized for mobile) */}
-        <button
-          type="button"
-          onClick={scrollPrev}
-          className="absolute left-2 sm:-left-4 lg:-left-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white border border-border/80 shadow-md flex items-center justify-center text-espresso opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-cream-deep hover:border-burnt-orange"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-        </button>
+      <div className="w-full max-w-[1696px] mx-auto px-4 group">
+        <div className="relative w-full">
+          {/* Navigation Arrows (Visible on all sizes, optimized for mobile) */}
+          <button
+            type="button"
+            onClick={scrollPrev}
+            className="absolute left-[8px] sm:left-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
 
-        <button
-          type="button"
-          onClick={scrollNext}
-          className="absolute right-2 sm:-right-4 lg:-right-6 top-[40%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white border border-border/80 shadow-md flex items-center justify-center text-espresso opacity-100 sm:opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-cream-deep hover:border-burnt-orange"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-        </button>
+          <button
+            type="button"
+            onClick={scrollNext}
+            className="absolute right-[8px] sm:right-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
 
-        {/* Carousel Container */}
-        <div className="overflow-visible w-full px-4 sm:px-0" ref={emblaRef}>
-          <div className="flex gap-4 sm:gap-[24px] py-6 touch-pan-y cursor-grab active:cursor-grabbing">
+          {/* Carousel Container */}
+          <div className="overflow-hidden md:overflow-visible relative w-full" ref={emblaRef}>
+            <div className="flex gap-[12px] md:gap-[24px] py-6 touch-pan-y cursor-grab active:cursor-grabbing">
             {displayCats.map((cat, idx) => (
               <div 
                 key={idx} 
-                className="flex-[0_0_85vw] sm:flex-[0_0_calc(100%/2.5-16px)] lg:flex-[0_0_calc(100%/3.5-18px)] xl:flex-[0_0_calc(100%/4.5-19.2px)] min-w-0"
+                className="flex-[0_0_calc(50%_-_6px)] md:flex-[0_0_calc(100%/2.5_-_16px)] lg:flex-[0_0_calc(100%/3.5_-_18px)] xl:flex-[0_0_calc(100%/4.5_-_19.2px)] min-w-0"
               >
                 <Link
                   to={(
@@ -315,6 +315,7 @@ export function HomeShopByCategory({
             ))}
           </div>
         </div>
+        </div>
       </div>
     </section>
   );
@@ -334,6 +335,12 @@ export function HomeBestSellers({
 }) {
   const [displayList, setDisplayList] = React.useState<Product[]>([]);
   const [loading, setLoading] = React.useState(true);
+
+  const [emblaRef] = useEmblaCarousel({
+    loop: true,
+    align: "start",
+    duration: 60,
+  });
 
   React.useEffect(() => {
     // ONLY display products where show_on_homepage = true
@@ -374,13 +381,15 @@ export function HomeBestSellers({
 
         {/* Mobile View */}
         <div className="block md:hidden mt-2">
-          <PremiumMobileCarousel
-            items={displayList}
-            slideClassName="flex-[0_0_85vw] min-w-0"
-            renderItem={(product) => (
-              <ProductCard p={product} onQuickView={onQuickView} />
-            )}
-          />
+          <div className="overflow-hidden w-full relative" ref={emblaRef}>
+            <div className="flex gap-[12px] touch-pan-y cursor-grab active:cursor-grabbing pb-4">
+              {displayList.map((product) => (
+                <div key={product.slug} className="flex-[0_0_calc(50%_-_6px)] min-w-0">
+                  <ProductCard p={product} onQuickView={onQuickView} />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Desktop/Tablet View */}
@@ -633,8 +642,8 @@ export function HomeCustomerStories({
 
       {/* Carousel */}
       <div className="relative z-10 px-4 sm:px-6 md:px-8 lg:px-12 mx-auto w-full max-w-[1600px]">
-        <div className="overflow-visible" ref={emblaRef}>
-          <div className="flex gap-4 sm:gap-6 ml-[-1rem] sm:ml-0">
+        <div className="overflow-hidden w-full" ref={emblaRef}>
+          <div className="flex gap-[12px] sm:gap-6">
             {photoStories.length === 0 ? (
               <div className="w-full py-20 flex flex-col items-center justify-center text-center px-4">
                 <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center text-brand-orange/40 mb-4">
@@ -647,10 +656,10 @@ export function HomeCustomerStories({
               photoStories.map((story) => (
                 <div
                   key={story.id}
-                  // Mobile: 1 card (~85vw). Tablet: 2 cards (~45vw). Desktop: 3 cards (~30vw or ~33.333% minus gap)
-                  className="flex-[0_0_85vw] sm:flex-[0_0_45vw] lg:flex-[0_0_33.333%] min-w-0"
+                  // Mobile: exactly 2 cards side-by-side. Tablet: 2 cards. Desktop: 3 cards.
+                  className="flex-[0_0_calc(50%_-_6px)] sm:flex-[0_0_calc(50%_-_12px)] lg:flex-[0_0_calc(33.33333%_-_16px)] min-w-0"
                 >
-                  <div className="w-full h-full flex flex-col bg-white rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-border/50">
+                  <div className="w-full h-full flex flex-col bg-white rounded-[16px] sm:rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-border/50">
                     
                     {/* CUSTOMER PHOTO */}
                     <div className="w-full aspect-[4/5] bg-cream relative">
@@ -669,40 +678,40 @@ export function HomeCustomerStories({
                     </div>
                     
                     {/* REVIEW CONTENT */}
-                    <div className="p-6 sm:p-8 flex flex-col flex-1">
+                    <div className="p-4 sm:p-6 md:p-8 flex flex-col flex-1">
                       {/* Rating */}
-                      <div className="flex items-center gap-2 mb-4">
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
                         <div className="flex gap-0.5 text-brand-orange">
                           {[...Array(story.rating || 5)].map((_, i) => (
-                            <Star key={i} className="w-[16px] h-[16px] fill-current" />
+                            <Star key={i} className="w-[12px] sm:w-[14px] md:w-[16px] h-[12px] sm:h-[14px] md:h-[16px] fill-current" />
                           ))}
                         </div>
-                        <span className="text-[13px] font-bold text-espresso tracking-wide">
+                        <span className="text-[11px] sm:text-[13px] font-bold text-espresso tracking-wide">
                           {(story.rating || 5).toFixed(1)}
                         </span>
                       </div>
                       
                       {/* Customer Review Quote */}
                       {story.review_text && (
-                        <blockquote className="text-[16px] sm:text-[18px] font-medium text-espresso leading-[1.6] mb-6 line-clamp-6">
+                        <blockquote className="text-[13px] sm:text-[16px] md:text-[18px] font-medium text-espresso leading-[1.6] mb-4 sm:mb-6 line-clamp-6">
                           "{story.review_text}"
                         </blockquote>
                       )}
                       
-                      <div className="mt-auto pt-4 border-t border-border/40">
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-[16px] text-espresso capitalize">
+                      <div className="mt-auto pt-3 sm:pt-4 border-t border-border/40">
+                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                          <span className="font-bold text-[14px] sm:text-[16px] text-espresso capitalize">
                             {story.customer_name}
                           </span>
                           {story.verified && (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold tracking-wide text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200/50 uppercase">
-                              <CheckCircle2 className="w-3 h-3" />
+                            <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold tracking-wide text-green-700 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full border border-green-200/50 uppercase">
+                              <CheckCircle2 className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
                               Verified
                             </span>
                           )}
                         </div>
                         {(story.customer_city || story.customer_state) && (
-                          <div className="text-[14px] text-muted-foreground mt-1 capitalize">
+                          <div className="text-[12px] sm:text-[14px] text-muted-foreground mt-1 capitalize truncate">
                             {[story.customer_city, story.customer_state].filter(Boolean).join(", ")}
                           </div>
                         )}
@@ -1165,7 +1174,7 @@ export function HomeHeritageVideo({ settings }: { settings?: Record<string, any>
       {/* =========================================================================
           ILLUSTRATED BRAND SECTION (Shared Component)
          ========================================================================= */}
-      <IllustratedBrandSection className="mt-16 sm:mt-24" settings={settings} />
+      <IllustratedBrandSection className="mt-8 sm:mt-12" settings={settings} />
     </section>
   );
 }

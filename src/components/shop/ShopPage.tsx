@@ -15,6 +15,8 @@ import { SiteLayout } from "@/components/site/Layout";
 import { ProductCard } from "@/components/site/ProductCard";
 import { QuickView } from "@/components/site/QuickView";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
+import { ShopHeroSlider } from "@/components/shop/ShopHeroSlider";
+import { CategoryHeroSlider } from "@/components/shop/CategoryHeroSlider";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
@@ -295,15 +297,12 @@ export function ShopPage({
           2. SHOP HERO (3-Slide Carousel, 1920x600 proportion)
          ========================================================================= */}
       {!overrideCategorySlug ? (
-        <PageHeroSlider page="shop" />
+        <ShopHeroSlider />
       ) : (
-        <section className="relative bg-cream-deep/40 py-16 sm:py-24 overflow-hidden">
-          <div className="container-page relative z-10 text-center flex flex-col items-center">
-            <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-espresso font-medium mb-4">
-              {categories.find(c => c.slug === overrideCategorySlug)?.name || overrideCategorySlug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
-            </h1>
-          </div>
-        </section>
+        <CategoryHeroSlider 
+          categorySlug={overrideCategorySlug} 
+          categoryName={categories.find(c => c.slug === overrideCategorySlug)?.name} 
+        />
       )}
 
       {/* (Old ShopCategorySection removed in favor of the Premium Nav below) */}

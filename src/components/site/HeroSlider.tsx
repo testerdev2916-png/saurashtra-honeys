@@ -8,6 +8,7 @@ export type HeroSlide = {
   title: string;
   eyebrow?: string | null;
   description?: string | null;
+  features?: string[];
   ctaText?: string | null;
   ctaTo?: string;
   ctaParams?: Record<string, string>;
@@ -48,8 +49,8 @@ export function HeroSlider({
 
   const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
   const aspectCls = effVariant === "home" 
-    ? "aspect-square md:aspect-[1920/700]" 
-    : "aspect-square md:aspect-[1920/600]";
+    ? "aspect-square md:aspect-[192/70]" 
+    : "aspect-square md:aspect-[16/5]";
 
   if (!slides || slides.length === 0) return null;
 

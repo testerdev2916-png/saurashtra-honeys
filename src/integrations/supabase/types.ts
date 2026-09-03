@@ -131,6 +131,51 @@ export type Database = {
         }
         Relationships: []
       }
+      category_hero_slides: {
+        Row: {
+          id: string
+          category_slug: string
+          image_url: string
+          mobile_image_url: string | null
+          title: string | null
+          subtitle: string | null
+          cta_label: string | null
+          cta_href: string | null
+          sort_order: number
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category_slug: string
+          image_url: string
+          mobile_image_url?: string | null
+          title?: string | null
+          subtitle?: string | null
+          cta_label?: string | null
+          cta_href?: string | null
+          sort_order?: number
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          category_slug?: string
+          image_url?: string
+          mobile_image_url?: string | null
+          title?: string | null
+          subtitle?: string | null
+          cta_label?: string | null
+          cta_href?: string | null
+          sort_order?: number
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string

@@ -135,14 +135,14 @@ export const createGuestOrder = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof createSchema>) => createSchema.parse(d))
   .handler(async ({ data }) => insertOrderRow(supabase, data, null));
 
-const verifySchema = z.object({
+export const verifySchema = z.object({
   order_id: z.string().uuid(),
   razorpay_order_id: z.string().min(1),
   razorpay_payment_id: z.string().min(1),
   razorpay_signature: z.string().min(1),
 });
 
-async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeof verifySchema>, callerUserId: string | null) {
+export async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeof verifySchema>, callerUserId?: string | null) {
   const secret = process.env.RAZORPAY_KEY_SECRET;
   if (!secret) throw new Error("Razorpay not configured");
   const { createHmac, timingSafeEqual } = await import("node:crypto");
@@ -150,16 +150,61 @@ async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeof verif
   const a = Buffer.from(expected); const b = Buffer.from(data.razorpay_signature);
   if (a.length !== b.length || !timingSafeEqual(a, b)) throw new Error("Invalid payment signature");
 
-    const { data: existing } = await supabaseClient.from("orders").select("user_id, razorpay_order_id, timeline").eq("id", data.order_id).single();
+  const { data: existing } = await supabaseClient
+    .from("orders")
+    .select("user_id, razorpay_order_id, timeline, status, items")
+    .eq("id", data.order_id)
+    .single();
+
   if (!existing || existing.razorpay_order_id !== data.razorpay_order_id) throw new Error("Order mismatch");
-  if (existing.user_id && existing.user_id !== callerUserId) throw new Error("Forbidden");
+  
+  // Webhook might not have callerUserId, so if callerUserId is provided, check it.
+  if (callerUserId !== undefined && existing.user_id && existing.user_id !== callerUserId) throw new Error("Forbidden");
+
+  // Idempotency: prevent duplicate processing
+  if (existing.status === "paid") {
+    return { ok: true, already_paid: true };
+  }
 
   const existingTimeline = Array.isArray(existing.timeline) ? (existing.timeline as unknown[]) : [];
-  const newTimeline = [...existingTimeline, { at: new Date().toISOString(), status: "paid", note: "Payment received" }];
+  const newTimeline = [...existingTimeline, { at: new Date().toISOString(), status: "paid", note: "Payment received via Razorpay" }];
+  
   const { error } = await supabaseClient.from("orders").update({
     status: "paid", razorpay_payment_id: data.razorpay_payment_id, timeline: newTimeline as never,
   }).eq("id", data.order_id);
   if (error) throw new Error(error.message);
+
+  // Inventory Deduction
+  if (Array.isArray(existing.items)) {
+    for (const item of existing.items as any[]) {
+      if (!item.slug || !item.size || !item.qty) continue;
+      
+      // Find the product id by slug
+      const { data: pData } = await supabaseClient.from("products").select("id").eq("canonical_url", item.slug).maybeSingle();
+      if (!pData) continue;
+      
+      // Find the variant id by product_id and label
+      const { data: vData } = await supabaseClient.from("product_variants")
+        .select("id, stock_quantity")
+        .eq("product_id", pData.id)
+        .eq("label", item.size)
+        .maybeSingle();
+        
+      if (vData) {
+        const newStock = Math.max(0, (vData.stock_quantity || 0) - item.qty);
+        await supabaseClient.from("product_variants").update({ stock_quantity: newStock }).eq("id", vData.id);
+        
+        // Log inventory history
+        await supabaseClient.from("inventory_history").insert({
+          product_id: pData.id,
+          change: -item.qty,
+          reason: "sale",
+          reference_id: data.order_id
+        });
+      }
+    }
+  }
+
   return { ok: true };
 }
 

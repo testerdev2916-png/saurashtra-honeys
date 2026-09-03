@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
 import { type Product } from "@/lib/products";
@@ -22,6 +23,7 @@ type ShoppableVideoCardProps = {
   product?: Product;
   index: number;
   isVisible: boolean;
+  className?: string;
 };
 
 function ShoppableVideoCard({
@@ -29,6 +31,7 @@ function ShoppableVideoCard({
   product,
   index,
   isVisible,
+  className,
 }: ShoppableVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -109,7 +112,7 @@ function ShoppableVideoCard({
     <div
       ref={cardRef}
       className={`group relative shrink-0 flex flex-col snap-center sm:snap-start
-        w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px]
+        ${className || "w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px]"}
         aspect-[9/16]
         rounded-[24px] overflow-hidden cursor-pointer
         shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)]
@@ -124,7 +127,8 @@ function ShoppableVideoCard({
       }}
     >
       <Link 
-        search={(prev: any) => ({ ...prev, reel: item.id })}
+        to="."
+        search={((prev: any) => ({ ...prev, reel: item.id })) as any}
         className="absolute inset-0 z-30 outline-none" 
         aria-label={`View ${displayTitle}`} 
       />
@@ -203,16 +207,25 @@ export function ShoppableVideoCarousel({
   placementContext = "all",
   className,
 }: ShoppableVideoCarouselProps) {
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    loop: true,
+    align: "start",
+    duration: 60,
+  });
+
+  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+
   const [videos, setVideos] = useState<HomepageVideoItem[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
 
   const search = useSearch({ strict: false }) as any;
-  const navigate = useNavigate({ strict: false });
+  const navigate = useNavigate({ strict: false } as any) as any;
   const activeReelId = search?.reel;
 
   const handleCloseViewer = useCallback(() => {
-    navigate({ search: (prev: any) => { const { reel, ...rest } = prev; return rest; }, replace: true });
+    navigate({ search: ((prev: any) => { const { reel, ...rest } = prev; return rest; }) as any, replace: true });
   }, [navigate]);
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -316,8 +329,66 @@ export function ShoppableVideoCarousel({
 
       </div>
 
-      {/* Full-width Carousel Track Marquee */}
-      <div className="w-full overflow-hidden ticker-wrap pb-10 pt-4 flex">
+      {/* MOBILE VIEW (Exactly 2 cards, arrows, swipeable) */}
+      <div className="block md:hidden container-page pb-10">
+        <div className="relative w-full">
+          {/* Navigation Arrows */}
+          <button
+            type="button"
+            onClick={scrollPrev}
+            className="absolute left-[8px] sm:left-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+          </button>
+          
+          <button
+            type="button"
+            onClick={scrollNext}
+            className="absolute right-[8px] sm:right-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+          </button>
+
+          <div className="overflow-hidden w-full relative" ref={emblaRef}>
+            <div className="flex gap-[12px] touch-pan-y cursor-grab active:cursor-grabbing">
+              {sortedVideos.map((item, idx) => (
+                <div key={`mob-${item.id}-${idx}`} className="flex-[0_0_calc(50%_-_6px)] min-w-0 pb-6">
+                  <ShoppableVideoCard
+                    item={item}
+                    product={allProducts.find((p) => p.slug === item.product_slug)}
+                    index={idx}
+                    isVisible={isSectionVisible}
+                    className="w-full"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Stats below Video Carousel */}
+        <div className="grid grid-cols-2 gap-[12px] w-full mt-[12px]">
+          <div className="p-3 sm:p-4 rounded-[16px] bg-white border border-black/5 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="font-serif text-xl font-bold text-[#D97706] mb-1">
+              15+ Years
+            </div>
+            <div className="text-[11px] sm:text-xs font-semibold text-[#2B2118]/80 leading-snug">
+              Beekeeping<br/>Experience
+            </div>
+          </div>
+          <div className="p-3 sm:p-4 rounded-[16px] bg-white border border-black/5 shadow-sm flex flex-col items-center justify-center text-center">
+            <div className="font-serif text-xl font-bold text-[#D97706] mb-1">
+              2000+
+            </div>
+            <div className="text-[11px] sm:text-xs font-semibold text-[#2B2118]/80 leading-snug">
+              Happy Customers<br/>Across India
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* DESKTOP VIEW (Full-width Carousel Track Marquee) */}
+      <div className="hidden md:flex w-full overflow-hidden ticker-wrap pb-10 pt-4">
         <div 
           className="flex w-max animate-ticker hover:[animation-play-state:paused]"
           style={{ animationDuration: '600s' }}
