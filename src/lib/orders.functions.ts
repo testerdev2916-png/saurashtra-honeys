@@ -121,9 +121,7 @@ async function insertOrderRow(supabaseClient: any, data: z.infer<typeof createSc
   if (data.payment_method === "razorpay") {
     const rp = await razorpayCreateOrder(totalPaise, `order_${row.id.slice(0, 30)}`);
     await supabaseClient.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
-    const rawKey = process.env.RAZORPAY_KEY_ID ?? "";
-    console.log("[RAZORPAY-DEBUG] key length:", rawKey.length, "| prefix:", JSON.stringify(rawKey.slice(0, 13)), "| ends:", JSON.stringify(rawKey.slice(-2)), "| orderId:", rp.id, "| amount:", rp.amount, "| currency:", rp.currency);
-    return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: rawKey, orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
+    return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: process.env.RAZORPAY_KEY_ID!, orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
   }
   return { orderId: row.id, orderNumber: row.order_number, razorpay: null as null, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
 }
