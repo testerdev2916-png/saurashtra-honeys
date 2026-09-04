@@ -670,7 +670,8 @@ export const listUsers = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
         const { data: roles } = await context.supabase.from("user_roles").select("user_id,role");
-    const { data: users, error } = await context.supabase.auth.admin.listUsers({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({
       page: 1,
       perPage: 200,
     });
@@ -727,7 +728,8 @@ export const inviteUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        const { data: inv, error } = await context.supabase.auth.admin.inviteUserByEmail(data.email);
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { data: inv, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email);
     if (error) throw new Error(error.message);
     if (data.role && inv.user) {
       await context.supabase
@@ -746,7 +748,8 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        const { error } = await context.supabase.auth.admin.generateLink({
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { error } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
       email: data.email,
     });
