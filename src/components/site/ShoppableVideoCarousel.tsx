@@ -54,19 +54,21 @@ function ShoppableVideoCard({
     if (!el || typeof IntersectionObserver === "undefined") return;
 
     // Detect when video is near viewport to mount it (limit to ~1 card distance)
+    // rootMargin restricts it to the middle 60% of the viewport to prevent mounting dozens of videos
     const nearObs = new IntersectionObserver(
       ([entry]) => {
         setIsNearViewport(entry.isIntersecting);
       },
-      { rootMargin: "300px 300px 300px 300px", threshold: 0 }
+      { rootMargin: "0px -20% 0px -20%", threshold: 0 }
     );
 
     // Detect when video is actively in viewport to autoplay it
+    // rootMargin restricts it to the exact middle 2% of the viewport so ONLY ONE video tries to play at a time
     const inViewObs = new IntersectionObserver(
       ([entry]) => {
-        setIsVideoInView(entry.isIntersecting && entry.intersectionRatio > 0.4);
+        setIsVideoInView(entry.isIntersecting);
       },
-      { threshold: [0, 0.4, 0.5, 1] }
+      { rootMargin: "0px -49% 0px -49%", threshold: 0 }
     );
 
     nearObs.observe(el);
@@ -134,7 +136,7 @@ function ShoppableVideoCard({
 
     document.addEventListener("visibilitychange", handleVisibility);
     return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [isVideoInView, isMuted]);
+  }, [isVideoInView, isMuted, isNearViewport]);
 
   useEffect(() => {
     // Trigger mount animation
