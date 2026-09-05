@@ -351,44 +351,80 @@ function ProductPage() {
           <div className="mt-7">
             {tab === "Description" || (tab as string) === "Story / Description" ? (
               <>
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">Our {p.name} is collected by bees from the nectar of {p.flora ?? "wild"} blossoms grown across the rich floral regions of Saurashtra. It is raw, unheated and unfiltered—preserving every natural enzyme, antioxidant, and subtle aroma present in the hive.</p>
-                <ul className="mt-5 grid sm:grid-cols-2 gap-3 text-sm font-medium text-espresso">
-                  {p.benefits.map((b) => (
-                    <li key={b} className="flex items-center gap-2.5"><span className="size-5 rounded-full bg-cream-deep text-burnt-orange flex items-center justify-center text-xs font-bold">✓</span> {b}</li>
-                  ))}
-                </ul>
+                <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                  {p.story_description || `Our ${p.name} is collected by bees from the nectar of ${p.flora ?? "wild"} blossoms grown across the rich floral regions of Saurashtra. It is raw, unheated and unfiltered—preserving every natural enzyme, antioxidant, and subtle aroma present in the hive.`}
+                </p>
+                {!p.story_description && (
+                  <ul className="mt-5 grid sm:grid-cols-2 gap-3 text-sm font-medium text-espresso">
+                    {p.benefits.map((b) => (
+                      <li key={b} className="flex items-center gap-2.5"><span className="size-5 rounded-full bg-cream-deep text-burnt-orange flex items-center justify-center text-xs font-bold">✓</span> {b}</li>
+                    ))}
+                  </ul>
+                )}
               </>
             ) : null}
+            
             {tab === "Benefits" || (tab as string) === "What Makes It Special" ? (
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-medium text-espresso">
-                {p.benefits.map((b) => <li key={b} className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>{b}</span></li>)}
-                <li className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>Rich in natural antimicrobial properties & enzymes</span></li>
-                <li className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>Never heated above natural hive temperature</span></li>
+                {p.what_makes_special && p.what_makes_special.length > 0 ? (
+                  p.what_makes_special.map((b, i) => (
+                    <li key={i} className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>{b}</span></li>
+                  ))
+                ) : (
+                  <>
+                    {p.benefits.map((b) => <li key={b} className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>{b}</span></li>)}
+                    <li className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>Rich in natural antimicrobial properties & enzymes</span></li>
+                    <li className="flex items-start gap-3"><Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>Never heated above natural hive temperature</span></li>
+                  </>
+                )}
               </ul>
             ) : null}
+            
             {tab === "How to Use" || (tab as string) === "Storage & Usage" ? (
-              <ol className="space-y-4 text-sm font-medium text-espresso">
-                {["Take 1–2 teaspoons each morning on an empty stomach for daily vitality.", "Stir into warm (never boiling) water, herbal infusions, or lemon water.", "Drizzle over yogurt, artisanal cheese, fruit bowls, or freshly baked sourdough.", "Store in a cool, dry place away from direct sunlight; natural crystallization is a sign of pure raw honey."].map((s, i) => <li key={i} className="flex gap-3.5 items-start"><span className="size-6 rounded-full bg-espresso text-cream text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span><span className="leading-relaxed">{s}</span></li>)}
-              </ol>
+              <>
+                {p.storage_usage ? (
+                  <div className="space-y-4 text-sm font-medium text-espresso leading-relaxed whitespace-pre-wrap">
+                    {p.storage_usage}
+                  </div>
+                ) : (
+                  <ol className="space-y-4 text-sm font-medium text-espresso">
+                    {["Take 1–2 teaspoons each morning on an empty stomach for daily vitality.", "Stir into warm (never boiling) water, herbal infusions, or lemon water.", "Drizzle over yogurt, artisanal cheese, fruit bowls, or freshly baked sourdough.", "Store in a cool, dry place away from direct sunlight; natural crystallization is a sign of pure raw honey."].map((s, i) => <li key={i} className="flex gap-3.5 items-start"><span className="size-6 rounded-full bg-espresso text-cream text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">{i + 1}</span><span className="leading-relaxed">{s}</span></li>)}
+                  </ol>
+                )}
+              </>
             ) : null}
+            
             {tab === "Ingredients" || (tab as string) === "Floral Source & Notes" ? (
               <div className="space-y-3">
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">100% Pure, Raw & Unfiltered Honey harvested primarily from {p.flora ?? "Wildflower"} blossoms in Saurashtra. No sugar syrups, artificial flavorings, or preservatives.</p>
-                <div className="p-4 rounded-xl bg-cream-deep/60 border border-border/80 text-xs font-medium text-espresso">
-                  <span className="font-bold text-burnt-orange">Tasting Note:</span> Distinct floral sweetness with an authentic earthy, soothing finish characteristic of raw Indian apiaries.
-                </div>
+                {p.floral_source_notes ? (
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">{p.floral_source_notes}</p>
+                ) : (
+                  <>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">100% Pure, Raw & Unfiltered Honey harvested primarily from {p.flora ?? "Wildflower"} blossoms in Saurashtra. No sugar syrups, artificial flavorings, or preservatives.</p>
+                    <div className="p-4 rounded-xl bg-cream-deep/60 border border-border/80 text-xs font-medium text-espresso">
+                      <span className="font-bold text-burnt-orange">Tasting Note:</span> Distinct floral sweetness with an authentic earthy, soothing finish characteristic of raw Indian apiaries.
+                    </div>
+                  </>
+                )}
               </div>
             ) : null}
+            
             {tab === "Lab Report" || (tab as string) === "Purity & Lab Test" ? (
               <div className="space-y-4">
-                <p className="text-sm md:text-base text-muted-foreground leading-relaxed">Every batch of Saurashtra Honey undergoes independent NABL-accredited laboratory testing for moisture content, HMF levels, C4 sugar adulteration, and pollen verification.</p>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-cream border border-border/80 text-sm">
-                  <div>
-                    <div className="font-bold text-espresso">Verified Batch Code: SH24-{p.slug.slice(0, 3).toUpperCase()}</div>
-                    <div className="text-xs text-muted-foreground">Tested for zero inverted sugar & 100% floral purity</div>
-                  </div>
-                  <a href="#" className="text-xs font-bold tracking-widest text-burnt-orange hover:underline uppercase">Download PDF Report →</a>
-                </div>
+                {p.purity_lab_test ? (
+                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">{p.purity_lab_test}</p>
+                ) : (
+                  <>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">Every batch of Saurashtra Honey undergoes independent NABL-accredited laboratory testing for moisture content, HMF levels, C4 sugar adulteration, and pollen verification.</p>
+                    <div className="flex items-center justify-between p-4 rounded-xl bg-cream border border-border/80 text-sm">
+                      <div>
+                        <div className="font-bold text-espresso">Verified Batch Code: SH24-{p.slug.slice(0, 3).toUpperCase()}</div>
+                        <div className="text-xs text-muted-foreground">Tested for zero inverted sugar & 100% floral purity</div>
+                      </div>
+                      <a href="#" className="text-xs font-bold tracking-widest text-burnt-orange hover:underline uppercase">Download PDF Report →</a>
+                    </div>
+                  </>
+                )}
               </div>
             ) : null}
           </div>

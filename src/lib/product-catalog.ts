@@ -24,6 +24,11 @@ type Row = {
   attributes?: unknown;
   additional_images?: unknown;
   show_on_homepage: boolean | null;
+  story_description: string | null;
+  what_makes_special: unknown;
+  floral_source_notes: string | null;
+  storage_usage: string | null;
+  purity_lab_test: string | null;
   updated_at: string;
 };
 
@@ -102,9 +107,9 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     slug: r.slug,
     name: r.name,
     tagline: r.tagline ?? "",
-    description: r.description ?? "",
+    description: r.description ?? staticMatch?.description ?? "",
     category: (r.category ?? "Honey") as Product["category"],
-    flora: r.flora ?? undefined,
+    flora: r.flora ?? staticMatch?.flora,
     badge: (r.badge ?? undefined) as Product["badge"],
     price: defaultVariant ? defaultVariant.price : r.price,
     priceMax: r.price_max ?? undefined,
@@ -113,15 +118,22 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     reviews: r.reviews_count,
     sizes: activeSizes,
     variants: mappedVariants,
-    benefits: Array.isArray(r.benefits) ? (r.benefits as string[]) : [],
     image: primaryImg,
     images: galleryImages,
     additionalImages: additionalImages,
+    benefits: Array.isArray(r.benefits)
+      ? (r.benefits as string[])
+      : staticMatch?.benefits ?? [],
     attributes:
-      r.attributes && typeof r.attributes === "object"
+      typeof r.attributes === "object" && r.attributes !== null
         ? (r.attributes as Record<string, string | string[]>)
-        : undefined,
+        : staticMatch?.attributes,
     showOnHomepage: !!r.show_on_homepage,
+    story_description: r.story_description ?? undefined,
+    what_makes_special: Array.isArray(r.what_makes_special) ? (r.what_makes_special as string[]) : undefined,
+    floral_source_notes: r.floral_source_notes ?? undefined,
+    storage_usage: r.storage_usage ?? undefined,
+    purity_lab_test: r.purity_lab_test ?? undefined,
     updatedAt: r.updated_at,
   };
 }
@@ -156,7 +168,21 @@ export async function fetchProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
+      .select(`
+        id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+        image_key,
+        image_url,
+        images,
+        attributes,
+        additional_images,
+        show_on_homepage,
+        story_description,
+        what_makes_special,
+        floral_source_notes,
+        storage_usage,
+        purity_lab_test,
+        updated_at
+      `)
       .eq("status", "published")
       .order("sort_order", { ascending: true });
     
@@ -184,8 +210,23 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select("id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,image_key,image_url,images,attributes,show_on_homepage,updated_at")
+      .select(`
+        id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+        image_key,
+        image_url,
+        images,
+        attributes,
+        additional_images,
+        show_on_homepage,
+        story_description,
+        what_makes_special,
+        floral_source_notes,
+        storage_usage,
+        purity_lab_test,
+        updated_at
+      `)
       .eq("slug", slug)
+      .eq("status", "published")
       .maybeSingle();
 
     if (error) {

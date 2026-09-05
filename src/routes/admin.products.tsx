@@ -90,6 +90,11 @@ type P = {
   canonical_url: string | null;
   attributes?: Record<string, string | string[]>;
   show_on_homepage: boolean;
+  story_description: string | null;
+  what_makes_special: string[] | null;
+  floral_source_notes: string | null;
+  storage_usage: string | null;
+  purity_lab_test: string | null;
 };
 
 const EMPTY: Partial<P> = {
@@ -120,8 +125,14 @@ const EMPTY: Partial<P> = {
   is_featured: false,
   is_bestseller: false,
   is_new_arrival: false,
+  video_url: "",
   attributes: {},
   show_on_homepage: false,
+  story_description: "",
+  what_makes_special: [],
+  floral_source_notes: "",
+  storage_usage: "",
+  purity_lab_test: "",
 };
 
 function ProductsPage() {
@@ -212,6 +223,11 @@ function ProductsPage() {
         is_bestseller: !!p.is_bestseller,
         is_new_arrival: !!p.is_new_arrival,
         show_on_homepage: !!p.show_on_homepage,
+        story_description: p.story_description || null,
+        what_makes_special: p.what_makes_special || null,
+        floral_source_notes: p.floral_source_notes || null,
+        storage_usage: p.storage_usage || null,
+        purity_lab_test: p.purity_lab_test || null,
         video_url: p.video_url || null,
         meta_title: p.meta_title || null,
         meta_description: p.meta_description || null,
@@ -571,12 +587,13 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
   useImperativeHandle(ref, () => ({
     save: triggerSave,
   }));
-  const [tab, setTab] = useState<"general" | "pricing" | "media" | "seo" | "details">("general");
+  const [tab, setTab] = useState<"general" | "pricing" | "media" | "seo" | "details" | "story">("general");
   const tabs = [
     ["general", "General"],
     ["pricing", "Pricing & Stock"],
     ["media", "Media"],
     ["details", "Details"],
+    ["story", "Story & Details"],
     ["seo", "SEO"],
   ] as const;
   const listCats = useServerFn(listCategories);
@@ -1235,6 +1252,123 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 className={inp}
               />
             </Field>
+          </div>
+        )}
+
+        {tab === "story" && (
+          <div className="grid md:grid-cols-2 gap-3 text-sm">
+            <div className="md:col-span-2">
+              <h3 className="font-serif text-lg font-bold text-espresso mb-3">Product Story & Details</h3>
+              <p className="text-xs text-muted-foreground mb-4">
+                These fields will dynamically appear in the product page tabs. Leave blank to hide the tab.
+              </p>
+            </div>
+            
+            <div className="md:col-span-2">
+              <Field label="Story / Description">
+                <textarea
+                  rows={5}
+                  value={f.story_description ?? ""}
+                  onChange={(e) => setF({ ...f, story_description: e.target.value })}
+                  className={inp}
+                  placeholder="Enter the product-specific story..."
+                />
+              </Field>
+            </div>
+
+            <div className="md:col-span-2 border border-border/80 rounded-xl p-4 bg-cream/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-xs font-bold text-espresso uppercase tracking-wider">
+                    What Makes It Special
+                  </h4>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Add bullet points to highlight unique qualities.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const curr = [...(f.what_makes_special || [])];
+                    curr.push("");
+                    setF({ ...f, what_makes_special: curr });
+                  }}
+                  className="px-2.5 py-1.5 text-xs font-bold bg-espresso text-cream rounded-lg hover:bg-burnt-orange transition-colors shrink-0"
+                >
+                  + Add Point
+                </button>
+              </div>
+              
+              {!f.what_makes_special || f.what_makes_special.length === 0 ? (
+                <p className="text-xs text-muted-foreground italic">No points added yet.</p>
+              ) : (
+                <div className="space-y-2">
+                  {f.what_makes_special.map((val, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-burnt-orange font-bold text-lg leading-none shrink-0">✓</span>
+                      <input
+                        type="text"
+                        value={val}
+                        onChange={(e) => {
+                          const curr = [...(f.what_makes_special || [])];
+                          curr[idx] = e.target.value;
+                          setF({ ...f, what_makes_special: curr });
+                        }}
+                        className={`${inp} text-xs flex-1`}
+                        placeholder="e.g. Rich in natural enzymes"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const curr = f.what_makes_special!.filter((_, i) => i !== idx);
+                          setF({ ...f, what_makes_special: curr });
+                        }}
+                        className="p-2 text-muted-foreground hover:text-red-600 shrink-0"
+                        title="Remove point"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="md:col-span-2">
+              <Field label="Floral Source & Notes">
+                <textarea
+                  rows={4}
+                  value={f.floral_source_notes ?? ""}
+                  onChange={(e) => setF({ ...f, floral_source_notes: e.target.value })}
+                  className={inp}
+                  placeholder="Explain the floral source, region, taste, aroma..."
+                />
+              </Field>
+            </div>
+            
+            <div className="md:col-span-2">
+              <Field label="Storage & Usage">
+                <textarea
+                  rows={4}
+                  value={f.storage_usage ?? ""}
+                  onChange={(e) => setF({ ...f, storage_usage: e.target.value })}
+                  className={inp}
+                  placeholder="Product-specific storage and usage instructions..."
+                />
+              </Field>
+            </div>
+            
+            <div className="md:col-span-2">
+              <Field label="Purity & Lab Test">
+                <textarea
+                  rows={4}
+                  value={f.purity_lab_test ?? ""}
+                  onChange={(e) => setF({ ...f, purity_lab_test: e.target.value })}
+                  className={inp}
+                  placeholder="Product-specific purity, testing and certification information..."
+                />
+              </Field>
+            </div>
           </div>
         )}
 
