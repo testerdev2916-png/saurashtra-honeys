@@ -36,6 +36,7 @@ function ShoppableVideoCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVideoInView, setIsVideoInView] = useState(false);
+  const [isNearViewport, setIsNearViewport] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
 
@@ -46,20 +47,32 @@ function ShoppableVideoCard({
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Play video only when this specific card is within the viewport
   useEffect(() => {
     const el = cardRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
 
-    const obs = new IntersectionObserver(
+    // Detect when video is near viewport to mount it
+    const nearObs = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearViewport(entry.isIntersecting);
+      },
+      { rootMargin: "600px 600px 600px 600px" }
+    );
+
+    // Detect when video is exactly in viewport to autoplay it
+    const inViewObs = new IntersectionObserver(
       ([entry]) => {
         setIsVideoInView(entry.isIntersecting && entry.intersectionRatio > 0.5);
       },
       { threshold: [0.5] }
     );
 
-    obs.observe(el);
-    return () => obs.unobserve(el);
+    nearObs.observe(el);
+    inViewObs.observe(el);
+    return () => {
+      nearObs.unobserve(el);
+      inViewObs.unobserve(el);
+    };
   }, []);
 
   // Handle play/pause based on viewport and tab visibility
@@ -141,15 +154,15 @@ function ShoppableVideoCard({
 
       {/* Hover scale effect wrapper for video */}
       <div 
-        className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center"
+        className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {item.video_url ? (
+        {item.video_url && isVisible && isNearViewport ? (
           <video
             ref={videoRef}
             src={item.video_url}
             poster={item.thumbnail_url || item.fallbackImage}
-            preload="metadata"
+            preload="none"
             playsInline
             muted
             loop
@@ -299,7 +312,7 @@ export function ShoppableVideoCarousel({
           obs.disconnect(); // Only need to trigger entry animation once
         }
       },
-      { threshold: 0.1 }
+      { rootMargin: "600px" } // trigger visibility slightly before it enters viewport
     );
     obs.observe(el);
     return () => obs.unobserve(el);
