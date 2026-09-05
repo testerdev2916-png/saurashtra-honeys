@@ -120,7 +120,7 @@ function ShoppableVideoCard({
       ref={cardRef}
       data-card-id={uniqueId}
       className={`shoppable-video-card group relative shrink-0 flex flex-col snap-center sm:snap-start
-        ${className || "w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px]"}
+        ${className || "w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px] mr-[16px] md:mr-[20px]"}
         aspect-[9/16]
         rounded-[24px] overflow-hidden cursor-pointer
         shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.15)]
@@ -371,9 +371,9 @@ export function ShoppableVideoCarousel({
           </button>
 
           <div className="overflow-hidden w-full relative" ref={emblaRef}>
-            <div className="flex gap-[12px] touch-pan-y cursor-grab active:cursor-grabbing">
+            <div className="flex touch-pan-y cursor-grab active:cursor-grabbing px-[16px]">
               {sortedVideos.map((item, idx) => (
-                <div key={`mob-${item.id}-${idx}`} className="flex-[0_0_calc(50%_-_6px)] min-w-0 pb-6">
+                <div key={`mob-${item.id}-${idx}`} className="flex-[0_0_calc(70%)] sm:flex-[0_0_calc(50%_-_8px)] min-w-0 mr-[16px] pb-6">
                   <ShoppableVideoCard
                     item={item}
                     product={allProducts.find((p) => p.slug === item.product_slug)}
@@ -416,7 +416,7 @@ export function ShoppableVideoCarousel({
           style={{ animationDuration: '600s' }}
         >
           {/* First set of duplicated videos */}
-          <div className="flex gap-4 sm:gap-6 pr-4 sm:pr-6">
+          <div className="flex">
             {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
               <ShoppableVideoCard
                 key={`set1-${item.id}-${idx}`}
@@ -429,7 +429,7 @@ export function ShoppableVideoCarousel({
             ))}
           </div>
           {/* Second identical set for seamless looping */}
-          <div className="flex gap-4 sm:gap-6 pr-4 sm:pr-6">
+          <div className="flex">
             {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
               <ShoppableVideoCard
                 key={`set2-${item.id}-${idx}`}
