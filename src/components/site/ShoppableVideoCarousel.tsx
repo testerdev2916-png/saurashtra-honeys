@@ -37,8 +37,6 @@ function ShoppableVideoCard({
 }: ShoppableVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [isActive, setIsActive] = useState(false);
-  const [isVisibleOnScreen, setIsVisibleOnScreen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
@@ -50,68 +48,40 @@ function ShoppableVideoCard({
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  // Listen for the global state event from the parent's reliable rAF tracking loop
-  useEffect(() => {
-    const handleState = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      setIsActive(customEvent.detail.activeId === uniqueId);
-      setIsVisibleOnScreen(customEvent.detail.visibleIds.includes(uniqueId));
-    };
-    window.addEventListener('shoppable-video-state', handleState);
-    return () => window.removeEventListener('shoppable-video-state', handleState);
-  }, [uniqueId]);
-
   // Handle mute global event
   useEffect(() => {
-    const handleMuteOthers = (e: Event) => {
+    const handleGlobalMute = (e: Event) => {
       const customEvent = e as CustomEvent;
       if (customEvent.detail.id !== uniqueId) {
         setIsMuted(true);
         if (videoRef.current) {
           videoRef.current.muted = true;
-          // Prompt requirement: "Pause any other actively playing video"
-          if (!videoRef.current.paused) {
-            videoRef.current.pause();
-          }
         }
       }
     };
-    window.addEventListener("shoppable-video-unmuted", handleMuteOthers);
-    return () => window.removeEventListener("shoppable-video-unmuted", handleMuteOthers);
+    window.addEventListener('shoppable-video-mute-others', handleGlobalMute);
+    return () => window.removeEventListener('shoppable-video-mute-others', handleGlobalMute);
   }, [uniqueId]);
 
-  // Handle play/pause based on viewport and tab visibility
+  // Attempt to play when visible
   useEffect(() => {
-    const vid = videoRef.current;
-    if (!vid) return;
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
 
-    // Explicitly enforce attributes as requested by user
-    vid.muted = isMuted;
-    vid.playsInline = true;
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && videoRef.current) {
+          videoRef.current.play().catch(e => console.error("Autoplay prevented:", e));
+        } else if (!entry.isIntersecting && videoRef.current) {
+          videoRef.current.pause();
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-    if (isVisibleOnScreen && !document.hidden) {
-      vid.play().catch(error => {
-        console.error("Video autoplay failed:", error);
-      });
-    } else {
-      if (!vid.paused) {
-        vid.pause();
-      }
-    }
-
-    const handleVisibility = () => {
-      if (document.hidden) {
-        if (!vid.paused) vid.pause();
-      } else if (isActive) {
-        vid.play().catch(error => {
-          console.error("Video autoplay failed:", error);
-        });
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
-  }, [isActive, isMuted]);
+    obs.observe(el);
+    return () => obs.unobserve(el);
+  }, []);
 
   useEffect(() => {
     // Trigger mount animation
@@ -125,10 +95,9 @@ function ShoppableVideoCard({
     
     if (isMuted) {
       setIsMuted(false);
-      window.dispatchEvent(new CustomEvent("shoppable-video-unmuted", { detail: { id: uniqueId } }));
+      window.dispatchEvent(new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }));
       if (videoRef.current) {
         videoRef.current.muted = false;
-        // Do NOT restart or pause, just ensure it's playing
         videoRef.current.play().catch(console.error);
       }
     } else {
@@ -196,10 +165,9 @@ function ShoppableVideoCard({
             ref={videoRef}
             src={item.video_url}
             poster={item.thumbnail_url || item.fallbackImage || undefined}
-            autoPlay={isVisibleOnScreen}
+            autoPlay
             playsInline
             muted={isMuted}
-            preload={isVisibleOnScreen ? "metadata" : "none"}
             loop
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
@@ -341,9 +309,11 @@ export function ShoppableVideoCarousel({
     });
   }, [activeVideos, category, currentSlug, allProducts]);
 
+  // IntersectionObserver to detect when carousel is near viewport
   useEffect(() => {
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
+
     const obs = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -353,68 +323,10 @@ export function ShoppableVideoCarousel({
       },
       { rootMargin: "600px" } // trigger visibility slightly before it enters viewport
     );
+
     obs.observe(el);
     return () => obs.unobserve(el);
   }, []);
-
-  // Use requestAnimationFrame to track visible cards and the active center card.
-  // This completely bypasses Safari/Chrome IntersectionObserver failures on transformed (marquee) elements.
-  useEffect(() => {
-    if (!isSectionVisible) return;
-    
-    let rafId: number;
-    let lastActiveId: string | null = null;
-    let lastVisibleIdsStr: string = "";
-    
-    const checkActiveCard = () => {
-      const cards = document.querySelectorAll('.shoppable-video-card');
-      let closestId: string | null = null;
-      let minDistance = Infinity;
-      const visibleIds: string[] = [];
-      
-      const centerX = window.innerWidth / 2;
-      
-      cards.forEach(card => {
-        const rect = card.getBoundingClientRect();
-        // Ignore cards completely outside the vertical viewport
-        if (rect.bottom < 0 || rect.top > window.innerHeight) return;
-
-        const id = card.getAttribute('data-card-id');
-        if (!id) return;
-
-        // If card is horizontally on screen (with 200px safe margin)
-        if (rect.right > -200 && rect.left < window.innerWidth + 200) {
-          visibleIds.push(id);
-        }
-
-        const cardCenterX = rect.left + rect.width / 2;
-        const distance = Math.abs(centerX - cardCenterX);
-        
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestId = id;
-        }
-      });
-      
-      const visibleIdsStr = visibleIds.join(',');
-      
-      if (closestId !== lastActiveId || visibleIdsStr !== lastVisibleIdsStr) {
-        lastActiveId = closestId;
-        lastVisibleIdsStr = visibleIdsStr;
-        window.dispatchEvent(new CustomEvent('shoppable-video-state', { 
-          detail: { activeId: closestId, visibleIds } 
-        }));
-      }
-      
-      rafId = requestAnimationFrame(checkActiveCard);
-    };
-    
-    rafId = requestAnimationFrame(checkActiveCard);
-    
-    return () => cancelAnimationFrame(rafId);
-  }, [isSectionVisible]);
-
-
 
   if (sortedVideos.length === 0) return null;
 
