@@ -137,9 +137,8 @@ function Checkout() {
       const ok = await loadRazorpay();
       if (!ok || !window.Razorpay) throw new Error("Could not load the payment gateway. Please check your connection.");
       const rp = new window.Razorpay({
-        key: res.razorpay.keyId,
-        amount: res.razorpay.amount,
-        currency: res.razorpay.currency,
+        key: res.razorpay.keyId.trim(),
+        // amount and currency are omitted because order_id is provided
         name: "Saurashtra Honey",
         description: `Order ${res.orderId.slice(0, 8)}`,
         order_id: res.razorpay.orderId,
@@ -160,6 +159,21 @@ function Checkout() {
           ondismiss: () => { toast.info("Payment cancelled"); setBusy(false); },
         },
       });
+
+      rp.on('payment.failed', function (response: any) {
+        console.error("Razorpay Payment Failed:", response.error);
+        toast.error(`Payment failed: ${response.error.description}`);
+        
+        // Log diagnostic info to backend or console
+        console.log("Diagnostic - Code:", response.error.code);
+        console.log("Diagnostic - Description:", response.error.description);
+        console.log("Diagnostic - Source:", response.error.source);
+        console.log("Diagnostic - Step:", response.error.step);
+        console.log("Diagnostic - Reason:", response.error.reason);
+        console.log("Diagnostic - Order ID:", response.error.metadata.order_id);
+        console.log("Diagnostic - Payment ID:", response.error.metadata.payment_id);
+      });
+
       rp.open();
       // Razorpay modal is open — reset busy so the page is interactive again
       setBusy(false);

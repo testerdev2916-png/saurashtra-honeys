@@ -60,8 +60,8 @@ async function resolveCoupon(supabaseClient: any, code: string | undefined, subt
 }
 
 async function razorpayCreateOrder(amountPaise: number, receipt: string) {
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+  const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
   if (!keyId || !keySecret) throw new Error("Razorpay is not configured. Please add RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET.");
   const auth = Buffer.from(`${keyId}:${keySecret}`).toString("base64");
   const res = await fetch("https://api.razorpay.com/v1/orders", {
@@ -121,7 +121,7 @@ async function insertOrderRow(supabaseClient: any, data: z.infer<typeof createSc
   if (data.payment_method === "razorpay") {
     const rp = await razorpayCreateOrder(totalPaise, `order_${row.id.slice(0, 30)}`);
     await supabaseClient.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
-    return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: process.env.RAZORPAY_KEY_ID!, orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
+    return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: process.env.RAZORPAY_KEY_ID!.trim(), orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
   }
   return { orderId: row.id, orderNumber: row.order_number, razorpay: null as null, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
 }
