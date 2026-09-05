@@ -704,13 +704,16 @@ export const setUserRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        if (data.action === "grant") {
-      const { error } = await context.supabase
+    // Use supabaseAdmin (service-role) to bypass RLS on user_roles.
+    // Security: assertPerm above already validated the caller has users.manage permission.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    if (data.action === "grant") {
+      const { error } = await supabaseAdmin
         .from("user_roles")
         .insert({ user_id: data.user_id, role: data.role } as never);
       if (error && !String(error.message).includes("duplicate")) throw new Error(error.message);
     } else {
-      const { error } = await context.supabase
+      const { error } = await supabaseAdmin
         .from("user_roles")
         .delete()
         .eq("user_id", data.user_id)
@@ -732,7 +735,8 @@ export const inviteUser = createServerFn({ method: "POST" })
         const { data: inv, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email);
     if (error) throw new Error(error.message);
     if (data.role && inv.user) {
-      await context.supabase
+      // supabaseAdmin is already imported above for inviteUserByEmail
+      await supabaseAdmin
         .from("user_roles")
         .insert({ user_id: inv.user.id, role: data.role } as never);
     }
