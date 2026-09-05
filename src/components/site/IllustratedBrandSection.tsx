@@ -4,8 +4,8 @@ export function IllustratedBrandSection({ className = "", settings }: { classNam
   const eyebrow = settings?.illus_eyebrow ?? "FROM THE HIVE";
   const ctaText = settings?.illus_cta_text ?? "Explore our story \u2192";
   const ctaUrl = settings?.illus_cta_url ?? "/our-story";
-  const leftImg = settings?.illus_left_img ?? "/images/heritage/illus_beekeeping.png";
-  const rightImg = settings?.illus_right_img ?? "/images/heritage/illus_wildflower.png";
+  const leftImg = settings?.illus_left_img ?? "/images/heritage/illus_beekeeping.webp";
+  const rightImg = settings?.illus_right_img ?? "/images/heritage/illus_wildflower.webp";
 
   return (
     <div className={`w-full px-2 sm:px-6 md:px-12 lg:px-20 overflow-hidden pb-10 pt-4 md:py-0 ${className}`}>

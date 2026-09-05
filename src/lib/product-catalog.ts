@@ -126,12 +126,18 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   };
 }
 
-async function fetchAllVariantsMap(): Promise<Map<string, VariantRow[]> | undefined> {
+async function fetchAllVariantsMap(productIds?: string[]): Promise<Map<string, VariantRow[]> | undefined> {
   try {
-    const { data: vData } = await supabase
+    let query = supabase
       .from("product_variants")
       .select("id,product_id,label,price,mrp,stock_quantity,is_active,is_default,sku,sort_order,weight_g")
       .order("sort_order", { ascending: true });
+
+    if (productIds && productIds.length > 0) {
+      query = query.in("product_id", productIds);
+    }
+
+    const { data: vData } = await query;
     if (vData && Array.isArray(vData)) {
       const varMap = new Map<string, VariantRow[]>();
       for (const v of vData as unknown as VariantRow[]) {
@@ -163,8 +169,10 @@ export async function fetchProducts(): Promise<Product[]> {
       console.warn("[fetchProducts] No products found in Supabase. Returning empty array.");
       return [];
     }
-    const varMap = await fetchAllVariantsMap();
-    return (data as unknown as Row[]).map((r) => toProduct(r, varMap));
+    const rows = data as unknown as Row[];
+    const productIds = rows.map((r) => r.id).filter(Boolean);
+    const varMap = await fetchAllVariantsMap(productIds);
+    return rows.map((r) => toProduct(r, varMap));
   } catch (err) {
     console.error("[fetchProducts] Exception:", err);
     throw err;
@@ -190,8 +198,9 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
       return null;
     }
 
-    const varMap = await fetchAllVariantsMap();
-    return toProduct(data as unknown as Row, varMap);
+    const row = data as unknown as Row;
+    const varMap = await fetchAllVariantsMap(row.id ? [row.id] : undefined);
+    return toProduct(row, varMap);
   } catch (err) {
     console.error("[fetchProduct] Exception:", err);
     throw err;

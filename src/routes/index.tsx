@@ -83,10 +83,6 @@ function Home() {
   const fetchInstaFn = useServerFn(getPublicInstagramFeed);
 
   useEffect(() => {
-    // Fetch live products
-    void fetchProducts().then((r) => {
-      if (r.length > 0) setList(r);
-    });
 
     // Fetch CMS sections — failure is safe, just means no CMS overrides
     void fetchHomepageSections()

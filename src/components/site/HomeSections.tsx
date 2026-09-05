@@ -236,10 +236,10 @@ export function HomeShopByCategory({
     <section className="pt-16 sm:pt-24 pb-16 sm:pb-20 bg-[#F8F5EF] overflow-hidden relative">
       {/* PREMIUM VINTAGE ANIMATED BACKGROUND LAYER */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.18] z-0">
-        <img loading="lazy" src="/images/bg_illustrations/floral_alpha.png" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
-        <img loading="lazy" src="/images/bg_illustrations/honeycomb_alpha.png" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
-        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.png" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
-        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.png" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
+        <img loading="lazy" src="/images/bg_illustrations/floral_alpha.webp" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
+        <img loading="lazy" src="/images/bg_illustrations/honeycomb_alpha.webp" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
+        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.webp" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
+        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.webp" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
       </div>
 
       <div className="container-page mb-8 relative z-10">
@@ -429,21 +429,31 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
       img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.png"
     },
     {
-      title: settings?.point3_title ?? "Pure by Nature",
-      desc: settings?.point3_desc ?? "No unnecessary additives — just naturally pure honey.",
-      img: settings?.point3_icon ?? "/images/heritage/illus_pure.png"
+      title: settings?.point1_title ?? "HIVE TO HOME",
+      desc: settings?.point1_desc ?? "We harvest raw honey from pristine Saurashtra flora, ensuring it never touches a factory.",
+      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.webp"
     },
     {
-      title: settings?.point4_title ?? "Responsible Beekeeping",
-      desc: settings?.point4_desc ?? "Thoughtful beekeeping practices that respect bees and their natural environment.",
-      img: settings?.point4_icon ?? "/images/heritage/illus_beekeeping.png"
+      title: settings?.point2_title ?? "WILDFLOWER RICH",
+      desc: settings?.point2_desc ?? "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
+      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.webp"
+    },
+    {
+      title: settings?.point3_title ?? "100% PURE & RAW",
+      desc: settings?.point3_desc ?? "Unheated and unfiltered to preserve natural enzymes, pollen, and health benefits.",
+      img: settings?.point3_icon ?? "/images/heritage/illus_pure.webp"
+    },
+    {
+      title: settings?.point4_title ?? "ETHICAL BEEKEEPING",
+      desc: settings?.point4_desc ?? "We protect our bees and their habitats, ensuring sustainable cycles year after year.",
+      img: settings?.point4_icon ?? "/images/heritage/illus_beekeeping.webp"
     }
   ];
 
   const fb_eyebrow = settings?.eyebrow ?? "OUR JOURNEY";
   const fb_heading = settings?.heading ?? "The Journey Behind Every Drop";
   const fb_desc = settings?.description ?? "From the wildflowers of Saurashtra to the hands of our beekeepers, every drop follows a journey rooted in nature, care, and patience. We preserve what nature creates — pure, authentic honey, just as it was meant to be.";
-  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/cinematic.png";
+  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/cinematic.webp";
 
   const fb_cta_text = settings?.cta_text ?? "EXPLORE OUR HIVE";
   const fb_cta_url = settings?.cta_url ?? "/bee-farming";
@@ -452,13 +462,15 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
     <section className="relative overflow-hidden bg-[#F8F5EF] py-16 sm:py-32">
       {/* 3. Large Heritage Illustrations (Parallax Background) */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.20] z-0">
-        <img loading="lazy" 
-          src="/images/bg_illustrations/floral_alpha.png" 
+        <img 
+          loading="lazy" 
+          src="/images/bg_illustrations/floral_alpha.webp" 
           alt="" 
-          className="absolute top-[20%] -left-[10%] sm:-left-[5%] w-[450px] sm:w-[600px] max-w-[60vw] object-contain animate-float-1" 
+          className="absolute -top-[15%] -left-[10%] w-[50vw] sm:w-[35vw] max-w-[300px] object-contain opacity-[0.08] pointer-events-none rotate-12" 
         />
-        <img loading="lazy" 
-          src="/images/bg_illustrations/honeycomb_alpha.png" 
+        <img 
+          loading="lazy" 
+          src="/images/bg_illustrations/honeycomb_alpha.webp" 
           alt="" 
           className="absolute top-[40%] -right-[15%] sm:-right-[5%] w-[400px] sm:w-[500px] max-w-[60vw] object-contain animate-float-2" 
         />

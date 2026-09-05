@@ -414,12 +414,12 @@ export function ShopPage({
         {/* FULL-HEIGHT DECORATIVE ARTWORK - LEFT */}
         <div className="hidden xl:flex absolute top-16 bottom-0 lg:-left-20 xl:-left-10 2xl:left-4 w-[300px] xl:w-[350px] 2xl:w-[450px] flex-col gap-[700px] opacity-10 mix-blend-multiply pointer-events-none z-0 select-none overflow-visible">
           {[
-            "/images/bg_illustrations/floral_alpha.png",
-            "/images/heritage/illus_beekeeping.png",
-            "/images/bg_illustrations/bees_alpha.png",
-            "/images/heritage/illus_wildflower.png",
-            "/images/bg_illustrations/floral_alpha.png",
-            "/images/heritage/illus_beekeeping.png"
+            "/images/bg_illustrations/floral_alpha.webp",
+            "/images/heritage/illus_beekeeping.webp",
+            "/images/bg_illustrations/bees_alpha.webp",
+            "/images/heritage/illus_wildflower.webp",
+            "/images/bg_illustrations/floral_alpha.webp",
+            "/images/heritage/illus_beekeeping.webp"
           ].map((src, i) => (
             <img key={`left-art-${i}`} src={src} alt="" className="w-full object-contain shrink-0" loading="lazy" />
           ))}
@@ -428,12 +428,12 @@ export function ShopPage({
         {/* FULL-HEIGHT DECORATIVE ARTWORK - RIGHT */}
         <div className="hidden xl:flex absolute top-64 bottom-0 lg:-right-20 xl:-right-10 2xl:right-4 w-[350px] xl:w-[400px] 2xl:w-[500px] flex-col gap-[700px] opacity-10 mix-blend-multiply pointer-events-none z-0 select-none overflow-visible">
           {[
-            "/images/bg_illustrations/honeycomb_alpha.png",
-            "/images/heritage/illus_hive_to_home.png",
-            "/images/bg_illustrations/dipper_alpha.png",
-            "/images/heritage/illus_pure.png",
-            "/images/bg_illustrations/honeycomb_alpha.png",
-            "/images/heritage/illus_hive_to_home.png"
+            "/images/bg_illustrations/honeycomb_alpha.webp",
+            "/images/heritage/illus_hive_to_home.webp",
+            "/images/bg_illustrations/dipper_alpha.webp",
+            "/images/heritage/illus_pure.webp",
+            "/images/bg_illustrations/honeycomb_alpha.webp",
+            "/images/heritage/illus_hive_to_home.webp"
           ].map((src, i) => (
             <img key={`right-art-${i}`} src={src} alt="" className="w-full object-contain shrink-0" loading="lazy" />
           ))}

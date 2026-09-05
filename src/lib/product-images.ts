@@ -84,7 +84,7 @@ export function resolveImage(
       // Remove query strings if they accidentally got stored
       path = path.split('?')[0].split('#')[0];
 
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path);
+      const { data } = supabase.storage.from(bucket).getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
       if (data && data.publicUrl) {
         resultUrl = data.publicUrl;
       }
@@ -132,7 +132,7 @@ export function getCategoryImageUrl(category: { image_url?: string | null, slug?
   
   path = path.split('?')[0].split('#')[0]; // remove accidental query strings
 
-  const { data } = supabase.storage.from("media").getPublicUrl(path);
+  const { data } = supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
   if (data && data.publicUrl) {
     return data.publicUrl;
   }

@@ -267,7 +267,7 @@ export const uploadCategoryImage = createServerFn({ method: "POST" })
       size_bytes: buf.byteLength,
       uploaded_by: context.userId,
     } as never);
-    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path);
+    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
     await audit(context.supabase, context.userId, "category.image_upload", "category", undefined, {
       filename: data.filename,
     });
@@ -304,7 +304,7 @@ export const uploadProductImage = createServerFn({ method: "POST" })
       size_bytes: buf.byteLength,
       uploaded_by: context.userId,
     } as never);
-    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path);
+    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
     await audit(context.supabase, context.userId, "product.image_upload", "product", undefined, {
       filename: data.filename,
     });
@@ -579,7 +579,7 @@ export const listMedia = createServerFn({ method: "POST" })
       (rows ?? []).map(async (r: { bucket: string; path: string }) => {
         const { data: pub } = context.supabase.storage
           .from(r.bucket)
-          .getPublicUrl(r.path);
+          .getPublicUrl(r.path, { transform: { quality: 80, format: 'webp' } });
         return { ...r, url: pub?.publicUrl ?? null };
       }),
     );
@@ -655,7 +655,7 @@ export const uploadMedia = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const { data: pub } = context.supabase.storage
       .from(data.bucket)
-      .getPublicUrl(path);
+      .getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
     await audit(context.supabase, context.userId, "media.upload", "media", row.id, {
       filename: data.filename,
       bucket: data.bucket,

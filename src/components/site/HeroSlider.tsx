@@ -31,6 +31,15 @@ export function HeroSlider({
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const paused = useRef(false);
   const touchX = useRef<number | null>(null);
+  
+  const [loaded, setLoaded] = useState<Set<number>>(() => {
+    const s = new Set([0]);
+    if (slides && slides.length > 1) {
+      s.add(1);
+      s.add(slides.length - 1);
+    }
+    return s;
+  });
 
   const go = (n: number, d: 1 | -1 = 1) => {
     if (!slides || slides.length <= 1) return;
@@ -46,6 +55,19 @@ export function HeroSlider({
     return () => { if (timer.current) clearTimeout(timer.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i, interval, slides?.length]);
+
+  useEffect(() => {
+    if (!slides || slides.length === 0) return;
+    setLoaded((prev) => {
+      const next = new Set(prev);
+      next.add(i);
+      if (slides.length > 1) {
+        next.add((i + 1) % slides.length);
+        next.add((i - 1 + slides.length) % slides.length);
+      }
+      return next.size > prev.size ? next : prev;
+    });
+  }, [i, slides?.length]);
 
   const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
   const aspectCls = effVariant === "home" 
@@ -85,26 +107,28 @@ export function HeroSlider({
                 className="absolute inset-0 z-0 block cursor-pointer"
                 aria-label={`Go to ${s.ctaTo || "/"}`}
               >
-                <picture className="w-full h-full block">
-                  {s.mobileImage && (
-                    <source 
-                      key={`mob-${s.updatedAt || s.mobileImage}`}
-                      media="(max-width: 767px)" 
-                      srcSet={s.mobileImage} 
+                {loaded.has(idx) && (
+                  <picture className="w-full h-full block">
+                    {s.mobileImage && (
+                      <source 
+                        key={`mob-${s.updatedAt || s.mobileImage}`}
+                        media="(max-width: 767px)" 
+                        srcSet={s.mobileImage} 
+                        // @ts-ignore: fetchpriority is valid in newer React versions
+                        fetchpriority={idx === 0 ? "high" : "auto"}
+                      />
+                    )}
+                    <img
+                      key={`desk-${s.updatedAt || s.image}`}
+                      src={s.image}
+                      alt={s.title}
+                      className="w-full h-full object-cover object-center"
+                      loading={idx === 0 ? "eager" : "lazy"}
                       // @ts-ignore: fetchpriority is valid in newer React versions
                       fetchpriority={idx === 0 ? "high" : "auto"}
                     />
-                  )}
-                  <img
-                    key={`desk-${s.updatedAt || s.image}`}
-                    src={s.image}
-                    alt={s.title}
-                    className="w-full h-full object-cover object-center"
-                    loading={idx === 0 ? "eager" : "lazy"}
-                    // @ts-ignore: fetchpriority is valid in newer React versions
-                    fetchpriority={idx === 0 ? "high" : "auto"}
-                  />
-                </picture>
+                  </picture>
+                )}
 
                 {/* Text Overlay (Only rendered if text fields are provided and not on homepage where text is baked into image) */}
                 {effVariant !== 'home' && (s.eyebrow || s.description || s.ctaText) && (
