@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
@@ -33,12 +33,14 @@ function ShoppableVideoCard({
   isVisible,
   className,
 }: ShoppableVideoCardProps) {
+  const cardId = useId();
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVideoInView, setIsVideoInView] = useState(false);
   const [isNearViewport, setIsNearViewport] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
 
   const formatDuration = (sec: number) => {
     if (!sec || isNaN(sec) || !isFinite(sec)) return "";
@@ -51,20 +53,20 @@ function ShoppableVideoCard({
     const el = cardRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
 
-    // Detect when video is near viewport to mount it
+    // Detect when video is near viewport to mount it (limit to ~1 card distance)
     const nearObs = new IntersectionObserver(
       ([entry]) => {
         setIsNearViewport(entry.isIntersecting);
       },
-      { rootMargin: "600px 600px 600px 600px" }
+      { rootMargin: "300px 300px 300px 300px", threshold: 0 }
     );
 
-    // Detect when video is exactly in viewport to autoplay it
+    // Detect when video is actively in viewport to autoplay it
     const inViewObs = new IntersectionObserver(
       ([entry]) => {
-        setIsVideoInView(entry.isIntersecting && entry.intersectionRatio > 0.5);
+        setIsVideoInView(entry.isIntersecting && entry.intersectionRatio > 0.4);
       },
-      { threshold: [0.5] }
+      { threshold: [0, 0.4, 0.5, 1] }
     );
 
     nearObs.observe(el);
@@ -75,14 +77,40 @@ function ShoppableVideoCard({
     };
   }, []);
 
+  // Handle mute global event
+  useEffect(() => {
+    const handleMuteOthers = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail.cardId !== cardId) {
+        setIsMuted(true);
+        if (videoRef.current) {
+          videoRef.current.muted = true;
+          // Prompt requirement: "Pause any other actively playing video"
+          if (!videoRef.current.paused) {
+            videoRef.current.pause();
+          }
+        }
+      }
+    };
+    window.addEventListener("shoppable-video-unmuted", handleMuteOthers);
+    return () => window.removeEventListener("shoppable-video-unmuted", handleMuteOthers);
+  }, [cardId]);
+
   // Handle play/pause based on viewport and tab visibility
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
 
+    vid.muted = isMuted;
+    vid.playsInline = true;
+
     const playVideo = async () => {
       try {
-        await vid.play();
+        if (vid.paused) {
+          // Preload auto immediately when we want to play, so it doesn't wait
+          vid.preload = "auto";
+          await vid.play();
+        }
       } catch (err) {
         // Autoplay may be blocked
       }
@@ -91,28 +119,48 @@ function ShoppableVideoCard({
     if (isVideoInView && !document.hidden) {
       void playVideo();
     } else {
-      vid.pause();
+      if (!vid.paused) {
+        vid.pause();
+      }
     }
 
     const handleVisibility = () => {
       if (document.hidden) {
-        vid.pause();
+        if (!vid.paused) vid.pause();
       } else if (isVideoInView) {
         void playVideo();
       }
     };
 
     document.addEventListener("visibilitychange", handleVisibility);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibility);
-    };
-  }, [isVideoInView]);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [isVideoInView, isMuted]);
 
   useEffect(() => {
     // Trigger mount animation
     const t = setTimeout(() => setHasLoaded(true), 50);
     return () => clearTimeout(t);
   }, []);
+
+  const handleVideoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const newMuted = !isMuted;
+    setIsMuted(newMuted);
+    
+    if (!newMuted) {
+      window.dispatchEvent(new CustomEvent("shoppable-video-unmuted", { detail: { cardId } }));
+      if (videoRef.current) {
+        videoRef.current.muted = false;
+        videoRef.current.play().catch(() => {});
+      }
+    } else {
+      if (videoRef.current) {
+        videoRef.current.muted = true;
+      }
+    }
+  };
 
   const displayTitle = item.title || product?.name || "Saurashtra Honey";
   const displaySubtitle = item.subtitle || product?.tagline || product?.category || "";
@@ -139,15 +187,23 @@ function ShoppableVideoCard({
         transitionDelay: hasLoaded ? "0ms" : `${index * 40}ms`,
       }}
     >
-      <Link 
-        to="."
-        search={((prev: any) => ({ ...prev, reel: item.id })) as any}
-        className="absolute inset-0 z-30 outline-none" 
-        aria-label={`View ${displayTitle}`} 
+      {/* Mute/Unmute Interaction Layer */}
+      <button
+        type="button"
+        onClick={handleVideoClick}
+        className="absolute inset-0 z-10 w-full h-full cursor-pointer outline-none appearance-none bg-transparent border-none p-0 m-0"
+        aria-label={isMuted ? "Unmute video" : "Mute video"}
       />
 
       {duration > 0 && (
-        <div className="absolute top-3 right-3 z-40 bg-black/50 backdrop-blur-md px-2 py-1 rounded-md text-white text-[11px] font-semibold tracking-wide pointer-events-none shadow-sm">
+        <div className="absolute top-3 right-3 z-40 bg-black/50 backdrop-blur-md px-2 py-1 rounded-md text-white text-[11px] font-semibold tracking-wide pointer-events-none shadow-sm flex items-center gap-1.5">
+          {!isMuted && (
+            <div className="flex gap-[2px] h-[10px] items-end">
+              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.0s', height: '100%' }}></div>
+              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.2s', height: '60%' }}></div>
+              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.4s', height: '80%' }}></div>
+            </div>
+          )}
           {formatDuration(duration)}
         </div>
       )}
@@ -162,9 +218,9 @@ function ShoppableVideoCard({
             ref={videoRef}
             src={item.video_url}
             poster={item.thumbnail_url || item.fallbackImage}
-            preload="none"
+            preload={isVideoInView ? "auto" : "none"}
             playsInline
-            muted
+            muted={isMuted}
             loop
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
@@ -184,7 +240,11 @@ function ShoppableVideoCard({
 
       {/* FLOATING PRODUCT CARD */}
       {product && (
-        <div className="absolute z-20 w-[76%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2.5 sm:p-3 flex flex-col items-center justify-center pointer-events-none">
+        <Link 
+          to="."
+          search={((prev: any) => ({ ...prev, reel: item.id })) as any}
+          className="absolute z-20 w-[76%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2.5 sm:p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-colors"
+        >
           <div className="w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] bg-white/60 border border-white/60 flex items-center justify-center mb-1.5 shadow-sm shrink-0 rounded-sm">
              <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-contain p-0.5" />
           </div>
@@ -205,7 +265,7 @@ function ShoppableVideoCard({
               </>
             )}
           </div>
-        </div>
+        </Link>
       )}
     </div>
   );

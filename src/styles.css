@@ -325,3 +325,9 @@
   transform: translateY(-1px);
 }
 
+
+@keyframes soundWave {
+  0% { transform: scaleY(0.6); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.6); }
+}
