@@ -89,7 +89,7 @@ function ShoppableVideoCard({
     vid.muted = isMuted;
     vid.playsInline = true;
 
-    if (isActive && !document.hidden) {
+    if (isVisibleOnScreen && !document.hidden) {
       vid.play().catch(error => {
         console.error("Video autoplay failed:", error);
       });
@@ -196,7 +196,7 @@ function ShoppableVideoCard({
             ref={videoRef}
             src={item.video_url}
             poster={item.thumbnail_url || item.fallbackImage || undefined}
-            autoPlay={isActive}
+            autoPlay={isVisibleOnScreen}
             playsInline
             muted={isMuted}
             preload={isVisibleOnScreen ? "metadata" : "none"}
