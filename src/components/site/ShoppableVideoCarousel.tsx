@@ -38,7 +38,7 @@ function ShoppableVideoCard({
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isActive, setIsActive] = useState(false);
-  const [isNearViewport, setIsNearViewport] = useState(false);
+  const [isVisibleOnScreen, setIsVisibleOnScreen] = useState(false);
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
@@ -50,30 +50,15 @@ function ShoppableVideoCard({
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
+  // Listen for the global state event from the parent's reliable rAF tracking loop
   useEffect(() => {
-    const el = cardRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-
-    // Load observer (mount element and preload metadata)
-    const nearObs = new IntersectionObserver(
-      ([entry]) => {
-        setIsNearViewport(entry.isIntersecting);
-      },
-      { rootMargin: "300px", threshold: 0 }
-    );
-
-    nearObs.observe(el);
-    return () => nearObs.unobserve(el);
-  }, []);
-
-  // Listen for the global active event from the parent's reliable rAF tracking loop
-  useEffect(() => {
-    const handleActive = (e: Event) => {
+    const handleState = (e: Event) => {
       const customEvent = e as CustomEvent;
-      setIsActive(customEvent.detail.id === uniqueId);
+      setIsActive(customEvent.detail.activeId === uniqueId);
+      setIsVisibleOnScreen(customEvent.detail.visibleIds.includes(uniqueId));
     };
-    window.addEventListener('shoppable-video-active', handleActive);
-    return () => window.removeEventListener('shoppable-video-active', handleActive);
+    window.addEventListener('shoppable-video-state', handleState);
+    return () => window.removeEventListener('shoppable-video-state', handleState);
   }, [uniqueId]);
 
   // Handle mute global event
@@ -206,15 +191,15 @@ function ShoppableVideoCard({
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {item.video_url && isVisible && isNearViewport ? (
+        {item.video_url ? (
           <video
             ref={videoRef}
             src={item.video_url}
-            poster={item.thumbnail_url || item.fallbackImage}
+            poster={item.thumbnail_url || item.fallbackImage || undefined}
             autoPlay={isActive}
             playsInline
             muted={isMuted}
-            preload={isNearViewport ? "metadata" : "none"}
+            preload={isVisibleOnScreen ? "metadata" : "none"}
             loop
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
@@ -372,18 +357,20 @@ export function ShoppableVideoCarousel({
     return () => obs.unobserve(el);
   }, []);
 
-  // Use requestAnimationFrame to perfectly isolate the single active card on screen.
-  // This completely bypasses Safari's IntersectionObserver failures on transformed (marquee) elements.
+  // Use requestAnimationFrame to track visible cards and the active center card.
+  // This completely bypasses Safari/Chrome IntersectionObserver failures on transformed (marquee) elements.
   useEffect(() => {
     if (!isSectionVisible) return;
     
     let rafId: number;
     let lastActiveId: string | null = null;
+    let lastVisibleIdsStr: string = "";
     
     const checkActiveCard = () => {
       const cards = document.querySelectorAll('.shoppable-video-card');
       let closestId: string | null = null;
       let minDistance = Infinity;
+      const visibleIds: string[] = [];
       
       const centerX = window.innerWidth / 2;
       
@@ -392,18 +379,31 @@ export function ShoppableVideoCarousel({
         // Ignore cards completely outside the vertical viewport
         if (rect.bottom < 0 || rect.top > window.innerHeight) return;
 
+        const id = card.getAttribute('data-card-id');
+        if (!id) return;
+
+        // If card is horizontally on screen (with 200px safe margin)
+        if (rect.right > -200 && rect.left < window.innerWidth + 200) {
+          visibleIds.push(id);
+        }
+
         const cardCenterX = rect.left + rect.width / 2;
         const distance = Math.abs(centerX - cardCenterX);
         
         if (distance < minDistance) {
           minDistance = distance;
-          closestId = card.getAttribute('data-card-id');
+          closestId = id;
         }
       });
       
-      if (closestId && closestId !== lastActiveId) {
+      const visibleIdsStr = visibleIds.join(',');
+      
+      if (closestId !== lastActiveId || visibleIdsStr !== lastVisibleIdsStr) {
         lastActiveId = closestId;
-        window.dispatchEvent(new CustomEvent('shoppable-video-active', { detail: { id: closestId } }));
+        lastVisibleIdsStr = visibleIdsStr;
+        window.dispatchEvent(new CustomEvent('shoppable-video-state', { 
+          detail: { activeId: closestId, visibleIds } 
+        }));
       }
       
       rafId = requestAnimationFrame(checkActiveCard);
