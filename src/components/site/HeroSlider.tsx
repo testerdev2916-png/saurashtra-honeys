@@ -130,40 +130,7 @@ export function HeroSlider({
                   </picture>
                 )}
 
-                {/* Text Overlay (Only rendered if text fields are provided and not on homepage where text is baked into image) */}
-                {effVariant !== 'home' && (s.eyebrow || s.description || s.ctaText) && (
-                  <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-6 bg-gradient-to-t from-[#120E0C]/70 via-[#120E0C]/20 to-transparent pointer-events-none">
-                    <div className="max-w-4xl mx-auto space-y-4 md:space-y-6 mt-12 md:mt-0">
-                      {s.eyebrow && (
-                        <div className="text-[10px] md:text-xs font-bold tracking-[0.25em] uppercase text-brand-orange drop-shadow-md">
-                          {s.eyebrow}
-                        </div>
-                      )}
-                      {idx === 0 ? (
-                        <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-cream drop-shadow-lg leading-tight md:leading-tight">
-                          {s.title}
-                        </h1>
-                      ) : (
-                        <h2 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-cream drop-shadow-lg leading-tight md:leading-tight">
-                          {s.title}
-                        </h2>
-                      )}
-                      {s.description && (
-                        <p className="text-sm md:text-lg text-cream/90 drop-shadow-md max-w-2xl mx-auto leading-relaxed md:leading-relaxed">
-                          {s.description}
-                        </p>
-                      )}
-                      {s.ctaText && (
-                        <div className="pt-4 md:pt-6">
-                          <span className="inline-flex items-center gap-2 bg-brand-orange text-white rounded-full px-6 py-3.5 md:px-8 md:py-4 font-bold text-[10px] md:text-xs uppercase tracking-widest shadow-md transition-transform pointer-events-auto hover:bg-brand-orange-hover hover:scale-[1.02]">
-                            {s.ctaText}
-                            <ArrowRight className="size-4" />
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
+
               </Link>
             </div>
           );

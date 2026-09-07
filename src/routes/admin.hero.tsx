@@ -337,28 +337,6 @@ function Editor({
                 />
               </Field>
 
-              <div className="md:col-span-2 pt-2 border-t border-border">
-                <p className="text-xs font-bold text-forest-dark mb-3 uppercase tracking-wider">Text Overlay (Optional)</p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Field label="Eyebrow Text (Small Label)">
-                    <input
-                      value={f.eyebrow ?? ""}
-                      onChange={(e) => setF({ ...f, eyebrow: e.target.value })}
-                      placeholder="e.g. NEW COLLECTION"
-                      className={inp}
-                    />
-                  </Field>
-
-                  <Field label="Description / Subtitle">
-                    <input
-                      value={f.subtitle ?? ""}
-                      onChange={(e) => setF({ ...f, subtitle: e.target.value })}
-                      placeholder="Short supporting sentence..."
-                      className={inp}
-                    />
-                  </Field>
-                </div>
-              </div>
 
               <Field label="Sort Order">
                 <input
@@ -397,28 +375,6 @@ function Editor({
                 </Field>
               </div>
 
-              <div className="md:col-span-2 pt-2 border-t border-border">
-                <p className="text-xs font-bold text-forest-dark mb-3 uppercase tracking-wider">Call To Action (Optional)</p>
-                <div className="grid md:grid-cols-2 gap-4">
-                  <Field label="CTA Button Text">
-                    <input
-                      value={f.cta_label ?? ""}
-                      onChange={(e) => setF({ ...f, cta_label: e.target.value })}
-                      placeholder="e.g. Shop Now"
-                      className={inp}
-                    />
-                  </Field>
-
-                  <Field label="CTA Target URL">
-                    <input
-                      value={f.cta_href ?? "/shop"}
-                      onChange={(e) => setF({ ...f, cta_href: e.target.value })}
-                      placeholder="/shop"
-                      className={inp}
-                    />
-                  </Field>
-                </div>
-              </div>
 
               <div className="md:col-span-2 pt-2">
                 <label className="inline-flex items-center gap-2 text-sm font-bold text-forest-dark cursor-pointer">
@@ -553,19 +509,7 @@ function Editor({
                     alt="Desktop Preview"
                     className="w-full h-full object-cover"
                   />
-                  {!hideTextOverlay && (f.eyebrow || f.subtitle || f.cta_label) && (
-                    <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none">
-                      {f.eyebrow && <div className="text-[9px] font-bold tracking-[0.25em] uppercase text-brand-orange mb-3 drop-shadow-md">{f.eyebrow}</div>}
-                      <h2 className="font-serif text-2xl font-bold text-cream mb-3 drop-shadow-lg leading-tight">{f.title || "Banner Title"}</h2>
-                      {f.subtitle && <p className="text-[11px] text-cream/90 mb-4 max-w-[80%] leading-relaxed drop-shadow-md">{f.subtitle}</p>}
-                      {f.cta_label && (
-                        <div className="inline-flex items-center gap-1.5 bg-brand-orange text-white rounded-full px-4 py-2 font-bold text-[9px] uppercase tracking-widest shadow-md">
-                          {f.cta_label}
-                          <ArrowRight className="size-3" />
-                        </div>
-                      )}
-                    </div>
-                  )}
+
                 </div>
               </div>
 
@@ -581,19 +525,7 @@ function Editor({
                     alt="Mobile Preview"
                     className="w-full h-full object-cover"
                   />
-                  {!hideTextOverlay && (f.eyebrow || f.subtitle || f.cta_label) && (
-                    <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none">
-                      {f.eyebrow && <div className="text-[9px] font-bold tracking-[0.25em] uppercase text-brand-orange mb-2 drop-shadow-md">{f.eyebrow}</div>}
-                      <h2 className="font-serif text-[20px] font-bold text-cream mb-2 drop-shadow-lg leading-tight">{f.title || "Banner Title"}</h2>
-                      {f.subtitle && <p className="text-[10px] text-cream/90 mb-3 max-w-[90%] leading-relaxed drop-shadow-md">{f.subtitle}</p>}
-                      {f.cta_label && (
-                        <div className="inline-flex items-center gap-1.5 bg-brand-orange text-white rounded-full px-4 py-2.5 font-bold text-[9px] uppercase tracking-widest shadow-md">
-                          {f.cta_label}
-                          <ArrowRight className="size-3" />
-                        </div>
-                      )}
-                    </div>
-                  )}
+
                 </div>
               </div>
             </div>
