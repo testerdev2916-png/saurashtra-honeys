@@ -442,10 +442,27 @@ function Editor({
                     return;
                   }
 
-                  const finalImageUrl = resolveImage(f.image_key, f.image_url?.trim(), "");
-                  const finalMobileUrl = f.mobile_image_url?.trim() ? resolveImage(null, f.mobile_image_url?.trim(), "") : null;
+                  let finalImageUrl = f.image_url?.trim() || "";
+                  let finalMobileUrl = f.mobile_image_url?.trim() || null;
 
-                  if (!finalImageUrl || !/^https?:\/\//i.test(finalImageUrl)) {
+                  // Auto-resolve relative Supabase paths to public HTTPS URLs
+                  if (finalImageUrl && !/^https?:\/\//i.test(finalImageUrl)) {
+                      const resolved = resolveImage(null, finalImageUrl, "");
+                      if (resolved && /^https?:\/\//i.test(resolved)) {
+                          finalImageUrl = resolved;
+                      }
+                  }
+                  if (finalMobileUrl && !/^https?:\/\//i.test(finalMobileUrl)) {
+                      const resolved = resolveImage(null, finalMobileUrl, "");
+                      if (resolved && /^https?:\/\//i.test(resolved)) {
+                          finalMobileUrl = resolved;
+                      }
+                  }
+
+                  const hasValidHttpsUrl = finalImageUrl && /^https?:\/\//i.test(finalImageUrl);
+                  const hasValidImageKey = !!f.image_key;
+
+                  if (!hasValidHttpsUrl && !hasValidImageKey) {
                     toast.error("Please provide a valid HTTPS URL for the desktop banner image");
                     return;
                   }
@@ -486,7 +503,7 @@ function Editor({
                         title: f.title,
                         subtitle: f.subtitle || null,
                         image_key: f.image_key || null,
-                        image_url: finalImageUrl || null,
+                        image_url: hasValidHttpsUrl ? finalImageUrl : null,
                         mobile_image_url: finalMobileUrl,
                         cta_label: f.cta_label || null,
                         cta_href: f.cta_href || "/shop",
