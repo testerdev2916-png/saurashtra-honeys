@@ -270,7 +270,9 @@ function Editor({
 
   const previewImage = resolveImage(f.image_key, f.image_url, FALLBACK_IMAGE);
   const previewMobileImage = f.mobile_image_url || previewImage;
-  const isHome = (f.page || "home").toLowerCase() === "home";
+  const pageStr = (f.page || "home").toLowerCase();
+  const isHome = pageStr === "home";
+  const hideTextOverlay = pageStr === "home" || pageStr === "shop";
 
   return (
     <div>
@@ -439,11 +441,15 @@ function Editor({
                     toast.error("Please provide a Slide Title.");
                     return;
                   }
-                  if (!f.image_url || !/^https?:\/\//i.test(f.image_url)) {
+
+                  const finalImageUrl = resolveImage(f.image_key, f.image_url?.trim(), "");
+                  const finalMobileUrl = f.mobile_image_url?.trim() ? resolveImage(null, f.mobile_image_url?.trim(), "") : null;
+
+                  if (!finalImageUrl || !/^https?:\/\//i.test(finalImageUrl)) {
                     toast.error("Please provide a valid HTTPS URL for the desktop banner image");
                     return;
                   }
-                  if (f.mobile_image_url && !/^https?:\/\//i.test(f.mobile_image_url)) {
+                  if (finalMobileUrl && !/^https?:\/\//i.test(finalMobileUrl)) {
                     toast.error("Please provide a valid HTTPS URL for the mobile banner image");
                     return;
                   }
@@ -480,8 +486,8 @@ function Editor({
                         title: f.title,
                         subtitle: f.subtitle || null,
                         image_key: f.image_key || null,
-                        image_url: f.image_url || null,
-                        mobile_image_url: f.mobile_image_url || null,
+                        image_url: finalImageUrl || null,
+                        mobile_image_url: finalMobileUrl,
                         cta_label: f.cta_label || null,
                         cta_href: f.cta_href || "/shop",
                         sort_order: Number(f.sort_order ?? 0),
@@ -530,7 +536,7 @@ function Editor({
                     alt="Desktop Preview"
                     className="w-full h-full object-cover"
                   />
-                  {(f.eyebrow || f.subtitle || f.cta_label) && (
+                  {!hideTextOverlay && (f.eyebrow || f.subtitle || f.cta_label) && (
                     <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none">
                       {f.eyebrow && <div className="text-[9px] font-bold tracking-[0.25em] uppercase text-brand-orange mb-3 drop-shadow-md">{f.eyebrow}</div>}
                       <h2 className="font-serif text-2xl font-bold text-cream mb-3 drop-shadow-lg leading-tight">{f.title || "Banner Title"}</h2>
@@ -558,7 +564,7 @@ function Editor({
                     alt="Mobile Preview"
                     className="w-full h-full object-cover"
                   />
-                  {(f.eyebrow || f.subtitle || f.cta_label) && (
+                  {!hideTextOverlay && (f.eyebrow || f.subtitle || f.cta_label) && (
                     <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none">
                       {f.eyebrow && <div className="text-[9px] font-bold tracking-[0.25em] uppercase text-brand-orange mb-2 drop-shadow-md">{f.eyebrow}</div>}
                       <h2 className="font-serif text-[20px] font-bold text-cream mb-2 drop-shadow-lg leading-tight">{f.title || "Banner Title"}</h2>
