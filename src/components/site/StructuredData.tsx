@@ -61,13 +61,13 @@ export function productLd(p: {
   };
 }
 
-export function organizationLd(origin = "") {
+export function organizationLd(origin = "", faviconUrl = "/favicon.ico") {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Saurashtra Honey",
     url: origin || undefined,
-    logo: origin + "/favicon.ico",
+    logo: faviconUrl.startsWith("http") ? faviconUrl : origin + faviconUrl,
     sameAs: [],
   };
 }

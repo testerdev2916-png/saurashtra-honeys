@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { products as staticProducts, type Product, type ProductVariant } from "@/lib/products";
+import { type Product, type ProductVariant } from "@/lib/products";
 import { resolveImage } from "@/lib/product-images";
 
 type Row = {
@@ -45,9 +45,6 @@ type VariantRow = {
   weight_g: number | null;
 };
 
-function fallbackImage(slug: string): string {
-  return staticProducts.find((p) => p.slug === slug)?.image ?? "";
-}
 
 function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
@@ -78,18 +75,17 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
       ? mappedVariants.find((v) => v.isDefault) || mappedVariants[0]
       : undefined;
 
-  const staticMatch = staticProducts.find((p) => p.slug === r.slug);
   const rawImages = Array.isArray(r.images)
     ? (r.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
     : [];
   const galleryImages =
     rawImages.length > 0
-      ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
-      : staticMatch?.images;
+      ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(img, null, "", r.updated_at))
+      : [];
   const primaryImg = resolveImage(
     r.image_key,
     r.image_url,
-    galleryImages && galleryImages.length > 0 ? galleryImages[0] : fallbackImage(r.slug),
+    galleryImages && galleryImages.length > 0 ? galleryImages[0] : "",
     r.updated_at
   );
 
@@ -100,16 +96,16 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     : [];
   const additionalImages =
     rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(img, null, fallbackImage(r.slug), r.updated_at))
-      : staticMatch?.additionalImages;
+      ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(img, null, "", r.updated_at))
+      : [];
 
   return {
     slug: r.slug,
     name: r.name,
     tagline: r.tagline ?? "",
-    description: r.description ?? staticMatch?.description ?? "",
+    description: r.description ?? "",
     category: (r.category ?? "Honey") as Product["category"],
-    flora: r.flora ?? staticMatch?.flora,
+    flora: r.flora ?? undefined,
     badge: (r.badge ?? undefined) as Product["badge"],
     price: defaultVariant ? defaultVariant.price : r.price,
     priceMax: r.price_max ?? undefined,
@@ -123,11 +119,11 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     additionalImages: additionalImages,
     benefits: Array.isArray(r.benefits)
       ? (r.benefits as string[])
-      : staticMatch?.benefits ?? [],
+      : [],
     attributes:
       typeof r.attributes === "object" && r.attributes !== null
         ? (r.attributes as Record<string, string | string[]>)
-        : staticMatch?.attributes,
+        : undefined,
     showOnHomepage: !!r.show_on_homepage,
     story_description: r.story_description ?? undefined,
     what_makes_special: Array.isArray(r.what_makes_special) ? (r.what_makes_special as string[]) : undefined,

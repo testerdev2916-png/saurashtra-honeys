@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -77,6 +77,7 @@ function HeroPage() {
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<Slide> | null>(null);
   const [filterPage, setFilterPage] = useState<string>("all");
+  const router = useRouter();
 
   async function load() {
     setLoading(true);
@@ -107,6 +108,7 @@ function HeroPage() {
         onCancel={() => setEdit(null)}
         onSaved={async () => {
           setEdit(null);
+          await router.invalidate();
           await load();
         }}
       />

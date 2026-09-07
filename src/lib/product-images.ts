@@ -51,7 +51,7 @@ export const imageMap: Record<string, string> = {
 };
 
 export const IMAGE_KEYS = Object.keys(imageMap);
-export const FALLBACK_IMAGE = hero;
+export const FALLBACK_IMAGE = "";
 
 export function resolveImage(
   key: string | null | undefined,

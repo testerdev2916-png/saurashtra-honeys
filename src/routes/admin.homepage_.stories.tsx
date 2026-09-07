@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Card, BtnPrimary, BtnGhost, Field, inp } from "@/components/admin/ui";
@@ -22,6 +22,7 @@ function AdminCustomerStories() {
   const [status, setStatus] = useState<"loading" | "empty" | "error" | "success">("loading");
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const router = useRouter();
   const [products, setProducts] = useState<{name: string, slug: string}[]>([]);
   const [uploading, setUploading] = useState(false);
 
@@ -151,6 +152,7 @@ function AdminCustomerStories() {
         },
       });
       resetForm();
+      await router.invalidate();
       loadData();
     } catch (err) {
       toast.error("Failed to save story");

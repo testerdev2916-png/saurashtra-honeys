@@ -19,6 +19,7 @@ import {
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useCompanySettings, getFaviconUrl } from "@/lib/company-settings";
 
 export const Route = createFileRoute("/blog/$slug")({
   loader: async ({ params }) => {
@@ -64,12 +65,14 @@ export const Route = createFileRoute("/blog/$slug")({
       </div>
     </SiteLayout>
   ),
-  component: BlogPostPage,
+  component: BlogPost,
 });
 
-function BlogPostPage() {
+function BlogPost() {
   const { post, related } = Route.useLoaderData();
   const [copied, setCopied] = useState(false);
+  const settings = useCompanySettings();
+  const faviconUrl = getFaviconUrl(settings);
 
   if (!post) {
     return (
@@ -105,7 +108,7 @@ function BlogPostPage() {
     publisher: {
       "@type": "Organization",
       name: "Saurashtra Honey",
-      logo: { "@type": "ImageObject", url: "/favicon.ico" },
+      logo: { "@type": "ImageObject", url: faviconUrl },
     },
     mainEntityOfPage: `/blog/${post.slug}`,
   };

@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -97,6 +97,7 @@ function WhoWeSupplyPage() {
   const [rows, setRows] = useState<SupplyServiceRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<SupplyServiceRow> | null>(null);
+  const router = useRouter();
 
   async function load() {
     setLoading(true);
@@ -122,6 +123,7 @@ function WhoWeSupplyPage() {
         onCancel={() => setEdit(null)}
         onSaved={async () => {
           setEdit(null);
+          await router.invalidate();
           await load();
         }}
       />

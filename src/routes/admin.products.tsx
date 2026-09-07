@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -139,6 +139,7 @@ function ProductsPage() {
   const list = useServerFn(listAdminProducts);
   const save = useServerFn(upsertProduct);
   const del = useServerFn(deleteProduct);
+  const router = useRouter();
   const getCats = useServerFn(listCategories);
   const [rows, setRows] = useState<P[]>([]);
   const [cats, setCats] = useState<any[]>([]);
@@ -247,6 +248,7 @@ function ProductsPage() {
     toast.success("All changes saved successfully.");
     setEdit(null);
     setIsDirty(false);
+    await router.invalidate();
     await load();
   }
 

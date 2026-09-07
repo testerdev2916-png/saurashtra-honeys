@@ -14,6 +14,7 @@ export type CompanySettings = {
   tagline?: string;
   logo_url?: string;
   favicon_url?: string;
+  updated_at?: string;
 };
 
 export const companySettingsQueryOptions = {
@@ -21,12 +22,16 @@ export const companySettingsQueryOptions = {
   queryFn: async (): Promise<CompanySettings | null> => {
     const { data, error } = await supabase
       .from("site_settings")
-      .select("value")
+      .select("value, updated_at")
       .eq("key", "company")
       .maybeSingle();
 
     if (error || !data?.value) return null;
-    return data.value as CompanySettings;
+    const val = data.value as CompanySettings;
+    if (data.updated_at) {
+      val.updated_at = data.updated_at;
+    }
+    return val;
   },
   // staleTime removed so that queries fetch fresh data instantly on navigation
 };
@@ -46,4 +51,14 @@ export function useCompanyLogoUrl(): string | undefined {
   const settings = useCompanySettings();
   const url = settings?.logo_url?.trim();
   return url ? url : undefined;
+}
+
+/** Central helper for getting the cache-busted favicon URL */
+export function getFaviconUrl(settings?: CompanySettings | null): string {
+  const rawUrl = settings?.favicon_url?.trim() || "/favicon.ico";
+  if (rawUrl === "/favicon.ico") return rawUrl;
+  
+  const sep = rawUrl.includes("?") ? "&" : "?";
+  const ts = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
+  return `${rawUrl}${sep}v=${ts}`;
 }

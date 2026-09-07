@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -331,6 +331,7 @@ function SectionSettingsPanel({
 // ─── Main component ───────────────────────────────────────────────────────────
 function HomepageManagement() {
   const [sections, setSections] = useState<HomepageSection[]>([]);
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -409,6 +410,7 @@ function HomepageManagement() {
     setSections((prev) =>
       prev.map((s) => (s.id === id ? { ...s, settings } : s))
     );
+    router.invalidate();
   };
 
   if (loading) {

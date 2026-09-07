@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -18,7 +18,8 @@ function CategoriesPage() {
   async function load() { setLoading(true); try { const r = await list({}); setRows(r.rows as Cat[]); } catch (e) { toast.error((e as Error).message); } finally { setLoading(false); } }
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
 
-  if (edit) return <Editor initial={edit} parents={rows} onCancel={() => setEdit(null)} onSaved={async () => { setEdit(null); await load(); }} />;
+  const router = useRouter();
+  if (edit) return <Editor initial={edit} parents={rows} onCancel={() => setEdit(null)} onSaved={async () => { setEdit(null); await router.invalidate(); await load(); }} />;
 
   const virtualRows = rows.filter((r) => r.slug === "all-products");
   const productRows = rows.filter((r) => r.slug !== "all-products");
