@@ -4,6 +4,7 @@ import { ArrowRight, Leaf, HeartHandshake, CheckCircle2, Droplet, Sprout, Wind, 
 import { SiteLayout } from "@/components/site/Layout";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
 import { fetchPageSections } from "@/lib/page-cms.functions";
+import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 
 // Photographic assets
 import heroHoneyImg from "@/assets/hero-honey.jpg";
@@ -205,35 +206,8 @@ function OurStory() {
       ]} />
 
       <main className="bg-[#FDFBF7] text-[#2B2118] overflow-hidden">
-        
         {/* 1. HERO SECTION */}
-        <section className="relative w-full aspect-[1920/600] min-h-[400px] sm:min-h-[450px] md:min-h-[500px] flex items-center bg-[#2B2118]">
-          <div className="absolute inset-0 w-full h-full">
-            <picture>
-              {hero.mobile_image && <source media="(max-width: 768px)" srcSet={hero.mobile_image} />}
-              <img 
-                src={hero.desktop_image || heroHoneyImg} 
-                alt="Saurashtra Landscape" 
-                className="w-full h-full object-cover opacity-80"
-              />
-            </picture>
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent mix-blend-multiply" />
-          </div>
-          <div className="container-page relative z-10 text-white reveal opacity-0 translate-y-8 transition-all duration-1000">
-            <span className="text-[11px] sm:text-[12px] uppercase tracking-[0.25em] font-semibold text-white/90 mb-4 block">
-              {hero.eyebrow || "OUR STORY"}
-            </span>
-            <h1 className="font-serif text-[42px] sm:text-[56px] md:text-[72px] leading-[1.1] mb-6 max-w-2xl text-white">
-              <span className="whitespace-pre-wrap">{hero.heading || "Born in Saurashtra.\nMade by Nature."}</span>
-            </h1>
-            <p className="text-[16px] md:text-[18px] text-white/90 max-w-xl leading-relaxed mb-8 font-light">
-              {hero.description || "A journey from wildflowers and healthy hives to pure honey, carefully brought to your home."}
-            </p>
-            <Link to="/our-story" onClick={() => document.getElementById('origin')?.scrollIntoView({behavior: 'smooth'})} className="inline-flex items-center gap-3 bg-[#3B5241] hover:bg-[#2C3D30] text-white px-8 py-3.5 rounded-full text-sm font-bold tracking-widest uppercase transition-colors">
-              {hero.cta_text || "DISCOVER OUR JOURNEY"} <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </section>
+        <PageHeroSlider page="our-story" />
 
         {/* 2. WHERE IT BEGAN */}
         <section id="origin" className="py-24 md:py-32 bg-white">
