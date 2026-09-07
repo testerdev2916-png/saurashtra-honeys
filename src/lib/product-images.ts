@@ -111,7 +111,7 @@ export function resolveImage(
  * 3. Converts a Storage path to the correct public URL exactly once.
  * 4. Never uses local fallback when a valid image_url exists.
  */
-export function getCategoryImageUrl(category: { image_url?: string | null, slug?: string }): string | null {
+export function getCategoryImageUrl(category: { image_url?: string | null, slug?: string, updated_at?: string | null }): string | null {
   if (!category || !category.image_url) {
     return null;
   }
@@ -119,24 +119,34 @@ export function getCategoryImageUrl(category: { image_url?: string | null, slug?
   const cleanUrl = category.image_url.trim();
   if (!cleanUrl) return null;
 
-  // If it's already a full HTTP/HTTPS URL, return it exactly as-is.
-  if (/^https?:\/\//i.test(cleanUrl)) {
-    return cleanUrl;
+  let resultUrl = cleanUrl;
+
+  // Convert Storage path to correct public URL if needed.
+  if (!/^https?:\/\//i.test(cleanUrl)) {
+    let path = cleanUrl.replace(/^\/+/, '');
+    if (path.startsWith('media/')) {
+      path = path.substring(6);
+    }
+    
+    path = path.split('?')[0].split('#')[0]; // remove accidental query strings
+
+    const { data } = supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
+    if (data && data.publicUrl) {
+      resultUrl = data.publicUrl;
+    } else {
+      return null;
+    }
   }
 
-  // It's a storage path, convert it exactly once using the "media" bucket.
-  let path = cleanUrl.replace(/^\/+/, '');
-  if (path.startsWith('media/')) {
-    path = path.substring(6);
-  }
-  
-  path = path.split('?')[0].split('#')[0]; // remove accidental query strings
-
-  const { data } = supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' } });
-  if (data && data.publicUrl) {
-    return data.publicUrl;
+  // Cache busting
+  if (category.updated_at && resultUrl.includes('supabase.co')) {
+    const ts = new Date(category.updated_at).getTime();
+    if (!isNaN(ts)) {
+      const separator = resultUrl.includes('?') ? '&' : '?';
+      resultUrl += `${separator}v=${ts}`;
+    }
   }
 
-  return null;
+  return resultUrl;
 }
 

@@ -15,7 +15,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { AnalyticsScripts } from "@/components/site/AnalyticsScripts";
 import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 
-import { FaviconUpdater } from "@/components/site/FaviconUpdater";
+import { companySettingsQueryOptions } from "@/lib/company-settings";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -54,18 +54,40 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { name: "theme-color", content: "#2B1B14" },
-      { property: "og:site_name", content: "Saurashtra Honey" },
-      { property: "og:locale", content: "en_IN" },
-      { name: "twitter:site", content: "@saurashtrahoney" },
-    ],
-    links: [
-      { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+  loader: async ({ context }) => {
+    let settings = null;
+    try {
+      settings = await context.queryClient.fetchQuery(companySettingsQueryOptions);
+    } catch {
+      // Ignore
+    }
+    return { settings };
+  },
+  head: ({ loaderData }) => {
+    const rawUrl = loaderData?.settings?.favicon_url?.trim() || "/favicon.ico";
+    const sep = rawUrl.includes("?") ? "&" : "?";
+    const versionedUrl = `${rawUrl}${sep}v=${Date.now()}`;
+
+    return {
+      meta: [
+        { charSet: "utf-8" },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
+        { name: "theme-color", content: "#2B1B14" },
+        { property: "og:site_name", content: "Saurashtra Honey" },
+        { property: "og:locale", content: "en_IN" },
+        { name: "twitter:site", content: "@saurashtrahoney" },
+      ],
+      links: [
+        { rel: "stylesheet", href: appCss },
+        { 
+          rel: "icon", 
+          href: versionedUrl, 
+          type: rawUrl.endsWith(".svg") 
+            ? "image/svg+xml" 
+            : rawUrl.endsWith(".png") 
+              ? "image/png" 
+              : "image/x-icon" 
+        },
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
@@ -84,7 +106,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         }),
       },
     ],
-  }),
+    };
+  },
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -148,7 +171,6 @@ function RootComponent() {
                   {!isAdmin && <WhatsAppFloat />}
 
                   <AnalyticsScripts />
-                  <FaviconUpdater />
                   <Toaster position="top-right" richColors />
                 </CartProvider>
               </CompareProvider>

@@ -28,7 +28,7 @@ export const companySettingsQueryOptions = {
     if (error || !data?.value) return null;
     return data.value as CompanySettings;
   },
-  staleTime: 1000 * 60 * 5, // 5 minutes
+  // staleTime removed so that queries fetch fresh data instantly on navigation
 };
 
 /**

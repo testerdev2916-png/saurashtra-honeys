@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ function SettingsPage() {
   const [busy, setBusy] = useState<string | null>(null);
   const [values, setValues] = useState<Record<string, Record<string, string>>>({});
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   async function load() {
     try {
@@ -73,6 +74,7 @@ function SettingsPage() {
       await save({ data: { key, value: values[key] ?? {}, is_public: true } });
       toast.success(`Saved ${key}`);
       if (key === "company") void queryClient.invalidateQueries({ queryKey: ["company-settings"] });
+      await router.invalidate();
       await load();
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(null); }
   }
