@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
 export function ImageUpload({
   value,
@@ -27,21 +28,12 @@ export function ImageUpload({
       setUploading(true);
       
       const fileExt = file.name.split('.').pop();
-      const fileName = `${folder}/${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      // Upload to Cloudinary
+      const finalUrl = await uploadToCloudinary(file, folder);
 
-      const { data, error } = await supabase.storage
-        .from(bucket)
-        .upload(fileName, file, { upsert: false });
-
-      if (error) throw error;
-
-      const { data: publicUrlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(fileName);
-
-      onChange(publicUrlData.publicUrl);
+      onChange(finalUrl);
     } catch (error: any) {
-      toast.error(error.message || "Failed to upload image");
+      toast.error(error.message || "Failed to upload media");
       console.error(error);
     } finally {
       setUploading(false);

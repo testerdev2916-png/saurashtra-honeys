@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BtnGhost,
@@ -227,12 +228,8 @@ function Editor({ doc, onCancel, onSaved }: { doc: Partial<CategoryHeroSlide>; o
     if (!file) return;
     setUploadingDesktop(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `categories/hero_${Date.now()}_desktop.${ext}`;
-      const { error: upErr } = await supabase.storage.from("media").upload(path, file);
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("media").getPublicUrl(path);
-      setF({ ...f, image_url: data.publicUrl });
+      const url = await uploadToCloudinary(file, "categories");
+      setF({ ...f, image_url: url });
       toast.success("Desktop image uploaded");
     } catch (err) {
       toast.error((err as Error).message);
@@ -246,12 +243,8 @@ function Editor({ doc, onCancel, onSaved }: { doc: Partial<CategoryHeroSlide>; o
     if (!file) return;
     setUploadingMobile(true);
     try {
-      const ext = file.name.split(".").pop();
-      const path = `categories/hero_${Date.now()}_mobile.${ext}`;
-      const { error: upErr } = await supabase.storage.from("media").upload(path, file);
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("media").getPublicUrl(path);
-      setF({ ...f, mobile_image_url: data.publicUrl });
+      const url = await uploadToCloudinary(file, "categories");
+      setF({ ...f, mobile_image_url: url });
       toast.success("Mobile image uploaded");
     } catch (err) {
       toast.error((err as Error).message);
