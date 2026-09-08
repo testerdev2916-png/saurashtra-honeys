@@ -8,14 +8,14 @@ import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload } from "l
 
 export const Route = createFileRoute("/admin/categories")({ component: CategoriesPage });
 
-type Cat = { id: string; slug: string; name: string; description: string | null; image_url: string | null; parent_id: string | null; sort_order: number; active: boolean; seo_title: string | null; seo_description: string | null };
-const EMPTY: Partial<Cat> = { slug: "", name: "", description: "", image_url: "", parent_id: null, sort_order: 0, active: true, seo_title: "", seo_description: "" };
+type Cat = { id: string; slug: string; name: string; description: string | null; image_url: string | null; parent_id: string | null; sort_order: number; active: boolean; show_in_shop_nav: boolean; shop_nav_label: string | null; shop_nav_sort_order: number; seo_title: string | null; seo_description: string | null };
+const EMPTY: Partial<Cat> = { slug: "", name: "", description: "", image_url: "", parent_id: null, sort_order: 0, active: true, show_in_shop_nav: false, shop_nav_label: "", shop_nav_sort_order: 0, seo_title: "", seo_description: "" };
 
 function CategoriesPage() {
   const list = useServerFn(listCategories); const save = useServerFn(upsertCategory); const del = useServerFn(deleteCategory);
   const [rows, setRows] = useState<Cat[]>([]); const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<Cat> | null>(null);
-  async function load() { setLoading(true); try { const r = await list({}); setRows(r.rows as Cat[]); } catch (e) { toast.error((e as Error).message); } finally { setLoading(false); } }
+  async function load() { setLoading(true); try { const r = await list({}); setRows(r.rows as unknown as Cat[]); } catch (e) { toast.error((e as Error).message); } finally { setLoading(false); } }
   useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
 
   const router = useRouter();
@@ -26,7 +26,7 @@ function CategoriesPage() {
 
   const renderTable = (data: Cat[], emptyText: string) => (
     <TableWrap>
-      <thead><tr>{["Sort","Image","Slug","Name","Parent","Status",""].map((h) => <Th key={h}>{h}</Th>)}</tr></thead>
+      <thead><tr>{["Sort","Image","Slug","Name","Parent","In Shop Nav","Nav Sort","Status",""].map((h) => <Th key={h}>{h}</Th>)}</tr></thead>
       <tbody className="divide-y divide-border">
         {loading && <tr><Td className="text-center py-12 text-muted-foreground">Loading…</Td></tr>}
         {!loading && data.length === 0 && <tr><Td className="text-center py-12 text-muted-foreground">{emptyText}</Td></tr>}
@@ -41,6 +41,8 @@ function CategoriesPage() {
             <Td className="text-xs font-mono">{r.slug}</Td>
             <Td className="font-medium text-forest-dark">{r.name}</Td>
             <Td className="text-xs">{rows.find((x) => x.id === r.parent_id)?.name ?? "—"}</Td>
+            <Td><StatusPill s={r.show_in_shop_nav ? "active" : "disabled"} /></Td>
+            <Td className="text-xs">{r.shop_nav_sort_order}</Td>
             <Td><StatusPill s={r.active ? "active" : "disabled"} /></Td>
             <Td className="text-right">
               <button onClick={() => setEdit(r)} className="text-gold-deep hover:underline text-xs font-bold mr-3"><Pencil className="size-3.5 inline" /> EDIT</button>
@@ -138,7 +140,24 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
           <div className="md:col-span-2"><Field label="Description"><textarea rows={3} value={f.description ?? ""} onChange={(e) => setF({ ...f, description: e.target.value })} className={inp} /></Field></div>
           <Field label="SEO title"><input value={f.seo_title ?? ""} onChange={(e) => setF({ ...f, seo_title: e.target.value })} className={inp} /></Field>
           <Field label="SEO description"><input value={f.seo_description ?? ""} onChange={(e) => setF({ ...f, seo_description: e.target.value })} className={inp} /></Field>
-          <label className="flex items-center gap-2 text-xs md:col-span-2"><input type="checkbox" checked={!!f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} /> Active</label>
+          
+          <div className="md:col-span-2 mt-4 pt-4 border-t border-border">
+            <h3 className="font-serif text-lg text-forest-dark mb-3">Shop Navigation Settings</h3>
+            <div className="grid md:grid-cols-2 gap-3">
+              <label className="flex items-center gap-2 text-sm md:col-span-2">
+                <input type="checkbox" checked={!!f.show_in_shop_nav} onChange={(e) => setF({ ...f, show_in_shop_nav: e.target.checked })} /> 
+                Show in Shop Navigation Dropdown
+              </label>
+              <Field label="Navigation Label (Optional)">
+                <input value={f.shop_nav_label ?? ""} onChange={(e) => setF({ ...f, shop_nav_label: e.target.value })} className={inp} placeholder="Overrides category name if set" />
+              </Field>
+              <Field label="Navigation Sort Order">
+                <input type="number" value={f.shop_nav_sort_order ?? 0} onChange={(e) => setF({ ...f, shop_nav_sort_order: Number(e.target.value) })} className={inp} />
+              </Field>
+            </div>
+          </div>
+
+          <label className="flex items-center gap-2 text-xs md:col-span-2 mt-2"><input type="checkbox" checked={!!f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} /> Active</label>
         </div>
         <div className="mt-6 flex gap-3">
           <BtnPrimary disabled={busy} onClick={async () => {
@@ -147,6 +166,7 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
               await save({ data: {
                 id: f.id, slug: f.slug!, name: f.name!, description: f.description ?? null, image_url: f.image_url || null,
                 parent_id: f.parent_id ?? null, sort_order: Number(f.sort_order ?? 0), active: !!f.active,
+                show_in_shop_nav: !!f.show_in_shop_nav, shop_nav_label: f.shop_nav_label || null, shop_nav_sort_order: Number(f.shop_nav_sort_order ?? 0),
                 seo_title: f.seo_title || null, seo_description: f.seo_description || null,
               }});
               toast.success("Saved"); await onSaved();

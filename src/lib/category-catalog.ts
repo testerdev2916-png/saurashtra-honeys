@@ -17,6 +17,9 @@ export type ShopCategory = {
   parent_id: string | null;
   sort_order: number;
   active: boolean;
+  show_in_shop_nav?: boolean;
+  shop_nav_label?: string | null;
+  shop_nav_sort_order?: number;
   updated_at?: string;
 };
 
@@ -64,7 +67,7 @@ export const listPublicCategoriesFn = async (): Promise<ShopCategory[]> => {
   try {
     const { data, error } = await supabase
       .from("categories")
-      .select("id, slug, name, image_url, parent_id, sort_order, active, updated_at")
+      .select("id, slug, name, image_url, parent_id, sort_order, active, show_in_shop_nav, shop_nav_label, shop_nav_sort_order, updated_at")
       .eq("active", true)
       .order("sort_order", { ascending: true })
       .order("name", { ascending: true });
@@ -91,19 +94,6 @@ export const listPublicCategoriesFn = async (): Promise<ShopCategory[]> => {
         });
 
         const finalCats = dynamicCats.map(mapCategory).sort((a, b) => a.sort_order - b.sort_order);
-        
-        // Ensure Gift Hamper always exists
-        if (!finalCats.find(c => c.slug === "gift-hamper" || c.slug === "gift-hampers")) {
-          finalCats.push({
-            id: "gift-hamper",
-            slug: "gift-hamper",
-            name: "Gift Hamper",
-            image_url: giftpackFallback,
-            parent_id: null,
-            sort_order: 99,
-            active: true
-          });
-        }
 
         console.log("[CATEGORY PIPELINE]", {
           source: "PRODUCTS_FALLBACK (42501)",
@@ -118,19 +108,6 @@ export const listPublicCategoriesFn = async (): Promise<ShopCategory[]> => {
     }
     
     const finalCats = (data || []).map(mapCategory);
-    
-    // Ensure Gift Hamper always exists
-    if (!finalCats.find(c => c.slug === "gift-hamper" || c.slug === "gift-hampers")) {
-      finalCats.push({
-        id: "gift-hamper",
-        slug: "gift-hamper",
-        name: "Gift Hamper",
-        image_url: giftpackFallback,
-        parent_id: null,
-        sort_order: 99,
-        active: true
-      });
-    }
 
     console.log("[CATEGORY PIPELINE]", {
       source: "SUPABASE_DB",

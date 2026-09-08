@@ -305,13 +305,9 @@ export function Navbar() {
         <div className="w-full max-w-[1400px] mx-auto py-12 px-6 xl:px-12">
           <div className="grid grid-cols-7 gap-4 xl:gap-8 w-full items-start">
             {(() => {
-              // Reorder to match requested design if possible, fallback to DB order
-              const desiredOrder = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beeswax Products", "Beauty Products", "Gift Hamper"];
-              let orderedCats = desiredOrder.map(name => dbCategories.find(c => c.name.toLowerCase() === name.toLowerCase() || c.name.toLowerCase() === name.toLowerCase() + "s")).filter(Boolean) as typeof dbCategories;
-              
-              // If we didn't find all requested categories, append the rest
-              const remaining = dbCategories.filter(c => !orderedCats.find(o => o.slug === c.slug));
-              const displayCats = [...orderedCats, ...remaining].filter(c => c.slug !== "all-products");
+              const displayCats = dbCategories
+                .filter(c => c.show_in_shop_nav && c.active)
+                .sort((a, b) => (a.shop_nav_sort_order ?? 0) - (b.shop_nav_sort_order ?? 0));
 
               return displayCats.map((cat) => (
                 <Link key={cat.slug} to={cat.slug === "all-products" ? "/shop" : "/shop/$slug"} params={cat.slug === "all-products" ? undefined : { slug: cat.slug }} onClick={() => setShopOpen(false)} className="group flex flex-col items-center text-center gap-4 outline-none w-full">
@@ -319,7 +315,7 @@ export function Navbar() {
                     <img src={cat.image_url || undefined} alt={cat.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
                   </div>
                   <span className="font-serif text-[14px] xl:text-[15px] text-espresso group-hover:text-brand-orange transition-colors leading-tight px-1">
-                    {cat.name}
+                    {cat.shop_nav_label || cat.name}
                   </span>
                 </Link>
               ));
@@ -441,10 +437,10 @@ export function Navbar() {
                               <div>
                                 <p className="text-[10px] tracking-wide text-brand-orange font-bold mb-3">Shop by Category</p>
                                 <div className="grid grid-cols-2 gap-2">
-                                  {dbCategories.filter(c => c.slug !== "all-products").map((cat) => (
+                                  {dbCategories.filter(c => c.show_in_shop_nav && c.active).sort((a, b) => (a.shop_nav_sort_order ?? 0) - (b.shop_nav_sort_order ?? 0)).map((cat) => (
                                     <Link key={cat.slug} to={cat.slug === "all-products" ? "/shop" : "/shop/$slug"} params={cat.slug === "all-products" ? undefined : { slug: cat.slug }} onClick={() => setMobileOpen(false)} className="flex items-center gap-2.5 p-2 rounded-lg bg-white border border-border/50 shadow-sm">
                                       <img loading="lazy" src={cat.image_url || undefined} alt="" className="size-7 rounded object-cover" />
-                                      <span className="text-[13px] font-medium text-espresso truncate">{cat.name}</span>
+                                      <span className="text-[13px] font-medium text-espresso truncate">{cat.shop_nav_label || cat.name}</span>
                                     </Link>
                                   ))}
                                 </div>

@@ -78,6 +78,9 @@ const catSchema = z.object({
   parent_id: z.string().uuid().nullable().optional(),
   sort_order: z.number().int().default(0),
   active: z.boolean().default(true),
+  show_in_shop_nav: z.boolean().default(false),
+  shop_nav_label: z.string().max(200).nullable().optional(),
+  shop_nav_sort_order: z.number().int().default(0),
   seo_title: z.string().max(200).nullable().optional(),
   seo_description: z.string().max(400).nullable().optional(),
 });
