@@ -49,7 +49,7 @@ const SECTION_CONFIG: Record<
   },
   trust_strip: {
     title: "Benefits / Trust Strip",
-    desc: "100% Pure Honey, Lab Tested, Farm Sourced trust badges.",
+    desc: "Pure Honey, Lab Tested, Farm Sourced trust badges.",
     link: "/admin/homepage/trust",
   },
   shop_by_category: {
@@ -125,11 +125,7 @@ const SECTION_CONFIG: Record<
       { type: "image", key: "point4_icon", label: "Story Point 4 - Icon", folder: "homepage" },
     ],
   },
-  stats_strip: {
-    title: "Statistics Strip (Not displayed on frontend)",
-    desc: "Key metrics like Happy Customers, Lab Tested Batches.",
-    fields: [{ type: "stats", key: "stats", label: "Statistics" }],
-  },
+
   testimonials: {
     title: "Testimonials / Customer Reviews",
     desc: "Customer reviews featured on the homepage.",

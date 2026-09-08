@@ -111,7 +111,7 @@ function AdminTrustItems() {
     <div>
       <PageHeader
         title="Trust Strip"
-        subtitle="Manage the trust badges (e.g. 100% Pure Honey, Lab Tested) displayed on the homepage."
+        subtitle="Manage the trust badges (e.g. Pure Honey, Lab Tested) displayed on the homepage."
         actions={
           <Link to="/admin/homepage" className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep">
             <ArrowLeft className="size-4" /> Back to Homepage CMS
@@ -131,7 +131,7 @@ function AdminTrustItems() {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Title *">
-                <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={inp} placeholder="e.g. 100% Pure Honey" />
+                <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={inp} placeholder="e.g. Pure Honey" />
               </Field>
               <Field label="Icon Name (Lucide icon name)">
                 <input value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className={inp} placeholder="e.g. ShieldCheck" />
