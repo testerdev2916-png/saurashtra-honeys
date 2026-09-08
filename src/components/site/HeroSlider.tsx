@@ -74,7 +74,13 @@ export function HeroSlider({
     ? "aspect-square md:aspect-[192/70]" 
     : "aspect-square md:aspect-[16/5]";
 
-  if (!slides || slides.length === 0) return null;
+  if (!slides || slides.length === 0) {
+    return (
+      <section className="relative w-full max-w-[100vw] overflow-x-hidden bg-[#120E0C]">
+        <div className={`relative w-full ${aspectCls} animate-pulse bg-[#1A1412]`} />
+      </section>
+    );
+  }
 
   return (
     <section

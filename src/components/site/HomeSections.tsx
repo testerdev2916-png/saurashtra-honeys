@@ -69,7 +69,6 @@ export function HomeHero() {
     });
   }, [getRows]);
 
-  if (!slides || slides.length === 0) return null;
   return <HeroSlider slides={slides} size="home" interval={5000} />;
 }
 

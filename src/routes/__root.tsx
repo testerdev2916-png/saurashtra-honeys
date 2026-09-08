@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts,
+  Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, ScrollRestoration
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -165,6 +165,7 @@ function RootComponent() {
             <WishlistProvider>
               <CompareProvider>
                 <CartProvider>
+                  <ScrollRestoration />
                   <Outlet />
                   <CartDrawer />
                   <CompareBar />
