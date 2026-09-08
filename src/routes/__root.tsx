@@ -64,7 +64,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     return { settings };
   },
   head: ({ loaderData }) => {
-    const rawUrl = loaderData?.settings?.favicon_url?.trim() || "/favicon.ico";
+    const rawUrl = loaderData?.settings?.favicon_url?.trim() || "/favicon-v2.ico";
     const sep = rawUrl.includes("?") ? "&" : "?";
     const versionedUrl = `${rawUrl}${sep}v=${Date.now()}`;
 

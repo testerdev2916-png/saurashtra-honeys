@@ -55,8 +55,8 @@ export function useCompanyLogoUrl(): string | undefined {
 
 /** Central helper for getting the cache-busted favicon URL */
 export function getFaviconUrl(settings?: CompanySettings | null): string {
-  const rawUrl = settings?.favicon_url?.trim() || "/favicon.ico";
-  if (rawUrl === "/favicon.ico") return rawUrl;
+  const rawUrl = settings?.favicon_url?.trim() || "/favicon-v2.ico";
+  if (rawUrl === "/favicon-v2.ico") return rawUrl;
   
   const sep = rawUrl.includes("?") ? "&" : "?";
   const ts = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();

@@ -61,7 +61,7 @@ export function productLd(p: {
   };
 }
 
-export function organizationLd(origin = "", faviconUrl = "/favicon.ico") {
+export function organizationLd(origin = "", faviconUrl = "/favicon-v2.ico") {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
