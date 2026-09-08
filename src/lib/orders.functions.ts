@@ -10,6 +10,8 @@ const itemSchema = z.object({
   price: z.number().int().nonnegative(),
   qty: z.number().int().positive().max(999),
   image: z.string().max(2000).optional(),
+  variantId: z.string().optional(),
+  sku: z.string().optional(),
 });
 const shippingSchema = z.object({
   line1: z.string().min(3).max(200),

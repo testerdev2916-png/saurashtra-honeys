@@ -28,6 +28,8 @@ export type ProductVariant = {
   isDefault?: boolean;
   sku?: string;
   weightG?: number;
+  image?: string;
+  images?: string[];
 };
 
 export type Product = {

@@ -1268,6 +1268,8 @@ export type Database = {
           cost_price: number | null
           created_at: string
           id: string
+          image_url: string | null
+          images: Json | null
           is_active: boolean
           is_default: boolean
           label: string
@@ -1286,6 +1288,8 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           id?: string
+          image_url?: string | null
+          images?: Json | null
           is_active?: boolean
           is_default?: boolean
           label: string
@@ -1304,6 +1308,8 @@ export type Database = {
           cost_price?: number | null
           created_at?: string
           id?: string
+          image_url?: string | null
+          images?: Json | null
           is_active?: boolean
           is_default?: boolean
           label?: string

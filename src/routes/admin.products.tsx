@@ -1696,6 +1696,43 @@ function VariantsEditor({
   const [saving, setSaving] = useState(false);
   const listV = useServerFn(listProductVariants);
   const saveV = useServerFn(saveProductVariants);
+  const uploadImg = useServerFn(uploadProductImage);
+  const [uploadingVariantIndex, setUploadingVariantIndex] = useState<number | null>(null);
+
+  async function handleVariantMediaUpload(file: File, variantIndex: number, type: "primary" | "gallery", galleryIndex?: number) {
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Image too large. Max 2MB.");
+      return;
+    }
+    setUploadingVariantIndex(variantIndex);
+    try {
+      const ext = file.name.split(".").pop();
+      const fn = `variant-${Date.now()}.${ext}`;
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const b64 = reader.result as string;
+        const res = await uploadImg({ data: { fileData: b64, fileName: fn } });
+        if (res.error) {
+          toast.error(res.error);
+        } else if (res.url) {
+          const v = variants[variantIndex];
+          if (type === "primary") {
+            updateVariant(variantIndex, { image_url: res.url });
+          } else if (type === "gallery" && galleryIndex !== undefined) {
+            const cur = Array.from({ length: 4 }, (_, i) => (v.images ?? [])[i] || "");
+            cur[galleryIndex] = res.url;
+            updateVariant(variantIndex, { images: cur });
+          }
+          toast.success("Image uploaded!");
+        }
+        setUploadingVariantIndex(null);
+      };
+      reader.readAsDataURL(file);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setUploadingVariantIndex(null);
+    }
+  }
 
   useEffect(() => {
     const defaultList = buildFallbackVariants(
@@ -1965,6 +2002,117 @@ function VariantsEditor({
                     className={inp}
                   />
                 </Field>
+              </div>
+
+              {/* Variant Images Section */}
+              <div className="pt-4 border-t border-border mt-4">
+                <h4 className="text-sm font-bold text-forest-dark mb-3">Variant Images</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  {/* Primary Image */}
+                  <div className="rounded-xl border border-burnt-orange shadow-sm p-2 bg-white flex flex-col justify-between space-y-2 relative">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-burnt-orange">
+                      Primary
+                    </span>
+                    {v.image_url && (
+                      <button
+                        type="button"
+                        onClick={() => updateVariant(i, { image_url: null })}
+                        className="text-destructive text-[10px] hover:underline font-semibold absolute top-2 right-2"
+                      >
+                        Remove
+                      </button>
+                    )}
+                    <div className="aspect-square rounded-lg overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center">
+                      {v.image_url ? (
+                        <img src={resolveImage(v.image_url, null)} alt="Primary" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="text-center text-muted-foreground/60 p-2">
+                          <ImageOff className="size-4 mx-auto opacity-40" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) void handleVariantMediaUpload(file, i, "primary");
+                          e.target.value = "";
+                        }}
+                      />
+                      <BtnGhost
+                        type="button"
+                        disabled={uploadingVariantIndex === i}
+                        onClick={(e) => {
+                          const input = e.currentTarget.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                          if (input) input.click();
+                        }}
+                        className="w-full border-border font-semibold text-[10px] py-1.5 px-1 text-burnt-orange h-auto min-h-0"
+                      >
+                        <Upload className="size-3 mr-1" /> {v.image_url ? "REPLACE" : "UPLOAD"}
+                      </BtnGhost>
+                    </div>
+                  </div>
+
+                  {/* Gallery Images (4 slots) */}
+                  {[0, 1, 2, 3].map((gIdx) => {
+                    const u = (v.images ?? [])[gIdx] || "";
+                    return (
+                      <div key={gIdx} className="rounded-xl border border-border p-2 bg-white flex flex-col justify-between space-y-2 relative">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-espresso">
+                          Gallery {gIdx + 1}
+                        </span>
+                        {u && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = Array.from({ length: 4 }, (_, j) => (v.images ?? [])[j] || "");
+                              cur[gIdx] = "";
+                              updateVariant(i, { images: cur });
+                            }}
+                            className="text-destructive text-[10px] hover:underline font-semibold absolute top-2 right-2"
+                          >
+                            Remove
+                          </button>
+                        )}
+                        <div className="aspect-square rounded-lg overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center">
+                          {u ? (
+                            <img src={resolveImage(u, null)} alt={`Gallery ${gIdx + 1}`} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="text-center text-muted-foreground/60 p-2">
+                              <ImageOff className="size-4 mx-auto opacity-40" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) void handleVariantMediaUpload(file, i, "gallery", gIdx);
+                              e.target.value = "";
+                            }}
+                          />
+                          <BtnGhost
+                            type="button"
+                            disabled={uploadingVariantIndex === i}
+                            onClick={(e) => {
+                              const input = e.currentTarget.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                              if (input) input.click();
+                            }}
+                            className="w-full border-border font-semibold text-[10px] py-1.5 px-1 text-espresso h-auto min-h-0"
+                          >
+                            <Upload className="size-3 mr-1" /> {u ? "REPLACE" : "UPLOAD"}
+                          </BtnGhost>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           ))}

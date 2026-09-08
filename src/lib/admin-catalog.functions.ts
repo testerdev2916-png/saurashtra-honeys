@@ -197,6 +197,8 @@ const variantInputSchema = z.object({
   is_default: z.boolean().default(false),
   is_active: z.boolean().default(true),
   sort_order: z.number().int().default(0),
+  image_url: z.string().nullable().optional(),
+  images: z.array(z.string()).nullable().optional(),
 });
 
 export type VariantItem = z.infer<typeof variantInputSchema>;

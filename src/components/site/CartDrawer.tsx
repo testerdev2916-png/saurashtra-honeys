@@ -82,17 +82,17 @@ export function CartDrawer() {
                         <div className="font-serif text-sm text-forest-dark leading-tight truncate">{i.name}</div>
                         <div className="text-[11px] text-muted-foreground">Size: {i.size}</div>
                       </div>
-                      <button aria-label="Remove" onClick={() => remove(i.slug, i.size)} className="text-muted-foreground hover:text-destructive shrink-0 p-1.5 -m-1.5"><Trash2 className="size-4" /></button>
+                      <button aria-label="Remove" onClick={() => remove(i.slug, i.size, i.variantId)} className="text-muted-foreground hover:text-destructive shrink-0 p-1.5 -m-1.5"><Trash2 className="size-4" /></button>
                     </div>
                     <div className="mt-2 flex items-center justify-between gap-2">
                       <div className="inline-flex items-center border border-border rounded-lg bg-background">
-                        <button aria-label="Decrease quantity" onClick={() => updateQty(i.slug, i.size, i.qty - 1)} className="px-2.5 py-1.5"><Minus className="size-3" /></button>
+                        <button aria-label="Decrease quantity" onClick={() => updateQty(i.slug, i.size, i.qty - 1, i.variantId)} className="px-2.5 py-1.5"><Minus className="size-3" /></button>
                         <span className="px-2 text-xs tabular-nums min-w-[1.5rem] text-center">{i.qty}</span>
-                        <button aria-label="Increase quantity" onClick={() => updateQty(i.slug, i.size, i.qty + 1)} className="px-2.5 py-1.5"><Plus className="size-3" /></button>
+                        <button aria-label="Increase quantity" onClick={() => updateQty(i.slug, i.size, i.qty + 1, i.variantId)} className="px-2.5 py-1.5" disabled={i.stock !== undefined && i.qty >= i.stock}><Plus className="size-3" /></button>
                       </div>
                       <div className="text-sm font-semibold text-forest-dark">₹{(i.price * i.qty).toLocaleString()}</div>
                     </div>
-                    <button onClick={() => moveToSaved(i.slug, i.size)} className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-forest-dark/70 hover:text-gold-deep py-1">
+                    <button onClick={() => moveToSaved(i.slug, i.size, i.variantId)} className="mt-1.5 inline-flex items-center gap-1 text-[10px] text-forest-dark/70 hover:text-gold-deep py-1">
                       <BookmarkPlus className="size-3" /> Save for later
                     </button>
                   </div>
@@ -113,8 +113,8 @@ export function CartDrawer() {
                       <div className="text-muted-foreground">{i.size} · ₹{i.price}</div>
                     </div>
                     <div className="flex flex-col gap-1 shrink-0">
-                      <button onClick={() => moveToCart(i.slug, i.size)} className="text-[10px] font-bold tracking-widest text-gold-deep hover:underline inline-flex items-center gap-1"><ArrowUpRight className="size-3" />MOVE</button>
-                      <button aria-label="Remove saved item" onClick={() => removeSaved(i.slug, i.size)} className="text-muted-foreground hover:text-destructive"><X className="size-3.5" /></button>
+                      <button onClick={() => moveToCart(i.slug, i.size, i.variantId)} className="text-[10px] font-bold tracking-widest text-gold-deep hover:underline inline-flex items-center gap-1"><ArrowUpRight className="size-3" />MOVE</button>
+                      <button aria-label="Remove saved item" onClick={() => removeSaved(i.slug, i.size, i.variantId)} className="text-muted-foreground hover:text-destructive"><X className="size-3.5" /></button>
                     </div>
                   </li>
                 ))}

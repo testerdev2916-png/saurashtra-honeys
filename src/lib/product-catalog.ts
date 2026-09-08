@@ -43,6 +43,8 @@ type VariantRow = {
   is_default: boolean | null;
   sku: string | null;
   weight_g: number | null;
+  image_url?: string | null;
+  images?: unknown;
 };
 
 
@@ -60,6 +62,12 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
           isDefault: !!v.is_default,
           sku: v.sku ?? undefined,
           weightG: v.weight_g ?? undefined,
+          image: v.image_url ? resolveImage(v.image_url, null, "", r.updated_at) : undefined,
+          images: Array.isArray(v.images)
+            ? (v.images as string[])
+                .filter((u) => typeof u === "string" && u.trim().length > 0)
+                .map((u) => resolveImage(u, null, "", r.updated_at))
+            : undefined,
         }))
       : undefined;
 
@@ -138,7 +146,7 @@ async function fetchAllVariantsMap(productIds?: string[]): Promise<Map<string, V
   try {
     let query = supabase
       .from("product_variants")
-      .select("id,product_id,label,price,mrp,stock_quantity,is_active,is_default,sku,sort_order,weight_g")
+      .select("id,product_id,label,price,mrp,stock_quantity,is_active,is_default,sku,sort_order,weight_g,image_url,images")
       .order("sort_order", { ascending: true });
 
     if (productIds && productIds.length > 0) {

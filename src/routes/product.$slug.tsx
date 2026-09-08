@@ -25,6 +25,9 @@ import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel
 import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    variant: search.variant as string | undefined,
+  }),
   loader: async ({ params }) => {
     const dbP = await fetchProduct(params.slug);
     const p = dbP;
@@ -75,7 +78,17 @@ const FAQS = [
 
 function ProductPage() {
   const { product: p } = Route.useLoaderData() as { product: Product };
-  const [size, setSize] = useState(p.sizes[0]);
+  const search = Route.useSearch();
+
+
+  const [size, setSize] = useState(() => {
+    if (search.variant && p.variants) {
+      const v = p.variants.find((x) => x.id === search.variant);
+      if (v) return v.label;
+    }
+    return p.sizes[0] || "";
+  });
+  
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<"Description"|"Benefits"|"How to Use"|"Ingredients"|"Lab Report">("Description");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -97,16 +110,34 @@ function ProductPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [p.slug]);
 
+  const activeVariant = useMemo(() => getVariantByLabel(p, size), [p, size]);
+
+  useEffect(() => {
+    if (activeVariant && activeVariant.id && activeVariant.id !== search.variant) {
+      navigate({ search: { variant: activeVariant.id }, replace: true });
+    }
+  }, [activeVariant, search.variant, navigate]);
+
   const gallery = useMemo(() => {
+    if (activeVariant && activeVariant.images && activeVariant.images.length > 0) {
+      return activeVariant.images;
+    }
+    if (activeVariant && activeVariant.image) {
+      const base = getProductGallery(p) || [];
+      return [activeVariant.image, ...base.filter(img => img !== activeVariant.image)];
+    }
     const base = getProductGallery(p) || [];
     const add = getProductAdditionalImages(p) || [];
     return [...base, ...add].filter((u) => u && u.trim().length > 0);
-  }, [p]);
+  }, [p, activeVariant]);
+
+  useEffect(() => {
+    setHeroIdx(0);
+  }, [size]);
 
   const related = allProducts.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 4);
   const fbt = allProducts.filter((x) => x.slug !== p.slug).slice(0, 3);
 
-  const activeVariant = useMemo(() => getVariantByLabel(p, size), [p, size]);
   const activePrice = activeVariant.price ?? p.price;
   const activeMrp = activeVariant.mrp ?? p.mrp;
   const stock = activeVariant.stock ?? (p as unknown as { stock_quantity?: number }).stock_quantity ?? 100;

@@ -26,12 +26,12 @@ type CartCtx = {
   open: boolean;
   setOpen: (b: boolean) => void;
   add: (p: Product, size?: string, qty?: number, variant?: ProductVariant) => void;
-  remove: (slug: string, size: string) => void;
-  updateQty: (slug: string, size: string, qty: number) => void;
+  remove: (slug: string, size: string, variantId?: string) => void;
+  updateQty: (slug: string, size: string, qty: number, variantId?: string) => void;
   clear: () => void;
-  moveToSaved: (slug: string, size: string) => void;
-  moveToCart: (slug: string, size: string) => void;
-  removeSaved: (slug: string, size: string) => void;
+  moveToSaved: (slug: string, size: string, variantId?: string) => void;
+  moveToCart: (slug: string, size: string, variantId?: string) => void;
+  removeSaved: (slug: string, size: string, variantId?: string) => void;
   coupon: AppliedCoupon | null;
   applyCoupon: (c: AppliedCoupon | null) => void;
   count: number;
@@ -85,25 +85,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const s = size ?? p.sizes[0];
         const v = variant ?? getVariantByLabel(p, s);
         const itemPrice = v.price ?? p.price;
+        const itemImage = v.image ?? p.image;
         setItems((prev) => {
-          const idx = prev.findIndex((i) => i.slug === p.slug && i.size === s);
+          const idx = prev.findIndex((i) => (v.id && i.variantId) ? i.variantId === v.id : (i.slug === p.slug && i.size === s));
           if (idx >= 0) {
             const next = [...prev];
             const newQty = next[idx].qty + qty;
             const cappedQty = v.stock !== undefined ? Math.min(newQty, v.stock) : newQty;
-            next[idx] = { ...next[idx], qty: cappedQty, price: itemPrice, variantId: v.id, sku: v.sku, stock: v.stock };
+            next[idx] = { ...next[idx], qty: cappedQty, price: itemPrice, variantId: v.id, sku: v.sku, stock: v.stock, image: itemImage };
             return next;
           }
           const initialQty = v.stock !== undefined ? Math.min(qty, v.stock) : qty;
-          return [...prev, { slug: p.slug, name: p.name, image: p.image, size: s, price: itemPrice, qty: initialQty, variantId: v.id, sku: v.sku, stock: v.stock }];
+          return [...prev, { slug: p.slug, name: p.name, image: itemImage, size: s, price: itemPrice, qty: initialQty, variantId: v.id, sku: v.sku, stock: v.stock }];
         });
         setOpen(true);
       },
-      remove: (slug, size) => setItems((prev) => prev.filter((i) => !(i.slug === slug && i.size === size))),
-      updateQty: (slug, size, qty) =>
+      remove: (slug, size, variantId) => setItems((prev) => prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)))),
+      updateQty: (slug, size, qty, variantId) =>
         setItems((prev) =>
           prev.map((i) => {
-            if (i.slug === slug && i.size === size) {
+            const match = (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size);
+            if (match) {
               const clamped = Math.max(1, qty);
               const maxQty = i.stock !== undefined ? Math.min(clamped, i.stock) : clamped;
               return { ...i, qty: maxQty };
@@ -112,23 +114,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
           })
         ),
       clear: () => { setItems([]); setCoupon(null); },
-      moveToSaved: (slug, size) => setItems((prev) => {
-        const it = prev.find((i) => i.slug === slug && i.size === size);
+      moveToSaved: (slug, size, variantId) => setItems((prev) => {
+        const it = prev.find((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
         if (!it) return prev;
-        setSaved((s) => s.some((x) => x.slug === slug && x.size === size) ? s : [...s, { ...it, qty: 1 }]);
-        return prev.filter((i) => !(i.slug === slug && i.size === size));
+        setSaved((s) => s.some((x) => (variantId && x.variantId) ? x.variantId === variantId : (x.slug === slug && x.size === size)) ? s : [...s, { ...it, qty: 1 }]);
+        return prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)));
       }),
-      moveToCart: (slug, size) => setSaved((prev) => {
-        const it = prev.find((i) => i.slug === slug && i.size === size);
+      moveToCart: (slug, size, variantId) => setSaved((prev) => {
+        const it = prev.find((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
         if (!it) return prev;
         setItems((cur) => {
-          const idx = cur.findIndex((i) => i.slug === slug && i.size === size);
+          const idx = cur.findIndex((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
           if (idx >= 0) { const next = [...cur]; next[idx] = { ...next[idx], qty: next[idx].qty + 1 }; return next; }
           return [...cur, { ...it, qty: 1 }];
         });
-        return prev.filter((i) => !(i.slug === slug && i.size === size));
+        return prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)));
       }),
-      removeSaved: (slug, size) => setSaved((prev) => prev.filter((i) => !(i.slug === slug && i.size === size))),
+      removeSaved: (slug, size, variantId) => setSaved((prev) => prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)))),
       coupon, applyCoupon,
       count: items.reduce((n, i) => n + i.qty, 0),
       subtotal, subtotalPaise,
