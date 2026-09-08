@@ -81,7 +81,7 @@ function GiftHampersPage() {
       <StructuredData data={breadcrumbLd([{ name: "Home", url: "/" }, { name: "Bulk & Gifting", url: "/bulk-gifting" }, { name: "Gift Hampers", url: "/gift-hampers" }])} />
 
       {/* 1. Premium Hero */}
-      <PageHeroSlider page="bulk-orders" />
+      <PageHeroSlider page="bulk-gifting" />
       <div className="bg-[#2B2118] py-6 flex justify-center gap-4">
         <button onClick={scrollToForm} className="bg-[#D97706] text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-[#B57420] transition-colors">
           Design My Gift Hamper

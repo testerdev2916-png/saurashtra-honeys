@@ -242,7 +242,7 @@ function BlogPage() {
       {/* =========================================================================
           2. JOURNAL HERO (Left: Eyebrow + Serif Heading + Orange Italics + CTA, Right: Apiary Photo)
          ========================================================================= */}
-      <PageHeroSlider page="blog" />
+      <PageHeroSlider page="journal" />
 
       {/* =========================================================================
           4. JOURNAL INTRODUCTION (#journal-grid)

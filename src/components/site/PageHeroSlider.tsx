@@ -6,7 +6,7 @@ export function PageHeroSlider({
   page,
   interval = 6000,
 }: {
-  page: "home" | "shop" | "our-story" | "bee-farming" | "blog" | "bulk-orders" | "contact" | string;
+  page: "home" | "shop" | "our-story" | "journal" | "bulk-gifting" | "contact" | string;
   interval?: number;
 }) {
   const [slides, setSlides] = useState<HeroSlide[]>(() =>

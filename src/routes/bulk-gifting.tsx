@@ -126,7 +126,7 @@ function BulkGiftingHubPage() {
         ])}
       />
 
-      <PageHeroSlider page="bulk-orders" />
+      <PageHeroSlider page="bulk-gifting" />
 
       {/* Overview Intro */}
       <section className="py-20 bg-[#FDFBF7]">

@@ -64,9 +64,8 @@ const PAGE_OPTIONS = [
   { value: "home", label: "Home Page (1920×700)" },
   { value: "shop", label: "Shop (1920×600)" },
   { value: "our-story", label: "Our Story (1920×600)" },
-  { value: "bee-farming", label: "Bee Farming (1920×600)" },
-  { value: "blog", label: "Journal (1920×600)" },
-  { value: "bulk-orders", label: "Bulk & Gifting (1920×600)" },
+  { value: "journal", label: "Journal (1920×600)" },
+  { value: "bulk-gifting", label: "Bulk & Gifting (1920×600)" },
   { value: "contact", label: "Contact (1920×600)" },
 ];
 
