@@ -40,6 +40,7 @@ function ShoppableVideoCard({
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
+  const [isNearViewport, setIsNearViewport] = useState(false);
 
   const formatDuration = (sec: number) => {
     if (!sec || isNaN(sec) || !isFinite(sec)) return "";
@@ -63,12 +64,13 @@ function ShoppableVideoCard({
     return () => window.removeEventListener('shoppable-video-mute-others', handleGlobalMute);
   }, [uniqueId]);
 
-  // Attempt to play when visible
+  // Attempt to play when visible & lazy load when near viewport
   useEffect(() => {
     const el = cardRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
 
-    const obs = new IntersectionObserver(
+    // Observer for Play/Pause
+    const obsPlay = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && videoRef.current) {
           videoRef.current.play().catch(e => console.error("Autoplay prevented:", e));
@@ -79,8 +81,20 @@ function ShoppableVideoCard({
       { threshold: 0.1 }
     );
 
-    obs.observe(el);
-    return () => obs.unobserve(el);
+    // Observer for Lazy Loading / Unloading video src
+    const obsLoad = new IntersectionObserver(
+      ([entry]) => {
+        setIsNearViewport(entry.isIntersecting);
+      },
+      { rootMargin: "600px" }
+    );
+
+    obsPlay.observe(el);
+    obsLoad.observe(el);
+    return () => {
+      obsPlay.unobserve(el);
+      obsLoad.unobserve(el);
+    };
   }, []);
 
   useEffect(() => {
@@ -160,7 +174,7 @@ function ShoppableVideoCard({
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {item.video_url ? (
+        {item.video_url && isNearViewport ? (
           <video
             ref={videoRef}
             src={item.video_url}
@@ -417,7 +431,7 @@ export function ShoppableVideoCarousel({
         >
           {/* First set of duplicated videos */}
           <div className="flex">
-            {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
+            {[...sortedVideos, ...sortedVideos].map((item, idx) => (
               <ShoppableVideoCard
                 key={`set1-${item.id}-${idx}`}
                 item={item}
@@ -430,7 +444,7 @@ export function ShoppableVideoCarousel({
           </div>
           {/* Second identical set for seamless looping */}
           <div className="flex">
-            {[...sortedVideos, ...sortedVideos, ...sortedVideos].map((item, idx) => (
+            {[...sortedVideos, ...sortedVideos].map((item, idx) => (
               <ShoppableVideoCard
                 key={`set2-${item.id}-${idx}`}
                 item={item}
