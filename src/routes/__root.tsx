@@ -82,9 +82,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { 
           rel: "icon", 
           href: versionedUrl, 
-          type: rawUrl.endsWith(".svg") 
+          type: rawUrl.split('?')[0].toLowerCase().endsWith(".svg") 
             ? "image/svg+xml" 
-            : rawUrl.endsWith(".png") 
+            : rawUrl.split('?')[0].toLowerCase().endsWith(".png") 
               ? "image/png" 
               : "image/x-icon" 
         },
