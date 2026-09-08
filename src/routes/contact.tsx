@@ -143,7 +143,7 @@ function ContactPage() {
     },
     {
       q: "How is your honey tested for purity?",
-      a: "Every batch of Saurashtra Honey undergoes strict independent NABL lab testing for moisture content, HMF levels, and sugar profiles to ensure 0% additives and 100% natural purity.",
+      a: "Every batch of Saurashtra Honey undergoes strict independent NABL lab testing for moisture content, HMF levels, and sugar profiles to ensure no additives and natural purity.",
     },
     {
       q: "Do you ship across India?",

@@ -308,7 +308,7 @@ function Checkout() {
               {busy ? "PLACING…" : method === "cod" ? `PLACE COD ORDER · ₹${total}` : `PAY ₹${total}`}
             </button>
             <div className="mt-3 space-y-1.5 text-[10px] text-muted-foreground">
-              <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-burnt-orange" /> 100% secure — no card data touches our servers</div>
+              <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-burnt-orange" /> Secure — no card data touches our servers</div>
               <div className="flex items-center gap-1.5"><Package className="size-3 text-burnt-orange" /> Easy replacement within 7 days if damaged</div>
             </div>
           </div>

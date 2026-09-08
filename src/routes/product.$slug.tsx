@@ -351,7 +351,7 @@ function ProductPage() {
       <section className="container-product pb-10">
         <div className="bg-cream-deep/70 border border-border/80 rounded-2xl p-6 grid grid-cols-2 md:grid-cols-4 gap-6 shadow-soft">
           {[
-            [Leaf, "100% Pure & Raw", "Unheated and unfiltered floral honey."],
+            [Leaf, "Pure & Raw", "Unheated and unfiltered floral honey."],
             [Beaker, "Lab Tested Purity", "Every batch certified for zero adulteration."],
             [Sparkles, "Direct From Apiary", "Harvested ethically from wildflower farms."],
             [Flower2, "Single Floral Note", "Capturing authentic regional terroir."],
@@ -431,7 +431,7 @@ function ProductPage() {
                   <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">{p.floral_source_notes}</p>
                 ) : (
                   <>
-                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">100% Pure, Raw & Unfiltered Honey harvested primarily from {p.flora ?? "Wildflower"} blossoms in Saurashtra. No sugar syrups, artificial flavorings, or preservatives.</p>
+                    <p className="text-sm md:text-base text-muted-foreground leading-relaxed">Pure, Raw & Unfiltered Honey harvested primarily from {p.flora ?? "Wildflower"} blossoms in Saurashtra. No sugar syrups, artificial flavorings, or preservatives.</p>
                     <div className="p-4 rounded-xl bg-cream-deep/60 border border-border/80 text-xs font-medium text-espresso">
                       <span className="font-bold text-burnt-orange">Tasting Note:</span> Distinct floral sweetness with an authentic earthy, soothing finish characteristic of raw Indian apiaries.
                     </div>
@@ -450,7 +450,7 @@ function ProductPage() {
                     <div className="flex items-center justify-between p-4 rounded-xl bg-cream border border-border/80 text-sm">
                       <div>
                         <div className="font-bold text-espresso">Verified Batch Code: SH24-{p.slug.slice(0, 3).toUpperCase()}</div>
-                        <div className="text-xs text-muted-foreground">Tested for zero inverted sugar & 100% floral purity</div>
+                        <div className="text-xs text-muted-foreground">Tested for zero inverted sugar & floral purity</div>
                       </div>
                       <a href="#" className="text-xs font-bold tracking-widest text-burnt-orange hover:underline uppercase">Download PDF Report →</a>
                     </div>
@@ -567,7 +567,7 @@ function ProductPage() {
       {/* PROMISE STRIP */}
       <section className="container-product pb-24">
         <div className="bg-espresso text-cream rounded-2xl p-6 md:p-8 grid grid-cols-2 md:grid-cols-4 gap-6 shadow-soft border border-white/10">
-          {[[PackageCheck, "100% Secure Payments", "256-bit encrypted transactions"], [Truck, "Fast & Safe Delivery", "Insured doorstep delivery"], [PackageCheck, "Artisanal Packing", "Recyclable glass & eco cushioning"], [ShieldCheck, "Purity Assurance", "Guaranteed unheated floral raw honey"]].map(([I, t, s]) => {
+          {[[PackageCheck, "Secure Payments", "256-bit encrypted transactions"], [Truck, "Fast & Safe Delivery", "Insured doorstep delivery"], [PackageCheck, "Artisanal Packing", "Recyclable glass & eco cushioning"], [ShieldCheck, "Purity Assurance", "Guaranteed unheated floral raw honey"]].map(([I, t, s]) => {
             const Icon = I as typeof PackageCheck;
             return (
               <div key={t as string} className="flex items-start gap-3.5">

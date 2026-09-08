@@ -34,7 +34,7 @@ const partnerSchema = z.object({
 });
 
 const perks = [
-  [Award, "Premium Products", "100% pure, raw and unfiltered honey."],
+  [Award, "Premium Products", "Pure, raw and unfiltered honey."],
   [Package, "Attractive Margins", "Competitive pricing with good profit."],
   [Megaphone, "Marketing Support", "Product creatives, posters and promotional support."],
   [GraduationCap, "Training & Guidance", "Complete knowledge and business support."],
@@ -160,7 +160,7 @@ function Partner() {
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-bold">Join the Saurashtra Honey Network</h2>
             <p className="mt-3 text-sm text-cream/80 leading-relaxed">Fill out your details below. Our partnership manager will review your profile and connect within 24 hours to discuss margins, samples, and terms.</p>
             <div className="mt-6 space-y-3 text-xs text-cream/75">
-              <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-burnt-orange" /> 100% Direct Manufacturer Supply</div>
+              <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-burnt-orange" /> Direct Manufacturer Supply</div>
               <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-burnt-orange" /> Guaranteed Batch Purity & NABL Reports</div>
               <div className="flex items-center gap-2.5"><ShieldCheck className="size-4 text-burnt-orange" /> Dedicated Regional Marketing Assistance</div>
             </div>
@@ -219,19 +219,11 @@ function Partner() {
         <div className="relative overflow-hidden rounded-3xl shadow-lg border border-white/10">
           <img src={drizzle} alt="" loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-espresso/95 via-espresso/90 to-espresso/60" />
-          <div className="relative p-8 md:p-12 grid lg:grid-cols-[1.4fr_1fr] gap-8 items-center text-cream">
-            <div>
+          <div className="relative p-8 md:p-12 text-cream text-center">
+            <div className="max-w-2xl mx-auto">
               <h2 className="font-serif text-3xl md:text-4xl font-bold">Let's create sweetness together.</h2>
               <p className="mt-3 text-sm text-cream/80">Join the Saurashtra Honey family today!</p>
               <a href="#apply" className="mt-6 inline-flex items-center gap-2 bg-burnt-orange text-white rounded-full px-7 py-3.5 text-xs font-bold tracking-widest hover:bg-terracotta transition-all shadow-md">JOIN NOW <Handshake className="size-4" /></a>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
-              {[["10K+", "Happy Partners"], ["500+", "Cities Covered"], ["100%", "Pure & Natural"], ["Growing", "Stronger Together"]].map(([n, l]) => (
-                <div key={l} className="text-center border-l border-cream/25 first:border-0 pl-3">
-                  <div className="font-serif text-2xl font-bold text-burnt-orange">{n}</div>
-                  <div className="text-cream/75 mt-0.5">{l}</div>
-                </div>
-              ))}
             </div>
           </div>
         </div>

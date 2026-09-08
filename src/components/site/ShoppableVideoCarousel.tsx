@@ -402,25 +402,6 @@ export function ShoppableVideoCarousel({
           </div>
         </div>
 
-        {/* Mobile Stats below Video Carousel */}
-        <div className="grid grid-cols-2 gap-[12px] w-full mt-[12px]">
-          <div className="p-3 sm:p-4 rounded-[16px] bg-white border border-black/5 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="font-serif text-xl font-bold text-[#D97706] mb-1">
-              15+ Years
-            </div>
-            <div className="text-[11px] sm:text-xs font-semibold text-[#2B2118]/80 leading-snug">
-              Beekeeping<br/>Experience
-            </div>
-          </div>
-          <div className="p-3 sm:p-4 rounded-[16px] bg-white border border-black/5 shadow-sm flex flex-col items-center justify-center text-center">
-            <div className="font-serif text-xl font-bold text-[#D97706] mb-1">
-              2000+
-            </div>
-            <div className="text-[11px] sm:text-xs font-semibold text-[#2B2118]/80 leading-snug">
-              Happy Customers<br/>Across India
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* DESKTOP VIEW (Full-width Carousel Track Marquee) */}

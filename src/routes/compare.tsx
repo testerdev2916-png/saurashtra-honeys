@@ -92,7 +92,7 @@ function ComparePage() {
                 {selected.map((p) => <td key={p.slug} className="p-5 border-t border-border/60 text-muted-foreground">{p.flora === "Ajwain" ? "Digestive health & tea" : p.flora === "Tulsi" ? "Immunity & respiratory care" : "Daily sweetener & toast"}</td>)}
               </Row>
               <Row label="Purity Assurance">
-                {selected.map((p) => <td key={p.slug} className="p-5 border-t border-border/60 font-medium text-botanical">100% Unheated, Raw & Lab Verified</td>)}
+                {selected.map((p) => <td key={p.slug} className="p-5 border-t border-border/60 font-medium text-botanical">Unheated, Raw & Lab Verified</td>)}
               </Row>
               <Row label="Customer Rating">
                 {selected.map((p) => <td key={p.slug} className="p-5 border-t border-border/60 font-bold text-espresso">{p.rating} ★ <span className="text-xs font-normal text-muted-foreground">({p.reviews} verified)</span></td>)}

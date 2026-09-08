@@ -124,7 +124,7 @@ function BulkOrdersPage() {
               {introSettings.heading || "Uncompromising Quality at Scale"}
             </h2>
             <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
-              {introSettings.description || "When you partner with Saurashtra Honey, you are guaranteed 100% pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
+              {introSettings.description || "When you partner with Saurashtra Honey, you are guaranteed pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
             </p>
             <ul className="space-y-4 pt-4">
               {['Low Minimum Order Quantities (MOQ)', 'Customizable Packaging Sizes', 'NABL Lab Certified Purity', 'Dedicated Account Manager'].map((item, i) => (

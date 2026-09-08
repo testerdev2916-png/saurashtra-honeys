@@ -126,7 +126,7 @@ const SECTION_CONFIG: Record<
     ],
   },
   stats_strip: {
-    title: "Statistics Strip",
+    title: "Statistics Strip (Not displayed on frontend)",
     desc: "Key metrics like Happy Customers, Lab Tested Batches.",
     fields: [{ type: "stats", key: "stats", label: "Statistics" }],
   },

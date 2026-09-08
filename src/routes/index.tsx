@@ -20,7 +20,6 @@ import {
   HomeBestSellers,
   HomeFarmBanner,
   HomeHeritageVideo,
-  HomeStatsStrip,
   HomeCustomerStories,
   HomeJournalPreview,
   HomeInstagramPreview,
@@ -63,7 +62,6 @@ const CANONICAL_SECTIONS = [
   "shoppable_videos",
   "farm_banner",
   "heritage_video",
-  "stats_strip",
   "testimonials",
   "journal",
 ] as const;
@@ -311,8 +309,7 @@ function Home() {
         return <HomeFarmBanner key="farm_banner" settings={settings} />;
       case "heritage_video":
         return <HomeHeritageVideo key="heritage_video" settings={settings} />;
-      case "stats_strip":
-        return <HomeStatsStrip key="stats_strip" settings={settings} />;
+
       case "testimonials":
         return <HomeCustomerStories key="testimonials" stories={stories} settings={settings} />;
       case "journal":

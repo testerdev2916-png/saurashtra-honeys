@@ -135,7 +135,7 @@ function BulkGiftingHubPage() {
             BUSINESS PARTNERSHIPS
           </div>
           <h2 className="font-serif text-[34px] sm:text-[44px] md:text-[56px] text-[#2B2118] font-[500] leading-tight mb-6 max-w-4xl mx-auto">
-            A Trusted Manufacturer of 100% Pure Natural Honey
+            A Trusted Manufacturer of Pure Natural Honey
           </h2>
           <p className="text-[#6B6257] text-[16px] sm:text-[18px] max-w-2xl mx-auto leading-relaxed">
             We provide end-to-end premium honey solutions for businesses worldwide. 
@@ -235,7 +235,7 @@ function BulkGiftingHubPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
             <div className="flex flex-col items-center">
               <ShieldCheck className="size-10 text-[#D97706] mb-4" strokeWidth={1} />
-              <div className="font-bold text-[18px] mb-2">100% Lab Tested</div>
+              <div className="font-bold text-[18px] mb-2">Lab Tested</div>
               <p className="text-[#FDFBF7]/70 text-[14px]">Every batch is independently certified for purity.</p>
             </div>
             <div className="flex flex-col items-center">

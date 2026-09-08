@@ -109,7 +109,7 @@ function CorporateGiftingPage() {
               {introSettings.description || "Corporate gifting should be more than just a formality. At Saurashtra Honey, we craft premium, health-conscious gifts that reflect your company's values and genuine appreciation. From Diwali to work anniversaries, our pure honey hampers stand out."}
             </p>
             <ul className="space-y-4 pt-4">
-              {['100% Pure, Healthy & Meaningful', 'Fully Customizable Branding', 'Premium Luxury Packaging', 'Hassle-Free Doorstep Delivery'].map((item, i) => (
+              {['Pure, Healthy & Meaningful', 'Fully Customizable Branding', 'Premium Luxury Packaging', 'Hassle-Free Doorstep Delivery'].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-[#2B2118] font-[500]">
                   <CheckCircle2 className="size-5 text-[#D97706]" /> {item}
                 </li>

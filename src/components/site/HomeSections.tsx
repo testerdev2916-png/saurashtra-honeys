@@ -88,7 +88,7 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
   }, []);
 
   const fallbackItems = [
-    { label: "100% Pure No Additives", img: "/images/trust/pure_no_additives.png" },
+    { label: "Pure No Additives", img: "/images/trust/pure_no_additives.png" },
     { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.png" },
     { label: "Natural Floral Sources", img: "/images/trust/natural_floral.png" },
     { label: "Rich in Nutrients", img: "/images/trust/rich_nutrients.png" },
@@ -532,53 +532,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
 }
 
 /* =========================================================================
-   8. STATISTICS STRIP (5 items horizontal grid below farm banner)
-   ========================================================================= */
-export function HomeStatsStrip({ settings }: { settings?: Record<string, any> }) {
-  const defaultStats = [
-    { value: "15+ Years", label: "Beekeeping Experience" },
-    { value: "2000+", label: "Happy Customers Across India" },
-    { value: "500+", label: "Bee Boxes Under Care" },
-    { value: "100%", label: "Lab Tested For Purity" },
-    { value: "0%", label: "Additives Always Pure" },
-  ];
-  const stats: { value: string; label: string }[] =
-    Array.isArray(settings?.stats) && settings.stats.length > 0
-      ? settings.stats
-      : defaultStats;
-
-  return (
-    <section className="bg-cream-deep/50 border-b border-border/80 py-8 sm:py-12">
-      <div className="container-page px-4 sm:px-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6 text-center">
-          {stats.map(({ value, label }, idx) => {
-            const isLastOdd = idx === stats.length - 1 && stats.length % 2 !== 0;
-            return (
-              <div
-                key={idx}
-                className={`p-3 sm:p-4 rounded-[20px] bg-cream/70 border border-border/60 shadow-xs flex flex-col items-center justify-center ${
-                  isLastOdd
-                    ? "col-span-2 w-[calc(50%-0.375rem)] mx-auto md:col-span-1 md:w-full md:mx-0"
-                    : ""
-                }`}
-              >
-                <div className="font-serif text-xl sm:text-3xl font-bold text-brand-orange">
-                  {value}
-                </div>
-                <div className="text-[11px] sm:text-sm font-semibold text-espresso/80 mt-1 leading-snug">
-                  {label}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* =========================================================================
-   9. CUSTOMER STORIES (Replaces Testimonials - Carousel with Videos/Photos/Reviews)
+   8. CUSTOMER STORIES (Replaces Testimonials - Carousel with Videos/Photos/Reviews)
    ========================================================================= */
 
 export function HomeCustomerStories({
