@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import { type Product, type ProductVariant } from "@/lib/products";
+import { sortVariantsBySize, type Product, type ProductVariant } from "@/lib/products";
 import { resolveImage } from "@/lib/product-images";
 
 type Row = {
@@ -50,7 +50,7 @@ type VariantRow = {
 
 function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
-  const mappedVariants: ProductVariant[] | undefined =
+  let mappedVariants: ProductVariant[] | undefined =
     dbVariants && dbVariants.length > 0
       ? dbVariants.map((v) => ({
           id: v.id,
@@ -71,6 +71,17 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
         }))
       : undefined;
 
+  // Preserve the intended default variant BEFORE sorting
+  const defaultVariant =
+    mappedVariants && mappedVariants.length > 0
+      ? mappedVariants.find((v) => v.isDefault) || mappedVariants[0]
+      : undefined;
+
+  // Apply logical ascending numerical sort to variants (e.g. 50g -> 250g -> 1kg)
+  if (mappedVariants) {
+    mappedVariants = sortVariantsBySize(mappedVariants);
+  }
+
   const activeSizes =
     mappedVariants && mappedVariants.length > 0
       ? mappedVariants.map((v) => v.label)
@@ -78,10 +89,6 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
       ? (r.sizes as string[])
       : [];
 
-  const defaultVariant =
-    mappedVariants && mappedVariants.length > 0
-      ? mappedVariants.find((v) => v.isDefault) || mappedVariants[0]
-      : undefined;
 
   const rawImages = Array.isArray(r.images)
     ? (r.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)

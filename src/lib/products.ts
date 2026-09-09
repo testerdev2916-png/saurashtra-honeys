@@ -787,3 +787,48 @@ export function resolveActiveImage(product: Product, variant?: ProductVariant): 
   return product.image;
 }
 
+/**
+ * Normalizes a variant label into a stable, comparable gram weight.
+ * Examples: "50g" -> 50, "1kg" -> 1000, "1.5kg" -> 1500, "3 x 250g" -> 750
+ * Unparseable sizes (e.g. "Gift Pack") return Infinity so they sort at the end.
+ */
+export function parseSizeValue(label: string): number {
+  if (!label) return Infinity;
+  const lower = label.toLowerCase().replace(/\s+/g, '');
+  
+  // "3x250g" or "3*250g" or "3×250g"
+  const multiMatch = lower.match(/^(\d+)[x*×]([\d.]+)(kg|g|l|ml)$/);
+  if (multiMatch) {
+    const qty = parseInt(multiMatch[1], 10);
+    const val = parseFloat(multiMatch[2]);
+    const unit = multiMatch[3];
+    let multiplier = 1;
+    if (unit === 'kg' || unit === 'l') multiplier = 1000;
+    return qty * val * multiplier;
+  }
+  
+  // "250g", "1.5kg", "500ml"
+  const singleMatch = lower.match(/^([\d.]+)(kg|g|l|ml)$/);
+  if (singleMatch) {
+    const val = parseFloat(singleMatch[1]);
+    const unit = singleMatch[2];
+    let multiplier = 1;
+    if (unit === 'kg' || unit === 'l') multiplier = 1000;
+    return val * multiplier;
+  }
+  
+  return Infinity;
+}
+
+/**
+ * Sorts an array of variants ascendingly by their parsed size value.
+ * Variants that cannot be parsed fall to the end. Identical sizes maintain original order.
+ */
+export function sortVariantsBySize(variants: ProductVariant[]): ProductVariant[] {
+  return [...variants].sort((a, b) => {
+    const valA = parseSizeValue(a.label);
+    const valB = parseSizeValue(b.label);
+    if (valA === valB) return 0;
+    return valA - valB;
+  });
+}
