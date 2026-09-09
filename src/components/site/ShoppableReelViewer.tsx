@@ -338,7 +338,7 @@ function ReelSection({ item, index, product, isActive, setActiveReelId, isMuted,
               {product ? (
                 <div className="mt-2 bg-white/10 backdrop-blur-xl border border-white/20 rounded-[20px] p-2.5 flex items-center gap-3 w-full shadow-lg">
                   <div className="size-[48px] rounded-[14px] overflow-hidden bg-white/10 shrink-0 border border-white/10">
-                    <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                    <img src={resolveActiveImage(product, getDefaultVariant(product))} alt={product.name} className="w-full h-full object-cover bg-white" />
                   </div>
                   <div className="flex-1 min-w-0 flex flex-col justify-center">
                     <h4 className="text-white font-semibold text-[13px] leading-tight truncate drop-shadow-sm">{product.name}</h4>
@@ -388,7 +388,7 @@ function ReelSection({ item, index, product, isActive, setActiveReelId, isMuted,
             <div className="bg-white rounded-[32px] p-7 shadow-2xl space-y-6 transform transition-all hover:shadow-[0_20px_40px_rgb(0,0,0,0.3)]">
               <div className="flex gap-5">
                 <div className="size-[100px] rounded-[24px] overflow-hidden bg-[#F8F5EF] shrink-0 border border-black/5 shadow-inner">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover mix-blend-multiply" />
+                  <img src={resolveActiveImage(product, getDefaultVariant(product))} alt={product.name} className="w-full h-full object-contain mix-blend-multiply p-1" />
                 </div>
                 <div className="flex flex-col justify-center">
                   <h3 className="font-serif font-bold text-2xl text-espresso line-clamp-2 leading-tight">{product.name}</h3>
