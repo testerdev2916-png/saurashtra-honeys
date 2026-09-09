@@ -29,6 +29,7 @@ export type ProductVariant = {
   sku?: string;
   weightG?: number;
   image?: string;
+  image_url?: string | null;
   images?: string[];
 };
 
@@ -775,5 +776,14 @@ export function getVariantByLabel(product: Product, label?: string): ProductVari
     if (found) return found;
   }
   return getDefaultVariant(product);
+}
+
+export function resolveActiveImage(product: Product, variant?: ProductVariant): string {
+  if (variant) {
+    if (variant.image_url && variant.image_url.trim().length > 0) return variant.image_url;
+    if (variant.image && variant.image.trim().length > 0) return variant.image;
+    if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0) return variant.images[0];
+  }
+  return product.image;
 }
 

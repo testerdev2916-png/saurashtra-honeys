@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { getVariantByLabel, type Product } from "@/lib/products";
+import { getVariantByLabel, resolveActiveImage, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { Leaf, ShoppingCart, Star, X } from "lucide-react";
@@ -17,6 +17,8 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
   const activeVariant = product ? getVariantByLabel(product, size) : undefined;
   const activePrice = activeVariant?.price ?? product?.price ?? 0;
   const activeMrp = activeVariant?.mrp ?? product?.mrp;
+  
+  const activeImage = product ? resolveActiveImage(product, activeVariant) : "";
 
   return (
     <Dialog open={!!product} onOpenChange={(o) => !o && onClose()}>
@@ -29,7 +31,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                   {product.badge}
                 </span>
               )}
-              <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-cover" />
+              <img loading="lazy" src={activeImage} alt={product.name} className="w-full h-full object-cover" />
             </div>
             <div className="p-6 flex flex-col relative">
               <button onClick={onClose} className="absolute top-3 right-3 size-8 rounded-full bg-cream flex items-center justify-center hover:bg-gold/30" aria-label="Close">

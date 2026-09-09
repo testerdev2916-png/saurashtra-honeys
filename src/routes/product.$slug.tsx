@@ -34,20 +34,30 @@ export const Route = createFileRoute("/product/$slug")({
     if (!p) throw notFound();
     return { product: p };
   },
-  head: ({ loaderData }) => ({
-    meta: loaderData
-      ? [
-          { title: `${loaderData.product.name} — Saurashtra Honey` },
-          { name: "description", content: loaderData.product.description.slice(0, 155) },
-          { property: "og:title", content: `${loaderData.product.name} — Saurashtra Honey` },
-          { property: "og:description", content: loaderData.product.tagline },
-          { property: "og:type", content: "product" },
-          { property: "og:image", content: loaderData.product.image },
-          { name: "twitter:card", content: "summary_large_image" },
-          { name: "twitter:image", content: loaderData.product.image },
-        ]
-      : [],
-  }),
+  head: ({ loaderData, search }) => {
+    if (!loaderData) return { meta: [] };
+    let image = loaderData.product.image;
+    if (search.variant && loaderData.product.variants) {
+      const v = loaderData.product.variants.find((x) => x.id === search.variant);
+      if (v) {
+        if (v.image_url && v.image_url.trim().length > 0) image = v.image_url;
+        else if (v.image && v.image.trim().length > 0) image = v.image;
+        else if (v.images && v.images.length > 0 && v.images[0].trim().length > 0) image = v.images[0];
+      }
+    }
+    return {
+      meta: [
+        { title: `${loaderData.product.name} — Saurashtra Honey` },
+        { name: "description", content: loaderData.product.description.slice(0, 155) },
+        { property: "og:title", content: `${loaderData.product.name} — Saurashtra Honey` },
+        { property: "og:description", content: loaderData.product.tagline },
+        { property: "og:type", content: "product" },
+        { property: "og:image", content: image },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:image", content: image },
+      ]
+    };
+  },
   notFoundComponent: () => (
     <SiteLayout>
       <div className="container-product py-24 text-center">

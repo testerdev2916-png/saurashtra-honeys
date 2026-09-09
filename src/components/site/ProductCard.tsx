@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, Eye, Plus, GitCompare, Star, ShoppingCart } from "lucide-react";
 import { useState } from "react";
-import { getVariantByLabel, type Product } from "@/lib/products";
+import { getVariantByLabel, resolveActiveImage, type Product } from "@/lib/products";
 import { useCart } from "@/lib/cart";
 import { useWishlist } from "@/lib/wishlist";
 import { useCompare } from "@/lib/compare";
@@ -32,6 +32,8 @@ export function ProductCard({ p, onQuickView }: { p: Product; onQuickView?: (p: 
   const activePrice = activeVariant.price ?? p.price;
   const activeMrp = activeVariant.mrp ?? p.mrp;
   const discount = activeMrp && activeMrp > activePrice ? Math.round(((activeMrp - activePrice) / activeMrp) * 100) : 0;
+  
+  const activeImage = resolveActiveImage(p, activeVariant);
 
   return (
     <div className="group bg-white rounded-2xl border border-border/90 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lift md:hover:-translate-y-1.5 h-full">
@@ -57,7 +59,7 @@ export function ProductCard({ p, onQuickView }: { p: Product; onQuickView?: (p: 
           </button>
         </div>
         <Link to="/product/$slug" params={{ slug: p.slug }} onClick={() => track("select_item", { items: [toItem(p, { size })] })} className="block w-full h-full">
-          <img key={p.updatedAt || p.image} src={p.image} alt={p.name} loading="lazy" className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out" />
+          <img key={p.updatedAt || activeImage} src={activeImage} alt={p.name} loading="lazy" className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out" />
         </Link>
         {onQuickView && (
           <button

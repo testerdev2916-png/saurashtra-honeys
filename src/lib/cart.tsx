@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { getVariantByLabel, type Product, type ProductVariant } from "./products";
+import { getVariantByLabel, resolveActiveImage, type Product, type ProductVariant } from "./products";
 
 export type CartItem = {
   slug: string;
@@ -85,7 +85,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         const s = size ?? p.sizes[0];
         const v = variant ?? getVariantByLabel(p, s);
         const itemPrice = v.price ?? p.price;
-        const itemImage = v.image ?? p.image;
+        const itemImage = resolveActiveImage(p, v);
         setItems((prev) => {
           const idx = prev.findIndex((i) => (v.id && i.variantId) ? i.variantId === v.id : (i.slug === p.slug && i.size === s));
           if (idx >= 0) {
