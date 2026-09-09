@@ -129,15 +129,21 @@ function ProductPage() {
   }, [activeVariant, search.variant, navigate]);
 
   const gallery = useMemo(() => {
+    // Helper to normalize URLs by stripping query parameters (like ?t= timestamp) to ensure accurate deduplication
+    const normalize = (url: string) => {
+      if (!url) return "";
+      return url.split("?")[0].trim();
+    };
+
     // 1. All Variant Images across the entire product (to exclude from common images)
     const allVariantImages = new Set<string>();
     if (p.variants && p.variants.length > 0) {
       p.variants.forEach((v) => {
-        if (v.image) allVariantImages.add(v.image);
-        if (v.image_url) allVariantImages.add(v.image_url);
+        if (v.image) allVariantImages.add(normalize(v.image));
+        if (v.image_url) allVariantImages.add(normalize(v.image_url));
         if (v.images && v.images.length > 0) {
           v.images.forEach(img => {
-            if (img) allVariantImages.add(img);
+            if (img) allVariantImages.add(normalize(img));
           });
         }
       });
@@ -152,7 +158,19 @@ function ProductPage() {
         variantImages.push(...activeVariant.images);
       }
     }
-    const finalVariantImages = Array.from(new Set(variantImages.filter((u) => u && u.trim().length > 0))).slice(0, 2);
+    
+    // Deduplicate variant images by normalized URL, keeping the original URL (with ?t=) for rendering
+    const seenVariant = new Set<string>();
+    const finalVariantImages: string[] = [];
+    for (const url of variantImages) {
+      if (!url || !url.trim()) continue;
+      const norm = normalize(url);
+      if (!seenVariant.has(norm)) {
+        seenVariant.add(norm);
+        finalVariantImages.push(url);
+        if (finalVariantImages.length >= 2) break;
+      }
+    }
 
     // 3. Common Product Images (Unlimited)
     const commonImages: string[] = [];
@@ -160,20 +178,20 @@ function ProductPage() {
     if (p.images && p.images.length > 0) commonImages.push(...p.images);
     if (p.additionalImages && p.additionalImages.length > 0) commonImages.push(...p.additionalImages);
     
-    // Also parse attributes for additional images if it exists directly on p (from DB)
-    const pAny = p as any;
-    if (pAny.attributes?.additional_images && Array.isArray(pAny.attributes.additional_images)) {
-      commonImages.push(...pAny.attributes.additional_images);
+    // Deduplicate common images by normalized URL and EXCLUDE any image that is associated with ANY variant
+    const seenCommon = new Set<string>();
+    const finalCommonImages: string[] = [];
+    for (const url of commonImages) {
+      if (!url || !url.trim()) continue;
+      const norm = normalize(url);
+      // Skip if it's already in common, OR if it's a known variant image
+      if (!seenCommon.has(norm) && !allVariantImages.has(norm)) {
+        seenCommon.add(norm);
+        finalCommonImages.push(url);
+      }
     }
-    
-    // Deduplicate common images and EXCLUDE any image that is associated with ANY variant
-    const rawCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0)));
-    const finalCommonImages = rawCommonImages.filter(url => !allVariantImages.has(url));
 
     // 4. Combine
-    // By definition, finalCommonImages has NO intersection with allVariantImages.
-    // finalVariantImages ONLY contains images from activeVariant.
-    // So there is zero chance of duplicates between finalVariantImages and finalCommonImages.
     return [...finalVariantImages, ...finalCommonImages];
   }, [p, activeVariant]);
 
