@@ -200,8 +200,6 @@ function ProductPage() {
   }, [size]);
 
   const related = allProducts.filter((x) => x.slug !== p.slug && x.category === p.category).slice(0, 4);
-  const fbt = allProducts.filter((x) => x.slug !== p.slug).slice(0, 3);
-
   const activePrice = activeVariant.price ?? p.price;
   const activeMrp = activeVariant.mrp ?? p.mrp;
   const stock = activeVariant.stock ?? (p as unknown as { stock_quantity?: number }).stock_quantity ?? 100;
@@ -523,34 +521,6 @@ function ProductPage() {
           </div>
         </div>
       </section>
-
-
-      {/* Frequently bought together */}
-      {fbt.length > 0 && (
-        <section className="container-product pb-12">
-          <h2 className="font-serif text-2xl font-bold text-espresso mb-4">Frequently Bought Together</h2>
-          <div className="bg-cream-deep/50 border border-border/80 rounded-2xl p-5 md:p-7 grid md:grid-cols-[1fr_auto] gap-6 md:gap-8 items-center shadow-soft">
-            <div className="flex items-center gap-3 md:gap-5 overflow-x-auto pb-2 md:pb-0">
-              {[p, ...fbt].map((x, i) => (
-                <div key={x.slug} className="flex items-center gap-3 md:gap-4 shrink-0">
-                  <div className="w-24 md:w-28 shrink-0">
-                    <img src={x.image} alt={x.name} className="w-full aspect-square rounded-xl object-cover bg-white shadow-xs border border-border/80" />
-                    <div className="mt-1.5 font-serif text-xs md:text-sm font-bold text-espresso leading-tight line-clamp-2">{x.name}</div>
-                    <div className="text-[11px] md:text-xs text-muted-foreground font-semibold mt-0.5">₹{x.price}</div>
-                  </div>
-                  {i < fbt.length && <Plus className="size-5 text-burnt-orange shrink-0" />}
-                </div>
-              ))}
-            </div>
-            <div className="md:text-right border-t md:border-t-0 pt-4 md:pt-0 border-border/60">
-              <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">Bundle Price</div>
-              <div className="font-serif text-2xl md:text-3xl font-bold text-espresso">₹{[p, ...fbt].reduce((s, x) => s + x.price, 0)}</div>
-              <button onClick={() => { [p, ...fbt].forEach((x) => add(x)); toast.success("Bundle added to cart"); }}
-                className="mt-3 w-full md:w-auto bg-espresso text-cream rounded-xl px-6 py-3 text-xs font-bold tracking-widest hover:bg-burnt-orange transition-colors shadow-sm">ADD BUNDLE TO CART</button>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Honey Process Infographic */}
       <section 
