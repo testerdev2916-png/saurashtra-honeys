@@ -129,7 +129,21 @@ function ProductPage() {
   }, [activeVariant, search.variant, navigate]);
 
   const gallery = useMemo(() => {
-    // 1. Variant Images (Max 2)
+    // 1. All Variant Images across the entire product (to exclude from common images)
+    const allVariantImages = new Set<string>();
+    if (p.variants && p.variants.length > 0) {
+      p.variants.forEach((v) => {
+        if (v.image) allVariantImages.add(v.image);
+        if (v.image_url) allVariantImages.add(v.image_url);
+        if (v.images && v.images.length > 0) {
+          v.images.forEach(img => {
+            if (img) allVariantImages.add(img);
+          });
+        }
+      });
+    }
+
+    // 2. Currently Selected Variant Images (Max 2)
     const variantImages: string[] = [];
     if (activeVariant) {
       if (activeVariant.image) variantImages.push(activeVariant.image);
@@ -140,7 +154,7 @@ function ProductPage() {
     }
     const finalVariantImages = Array.from(new Set(variantImages.filter((u) => u && u.trim().length > 0))).slice(0, 2);
 
-    // 2. Common Product Images (Unlimited)
+    // 3. Common Product Images (Unlimited)
     const commonImages: string[] = [];
     if (p.image) commonImages.push(p.image);
     if (p.images && p.images.length > 0) commonImages.push(...p.images);
@@ -152,9 +166,14 @@ function ProductPage() {
       commonImages.push(...pAny.attributes.additional_images);
     }
     
-    const finalCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0)));
+    // Deduplicate common images and EXCLUDE any image that is associated with ANY variant
+    const rawCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0)));
+    const finalCommonImages = rawCommonImages.filter(url => !allVariantImages.has(url));
 
-    // 3. Combine
+    // 4. Combine
+    // By definition, finalCommonImages has NO intersection with allVariantImages.
+    // finalVariantImages ONLY contains images from activeVariant.
+    // So there is zero chance of duplicates between finalVariantImages and finalCommonImages.
     return [...finalVariantImages, ...finalCommonImages];
   }, [p, activeVariant]);
 
