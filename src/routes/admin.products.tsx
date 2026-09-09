@@ -460,7 +460,15 @@ function ProductsPage() {
             </tr>
           )}
           {!loading &&
-            filtered.map((r) => (
+            filtered.map((r) => {
+              const displayImage = resolveImage(
+                r.image_key,
+                r.image_url,
+                r.images && r.images.length > 0 ? r.images[0] : "",
+                (r as any).updated_at
+              );
+
+              return (
               <tr key={r.id} className="hover:bg-cream/40">
                 <Td>
                   <input
@@ -475,9 +483,9 @@ function ProductsPage() {
                 </Td>
                 <Td>
                   <div className="flex items-center gap-3">
-                    {r.image_url ? (
+                    {displayImage ? (
                       <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
-                        <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
+                        <img src={displayImage} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
                       </div>
                     ) : (
                       <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
@@ -535,7 +543,8 @@ function ProductsPage() {
                   </button>
                 </Td>
               </tr>
-            ))}
+            );
+          })}
         </tbody>
       </TableWrap>
       </>
