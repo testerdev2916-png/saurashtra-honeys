@@ -98,7 +98,7 @@ function ProductPage() {
   const { add, setOpen } = useCart();
   const wl = useWishlist();
   const cmp = useCompare();
-  const navigate = useNavigate();
+  const navigate = Route.useNavigate();
 
   useEffect(() => { void fetchProducts().then((r) => { if (r.length) setAllProducts(r); }); }, []);
 
