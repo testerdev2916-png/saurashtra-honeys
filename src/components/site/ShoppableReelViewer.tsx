@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { X, Heart, Share2, ShoppingBag, Volume2, VolumeX, Play, ExternalLink, ChevronDown } from "lucide-react";
 import type { HomepageVideoItem } from "@/lib/homepage-videos";
-import type { Product } from "@/lib/products";
+import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
 
@@ -258,11 +258,25 @@ function ReelSection({ item, index, product, isActive, setActiveReelId, isMuted,
               className="absolute inset-0 w-full h-full object-cover cursor-pointer"
             />
           ) : (
-            <div className="absolute inset-0 w-full h-full">
-              <img src={item.thumbnail_url || item.fallbackImage} className="absolute inset-0 w-full h-full object-cover opacity-60" alt="" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                 <span className="text-white bg-black/50 px-4 py-2 rounded-lg font-medium backdrop-blur-md">Video Unavailable</span>
-              </div>
+            <div className="absolute inset-0 w-full h-full bg-[#F8F5EF] overflow-hidden">
+              {product ? (() => {
+                 const defaultVar = getDefaultVariant(product);
+                 const displayImage = resolveActiveImage(product, defaultVar);
+                 return (
+                   <div className="absolute inset-0 flex items-center justify-center p-8 md:p-16">
+                     <img src={displayImage} className="w-full h-full object-contain mix-blend-multiply drop-shadow-2xl scale-[1.02]" alt={product.name} />
+                   </div>
+                 );
+              })() : (
+                 <div className="absolute inset-0 bg-espresso">
+                   {(item.thumbnail_url || item.fallbackImage) ? (
+                     <img src={item.thumbnail_url || item.fallbackImage} className="absolute inset-0 w-full h-full object-cover opacity-60" alt="" />
+                   ) : null}
+                   <div className="absolute inset-0 flex items-center justify-center">
+                     <span className="text-white bg-black/50 px-4 py-2 rounded-lg font-medium backdrop-blur-md">Media Unavailable</span>
+                   </div>
+                 </div>
+              )}
             </div>
           )}
 
