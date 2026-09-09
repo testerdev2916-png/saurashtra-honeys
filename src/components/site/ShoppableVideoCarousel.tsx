@@ -207,22 +207,22 @@ function ShoppableVideoCard({
         <Link 
           to="."
           search={((prev: any) => ({ ...prev, reel: item.id })) as any}
-          className="absolute z-20 w-[84%] sm:w-[80%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[18px] sm:rounded-[20px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-3 sm:p-3.5 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)]"
+          className="absolute z-20 w-[68%] sm:w-[60%] left-1/2 -translate-x-1/2 bottom-[4%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2 sm:p-2.5 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)]"
         >
-          <div className="w-[88px] h-[88px] sm:w-[100px] sm:h-[100px] bg-white border border-white/80 flex items-center justify-center mb-2.5 shadow-sm shrink-0 rounded-[14px] overflow-hidden">
-             <img loading="lazy" src={displayImage} alt={product.name} className="w-full h-full object-contain p-1.5" />
+          <div className="w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] bg-white border border-white/80 flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm shrink-0 rounded-[12px] overflow-hidden">
+             <img loading="lazy" src={displayImage} alt={product.name} className="w-full h-full object-contain p-1" />
           </div>
-          <h3 className="font-semibold text-black text-center text-[13px] sm:text-[14px] leading-tight mb-1 px-1 line-clamp-2">
+          <h3 className="font-semibold text-black text-center text-[11px] sm:text-[12px] leading-tight mb-0.5 px-1 line-clamp-2">
             {displayTitle}
           </h3>
-          <div className="text-black font-bold text-[13px] sm:text-[14px]">
+          <div className="text-black font-bold text-[11px] sm:text-[13px]">
             {product.priceMax ? (
               <>₹{product.price.toLocaleString("en-IN")} - ₹{product.priceMax.toLocaleString("en-IN")}</>
             ) : (
               <>
                 ₹{product.price.toLocaleString("en-IN")}
                 {product.mrp && product.mrp > product.price && (
-                  <span className="text-black/60 line-through font-medium ml-1.5 text-[11px] sm:text-[12px]">
+                  <span className="text-black/60 line-through font-medium ml-1 text-[10px] sm:text-[11px]">
                     ₹{product.mrp.toLocaleString("en-IN")}
                   </span>
                 )}
