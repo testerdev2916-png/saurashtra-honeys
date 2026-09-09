@@ -574,6 +574,8 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
               name: f.category,
               active: true,
               sort_order: cats.length + 1,
+              show_in_shop_nav: false,
+              shop_nav_sort_order: 0,
             },
           });
         } catch {
@@ -1708,28 +1710,27 @@ function VariantsEditor({
     try {
       const ext = file.name.split(".").pop();
       const fn = `variant-${Date.now()}.${ext}`;
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const b64 = reader.result as string;
-        const res = await uploadImg({ data: { fileData: b64, fileName: fn } });
-        if (res.error) {
-          toast.error(res.error);
-        } else if (res.url) {
-          const v = variants[variantIndex];
-          if (type === "primary") {
-            updateVariant(variantIndex, { image_url: res.url });
-          } else if (type === "gallery" && galleryIndex !== undefined) {
-            const cur = Array.from({ length: 4 }, (_, i) => (v.images ?? [])[i] || "");
-            cur[galleryIndex] = res.url;
-            updateVariant(variantIndex, { images: cur });
-          }
-          toast.success("Image uploaded!");
+      const b64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result).split(",")[1]);
+        reader.onerror = () => reject(new Error("Could not read file"));
+        reader.readAsDataURL(file);
+      });
+      const res = await uploadImg({ data: { filename: fn, contentType: file.type, base64: b64 } });
+      if (res && res.url) {
+        const v = variants[variantIndex];
+        if (type === "primary") {
+          updateVariant(variantIndex, { image_url: res.url });
+        } else if (type === "gallery" && galleryIndex !== undefined) {
+          const cur = Array.from({ length: 4 }, (_, i) => (v.images ?? [])[i] || "");
+          cur[galleryIndex] = res.url;
+          updateVariant(variantIndex, { images: cur });
         }
-        setUploadingVariantIndex(null);
-      };
-      reader.readAsDataURL(file);
+        toast.success("Image uploaded!");
+      }
     } catch (e) {
       toast.error((e as Error).message);
+    } finally {
       setUploadingVariantIndex(null);
     }
   }

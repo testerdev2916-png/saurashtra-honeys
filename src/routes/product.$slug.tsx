@@ -25,7 +25,7 @@ import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel
 import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): { variant?: string } => ({
     variant: search.variant as string | undefined,
   }),
   loader: async ({ params }) => {
