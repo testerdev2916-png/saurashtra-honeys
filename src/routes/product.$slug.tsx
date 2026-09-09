@@ -312,9 +312,7 @@ function ProductPage() {
           </div>
 
           <div className="bg-cream-deep/40 border border-border/80 rounded-3xl overflow-hidden relative group shadow-soft aspect-square w-full">
-            <span className="absolute top-4 right-4 z-10 size-24 rounded-full bg-white/95 backdrop-blur-md border border-burnt-orange/40 flex flex-col items-center justify-center text-[9px] font-bold text-espresso tracking-widest text-center leading-tight shadow-sm">
-              RAW &<br /><span className="text-burnt-orange">UNFILTERED</span><br /><Leaf className="size-3.5 text-burnt-orange mx-auto mt-1" />
-            </span>
+
             <button
               aria-label="Zoom"
               onClick={() => setZoom(true)}
@@ -758,9 +756,7 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
           ))}
         </div>
       )}
-      <span className="absolute top-4 right-8 z-10 size-16 rounded-full bg-white/95 backdrop-blur-md border border-[#D97706]/40 flex flex-col items-center justify-center text-[8px] font-bold text-[#2B2118] tracking-widest text-center leading-[1.1] shadow-sm">
-        RAW &<br /><span className="text-[#D97706]">UNFILTERED</span><br /><Leaf className="size-3 text-[#D97706] mx-auto mt-0.5" />
-      </span>
+
     </div>
   );
 }
