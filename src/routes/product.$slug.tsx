@@ -119,16 +119,26 @@ function ProductPage() {
   }, [activeVariant, search.variant, navigate]);
 
   const gallery = useMemo(() => {
-    if (activeVariant && activeVariant.images && activeVariant.images.length > 0) {
-      return activeVariant.images;
+    // 1. Variant Images (Max 2)
+    const variantImages: string[] = [];
+    if (activeVariant) {
+      if (activeVariant.image) variantImages.push(activeVariant.image);
+      if (activeVariant.images && activeVariant.images.length > 0) {
+        variantImages.push(...activeVariant.images);
+      }
     }
-    if (activeVariant && activeVariant.image) {
-      const base = getProductGallery(p) || [];
-      return [activeVariant.image, ...base.filter(img => img !== activeVariant.image)];
+    const finalVariantImages = Array.from(new Set(variantImages.filter((u) => u && u.trim().length > 0))).slice(0, 2);
+
+    // 2. Common Product Images (Max 3)
+    const commonImages: string[] = [];
+    if (p.image) commonImages.push(p.image);
+    if (p.images && p.images.length > 0) {
+      commonImages.push(...p.images);
     }
-    const base = getProductGallery(p) || [];
-    const add = getProductAdditionalImages(p) || [];
-    return [...base, ...add].filter((u) => u && u.trim().length > 0);
+    const finalCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0))).slice(0, 3);
+
+    // 3. Combine
+    return [...finalVariantImages, ...finalCommonImages];
   }, [p, activeVariant]);
 
   useEffect(() => {

@@ -595,7 +595,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
   const tabs = [
     ["general", "General"],
     ["pricing", "Pricing & Stock"],
-    ["media", "Media"],
+    ["media", "Common Product Images"],
     ["details", "Details"],
     ["story", "Story & Details"],
     ["seo", "SEO"],
@@ -991,14 +991,14 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
             {/* A. PRODUCT GALLERY IMAGES */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
               <div>
-                <h3 className="font-serif text-lg font-bold text-espresso">Product Gallery Images</h3>
+                <h3 className="font-serif text-lg font-bold text-espresso">Common Product Images</h3>
                 <p className="text-xs text-muted-foreground">
-                  Upload up to 4 permanent images. Recommended size: 1080 × 1080 px.
+                  Maximum 3 common product images. Recommended size: 1080 × 1080 px.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[0, 1, 2, 3].map((idx) => {
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                {[0, 1, 2].map((idx) => {
                   const u = (f.images ?? [])[idx] || "";
                   return (
                     <div
@@ -1015,7 +1015,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           <button
                             type="button"
                             onClick={() => {
-                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
+                              const cur = Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "");
                               cur[idx] = "";
                               setF({ ...f, images: cur, image_url: cur[0] || null });
                             }}
@@ -1045,7 +1045,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
+                              const cur = Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "");
                               setF({ ...f, images: cur }); // pad array first
                               void handleMediaUpload(file, "gallery", idx);
                             }
@@ -1072,109 +1072,23 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 })}
               </div>
 
-              <Field label="Or paste Gallery URLs (one per line, exactly 4 lines mapping to slots 1-4)">
+              <Field label="Or paste Gallery URLs (one per line, exactly 3 lines mapping to slots 1-3)">
                 <textarea
-                  rows={4}
-                  value={Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "").join("\n")}
+                  rows={3}
+                  value={Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "").join("\n")}
                   onChange={(e) => {
                     const lines = e.target.value.split("\n").map(s => s.trim());
-                    const cur = Array.from({ length: 4 }, (_, i) => lines[i] || "");
+                    const cur = Array.from({ length: 3 }, (_, i) => lines[i] || "");
                     setF({ ...f, images: cur, image_url: cur[0] || null });
                   }}
                   className={`${inp} font-mono text-xs`}
-                  placeholder="Paste exactly 4 image URLs, one per line (leave blank line for empty slot)"
+                  placeholder="Paste exactly 3 image URLs, one per line (leave blank line for empty slot)"
                 />
               </Field>
             </div>
 
-            {/* B. ADDITIONAL PRODUCT IMAGES */}
-            <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-espresso">Additional Product Images</h3>
-                <p className="text-xs text-muted-foreground">
-                  Upload up to 8 images. Recommended size: 1080 × 1080 px.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {[0, 1, 2, 3, 4, 5, 6, 7].map((idx) => {
-                  const url = (f.additional_images ?? [])[idx];
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-2xl border border-border/80 p-3 bg-white flex flex-col justify-between space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-espresso">
-                          Additional Image {idx + 1}
-                        </span>
-                        {url && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const cur = [...(f.additional_images ?? [])];
-                              cur[idx] = "";
-                              setF({ ...f, additional_images: cur });
-                            }}
-                            className="text-destructive text-xs hover:underline font-semibold"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
-                        {url ? (
-                          <img src={resolveImage(url, null)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="text-center text-muted-foreground/60 p-4">
-                            <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
-                            <span className="text-xs block">1080 × 1080 px</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) void handleMediaUpload(file, idx);
-                            e.target.value = "";
-                          }}
-                        />
-                        <div className="flex gap-2">
-                          <BtnGhost
-                            type="button"
-                            disabled={uploadingMedia}
-                            onClick={(e) => {
-                              const input = e.currentTarget.parentElement?.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
-                              if (input) input.click();
-                            }}
-                            className="flex-1 border-border text-espresso font-semibold text-xs py-2 px-1"
-                          >
-                            <Upload className="size-3.5" />
-                            {url ? "REPLACE" : "UPLOAD"}
-                          </BtnGhost>
-                        </div>
-                        <input
-                          value={url ?? ""}
-                          onChange={(e) => {
-                            const cur = [...(f.additional_images ?? [])];
-                            cur[idx] = e.target.value;
-                            setF({ ...f, additional_images: cur });
-                          }}
-                          className={`${inp} mt-2 text-[10px] font-mono`}
-                          placeholder="Or paste URL…"
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            {/* B. ADDITIONAL PRODUCT IMAGES - Hidden per new rules */}
+            {/* <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">...</div> */}
 
             {/* PRODUCT VIDEO URL */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80">
@@ -2007,7 +1921,10 @@ function VariantsEditor({
 
               {/* Variant Images Section */}
               <div className="pt-4 border-t border-border mt-4">
-                <h4 className="text-sm font-bold text-forest-dark mb-3">Variant Images</h4>
+                <div className="mb-3">
+                  <h4 className="text-sm font-bold text-forest-dark">Variant Images</h4>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Maximum 2 variant images (1 primary, 1 gallery).</p>
+                </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {/* Primary Image */}
                   <div className="rounded-xl border border-burnt-orange shadow-sm p-2 bg-white flex flex-col justify-between space-y-2 relative">
@@ -2057,8 +1974,8 @@ function VariantsEditor({
                     </div>
                   </div>
 
-                  {/* Gallery Images (4 slots) */}
-                  {[0, 1, 2, 3].map((gIdx) => {
+                  {/* Gallery Image (1 slot) */}
+                  {[0].map((gIdx) => {
                     const u = (v.images ?? [])[gIdx] || "";
                     return (
                       <div key={gIdx} className="rounded-xl border border-border p-2 bg-white flex flex-col justify-between space-y-2 relative">
@@ -2069,7 +1986,7 @@ function VariantsEditor({
                           <button
                             type="button"
                             onClick={() => {
-                              const cur = Array.from({ length: 4 }, (_, j) => (v.images ?? [])[j] || "");
+                              const cur = Array.from({ length: 1 }, (_, j) => (v.images ?? [])[j] || "");
                               cur[gIdx] = "";
                               updateVariant(i, { images: cur });
                             }}
