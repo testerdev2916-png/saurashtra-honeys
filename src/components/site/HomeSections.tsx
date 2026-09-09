@@ -436,16 +436,6 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
       title: settings?.point2_title ?? "WILDFLOWER RICH",
       desc: settings?.point2_desc ?? "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
       img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.webp"
-    },
-    {
-      title: settings?.point3_title ?? "100% PURE & RAW",
-      desc: settings?.point3_desc ?? "Unheated and unfiltered to preserve natural enzymes, pollen, and health benefits.",
-      img: settings?.point3_icon ?? "/images/heritage/illus_pure.webp"
-    },
-    {
-      title: settings?.point4_title ?? "ETHICAL BEEKEEPING",
-      desc: settings?.point4_desc ?? "We protect our bees and their habitats, ensuring sustainable cycles year after year.",
-      img: settings?.point4_icon ?? "/images/heritage/illus_beekeeping.webp"
     }
   ];
 
