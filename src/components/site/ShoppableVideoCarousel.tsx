@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react"
 import useEmblaCarousel from "embla-carousel-react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
-import { type Product } from "@/lib/products";
+import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { SectionEyebrow } from "@/components/site/Layout";
@@ -200,26 +200,29 @@ function ShoppableVideoCard({
       </div>
 
       {/* FLOATING PRODUCT CARD */}
-      {product && (
+      {product && (() => {
+        const defaultVar = getDefaultVariant(product);
+        const displayImage = resolveActiveImage(product, defaultVar);
+        return (
         <Link 
           to="."
           search={((prev: any) => ({ ...prev, reel: item.id })) as any}
-          className="absolute z-20 w-[76%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2.5 sm:p-3 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-colors"
+          className="absolute z-20 w-[84%] sm:w-[80%] left-1/2 -translate-x-1/2 bottom-[5%] rounded-[18px] sm:rounded-[20px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-3 sm:p-3.5 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)]"
         >
-          <div className="w-[40px] h-[40px] sm:w-[44px] sm:h-[44px] bg-white/60 border border-white/60 flex items-center justify-center mb-1.5 shadow-sm shrink-0 rounded-sm">
-             <img loading="lazy" src={product.image} alt={product.name} className="w-full h-full object-contain p-0.5" />
+          <div className="w-[88px] h-[88px] sm:w-[100px] sm:h-[100px] bg-white border border-white/80 flex items-center justify-center mb-2.5 shadow-sm shrink-0 rounded-[14px] overflow-hidden">
+             <img loading="lazy" src={displayImage} alt={product.name} className="w-full h-full object-contain p-1.5" />
           </div>
-          <h3 className="font-semibold text-black text-center text-[12px] sm:text-[13px] leading-tight mb-0.5 px-1">
+          <h3 className="font-semibold text-black text-center text-[13px] sm:text-[14px] leading-tight mb-1 px-1 line-clamp-2">
             {displayTitle}
           </h3>
-          <div className="text-black font-bold text-[12px] sm:text-[13px]">
+          <div className="text-black font-bold text-[13px] sm:text-[14px]">
             {product.priceMax ? (
               <>₹{product.price.toLocaleString("en-IN")} - ₹{product.priceMax.toLocaleString("en-IN")}</>
             ) : (
               <>
                 ₹{product.price.toLocaleString("en-IN")}
                 {product.mrp && product.mrp > product.price && (
-                  <span className="text-black/60 line-through font-medium ml-1 text-[11px]">
+                  <span className="text-black/60 line-through font-medium ml-1.5 text-[11px] sm:text-[12px]">
                     ₹{product.mrp.toLocaleString("en-IN")}
                   </span>
                 )}
@@ -227,7 +230,8 @@ function ShoppableVideoCard({
             )}
           </div>
         </Link>
-      )}
+        );
+      })()}
     </div>
   );
 }
