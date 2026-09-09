@@ -123,19 +123,26 @@ function ProductPage() {
     const variantImages: string[] = [];
     if (activeVariant) {
       if (activeVariant.image) variantImages.push(activeVariant.image);
+      if (activeVariant.image_url) variantImages.push(activeVariant.image_url);
       if (activeVariant.images && activeVariant.images.length > 0) {
         variantImages.push(...activeVariant.images);
       }
     }
     const finalVariantImages = Array.from(new Set(variantImages.filter((u) => u && u.trim().length > 0))).slice(0, 2);
 
-    // 2. Common Product Images (Max 3)
+    // 2. Common Product Images (Unlimited)
     const commonImages: string[] = [];
     if (p.image) commonImages.push(p.image);
-    if (p.images && p.images.length > 0) {
-      commonImages.push(...p.images);
+    if (p.images && p.images.length > 0) commonImages.push(...p.images);
+    if (p.additionalImages && p.additionalImages.length > 0) commonImages.push(...p.additionalImages);
+    
+    // Also parse attributes for additional images if it exists directly on p (from DB)
+    const pAny = p as any;
+    if (pAny.attributes?.additional_images && Array.isArray(pAny.attributes.additional_images)) {
+      commonImages.push(...pAny.attributes.additional_images);
     }
-    const finalCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0))).slice(0, 3);
+    
+    const finalCommonImages = Array.from(new Set(commonImages.filter((u) => u && u.trim().length > 0)));
 
     // 3. Combine
     return [...finalVariantImages, ...finalCommonImages];

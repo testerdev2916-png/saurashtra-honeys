@@ -993,12 +993,12 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
               <div>
                 <h3 className="font-serif text-lg font-bold text-espresso">Common Product Images</h3>
                 <p className="text-xs text-muted-foreground">
-                  Maximum 3 common product images. Recommended size: 1080 × 1080 px.
+                  Upload common product images. Recommended size: 1080 × 1080 px.
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {[0, 1, 2].map((idx) => {
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {[0, 1, 2, 3].map((idx) => {
                   const u = (f.images ?? [])[idx] || "";
                   return (
                     <div
@@ -1015,7 +1015,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           <button
                             type="button"
                             onClick={() => {
-                              const cur = Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "");
+                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
                               cur[idx] = "";
                               setF({ ...f, images: cur, image_url: cur[0] || null });
                             }}
@@ -1045,7 +1045,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const cur = Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "");
+                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
                               setF({ ...f, images: cur }); // pad array first
                               void handleMediaUpload(file, "gallery", idx);
                             }
@@ -1072,23 +1072,109 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 })}
               </div>
 
-              <Field label="Or paste Gallery URLs (one per line, exactly 3 lines mapping to slots 1-3)">
+              <Field label="Or paste Gallery URLs (one per line, exactly 4 lines mapping to slots 1-4)">
                 <textarea
-                  rows={3}
-                  value={Array.from({ length: 3 }, (_, i) => (f.images ?? [])[i] || "").join("\n")}
+                  rows={4}
+                  value={Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "").join("\n")}
                   onChange={(e) => {
                     const lines = e.target.value.split("\n").map(s => s.trim());
-                    const cur = Array.from({ length: 3 }, (_, i) => lines[i] || "");
+                    const cur = Array.from({ length: 4 }, (_, i) => lines[i] || "");
                     setF({ ...f, images: cur, image_url: cur[0] || null });
                   }}
                   className={`${inp} font-mono text-xs`}
-                  placeholder="Paste exactly 3 image URLs, one per line (leave blank line for empty slot)"
+                  placeholder="Paste exactly 4 image URLs, one per line (leave blank line for empty slot)"
                 />
               </Field>
             </div>
 
-            {/* B. ADDITIONAL PRODUCT IMAGES - Hidden per new rules */}
-            {/* <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">...</div> */}
+            {/* B. ADDITIONAL COMMON IMAGES */}
+            <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-espresso">Additional Common Images</h3>
+                <p className="text-xs text-muted-foreground">
+                  Upload up to 8 additional common images.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {[0, 1, 2, 3, 4, 5, 6, 7].map((idx) => {
+                  const url = (f.additional_images ?? [])[idx];
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-border/80 p-3 bg-white flex flex-col justify-between space-y-3"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold uppercase tracking-wider text-espresso">
+                          Additional Image {idx + 1}
+                        </span>
+                        {url && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const cur = [...(f.additional_images ?? [])];
+                              cur[idx] = "";
+                              setF({ ...f, additional_images: cur });
+                            }}
+                            className="text-destructive text-xs hover:underline font-semibold"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
+                        {url ? (
+                          <img src={resolveImage(url, null)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="text-center text-muted-foreground/60 p-4">
+                            <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
+                            <span className="text-xs block">1080 × 1080 px</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) void handleMediaUpload(file, idx);
+                            e.target.value = "";
+                          }}
+                        />
+                        <div className="flex gap-2">
+                          <BtnGhost
+                            type="button"
+                            disabled={uploadingMedia}
+                            onClick={(e) => {
+                              const input = e.currentTarget.parentElement?.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                              if (input) input.click();
+                            }}
+                            className="flex-1 border-border text-espresso font-semibold text-xs py-2 px-1"
+                          >
+                            <Upload className="size-3.5" />
+                            {url ? "REPLACE" : "UPLOAD"}
+                          </BtnGhost>
+                        </div>
+                        <input
+                          value={url ?? ""}
+                          onChange={(e) => {
+                            const cur = [...(f.additional_images ?? [])];
+                            cur[idx] = e.target.value;
+                            setF({ ...f, additional_images: cur });
+                          }}
+                          className={`${inp} mt-2 text-[10px] font-mono`}
+                          placeholder="Or paste URL…"
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
             {/* PRODUCT VIDEO URL */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80">
