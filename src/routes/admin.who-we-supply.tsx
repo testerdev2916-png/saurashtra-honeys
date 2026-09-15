@@ -41,8 +41,7 @@ import {
   PlusCircle,
   XCircle,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 export const Route = createFileRoute("/admin/who-we-supply")({ component: WhoWeSupplyPage });
 
 const AVAILABLE_ICONS = [
@@ -262,16 +261,8 @@ function Editor({
     }
     setUploading(true);
     try {
-      const safeName = file.name.replace(/[^\w.-]+/g, "_");
-      const path = `who-we-supply/${Date.now()}_${safeName}`;
-      const { data, error } = await supabase.storage.from("media").upload(path, file, {
-        contentType: file.type,
-        cacheControl: "3600",
-        upsert: true,
-      });
-      if (error) throw new Error(error.message);
-      const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
-      setF((prev) => ({ ...prev, image_url: pubData.publicUrl, image_key: null }));
+      const finalUrl = await uploadToCloudinary(file, "who_we_supply");
+      setF((prev) => ({ ...prev, image_url: finalUrl, image_key: null }));
       toast.success("Image uploaded successfully");
     } catch (e) {
       toast.error((e as Error).message);

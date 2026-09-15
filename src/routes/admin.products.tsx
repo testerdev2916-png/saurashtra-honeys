@@ -10,7 +10,8 @@ import {
   saveProductVariants,
   type VariantItem,
 } from "@/lib/admin-catalog.functions";
-import { listCategories, upsertCategory, uploadProductImage } from "@/lib/admin-cms.functions";
+import { listCategories, upsertCategory } from "@/lib/admin-cms.functions";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { resolveImage } from "@/lib/product-images";
 import { IMAGE_KEYS } from "@/lib/product-images";
 import {
@@ -625,7 +626,6 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
     });
   }, []);
 
-  const uploadImg = useServerFn(uploadProductImage);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const galleryRef = useRef<HTMLInputElement>(null);
   const addRef0 = useRef<HTMLInputElement>(null);
@@ -635,20 +635,14 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
   async function handleMediaUpload(file: File, mode: "gallery" | number, replaceIdx?: number) {
     setUploadingMedia(true);
     try {
-      const b64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",")[1]);
-        reader.onerror = () => reject(new Error("Could not read file"));
-        reader.readAsDataURL(file);
-      });
-      const res = await uploadImg({ data: { filename: file.name, contentType: file.type, base64: b64 } });
-      if (res && res.url) {
+      const url = await uploadToCloudinary(file, "products");
+      if (url) {
         if (mode === "gallery") {
           const cur = [...(f.images ?? [])];
           if (typeof replaceIdx === "number") {
-            cur[replaceIdx] = res.url;
+            cur[replaceIdx] = url;
           } else if (cur.length < 9) {
-            cur.push(res.url);
+            cur.push(url);
           }
           setF((prev) => ({
             ...prev,
@@ -657,7 +651,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
           }));
         } else {
           const cur = [...(f.additional_images ?? [])];
-          cur[mode as number] = res.url;
+          cur[mode as number] = url;
           setF((prev) => ({ ...prev, additional_images: cur }));
         }
         toast.success("Image uploaded");
@@ -1707,7 +1701,6 @@ function VariantsEditor({
   const [saving, setSaving] = useState(false);
   const listV = useServerFn(listProductVariants);
   const saveV = useServerFn(saveProductVariants);
-  const uploadImg = useServerFn(uploadProductImage);
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState<number | null>(null);
 
   async function handleVariantMediaUpload(file: File, variantIndex: number, type: "primary" | "gallery", galleryIndex?: number) {
@@ -1717,22 +1710,14 @@ function VariantsEditor({
     }
     setUploadingVariantIndex(variantIndex);
     try {
-      const ext = file.name.split(".").pop();
-      const fn = `variant-${Date.now()}.${ext}`;
-      const b64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",")[1]);
-        reader.onerror = () => reject(new Error("Could not read file"));
-        reader.readAsDataURL(file);
-      });
-      const res = await uploadImg({ data: { filename: fn, contentType: file.type, base64: b64 } });
-      if (res && res.url) {
+      const url = await uploadToCloudinary(file, "products");
+      if (url) {
         const v = variants[variantIndex];
         if (type === "primary") {
-          updateVariant(variantIndex, { image_url: res.url });
+          updateVariant(variantIndex, { image_url: url });
         } else if (type === "gallery" && galleryIndex !== undefined) {
           const cur = Array.from({ length: 4 }, (_, i) => (v.images ?? [])[i] || "");
-          cur[galleryIndex] = res.url;
+          cur[galleryIndex] = url;
           updateVariant(variantIndex, { images: cur });
         }
         toast.success("Image uploaded!");

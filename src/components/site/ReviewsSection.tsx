@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
 type ReviewMedia = { path: string; type: "image" | "video"; url?: string };
 type ReviewRow = {
@@ -28,11 +29,16 @@ type SortKey = "newest" | "helpful";
 
 async function signMedia(items: ReviewMedia[]): Promise<ReviewMedia[]> {
   if (!items?.length) return [];
-  const paths = items.map((m) => m.path).filter(Boolean);
-  if (!paths.length) return items;
+  const paths = items.map((m) => m.path).filter((p) => p && !p.startsWith("http"));
+  if (!paths.length) {
+    return items.map((m) => ({ ...m, url: m.path.startsWith("http") ? m.path : m.url }));
+  }
   const { data } = await supabase.storage.from("review-media").createSignedUrls(paths, 60 * 60 * 24 * 7);
   const map = new Map((data ?? []).map((d) => [d.path, d.signedUrl]));
-  return items.map((m) => ({ ...m, url: map.get(m.path) ?? m.url }));
+  return items.map((m) => ({ 
+    ...m, 
+    url: m.path.startsWith("http") ? m.path : (map.get(m.path) ?? m.url) 
+  }));
 }
 
 // Deterministic "helpfulness" ranking without a votes column: prioritise reviews
@@ -137,14 +143,10 @@ export function ReviewsSection({ productSlug, productName }: { productSlug?: str
       const media: ReviewMedia[] = [];
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
-        const ext = (f.name.split(".").pop() ?? "bin").toLowerCase().replace(/[^a-z0-9]/g, "") || "bin";
-        const path = `${user.id}/${productSlug || "general"}/${crypto.randomUUID()}.${ext}`;
-        const { error: upErr } = await supabase.storage.from("review-media").upload(path, f, {
-          cacheControl: "3600", upsert: false, contentType: f.type,
-        });
-        if (upErr) throw new Error(`Failed to upload ${f.name}: ${upErr.message}`);
-        uploaded.push(path);
-        media.push({ path, type: f.type.startsWith("video/") ? "video" : "image" });
+        const url = await uploadToCloudinary(f, "reviews");
+        if (!url) throw new Error(`Failed to upload ${f.name}`);
+        uploaded.push(url);
+        media.push({ path: url, type: f.type.startsWith("video/") ? "video" : "image" });
         setUploadProgress({ done: i + 1, total: files.length });
       }
 
@@ -168,7 +170,10 @@ export function ReviewsSection({ productSlug, productName }: { productSlug?: str
       toast.error(msg);
       // Roll back any files uploaded during this failed attempt so nothing is orphaned.
       if (uploaded.length) {
-        await supabase.storage.from("review-media").remove(uploaded).catch(() => { /* best effort */ });
+        const supUploads = uploaded.filter(p => !p.startsWith("http"));
+        if (supUploads.length) {
+          await supabase.storage.from("review-media").remove(supUploads).catch(() => { /* best effort */ });
+        }
       }
     } finally {
       setSubmitting(false);
@@ -181,7 +186,10 @@ export function ReviewsSection({ productSlug, productName }: { productSlug?: str
     const { error } = await supabase.from("reviews").delete().eq("id", id);
     if (error) { toast.error(error.message); return; }
     if (media?.length) {
-      await supabase.storage.from("review-media").remove(media.map((m) => m.path)).catch(() => {});
+      const supPaths = media.map((m) => m.path).filter((p) => p && !p.startsWith("http"));
+      if (supPaths.length > 0) {
+        await supabase.storage.from("review-media").remove(supPaths).catch(() => {});
+      }
     }
     toast.success("Review removed");
     void load();

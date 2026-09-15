@@ -24,6 +24,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
+import { getCategoryImageUrl } from "@/lib/product-images";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
 import { fetchPublicHeroRows, heroRowToSlide } from "@/lib/hero-catalog";
 import { useServerFn } from "@tanstack/react-start";
@@ -202,7 +203,7 @@ export function HomeShopByCategory({
       };
       const baseCats = allCats.map(cat => ({
         name: cat.name,
-        img: cat.image_url || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
+        img: getCategoryImageUrl(cat) || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
         filter: cat.name,
         slug: cat.slug,
         updatedAt: cat.updatedAt

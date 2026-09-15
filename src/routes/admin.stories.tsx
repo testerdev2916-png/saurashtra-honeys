@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { listHomepageVideos, upsertHomepageVideo, deleteHomepageVideo, reorderHomepageVideos } from "@/lib/admin-cms.functions";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, ArrowUp, ArrowDown, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Video, Play, Pause } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 
@@ -279,21 +279,9 @@ function Editor({
     setVideoUploading(true);
     setVideoProgress(5);
     try {
-      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-      const path = `stories/videos/${Date.now()}_${safeName}`;
-
-      // Upload directly to Supabase Storage media bucket
-      const { data, error } = await supabase.storage.from("media").upload(path, file, {
-        contentType: file.type,
-        cacheControl: "3600",
-        upsert: true,
-      });
-
+      setVideoProgress(30);
+      const url = await uploadToCloudinary(file, "stories_videos");
       setVideoProgress(90);
-      if (error) throw new Error(error.message);
-
-      const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
-      const url = pubData.publicUrl;
 
       setF((prev) => ({ ...prev, video_url: url }));
       setVideoProgress(100);
@@ -317,20 +305,7 @@ function Editor({
 
     setThumbUploading(true);
     try {
-      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-      const path = `stories/thumbnails/${Date.now()}_${safeName}`;
-
-      const { data, error } = await supabase.storage.from("media").upload(path, file, {
-        contentType: file.type,
-        cacheControl: "3600",
-        upsert: true,
-      });
-
-      if (error) throw new Error(error.message);
-
-      const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
-      const url = pubData.publicUrl;
-
+      const url = await uploadToCloudinary(file, "stories_thumbnails");
       setF((prev) => ({ ...prev, thumbnail_url: url }));
       toast.success("Poster/thumbnail uploaded successfully");
     } catch (e) {

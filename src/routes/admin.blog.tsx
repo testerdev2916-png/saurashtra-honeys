@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { listPosts, upsertPost, deletePost } from "@/lib/admin-cms.functions";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, Pencil, Plus, RefreshCcw, Trash2, Star, Sparkles, Upload, Heading2, Heading3, Bold, Italic, List, Quote, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
 export const Route = createFileRoute("/admin/blog")({ component: BlogPage });
 
@@ -230,17 +230,8 @@ function Editor({
     }
     setUploading(true);
     try {
-      const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-      const path = `blog/covers/${Date.now()}_${safeName}`;
-      const { data, error } = await supabase.storage.from("media").upload(path, file, {
-        contentType: file.type,
-        cacheControl: "3600",
-        upsert: true,
-      });
-      if (error) throw new Error(error.message);
-
-      const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
-      setF((prev) => ({ ...prev, cover_image_url: pubData.publicUrl }));
+      const finalUrl = await uploadToCloudinary(file, "blog");
+      setF((prev) => ({ ...prev, cover_image_url: finalUrl }));
       toast.success("Featured image uploaded successfully");
     } catch (e) {
       toast.error((e as Error).message);

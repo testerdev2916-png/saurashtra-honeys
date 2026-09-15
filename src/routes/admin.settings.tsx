@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listSettings, upsertSetting } from "@/lib/admin-cms.functions";
 import { BtnPrimary, Card, Field, inp, PageHeader } from "@/components/admin/ui";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { Upload } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
@@ -46,23 +46,15 @@ function SettingsPage() {
 
   async function onUploadBranding(rowKey: string, fieldKey: string, file: File) {
     try {
-      const safeName = file.name.replace(/[^\w.-]+/g, "_");
-      const path = `logos/${Date.now()}_${safeName}`;
-      const { data, error } = await supabase.storage.from("media").upload(path, file, {
-        contentType: file.type || "application/octet-stream",
-        cacheControl: "3600",
-        upsert: true,
-      });
-      if (error) throw new Error(error.message);
-      const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
+      const finalUrl = await uploadToCloudinary(file, "settings");
       setValues((v) => ({
         ...v,
         [rowKey]: {
           ...v[rowKey],
-          [fieldKey]: pubData.publicUrl,
+          [fieldKey]: finalUrl,
         },
       }));
-      toast.success("Uploaded original branding file to Supabase Storage");
+      toast.success("Uploaded original branding file to Cloudinary");
     } catch (e) {
       toast.error((e as Error).message);
     }

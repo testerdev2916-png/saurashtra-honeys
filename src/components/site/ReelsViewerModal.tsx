@@ -4,6 +4,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { X, Volume2, VolumeX, Star, CheckCircle2, Heart, Share, MessageSquare } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { useWishlist } from "@/lib/wishlist";
+import { resolveImage } from "@/lib/product-images";
 
 type Story = {
   id: string;
@@ -335,7 +336,7 @@ export function ReelsViewerModal({
                             }}
                           >
                             <img 
-                              src={productImg} 
+                              src={resolveImage(null, productImg)} 
                               alt={matchedProduct.name} 
                               className="w-full h-full object-cover" 
                             />

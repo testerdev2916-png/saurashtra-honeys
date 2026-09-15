@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, Video, Save, Eye, Trash2, Pause, Play, CheckCircle2, ImageOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { 
   fetchAdminHeritageVideo, 
   upsertHeritageVideo, 
@@ -87,18 +87,7 @@ function HeritageManager() {
 
   // ---- File Upload Helpers ----
   async function uploadFile(file: File, folder: string): Promise<string> {
-    const safeName = file.name.replace(/[^\w.\-]+/g, "_");
-    const path = `heritage/${folder}/${Date.now()}_${safeName}`;
-
-    const { data, error } = await supabase.storage.from("media").upload(path, file, {
-      contentType: file.type,
-      cacheControl: "3600",
-      upsert: false,
-    });
-    if (error) throw new Error(error.message);
-
-    const { data: pubData } = supabase.storage.from("media").getPublicUrl(data.path);
-    return pubData.publicUrl;
+    return await uploadToCloudinary(file, `heritage_${folder}`);
   }
 
   async function onUploadVideo(file: File) {

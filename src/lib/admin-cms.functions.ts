@@ -235,84 +235,8 @@ export const deleteCategory = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// Dedicated upload for "Shop by Category" images. Stores into the shared `media`
-// bucket under a `categories/` prefix and returns a permanent PUBLIC url (not a
-// signed url) since category images render on the public storefront and must
-// never expire. The admin then saves the returned url onto categories.image_url
-// via upsertCategory.
-export const uploadCategoryImage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { filename: string; contentType: string; base64: string }) =>
-    z
-      .object({
-        filename: z.string().min(1).max(200),
-        contentType: z.string().max(120),
-        base64: z.string().min(1),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await assertPerm(context.supabase, context.userId, "categories.manage");
-        if (!data.contentType.startsWith("image/")) throw new Error("Only image files are allowed");
-    const safe = data.filename.replace(/[^\w.-]+/g, "_");
-    const path = `categories/${Date.now()}_${safe}`;
-    const buf = Buffer.from(data.base64, "base64");
-    if (buf.byteLength > 10 * 1024 * 1024) throw new Error("File too large (max 10MB)");
-    const up = await context.supabase.storage
-      .from("media")
-      .upload(path, buf, { contentType: data.contentType, upsert: false });
-    if (up.error) throw new Error(up.error.message);
-    await context.supabase.from("media_library").insert({
-      bucket: "media",
-      path,
-      filename: data.filename,
-      mime_type: data.contentType,
-      size_bytes: buf.byteLength,
-      uploaded_by: context.userId,
-    } as never);
-    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' as any } });
-    await audit(context.supabase, context.userId, "category.image_upload", "category", undefined, {
-      filename: data.filename,
-    });
-    return { url: pub?.publicUrl ?? null };
-  });
-
-export const uploadProductImage = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator((d: { filename: string; contentType: string; base64: string }) =>
-    z
-      .object({
-        filename: z.string().min(1).max(200),
-        contentType: z.string().max(120),
-        base64: z.string().min(1),
-      })
-      .parse(d),
-  )
-  .handler(async ({ data, context }) => {
-    await assertPerm(context.supabase, context.userId, "products.manage");
-        if (!data.contentType.startsWith("image/")) throw new Error("Only image files are allowed");
-    const safe = data.filename.replace(/[^\w.-]+/g, "_");
-    const path = `products/${Date.now()}_${safe}`;
-    const buf = Buffer.from(data.base64, "base64");
-    if (buf.byteLength > 10 * 1024 * 1024) throw new Error("File too large (max 10MB)");
-    const up = await context.supabase.storage
-      .from("media")
-      .upload(path, buf, { contentType: data.contentType, upsert: false });
-    if (up.error) throw new Error(up.error.message);
-    await context.supabase.from("media_library").insert({
-      bucket: "media",
-      path,
-      filename: data.filename,
-      mime_type: data.contentType,
-      size_bytes: buf.byteLength,
-      uploaded_by: context.userId,
-    } as never);
-    const { data: pub } = context.supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' as any } });
-    await audit(context.supabase, context.userId, "product.image_upload", "product", undefined, {
-      filename: data.filename,
-    });
-    return { url: pub?.publicUrl ?? null };
-  });
+// uploadCategoryImage and uploadProductImage have been removed. 
+// They are now handled directly on the frontend via uploadToCloudinary.
 
 /* -------------------- COUPONS -------------------- */
 
@@ -580,6 +504,9 @@ export const listMedia = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     const withUrls = await Promise.all(
       (rows ?? []).map(async (r: { bucket: string; path: string }) => {
+        if (r.bucket === "cloudinary") {
+          return { ...r, url: r.path };
+        }
         const { data: pub } = context.supabase.storage
           .from(r.bucket)
           .getPublicUrl(r.path, { transform: { quality: 80, format: 'webp' as any } });
@@ -600,70 +527,57 @@ export const deleteMedia = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .single();
     if (e0) throw new Error(e0.message);
-    await context.supabase.storage.from(row.bucket).remove([row.path]);
+    if (row.bucket !== "cloudinary") {
+      await context.supabase.storage.from(row.bucket).remove([row.path]);
+    }
     const { error } = await context.supabase.from("media_library").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     await audit(context.supabase, context.userId, "media.delete", "media", data.id);
     return { ok: true };
   });
 
-export const uploadMedia = createServerFn({ method: "POST" })
+export const saveCloudinaryMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator(
     (d: {
-      bucket: string;
-      folder?: string;
+      url: string;
       filename: string;
       contentType: string;
-      base64: string;
-      alt_text?: string;
+      sizeBytes: number;
     }) =>
       z
         .object({
-          bucket: z.enum(["product-images", "media"]),
-          folder: z
-            .enum(["logos", "hero", "banners", "blog", "avatars", "documents", "general"])
-            .optional(),
+          url: z.string().url(),
           filename: z.string().min(1).max(200),
           contentType: z.string().max(120),
-          base64: z.string().min(1),
-          alt_text: z.string().max(300).optional(),
+          sizeBytes: z.number().int().nonnegative(),
         })
         .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "media.manage");
-        const safe = data.filename.replace(/[^\w.-]+/g, "_");
-    const folderPrefix = data.bucket === "media" && data.folder ? `${data.folder}/` : "";
-    const path = `${folderPrefix}${Date.now()}_${safe}`;
-    const buf = Buffer.from(data.base64, "base64");
-    if (buf.byteLength > 20 * 1024 * 1024) throw new Error("File too large (max 20MB)");
-    const up = await context.supabase.storage
-      .from(data.bucket)
-      .upload(path, buf, { contentType: data.contentType, upsert: false });
-    if (up.error) throw new Error(up.error.message);
+    
     const { data: row, error } = await context.supabase
       .from("media_library")
       .insert({
-        bucket: data.bucket,
-        path,
+        bucket: "cloudinary",
+        path: data.url, // Store the full Cloudinary URL in the path column
         filename: data.filename,
         mime_type: data.contentType,
-        size_bytes: buf.byteLength,
-        alt_text: data.alt_text ?? null,
+        size_bytes: data.sizeBytes,
         uploaded_by: context.userId,
       } as never)
       .select("id,bucket,path")
       .single();
+      
     if (error) throw new Error(error.message);
-    const { data: pub } = context.supabase.storage
-      .from(data.bucket)
-      .getPublicUrl(path, { transform: { quality: 80, format: 'webp' as any } });
+    
     await audit(context.supabase, context.userId, "media.upload", "media", row.id, {
       filename: data.filename,
-      bucket: data.bucket,
+      bucket: "cloudinary",
     });
-    return { id: row.id, url: pub?.publicUrl ?? null, path };
+    
+    return { id: row.id, url: data.url, path: data.url };
   });
 
 /* -------------------- USERS / ROLES -------------------- */

@@ -6,30 +6,34 @@ import comb from "@/assets/honeycomb-bees.jpg";
 import ajwain from "@/assets/prod-ajwain.jpg";
 import family from "@/assets/family-honey.jpg";
 
+import { resolveImage } from "@/lib/product-images";
+
 export function resolvePostImage(url?: string | null, categoryOrSlug?: string | null): string {
-  if (url && (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/"))) {
-    return url;
-  }
   const key = (categoryOrSlug || "").toLowerCase();
+  let localFallback = drizzle;
   if (key.includes("health") || key.includes("ajwain") || key.includes("benefit")) {
-    return ajwain;
+    localFallback = ajwain;
+  } else if (key.includes("farm") || key.includes("beekeeping") || key.includes("cycle")) {
+    localFallback = beeFarm;
+  } else if (key.includes("ayurveda") || key.includes("remed") || key.includes("raw")) {
+    localFallback = drizzle;
+  } else if (key.includes("sustain") || key.includes("planet") || key.includes("bloom") || key.includes("flora")) {
+    localFallback = beeFlower;
+  } else if (key.includes("comb") || key.includes("hive")) {
+    localFallback = comb;
+  } else if (key.includes("purity") || key.includes("nabl") || key.includes("unadulterated")) {
+    localFallback = family;
   }
-  if (key.includes("farm") || key.includes("beekeeping") || key.includes("cycle")) {
-    return beeFarm;
+
+  if (url) {
+    if (url.startsWith("http://") || url.startsWith("https://") || url.startsWith("/")) {
+      return url;
+    }
+    // Handle legacy Supabase storage paths using our central resolver
+    return resolveImage(url, url, localFallback);
   }
-  if (key.includes("ayurveda") || key.includes("remed") || key.includes("raw")) {
-    return drizzle;
-  }
-  if (key.includes("sustain") || key.includes("planet") || key.includes("bloom") || key.includes("flora")) {
-    return beeFlower;
-  }
-  if (key.includes("comb") || key.includes("hive")) {
-    return comb;
-  }
-  if (key.includes("purity") || key.includes("nabl") || key.includes("unadulterated")) {
-    return family;
-  }
-  return drizzle;
+
+  return localFallback;
 }
 
 export function formatPostDate(isoString?: string | null): string {

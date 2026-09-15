@@ -2,7 +2,8 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { listCategories, upsertCategory, deleteCategory, uploadCategoryImage } from "@/lib/admin-cms.functions";
+import { listCategories, upsertCategory, deleteCategory } from "@/lib/admin-cms.functions";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload } from "lucide-react";
 
@@ -85,7 +86,6 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
   const save = useServerFn(upsertCategory);
-  const upload = useServerFn(uploadCategoryImage);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function onFile(file: File) {
@@ -93,13 +93,7 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
     if (file.size > 10 * 1024 * 1024) return toast.error("Image too large (max 10MB)");
     setUploading(true);
     try {
-      const b64: string = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result).split(",")[1]);
-        reader.onerror = () => reject(new Error("Could not read file"));
-        reader.readAsDataURL(file);
-      });
-      const { url } = await upload({ data: { filename: file.name, contentType: file.type, base64: b64 } });
+      const url = await uploadToCloudinary(file, "categories");
       if (url) { setF((prev) => ({ ...prev, image_url: url })); toast.success("Image uploaded"); }
     } catch (e) { toast.error((e as Error).message); } finally { setUploading(false); }
   }

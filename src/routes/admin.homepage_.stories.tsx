@@ -12,6 +12,7 @@ import {
   logAudit,
   type HomepageCustomerStory,
 } from "@/lib/homepage-cms.functions";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
 
 export const Route = createFileRoute("/admin/homepage_/stories")({
   component: AdminCustomerStories,
@@ -79,21 +80,12 @@ function AdminCustomerStories() {
     setUploading(true);
     toast.loading(`Uploading ${type}...`);
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const ext = file.name.split(".").pop();
-      const filename = `${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-      const path = type === "video" ? `stories/videos/${filename}` : `stories/thumbnails/${filename}`;
-      
-      const { data, error } = await supabase.storage.from("media").upload(path, file);
-      
-      if (error) throw error;
-      
-      const { data: publicUrlData } = supabase.storage.from("media").getPublicUrl(path);
+      const finalUrl = await uploadToCloudinary(file, "homepage_stories");
       
       if (type === "video") {
-        setFormData(prev => ({ ...prev, media_url: publicUrlData.publicUrl }));
+        setFormData(prev => ({ ...prev, media_url: finalUrl }));
       } else {
-        setFormData(prev => ({ ...prev, poster_image: publicUrlData.publicUrl }));
+        setFormData(prev => ({ ...prev, poster_image: finalUrl }));
       }
       
       toast.dismiss();

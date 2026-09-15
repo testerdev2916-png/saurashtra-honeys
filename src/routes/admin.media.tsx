@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { listMedia, deleteMedia, uploadMedia } from "@/lib/admin-cms.functions";
-import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader } from "@/components/admin/ui";
+import { listMedia, deleteMedia, saveCloudinaryMedia } from "@/lib/admin-cms.functions";
+import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { BtnGhost, BtnPrimary, Card, PageHeader } from "@/components/admin/ui";
 import { Copy, RefreshCcw, Search, Trash2, Upload } from "lucide-react";
 
 export const Route = createFileRoute("/admin/media")({ component: MediaPage });
@@ -17,7 +18,7 @@ const MEDIA_FOLDERS = ["logos", "hero", "banners", "blog", "avatars", "documents
 type Row = { id: string; bucket: string; path: string; filename: string; mime_type: string | null; size_bytes: number | null; created_at: string; url: string | null; alt_text: string | null };
 
 function MediaPage() {
-  const list = useServerFn(listMedia); const del = useServerFn(deleteMedia); const up = useServerFn(uploadMedia);
+  const list = useServerFn(listMedia); const del = useServerFn(deleteMedia); const saveMedia = useServerFn(saveCloudinaryMedia);
   const [bucket, setBucket] = useState<typeof BUCKETS[number] | "">("");
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
@@ -35,15 +36,13 @@ function MediaPage() {
 
   async function onFile(f: File) {
     if (f.size > 20 * 1024 * 1024) return toast.error("File too large (max 20MB)");
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const b64 = String(reader.result).split(",")[1];
-      try {
-        await up({ data: { bucket: uploadBucket, folder: uploadBucket === "media" ? uploadFolder : undefined, filename: f.name, contentType: f.type || "application/octet-stream", base64: b64 } });
-        toast.success("Uploaded"); void load();
-      } catch (e) { toast.error((e as Error).message); }
-    };
-    reader.readAsDataURL(f);
+    try {
+      const url = await uploadToCloudinary(f, uploadBucket === "media" ? uploadFolder : "products");
+      if (url) {
+        await saveMedia({ data: { url, filename: f.name, contentType: f.type || "application/octet-stream", sizeBytes: f.size } });
+        toast.success("Uploaded to Cloudinary"); void load();
+      }
+    } catch (e) { toast.error((e as Error).message); }
   }
 
   return (
