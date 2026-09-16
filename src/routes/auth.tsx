@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SiteLayout, SectionEyebrow } from "@/components/site/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { safeRedirectPath } from "@/lib/oauth-flow";
+import { safeRedirectPath, getURL, createOAuthIntent } from "@/lib/oauth-flow";
 import { useAuth } from "@/lib/auth";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -124,13 +124,17 @@ function AuthPage() {
   try {
     const searchParams = new URLSearchParams(window.location.search);
     const intended = searchParams.get("redirect") || "/";
-    const callbackUrl = new URL(`${window.location.origin}/auth/callback`);
-    callbackUrl.searchParams.set("redirect", intended);
+    
+    // Store intent securely in session storage to avoid Supabase exact-match whitelist rejections
+    createOAuthIntent(intended);
+
+    // Get an environment-aware, perfectly clean callback URL with no query params
+    const callbackUrl = `${getURL()}auth/callback`;
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: callbackUrl.toString(),
+        redirectTo: callbackUrl,
       },
     });
 

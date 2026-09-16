@@ -40,6 +40,17 @@ export function safeRedirectPath(path: string | null | undefined): string {
   }
 }
 
+export function getURL(): string {
+  let url =
+    import.meta.env?.VITE_SITE_URL ??
+    import.meta.env?.VITE_PUBLIC_SITE_URL ??
+    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+
+  url = url.includes("http") ? url : `https://${url}`;
+  url = url.endsWith("/") ? url : `${url}/`;
+  return url;
+}
+
 export function isLocalOAuthOrigin(origin: string): boolean {
   try {
     const { hostname, protocol } = new URL(origin);
@@ -69,15 +80,20 @@ export function buildOAuthCallbackUrl(origin: string, intentId: string): string 
   return url.toString();
 }
 
-export function consumeOAuthIntent(intentId: string | null):
+export function consumeOAuthIntent(intentId?: string | null):
   | { ok: true; target: string }
   | { ok: false; reason: "missing" | "not_found" | "mismatch" | "expired" | "invalid" } {
-  if (!intentId) return { ok: false, reason: "missing" };
   const s = storage();
   if (!s) return { ok: false, reason: "not_found" };
   const latest = s.getItem(LATEST_INTENT_KEY);
-  if (latest !== intentId) return { ok: false, reason: "mismatch" };
-  const raw = s.getItem(`${INTENT_PREFIX}${intentId}`);
+  
+  // If no intentId is passed, use the latest one implicitly (useful for clean redirect URLs)
+  const targetIntentId = intentId || latest;
+  
+  if (!targetIntentId) return { ok: false, reason: "missing" };
+  if (intentId && latest !== intentId) return { ok: false, reason: "mismatch" };
+  
+  const raw = s.getItem(`${INTENT_PREFIX}${targetIntentId}`);
   if (!raw) return { ok: false, reason: "not_found" };
   try {
     const intent = JSON.parse(raw) as Partial<OAuthIntent>;

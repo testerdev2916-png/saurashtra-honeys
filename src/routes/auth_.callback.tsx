@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { consumeOAuthIntent } from "@/lib/oauth-flow";
 
 export const Route = createFileRoute("/auth_/callback")({
   head: () => ({
@@ -18,7 +19,16 @@ function AuthCallback() {
   useEffect(() => {
     let cancelled = false;
     const url = new URL(window.location.href);
-    const intended = url.searchParams.get("redirect") || "/";
+    let intended = url.searchParams.get("redirect");
+
+    if (!intended) {
+      const intentResult = consumeOAuthIntent(url.searchParams.get("oauth_intent"));
+      if (intentResult.ok) {
+        intended = intentResult.target;
+      }
+    }
+
+    intended = intended || "/";
 
     const go = () => {
       if (cancelled) return;
