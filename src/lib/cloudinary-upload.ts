@@ -6,8 +6,8 @@ export async function uploadToCloudinary(file: File, folder: string): Promise<st
   // Get cloud name and preset from env vars (available in browser)
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME || "yzmffalu";
   
-  // Default to the generated unsigned preset if env variable is not set
-  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "zpbtlc1g";
+  // Default to saurashtra_unsigned if env variable is not set
+  const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "saurashtra_unsigned";
 
   const formData = new FormData();
   formData.append("file", file);
