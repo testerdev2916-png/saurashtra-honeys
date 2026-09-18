@@ -68,7 +68,9 @@ export function resolveImage(
 
   let resultUrl = fallback;
   if (cleanUrl) {
-    if (/^https?:\/\//i.test(cleanUrl)) {
+    if (cleanUrl.includes('res.cloudinary.com')) {
+      resultUrl = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, '')}`;
+    } else if (/^https?:\/\//i.test(cleanUrl)) {
       resultUrl = cleanUrl;
     } else {
       let path = cleanUrl.replace(/^\/+/, '');
@@ -121,8 +123,9 @@ export function getCategoryImageUrl(category: { image_url?: string | null, slug?
 
   let resultUrl = cleanUrl;
 
-  // Convert Storage path to correct public URL if needed.
-  if (!/^https?:\/\//i.test(cleanUrl)) {
+  if (cleanUrl.includes('res.cloudinary.com')) {
+    resultUrl = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, '')}`;
+  } else if (!/^https?:\/\//i.test(cleanUrl)) {
     let path = cleanUrl.replace(/^\/+/, '');
     if (path.startsWith('media/')) {
       path = path.substring(6);

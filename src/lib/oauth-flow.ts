@@ -42,9 +42,10 @@ export function safeRedirectPath(path: string | null | undefined): string {
 
 export function getURL(): string {
   let url =
+    (typeof window !== "undefined" ? window.location.origin : null) ??
     import.meta.env?.VITE_SITE_URL ??
     import.meta.env?.VITE_PUBLIC_SITE_URL ??
-    (typeof window !== "undefined" ? window.location.origin : "http://localhost:3000");
+    "http://localhost:3000";
 
   url = url.includes("http") ? url : `https://${url}`;
   url = url.endsWith("/") ? url : `${url}/`;

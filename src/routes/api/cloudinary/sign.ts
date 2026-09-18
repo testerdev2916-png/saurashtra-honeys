@@ -3,7 +3,7 @@ import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { v2 as cloudinary } from "cloudinary";
 
 cloudinary.config({
-  cloud_name: process.env.VITE_CLOUDINARY_CLOUD_NAME,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
   secure: true,
@@ -35,7 +35,7 @@ export const APIRoute = createAPIFileRoute("/api/cloudinary/sign")({
           timestamp,
           signature,
           api_key: process.env.CLOUDINARY_API_KEY,
-          cloud_name: process.env.VITE_CLOUDINARY_CLOUD_NAME,
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.VITE_CLOUDINARY_CLOUD_NAME,
           folder
         }),
         { headers: { "content-type": "application/json" } }
