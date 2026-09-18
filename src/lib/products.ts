@@ -779,10 +779,12 @@ export function getVariantByLabel(product: Product, label?: string): ProductVari
 }
 
 export function resolveActiveImage(product: Product, variant?: ProductVariant): string {
+  const isSupabase = (url: string) => url.includes('supabase.co');
+
   if (variant) {
-    if (variant.image_url && variant.image_url.trim().length > 0) return variant.image_url;
-    if (variant.image && variant.image.trim().length > 0) return variant.image;
-    if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0) return variant.images[0];
+    if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url)) return variant.image_url;
+    if (variant.image && variant.image.trim().length > 0 && !isSupabase(variant.image)) return variant.image;
+    if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0 && !isSupabase(variant.images[0])) return variant.images[0];
   }
   return product.image;
 }
