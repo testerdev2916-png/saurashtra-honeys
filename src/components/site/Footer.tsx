@@ -179,17 +179,15 @@ export function Footer() {
   );
 
   const socialLinks = [
-    { I: Instagram, href: settings?.social?.instagram || "https://instagram.com", label: "Instagram", show: !!settings?.social?.instagram },
-    { I: Facebook, href: settings?.social?.facebook || "https://facebook.com", label: "Facebook", show: !!settings?.social?.facebook },
-    { I: Youtube, href: settings?.social?.youtube || "https://youtube.com", label: "YouTube", show: !!settings?.social?.youtube },
+    { I: Facebook, href: settings?.social?.facebook || "https://facebook.com", label: "Facebook" },
+    { I: Instagram, href: settings?.social?.instagram || "https://instagram.com", label: "Instagram" },
+    { I: Youtube, href: settings?.social?.youtube || "https://youtube.com", label: "YouTube" },
     {
       I: WhatsAppIcon,
       href: settings?.contact?.whatsapp ? `https://wa.me/${settings.contact.whatsapp.replace(/\D/g, '')}` : "https://wa.me/919687328404",
       label: "WhatsApp",
-      show: !!settings?.contact?.whatsapp
     },
-    { I: Linkedin, href: settings?.social?.linkedin || "https://linkedin.com", label: "LinkedIn", show: !!settings?.social?.linkedin },
-  ].filter(link => link.show || Object.keys(settings).length === 0);
+  ];
   return (
     <footer className="relative bg-[#FCFAF5] text-[#2B1D14] pt-20 sm:pt-28 pb-4 overflow-hidden w-full max-w-full">
       <FooterDecorativeBackground />
@@ -219,9 +217,9 @@ export function Footer() {
                     target="_blank"
                     rel="noreferrer"
                     aria-label={label}
-                    className="size-10 rounded-full bg-[#EFE8DA] border-none text-[#2B1D14]/80 flex items-center justify-center hover:-translate-y-1 hover:shadow-[0_4px_12px_rgba(197,122,28,0.15)] hover:text-[#C57A1C] transition-all duration-300"
+                    className="size-12 rounded-full bg-[#593A21] border-none text-white flex items-center justify-center hover:-translate-y-1 hover:shadow-lg hover:bg-[#4a2e19] transition-all duration-300"
                   >
-                    <I className="size-4" />
+                    <I className="size-5" />
                   </a>
                 ))}
               </div>
