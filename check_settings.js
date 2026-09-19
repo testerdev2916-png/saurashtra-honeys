@@ -1,0 +1,14 @@
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL, 
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
+async function main() {
+  const { data } = await supabase.from('site_settings').select('settings_json').single();
+  console.log("Settings:", JSON.stringify(data?.settings_json, null, 2));
+}
+main();

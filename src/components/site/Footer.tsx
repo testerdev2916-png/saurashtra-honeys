@@ -205,11 +205,11 @@ export function Footer() {
             <div className="lg:col-span-4 flex flex-col items-center text-center w-full">
               <BrandMark />
               
-              <p className="mt-10 text-[14px] sm:text-[15px] text-[#2B1D14]/80 max-w-[280px] leading-relaxed font-serif italic">
+              <p className="mt-4 text-[14px] sm:text-[15px] text-[#2B1D14]/80 max-w-[280px] leading-relaxed font-serif italic">
                 "{settings.company?.tagline || "Handcrafted honey from the heart of Saurashtra.\nPure. Natural. Honest."}"
               </p>
               
-              <div className="mt-10 flex items-center justify-center gap-4">
+              <div className="mt-5 flex items-center justify-center gap-4">
                 {socialLinks.map(({ I, href, label }) => (
                   <a
                     key={label}
