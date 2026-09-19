@@ -27,11 +27,13 @@ export function HeroSlider({
   variant?: "home" | "inner";
 }) {
   const [i, setI] = useState(0);
+  const [prevI, setPrevI] = useState(0);
   const [dir, setDir] = useState<1 | -1>(1);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const paused = useRef(false);
   const touchX = useRef<number | null>(null);
-  
+  const isAnimating = useRef(false);
+
   const [loaded, setLoaded] = useState<Set<number>>(() => {
     const s = new Set([0]);
     if (slides && slides.length > 1) {
@@ -43,7 +45,15 @@ export function HeroSlider({
 
   const go = (n: number, d: 1 | -1 = 1) => {
     if (!slides || slides.length <= 1) return;
+    if (isAnimating.current) return;
+
+    isAnimating.current = true;
+    setTimeout(() => {
+      isAnimating.current = false;
+    }, 800);
+
     setDir(d);
+    setPrevI(i);
     setI((n + slides.length) % slides.length);
   };
   const next = () => go(i + 1, 1);
@@ -52,7 +62,9 @@ export function HeroSlider({
   useEffect(() => {
     if (paused.current || !slides || slides.length <= 1) return;
     timer.current = setTimeout(() => go(i + 1, 1), interval);
-    return () => { if (timer.current) clearTimeout(timer.current); };
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [i, interval, slides?.length]);
 
@@ -70,9 +82,8 @@ export function HeroSlider({
   }, [i, slides?.length]);
 
   const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
-  const aspectCls = effVariant === "home" 
-    ? "aspect-square md:aspect-[192/70]" 
-    : "aspect-square md:aspect-[16/5]";
+  const aspectCls =
+    effVariant === "home" ? "aspect-square md:aspect-[192/70]" : "aspect-square md:aspect-[16/5]";
 
   if (!slides || slides.length === 0) {
     return (
@@ -85,30 +96,61 @@ export function HeroSlider({
   return (
     <section
       className="relative w-full max-w-[100vw] overflow-x-hidden bg-[#120E0C]"
-      onMouseEnter={() => { paused.current = true; if (timer.current) clearTimeout(timer.current); }}
-      onMouseLeave={() => { paused.current = false; setI((v) => v); }}
-      onTouchStart={(e) => { touchX.current = e.touches[0].clientX; }}
+      onMouseEnter={() => {
+        paused.current = true;
+        if (timer.current) clearTimeout(timer.current);
+      }}
+      onMouseLeave={() => {
+        paused.current = false;
+        setI((v) => v);
+      }}
+      onTouchStart={(e) => {
+        touchX.current = e.touches[0].clientX;
+      }}
       onTouchEnd={(e) => {
         if (touchX.current === null) return;
         const dx = e.changedTouches[0].clientX - touchX.current;
-        if (Math.abs(dx) > 40) (dx < 0 ? next() : prev());
+        if (Math.abs(dx) > 40) dx < 0 ? next() : prev();
         touchX.current = null;
       }}
       aria-roledescription="carousel"
     >
-      <div className={`relative w-full ${aspectCls}`}>
-
+      <div className={`relative w-full overflow-hidden ${aspectCls}`}>
         {slides.map((s, idx) => {
           const isActive = idx === i;
-          const offset = isActive ? "translate-x-0 opacity-100 z-10" : `${dir === 1 ? "translate-x-full" : "-translate-x-full"} opacity-0 z-0`;
+          const isPrev = idx === prevI && i !== prevI;
+
+          let offset = "";
+          let zIndex = "z-0";
+          let visibility = "invisible";
+
+          if (isActive) {
+            offset = "translate-x-0";
+            zIndex = "z-10";
+            visibility = "visible";
+          } else if (isPrev) {
+            offset = dir === 1 ? "-translate-x-full" : "translate-x-full";
+            zIndex = "z-10";
+            visibility = "visible";
+          } else {
+            offset = dir === 1 ? "translate-x-full" : "-translate-x-full";
+            zIndex = "z-0";
+            visibility = "invisible";
+          }
+
+          const transitionCls =
+            isActive || isPrev
+              ? "transition-transform duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+              : "transition-none";
+
           return (
             <div
               key={idx}
               aria-hidden={!isActive}
-              className={`absolute inset-0 transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${offset}`}
+              className={`absolute inset-0 w-full h-full ${transitionCls} ${offset} ${zIndex} ${visibility}`}
             >
-              <Link 
-                to={s.ctaTo || "/"} 
+              <Link
+                to={s.ctaTo || "/"}
                 params={s.ctaParams as never}
                 className="absolute inset-0 z-0 block cursor-pointer"
                 aria-label={`Go to ${s.ctaTo || "/"}`}
@@ -116,10 +158,10 @@ export function HeroSlider({
                 {loaded.has(idx) && (
                   <picture className="w-full h-full block">
                     {s.mobileImage && (
-                      <source 
+                      <source
                         key={`mob-${s.updatedAt || s.mobileImage}`}
-                        media="(max-width: 767px)" 
-                        srcSet={s.mobileImage} 
+                        media="(max-width: 767px)"
+                        srcSet={s.mobileImage}
                         // @ts-ignore: fetchpriority is valid in newer React versions
                         fetchpriority={idx === 0 ? "high" : "auto"}
                       />
@@ -135,8 +177,6 @@ export function HeroSlider({
                     />
                   </picture>
                 )}
-
-
               </Link>
             </div>
           );
