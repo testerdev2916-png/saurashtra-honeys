@@ -191,8 +191,8 @@ function ProductPage() {
       }
     }
 
-    // 4. Combine and ensure no empty strings sneak through
-    return [...finalVariantImages, ...finalCommonImages].filter(u => typeof u === "string" && u.trim().length > 0);
+    // 4. Combine and ensure no empty strings or broken Supabase images sneak through
+    return [...finalVariantImages, ...finalCommonImages].filter(u => typeof u === "string" && u.trim().length > 0 && !u.includes("supabase.co"));
   }, [p, activeVariant]);
 
   useEffect(() => {
