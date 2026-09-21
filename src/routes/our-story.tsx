@@ -23,6 +23,9 @@ import familyHoneyImg from "@/assets/family-honey.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
+import promiseRawImg from "@/assets/promise_raw.jpg";
+import promiseHonestImg from "@/assets/promise_honest.jpg";
+import promiseResponsibleImg from "@/assets/promise_responsible.jpg";
 import { HiveToJarTimeline } from "@/components/site/HiveToJarTimeline";
 
 const RawIcon = ({
@@ -628,17 +631,17 @@ function OurStory() {
                 {
                   title: promise.promise1_title || "RAW",
                   desc: promise.promise1_desc || "As close to nature as possible.",
-                  icon: RawIcon,
+                  img: promiseRawImg,
                 },
                 {
                   title: promise.promise2_title || "HONEST",
                   desc: promise.promise2_desc || "No unnecessary additions.",
-                  icon: HonestIcon,
+                  img: promiseHonestImg,
                 },
                 {
                   title: promise.promise3_title || "RESPONSIBLE",
                   desc: promise.promise3_desc || "Care for bees, land & people.",
-                  icon: ResponsibleIcon,
+                  img: promiseResponsibleImg,
                 },
               ].map((p, i) => (
                 <div
@@ -646,8 +649,8 @@ function OurStory() {
                   className="flex flex-col items-center reveal opacity-0 translate-y-8 transition-all duration-1000"
                   style={{ transitionDelay: `${i * 150}ms` }}
                 >
-                  <div className="text-[#3B5241] mb-8">
-                    <p.icon className="w-36 h-36 md:w-44 md:h-44" strokeWidth={1} />
+                  <div className="mb-8 w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-sm hover:scale-105 transition-transform duration-500">
+                    <img src={p.img} alt={p.title} className="w-full h-full object-cover mix-blend-multiply" />
                   </div>
                   <h3 className="font-bold tracking-widest text-[#2B2118] mb-3 uppercase">
                     {p.title}

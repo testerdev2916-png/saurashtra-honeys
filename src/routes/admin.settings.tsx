@@ -18,6 +18,7 @@ const LABELS: Record<string, { title: string; fields: { key: string; label: stri
   business: { title: "Business", fields: [{ key: "gst", label: "GST number" }, { key: "hours", label: "Business hours" }] },
   footer:   { title: "Footer", fields: [{ key: "copyright", label: "Copyright line" }] },
   seo:      { title: "Default SEO", fields: [{ key: "default_title", label: "Default title" }, { key: "default_description", label: "Default description", textarea: true }, { key: "og_image", label: "Default OG image URL" }] },
+  shipping: { title: "Shipping & Delivery", fields: [{ key: "free_shipping_min_gujarat", label: "Free Shipping Min Order (Gujarat)" }, { key: "free_shipping_min_india", label: "Free Shipping Min Order (Rest of India)" }] },
 };
 
 function SettingsPage() {

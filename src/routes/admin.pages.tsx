@@ -28,6 +28,7 @@ const PAGE_GROUPS = {
     subtitle: "Manage bulk orders, corporate gifting, and private label content.",
     icon: Store,
     pages: [
+      { slug: "bulk-gifting", title: "B2B Hub (Outside Page)", desc: "The main landing page showing the 4 B2B cards." },
       { slug: "bulk-orders", title: "Bulk Orders", desc: "Wholesale supplies and bulk purchasing." },
       { slug: "corporate-gifting", title: "Corporate Gifting", desc: "Corporate gifting solutions and features." },
       { slug: "private-label", title: "Private Label", desc: "OEM and private label manufacturing." },

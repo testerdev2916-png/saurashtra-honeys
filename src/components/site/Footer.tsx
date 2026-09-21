@@ -157,8 +157,8 @@ export function Footer() {
 
   const helpLinks = [
     ["FAQs", "/contact"],
-    ["Shipping & Delivery", "/contact"],
-    ["Returns & Refunds", "/contact"],
+    ["Shipping & Delivery", "/shipping-returns"],
+    ["Returns & Refunds", "/shipping-returns"],
     ["Terms & Conditions", "/contact"],
     ["Privacy Policy", "/contact"],
     ["Track Order", "/track-order"],

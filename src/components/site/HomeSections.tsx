@@ -148,16 +148,15 @@ export function HomeMarqueeStrip({ settings }: { settings?: Record<string, any> 
       ))}
     </div>
   );
-
   return (
     <div className="w-full bg-announcement py-4 sm:py-5 overflow-hidden ticker-wrap">
-      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '95s' }}>
+      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '280s' }}>
         {/* Render enough blocks to cover large ultra-wide screens */}
         <div className="flex items-center">
-          {block}{block}{block}
+          {block}{block}{block}{block}{block}{block}
         </div>
         <div className="flex items-center">
-          {block}{block}{block}
+          {block}{block}{block}{block}{block}{block}
         </div>
       </div>
     </div>

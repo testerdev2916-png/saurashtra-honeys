@@ -6,6 +6,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 import { ArrowRight, Package, Gift, Sparkles, Tag, ShieldCheck, HeartHandshake, Award } from "lucide-react";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 
 // Photographic assets
 import heroProductsImg from "@/assets/hero-products.jpg";
@@ -29,10 +30,15 @@ export const Route = createFileRoute("/bulk-gifting")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: () => fetchPageSections("bulk-gifting"),
   component: BulkGiftingHubPage,
 });
 
 function BulkGiftingHubPage() {
+  const sections = Route.useLoaderData();
+  const getS = (key: string) => sections.find((s) => s.section_key === key)?.settings || {};
+  const hubCardsCMS = getS("hub_cards")?.cards || [];
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "center", skipSnaps: false, duration: 60 },
     [
@@ -82,7 +88,7 @@ function BulkGiftingHubPage() {
     };
   }, [emblaApi]);
 
-  const serviceCards = [
+  const defaultServiceCards = [
     {
       title: "Bulk Orders",
       desc: "Premium wholesale honey solutions for retailers, restaurants and distributors.",
@@ -116,6 +122,26 @@ function BulkGiftingHubPage() {
       cta: "Build Your Brand"
     },
   ];
+
+  const serviceCards = defaultServiceCards.map((defaultCard, i) => {
+    const cmsCard = hubCardsCMS[i];
+    if (!cmsCard) return defaultCard;
+
+    let Icon = defaultCard.Icon;
+    if (cmsCard.iconName === "Package") Icon = Package;
+    if (cmsCard.iconName === "Gift") Icon = Gift;
+    if (cmsCard.iconName === "Sparkles") Icon = Sparkles;
+    if (cmsCard.iconName === "Tag") Icon = Tag;
+
+    return {
+      title: cmsCard.title || defaultCard.title,
+      desc: cmsCard.desc || defaultCard.desc,
+      img: cmsCard.img || defaultCard.img,
+      Icon,
+      href: cmsCard.href || defaultCard.href,
+      cta: cmsCard.cta || defaultCard.cta,
+    };
+  });
 
   return (
     <SiteLayout>

@@ -369,8 +369,8 @@ export function ShopPage({
           PROMOTIONAL MARQUEE
          ========================================================================= */}
       <div className="w-full bg-announcement py-2.5 sm:py-3 overflow-hidden ticker-wrap border-y border-white/10">
-        <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '55s' }}>
-          {[1, 2].map((group) => (
+        <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '165s' }}>
+          {[1, 2, 3, 4, 5, 6].map((group) => (
             <div key={group} className="flex items-center whitespace-nowrap text-white text-[13px] sm:text-[14px] font-medium tracking-wide">
               <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Pure & Unfiltered Honey</span></span>
               <span className="text-white/40">•</span>
@@ -384,7 +384,7 @@ export function ShopPage({
               <span className="text-white/40">•</span>
               <span className="flex items-center gap-2 mx-4 sm:mx-6">🎁 <span>Perfect for Gifting</span></span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹400</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹1500</span></span>
               <span className="text-white/40">•</span>
               {/* Duplicate inner blocks once more to ensure it fills ultra-wide screens smoothly without ending early */}
               <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Pure & Unfiltered Honey</span></span>
@@ -399,7 +399,7 @@ export function ShopPage({
               <span className="text-white/40">•</span>
               <span className="flex items-center gap-2 mx-4 sm:mx-6">🎁 <span>Perfect for Gifting</span></span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹400</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹1500</span></span>
               <span className="text-white/40">•</span>
             </div>
           ))}

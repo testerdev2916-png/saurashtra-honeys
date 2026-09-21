@@ -51,13 +51,22 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
         ]
       },
       "saurashtra_land": {
-        title: "Saurashtra — The Land",
+        title: "Nomadic Beekeeping",
         description: "Full-width landscape section.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Supporting Text" },
           { type: "image", key: "bg_image", label: "Background Image", folder: "pages/our-story" },
+        ]
+      },
+      "honey_varieties": {
+        title: "Our Honey Varieties",
+        description: "List of the natural honey varieties produced.",
+        fields: [
+          { type: "text", key: "eyebrow", label: "Eyebrow Text" },
+          { type: "text", key: "heading", label: "Heading" },
+          { type: "textarea", key: "description", label: "Description" },
         ]
       },
       "heart_of_everything": {
@@ -119,7 +128,7 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
         ]
       },
       "responsible_beekeeping": {
-        title: "Responsible Beekeeping",
+        title: "Farmers & Nature",
         description: "Editorial split section with 4 cards.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
@@ -137,7 +146,7 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
         ]
       },
       "the_people": {
-        title: "The People Behind the Honey",
+        title: "Our Growth & Our Team",
         description: "Founder/family story.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
@@ -242,6 +251,30 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
+        ]
+      }
+    }
+  },
+  "bulk-gifting": {
+    title: "B2B Ecosystem (Outside Hub)",
+    sections: {
+      "hub_cards": {
+        title: "Service Cards",
+        description: "The 4 cards shown on the B2B landing page.",
+        fields: [
+          {
+            type: "list",
+            key: "cards",
+            label: "Service Cards",
+            itemFields: [
+              { type: "text", key: "title", label: "Title" },
+              { type: "textarea", key: "desc", label: "Description" },
+              { type: "image", key: "img", label: "Image", folder: "pages/b2b" },
+              { type: "text", key: "cta", label: "CTA Text" },
+              { type: "text", key: "href", label: "Link URL" },
+              { type: "text", key: "iconName", label: "Icon Name (Package, Gift, Sparkles, Tag)" }
+            ]
+          }
         ]
       }
     }

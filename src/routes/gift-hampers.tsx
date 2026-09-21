@@ -12,6 +12,7 @@ import { z } from "zod";
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroHoneyImg from "@/assets/hero-honey.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
+import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/gift-hampers")({
   head: () => ({
@@ -42,6 +43,7 @@ const schema = z.object({
 });
 
 function GiftHampersPage() {
+  const settings = useSiteSettings();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: "", email: "", phone: "", occasion: "", quantity: "", customization: "", message: "",
@@ -66,7 +68,7 @@ function GiftHampersPage() {
       toast.success("Design request received!", { description: "Our gifting specialist will contact you shortly." });
       setForm({ name: "", email: "", phone: "", occasion: "", quantity: "", customization: "", message: "" });
     } catch {
-      toast.error("Couldn't submit right now. Please call +91 96873 28404.");
+      toast.error(`Couldn't submit right now. Please call ${settings?.contact?.phone || "+91 96873 28404"}.`);
     } finally {
       setLoading(false);
     }
@@ -268,10 +270,10 @@ function GiftHampersPage() {
             
             <div className="mt-8 text-center text-[#6B6257] text-[14px]">
               <p>Or contact us directly:</p>
-              <div className="flex items-center justify-center gap-4 mt-2 font-bold text-[#2B2118]">
-                <a href="tel:+919687328404" className="hover:text-[#D97706]">📞 +91 96873 28404</a>
-                <span>|</span>
-                <a href="mailto:gifting@saurashtrahoney.com" className="hover:text-[#D97706]">✉️ gifting@saurashtrahoney.com</a>
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[15px] sm:text-[16px] md:text-[18px] font-medium text-[#2B2118] mt-2">
+                <a href={`tel:${settings?.contact?.phone ? settings.contact.phone.replace(/\s+/g, '') : "+919687328404"}`} className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5">📞 {settings?.contact?.phone || "+91 96873 28404"}</a>
+                <span className="text-[#2B2118]/30">|</span>
+                <a href={`mailto:${settings?.contact?.email || "wholesale@saurashtrahoney.com"}`} className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5">✉️ {settings?.contact?.email || "wholesale@saurashtrahoney.com"}</a>
               </div>
             </div>
           </div>

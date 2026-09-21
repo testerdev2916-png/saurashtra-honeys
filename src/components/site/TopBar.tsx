@@ -6,7 +6,7 @@ import { fetchAnnouncements, type AnnouncementItem } from "@/lib/homepage-cms.fu
 const fallbackMessages = [
   <span key="1" className="inline-flex items-center gap-2">
     <span className="shrink-0">🚚</span>
-    <span className="text-white font-bold">Free Delivery on orders above ₹400</span>
+    <span className="text-white font-bold">Free Delivery on orders above ₹1500</span>
   </span>,
   <span key="2" className="inline-flex items-center gap-2">
     <span className="shrink-0">🍯</span>
@@ -48,10 +48,10 @@ export function TopBar() {
     ? items.map((item, idx) => renderMessage(item, idx))
     : loading ? [] : fallbackMessages;
 
-  // We duplicate the message group twice per half (12 items per half, 24 items total)
-  // to ensure there is never any empty/blank area even on ultra-wide monitors,
+  // We duplicate the message group multiple times per half (12 times)
+  // to ensure there is never any empty/blank area even on ultra-wide monitors or when content is very short,
   // creating a mathematically seamless infinite loop.
-  const loopGroup = [...activeMessages, ...activeMessages];
+  const loopGroup = Array(12).fill(activeMessages).flat();
 
   if (activeMessages.length === 0) return null;
 
@@ -61,7 +61,7 @@ export function TopBar() {
       role="region"
       aria-label="Announcement bar"
     >
-      <div className="flex w-max items-center animate-ticker">
+      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '300s' }}>
         {/* First Half (0% to -50% translation area) */}
         <div className="flex items-center shrink-0">
           {loopGroup.map((msg, idx) => (

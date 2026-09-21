@@ -28,6 +28,7 @@ import { Route as OurStoryRouteImport } from './routes/our-story'
 import { Route as PrivateLabelRouteImport } from './routes/private-label'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as ShippingReturnsRouteImport } from './routes/shipping-returns'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TrackOrderRouteImport } from './routes/track-order'
@@ -171,6 +172,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShippingReturnsRoute = ShippingReturnsRouteImport.update({
+  id: '/shipping-returns',
+  path: '/shipping-returns',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ShopRoute = ShopRouteImport.update({
@@ -441,6 +447,7 @@ export interface FileRoutesByFullPath {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/shipping-returns': typeof ShippingReturnsRoute
   '/shop': typeof ShopRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
@@ -510,6 +517,7 @@ export interface FileRoutesByTo {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/shipping-returns': typeof ShippingReturnsRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
   '/wishlist': typeof WishlistRoute
@@ -580,6 +588,7 @@ export interface FileRoutesById {
   '/private-label': typeof PrivateLabelRoute
   '/reset-password': typeof ResetPasswordRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/shipping-returns': typeof ShippingReturnsRoute
   '/shop': typeof ShopRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/track-order': typeof TrackOrderRoute
@@ -652,6 +661,7 @@ export interface FileRouteTypes {
     | '/private-label'
     | '/reset-password'
     | '/robots.txt'
+    | '/shipping-returns'
     | '/shop'
     | '/sitemap.xml'
     | '/track-order'
@@ -721,6 +731,7 @@ export interface FileRouteTypes {
     | '/private-label'
     | '/reset-password'
     | '/robots.txt'
+    | '/shipping-returns'
     | '/sitemap.xml'
     | '/track-order'
     | '/wishlist'
@@ -790,6 +801,7 @@ export interface FileRouteTypes {
     | '/private-label'
     | '/reset-password'
     | '/robots.txt'
+    | '/shipping-returns'
     | '/shop'
     | '/sitemap.xml'
     | '/track-order'
@@ -861,6 +873,7 @@ export interface RootRouteChildren {
   PrivateLabelRoute: typeof PrivateLabelRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  ShippingReturnsRoute: typeof ShippingReturnsRoute
   ShopRoute: typeof ShopRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TrackOrderRoute: typeof TrackOrderRoute
@@ -1009,6 +1022,13 @@ declare module '@tanstack/react-router' {
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping-returns': {
+      id: '/shipping-returns'
+      path: '/shipping-returns'
+      fullPath: '/shipping-returns'
+      preLoaderRoute: typeof ShippingReturnsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/shop': {
@@ -1473,6 +1493,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivateLabelRoute: PrivateLabelRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  ShippingReturnsRoute: ShippingReturnsRoute,
   ShopRoute: ShopRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TrackOrderRoute: TrackOrderRoute,
