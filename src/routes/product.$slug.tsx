@@ -191,8 +191,8 @@ function ProductPage() {
       }
     }
 
-    // 4. Combine
-    return [...finalVariantImages, ...finalCommonImages];
+    // 4. Combine and ensure no empty strings sneak through
+    return [...finalVariantImages, ...finalCommonImages].filter(u => typeof u === "string" && u.trim().length > 0);
   }, [p, activeVariant]);
 
   useEffect(() => {
