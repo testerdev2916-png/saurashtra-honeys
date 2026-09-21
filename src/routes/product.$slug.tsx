@@ -34,17 +34,9 @@ export const Route = createFileRoute("/product/$slug")({
     if (!p) throw notFound();
     return { product: p };
   },
-  head: ({ loaderData, search }) => {
+  head: ({ loaderData }) => {
     if (!loaderData) return { meta: [] };
-    let image = loaderData.product.image;
-    if (search.variant && loaderData.product.variants) {
-      const v = loaderData.product.variants.find((x) => x.id === search.variant);
-      if (v) {
-        if (v.image_url && v.image_url.trim().length > 0) image = v.image_url;
-        else if (v.image && v.image.trim().length > 0) image = v.image;
-        else if (v.images && v.images.length > 0 && v.images[0].trim().length > 0) image = v.images[0];
-      }
-    }
+    const image = loaderData.product.image;
     return {
       meta: [
         { title: `${loaderData.product.name} — Saurashtra Honey` },
