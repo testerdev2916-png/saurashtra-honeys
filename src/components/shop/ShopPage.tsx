@@ -245,13 +245,11 @@ export function ShopPage({
     return list;
   }, [cat, q, sort, products]);
 
-  const [visibleCount, setVisibleCount] = useState(12);
-
   // Analytics tracking
   useEffect(() => {
     track("view_item_list", {
       item_list_name: cat,
-      items: filtered.slice(0, 20).map((p) => toItem(p)),
+      items: filtered.map((p) => toItem(p)),
     });
   }, [cat, filtered]);
 
@@ -485,7 +483,7 @@ export function ShopPage({
               <div
                 className="grid gap-5 sm:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
               >
-                {filtered.slice(0, visibleCount).map((product, idx) => (
+                {filtered.map((product, idx) => (
                   <div 
                     key={`${product.slug}-${cat}`}
                     className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both"
@@ -498,17 +496,6 @@ export function ShopPage({
                   </div>
                 ))}
               </div>
-
-              {visibleCount < filtered.length && (
-                <div className="w-full flex justify-center mt-12 mb-4 relative z-20">
-                  <button 
-                    onClick={() => setVisibleCount(c => c + 12)} 
-                    className="bg-cream border border-brand-orange text-brand-orange px-8 py-3 rounded-full font-bold text-sm hover:bg-brand-orange hover:text-white transition-colors"
-                  >
-                    Load More
-                  </button>
-                </div>
-              )}
             </>
           )}
         </div>
