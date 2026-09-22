@@ -240,7 +240,9 @@ export function ShopPage({
         list.sort((a, b) => (b.badge === "NEW" ? 1 : 0) - (a.badge === "NEW" ? 1 : 0));
         break;
       default:
-        list.sort((a, b) => (b.reviews || 0) - (a.reviews || 0));
+        // By default, the list is already sorted by `sort_order` from the backend query.
+        // We preserve that manual sorting order here.
+        break;
     }
     return list;
   }, [cat, q, sort, products]);
