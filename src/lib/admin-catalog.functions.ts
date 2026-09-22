@@ -72,6 +72,7 @@ const productSchema = z.object({
   is_bestseller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
   show_on_homepage: z.boolean().default(false),
+  home_sort_order: z.number().int().default(0),
   story_description: z.string().nullable().optional(),
   what_makes_special: z.array(z.string()).nullable().optional(),
   floral_source_notes: z.string().nullable().optional(),

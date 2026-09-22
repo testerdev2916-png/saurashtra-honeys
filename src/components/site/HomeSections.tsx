@@ -343,7 +343,9 @@ export function HomeBestSellers({
 
   React.useEffect(() => {
     // ONLY display products where show_on_homepage = true
-    const homepageProducts = products.filter(p => p.showOnHomepage === true);
+    const homepageProducts = products
+      .filter(p => p.showOnHomepage === true)
+      .sort((a, b) => (a.homeSortOrder || 0) - (b.homeSortOrder || 0));
     setDisplayList(homepageProducts);
     setLoading(false);
   }, [products]);

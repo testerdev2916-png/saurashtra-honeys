@@ -24,6 +24,7 @@ type Row = {
   attributes?: unknown;
   additional_images?: unknown;
   show_on_homepage: boolean | null;
+  home_sort_order: number | null;
   story_description: string | null;
   what_makes_special: unknown;
   floral_source_notes: string | null;
@@ -140,6 +141,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
         ? (r.attributes as Record<string, string | string[]>)
         : undefined,
     showOnHomepage: !!r.show_on_homepage,
+    homeSortOrder: r.home_sort_order ?? undefined,
     story_description: r.story_description ?? undefined,
     what_makes_special: Array.isArray(r.what_makes_special) ? (r.what_makes_special as string[]) : undefined,
     floral_source_notes: r.floral_source_notes ?? undefined,
@@ -186,6 +188,7 @@ export async function fetchProducts(): Promise<Product[]> {
         images,
         attributes,
         show_on_homepage,
+        home_sort_order,
         story_description,
         what_makes_special,
         floral_source_notes,
@@ -227,6 +230,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
         images,
         attributes,
         show_on_homepage,
+        home_sort_order,
         story_description,
         what_makes_special,
         floral_source_notes,

@@ -61,6 +61,7 @@ export type Product = {
   flora?: string;
   attributes?: Record<string, string | string[]>;
   showOnHomepage?: boolean;
+  homeSortOrder?: number;
   story_description?: string;
   what_makes_special?: string[];
   floral_source_notes?: string;

@@ -69,6 +69,7 @@ type P = {
   in_stock: boolean;
   published: boolean;
   sort_order: number;
+  home_sort_order: number;
   sku: string | null;
   barcode: string | null;
   brand: string | null;
@@ -121,6 +122,7 @@ const EMPTY: Partial<P> = {
   in_stock: true,
   published: true,
   sort_order: 0,
+  home_sort_order: 0,
   low_stock_limit: 5,
   status: "published",
   is_featured: false,
@@ -209,6 +211,7 @@ function ProductsPage() {
         in_stock: !!p.in_stock,
         published: !!p.published,
         sort_order: Number(p.sort_order ?? 0),
+        home_sort_order: Number((p as any).home_sort_order ?? 0),
         sku: p.sku || null,
         barcode: p.barcode || null,
         brand: p.brand || null,
@@ -879,11 +882,19 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 <option value="archived">Archived</option>
               </select>
             </Field>
-            <Field label="Sort order">
+            <Field label="Shop Sort Order">
               <input
                 type="number"
                 value={f.sort_order ?? 0}
                 onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })}
+                className={inp}
+              />
+            </Field>
+            <Field label="Homepage Sort Order">
+              <input
+                type="number"
+                value={f.home_sort_order ?? 0}
+                onChange={(e) => setF({ ...f, home_sort_order: Number(e.target.value) })}
                 className={inp}
               />
             </Field>
