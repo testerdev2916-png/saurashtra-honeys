@@ -144,6 +144,7 @@
     overflow-x: hidden;
     overflow-x: clip;
     position: relative;
+    font-variant-numeric: lining-nums;
   }
   body {
     background-color: var(--color-background);
