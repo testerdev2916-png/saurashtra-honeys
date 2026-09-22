@@ -293,6 +293,7 @@ function ProductsPage() {
           ...p,
           id: undefined,
           slug: `${p.slug}-copy`,
+          sku: p.sku ? `${p.sku}-copy` : undefined,
           name: `${p.name} (Copy)`,
           published: false,
           status: "draft",
