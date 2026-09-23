@@ -58,6 +58,7 @@ export type Product = {
   additionalImages?: string[];
   benefits: string[];
   description: string;
+  is_wholesale?: boolean;
   flora?: string;
   attributes?: Record<string, string | string[]>;
   showOnHomepage?: boolean;

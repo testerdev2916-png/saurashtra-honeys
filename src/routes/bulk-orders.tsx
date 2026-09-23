@@ -14,6 +14,9 @@ import beeFarmImg from "@/assets/bee-farm.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
 import { fetchPageSections } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
+import { supabase } from "@/integrations/supabase/client";
+import type { Product } from "@/lib/products";
+import { ProductCard } from "@/components/site/ProductCard";
 
 export const Route = createFileRoute("/bulk-orders")({
   head: () => ({
@@ -30,7 +33,26 @@ export const Route = createFileRoute("/bulk-orders")({
       { property: "og:type", content: "website" },
     ],
   }),
-  loader: () => fetchPageSections("bulk-orders"),
+  loader: async () => {
+    const sections = await fetchPageSections("bulk-orders");
+    let wholesaleProducts: Product[] = [];
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("published", true)
+        .eq("is_wholesale", true)
+        .order("sort_order", { ascending: true });
+        
+      if (!error && data) {
+        // Map data to Product type if needed, usually it matches closely enough or can be cast
+        wholesaleProducts = data as unknown as Product[];
+      }
+    } catch (e) {
+      console.warn("Could not fetch wholesale products. The is_wholesale column might not exist yet.");
+    }
+    return { sections, wholesaleProducts };
+  },
   component: BulkOrdersPage,
 });
 
@@ -45,7 +67,7 @@ const schema = z.object({
 });
 
 function BulkOrdersPage() {
-  const sections = Route.useLoaderData();
+  const { sections, wholesaleProducts } = Route.useLoaderData();
   const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
   const settings = useSiteSettings();
 
@@ -142,8 +164,32 @@ function BulkOrdersPage() {
         </div>
       </section>
 
+      {/* 2.5 Wholesale Products */}
+      {wholesaleProducts && wholesaleProducts.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="container-page max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <span className="text-[11px] uppercase tracking-[0.25em] text-[#3B5241] font-bold block mb-4">
+                BULK PRICING AVAILABLE
+              </span>
+              <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] leading-tight mb-4">
+                Wholesale Honey Products
+              </h2>
+              <p className="text-[#6B6257] max-w-2xl mx-auto">
+                Explore our range of honey products available for bulk and wholesale orders.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {wholesaleProducts.map((p) => (
+                <ProductCard key={p.slug} p={{ ...p, badge: p.badge || "WHOLESALE" } as any} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* 3. Benefits Section */}
-      <section className="py-20 bg-white">
+      <section className="py-20 bg-[#FDFBF7]">
         <div className="container-page">
           <div className="text-center mb-16">
             <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118]">Wholesale Benefits</h2>

@@ -930,6 +930,14 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
               />{" "}
               Show on Homepage (Our Finest Picks)
             </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-brand-orange">
+              <input
+                type="checkbox"
+                checked={!!f.is_wholesale}
+                onChange={(e) => setF({ ...f, is_wholesale: e.target.checked })}
+              />{" "}
+              Wholesale Product
+            </label>
           </div>
         )}
 
