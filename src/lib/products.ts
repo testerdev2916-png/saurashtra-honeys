@@ -788,7 +788,15 @@ export function resolveActiveImage(product: Product, variant?: ProductVariant): 
     if (variant.image && variant.image.trim().length > 0 && !isSupabase(variant.image)) return variant.image;
     if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0 && !isSupabase(variant.images[0])) return variant.images[0];
   }
-  return product.image;
+  
+  const p = product as any;
+  if (p.image_url && p.image_url.trim().length > 0 && !isSupabase(p.image_url)) return p.image_url;
+  if (p.images && p.images.length > 0 && typeof p.images[0] === 'string' && p.images[0].trim().length > 0 && !isSupabase(p.images[0])) return p.images[0];
+  if (p.additionalImages && p.additionalImages.length > 0 && typeof p.additionalImages[0] === 'string' && p.additionalImages[0].trim().length > 0 && !isSupabase(p.additionalImages[0])) return p.additionalImages[0];
+  if (p.additional_images && Array.isArray(p.additional_images) && p.additional_images.length > 0 && typeof p.additional_images[0] === 'string' && p.additional_images[0].trim().length > 0 && !isSupabase(p.additional_images[0])) return p.additional_images[0];
+  if (p.image && p.image.trim().length > 0 && !isSupabase(p.image)) return p.image;
+  
+  return p.image || "";
 }
 
 /**
