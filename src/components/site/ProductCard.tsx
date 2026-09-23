@@ -80,14 +80,16 @@ export function ProductCard({ p, onQuickView }: { p: Product; onQuickView?: (p: 
         </h3>
 
         {/* Rating stars & reviews matching reference */}
-        <div className="flex items-center gap-1.5 text-xs">
-          <div className="flex items-center text-brand-orange" aria-label="5 out of 5 stars">
-            {[...Array(5)].map((_, idx) => (
-              <Star key={idx} className="size-3.5 fill-brand-orange text-brand-orange" />
-            ))}
+        {(p.reviews > 0 || (p as any).reviews_count > 0) && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <div className="flex items-center text-brand-orange" aria-label={`${p.rating || 5} out of 5 stars`}>
+              {[...Array(5)].map((_, idx) => (
+                <Star key={idx} className="size-3.5 fill-brand-orange text-brand-orange" />
+              ))}
+            </div>
+            <span className="font-bold text-muted-foreground text-[11px]">({p.reviews || (p as any).reviews_count})</span>
           </div>
-          <span className="font-bold text-muted-foreground text-[11px]">({p.reviews || 180})</span>
-        </div>
+        )}
 
         <div className="hidden md:flex gap-1.5 flex-wrap mt-0.5">
           {p.sizes.map((s) => (
