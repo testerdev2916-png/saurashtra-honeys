@@ -85,6 +85,7 @@ type P = {
   is_featured: boolean;
   is_bestseller: boolean;
   is_new_arrival: boolean;
+  is_wholesale: boolean;
   video_url: string | null;
   meta_title: string | null;
   meta_description: string | null;

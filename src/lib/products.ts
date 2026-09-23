@@ -18,6 +18,21 @@ import honeycombBees from "@/assets/honeycomb-bees.jpg";
 import prodLiquid from "@/assets/prod-liquid.jpg";
 import teamBeekeepers from "@/assets/team-beekeepers.jpg";
 
+export const localImageMap: Record<string, string> = {
+  "prod-ajwain": ajwain,
+  "prod-fennel": fennel,
+  "prod-lychee": lychee,
+  "prod-multiflora": multiflora,
+  "prod-squeeze": squeeze,
+  "prod-honeycomb": honeycomb,
+  "prod-giftpack": giftpack,
+  "prod-beeswax-pellets": beeswaxPellets,
+  "prod-bee-pollen": beePollen,
+  "prod-beeswax-candles": beeswaxCandles,
+  "prod-beauty": beautyProducts,
+  "prod-luxury-hamper": luxuryHamper,
+};
+
 export type ProductVariant = {
   id?: string;
   label: string;
@@ -782,6 +797,11 @@ export function getVariantByLabel(product: Product, label?: string): ProductVari
 
 export function resolveActiveImage(product: Product, variant?: ProductVariant): string {
   const isSupabase = (url: string) => url.includes('supabase.co');
+  
+  const p = product as any;
+  if (p.image_key && localImageMap[p.image_key]) {
+    return localImageMap[p.image_key];
+  }
 
   if (variant) {
     if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url)) return variant.image_url;
@@ -789,7 +809,6 @@ export function resolveActiveImage(product: Product, variant?: ProductVariant): 
     if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0 && !isSupabase(variant.images[0])) return variant.images[0];
   }
   
-  const p = product as any;
   if (p.image_url && p.image_url.trim().length > 0 && !isSupabase(p.image_url)) return p.image_url;
   if (p.images && p.images.length > 0 && typeof p.images[0] === 'string' && p.images[0].trim().length > 0 && !isSupabase(p.images[0])) return p.images[0];
   if (p.additionalImages && p.additionalImages.length > 0 && typeof p.additionalImages[0] === 'string' && p.additionalImages[0].trim().length > 0 && !isSupabase(p.additionalImages[0])) return p.additionalImages[0];
