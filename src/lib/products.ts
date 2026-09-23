@@ -799,9 +799,6 @@ export function resolveActiveImage(product: Product, variant?: ProductVariant): 
   const isSupabase = (url: string) => url.includes('supabase.co');
   
   const p = product as any;
-  if (p.image_key && localImageMap[p.image_key]) {
-    return localImageMap[p.image_key];
-  }
 
   if (variant) {
     if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url)) return variant.image_url;
