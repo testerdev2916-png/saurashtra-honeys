@@ -34,17 +34,19 @@ export function ProductCard({ p, onQuickView }: { p: Product; onQuickView?: (p: 
   const discount = activeMrp && activeMrp > activePrice ? Math.round(((activeMrp - activePrice) / activeMrp) * 100) : 0;
   
   const activeImage = resolveActiveImage(p, activeVariant);
+  
+  const displayBadge = p.badge || (p.is_wholesale ? "WHOLESALE" : null);
 
   return (
     <div className="group bg-white rounded-2xl border border-border/90 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lift md:hover:-translate-y-1.5 h-full">
       <div className="relative block bg-cream aspect-square overflow-hidden shrink-0">
-        {p.badge && p.badge !== "NEW" && (
-          <span className={`absolute top-2.5 left-2.5 md:top-3 md:left-3 z-10 text-[9px] md:text-[10px] font-bold tracking-wider px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-sm ${p.badge === "BESTSELLER" ? "bg-espresso text-cream" : "bg-burnt-orange text-white"}`}>
-            {p.badge}
+        {displayBadge && displayBadge !== "NEW" && (
+          <span className={`absolute top-2.5 left-2.5 md:top-3 md:left-3 z-10 text-[9px] md:text-[10px] font-bold tracking-wider px-2 py-0.5 md:px-2.5 md:py-1 rounded-full shadow-sm ${displayBadge === "BESTSELLER" ? "bg-espresso text-cream" : "bg-burnt-orange text-white"}`}>
+            {displayBadge}
           </span>
         )}
         {discount > 0 && (
-          <span className="absolute top-2.5 left-2.5 md:hidden z-10 text-[9px] font-bold px-2 py-0.5 rounded-full bg-terracotta text-white shadow-sm" style={{ top: p.badge ? "2rem" : "0.625rem" }}>
+          <span className="absolute top-2.5 left-2.5 md:hidden z-10 text-[9px] font-bold px-2 py-0.5 rounded-full bg-terracotta text-white shadow-sm" style={{ top: displayBadge ? "2rem" : "0.625rem" }}>
             -{discount}%
           </span>
         )}
