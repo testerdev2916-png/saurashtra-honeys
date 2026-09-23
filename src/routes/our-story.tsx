@@ -14,6 +14,8 @@ import { SiteLayout } from "@/components/site/Layout";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
 import { fetchPageSections } from "@/lib/page-cms.functions";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
+import { supabase } from "@/integrations/supabase/client";
+import { AchievementsGallery, type Achievement } from "@/components/site/AchievementsGallery";
 
 // Photographic assets
 import heroHoneyImg from "@/assets/hero-honey.jpg";
@@ -239,12 +241,29 @@ export const Route = createFileRoute("/our-story")({
       },
     ],
   }),
-  loader: () => fetchPageSections("our-story"),
+  loader: async () => {
+    const sections = await fetchPageSections("our-story");
+    let achievements: Achievement[] = [];
+    try {
+      const { data, error } = await (supabase as any)
+        .from("achievements_gallery")
+        .select("*")
+        .eq("is_active", true)
+        .order("display_order", { ascending: true })
+        .order("created_at", { ascending: false });
+      if (!error && data) {
+        achievements = data as any as Achievement[];
+      }
+    } catch (e) {
+      console.warn("Could not fetch achievements gallery (table might not exist yet):", e);
+    }
+    return { sections, achievements };
+  },
   component: OurStory,
 });
 
 function OurStory() {
-  const sections = Route.useLoaderData();
+  const { sections, achievements } = Route.useLoaderData();
   const getS = (key: string) => sections.find((s) => s.section_key === key)?.settings || {};
 
   const hero = getS("hero");
@@ -662,30 +681,8 @@ function OurStory() {
           </div>
         </section>
 
-        {/* 11. FINAL CTA */}
-        <section className="relative py-32 bg-[#FDFBF7] overflow-hidden">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] opacity-10 pointer-events-none translate-x-1/3 -translate-y-1/3">
-            <img
-              src={heroHoneyImg}
-              className="w-full h-full object-cover rounded-full blur-3xl"
-              alt=""
-            />
-          </div>
-          <div className="container-page text-center max-w-3xl mx-auto relative z-10 reveal opacity-0 translate-y-8 transition-all duration-1000">
-            <span className="text-[11px] uppercase tracking-[0.25em] text-[#3B5241] font-bold block mb-4">
-              {finalCta.eyebrow || "PURE HONEY YOU CAN TRUST"}
-            </span>
-            <h2 className="font-serif text-[40px] md:text-[56px] leading-tight text-[#2B2118] mb-10">
-              {finalCta.heading || "From our bees to your business and home."}
-            </h2>
-            <Link
-              to={finalCta.cta_link || "/shop"}
-              className="inline-flex items-center gap-3 bg-[#3B5241] hover:bg-[#2C3D30] text-white px-8 py-3.5 rounded-full text-sm font-bold tracking-widest uppercase transition-colors"
-            >
-              {finalCta.cta_text || "SHOP OUR HONEY"} <ArrowRight className="size-4" />
-            </Link>
-          </div>
-        </section>
+        {/* 11. ACHIEVEMENTS & AWARDS GALLERY */}
+        <AchievementsGallery items={achievements} />
       </main>
     </SiteLayout>
   );

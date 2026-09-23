@@ -34,6 +34,7 @@ import {
   Layers,
   Instagram,
   Video,
+  Trophy,
 } from "lucide-react";
 
 type NavItem = {
@@ -71,6 +72,7 @@ const NAV: NavItem[] = [
   { label: "B2B / Partnerships", to: "/admin/pages?group=b2b", icon: Store, perm: "settings.manage" },
   
   { label: "Blog", to: "/admin/blog", icon: FileText, perm: "blog.manage" },
+  { label: "Achievements & Awards", to: "/admin/achievements", icon: Trophy, perm: "settings.manage" },
   { label: "Media Library", to: "/admin/media", icon: ImageIcon, perm: "media.manage" },
 
   // ── Site Settings & Marketing ──
