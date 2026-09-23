@@ -444,7 +444,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
   const fb_eyebrow = settings?.eyebrow ?? "OUR JOURNEY";
   const fb_heading = settings?.heading ?? "The Journey Behind Every Drop";
   const fb_desc = settings?.description ?? "From the wildflowers of Saurashtra to the hands of our beekeepers, every drop follows a journey rooted in nature, care, and patience. We preserve what nature creates — pure, authentic honey, just as it was meant to be.";
-  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/cinematic.webp";
+  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/journey-beekeeper.jpg";
 
   const fb_cta_text = settings?.cta_text ?? "EXPLORE OUR HIVE";
   const fb_cta_url = settings?.cta_url ?? "/bee-farming";
