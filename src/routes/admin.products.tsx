@@ -1724,10 +1724,6 @@ function VariantsEditor({
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState<number | null>(null);
 
   async function handleVariantMediaUpload(file: File, variantIndex: number, type: "primary" | "gallery", galleryIndex?: number) {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image too large. Max 2MB.");
-      return;
-    }
     setUploadingVariantIndex(variantIndex);
     try {
       const url = await uploadToCloudinary(file, "products");
