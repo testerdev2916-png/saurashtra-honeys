@@ -1,4 +1,25 @@
+import imageCompression from 'browser-image-compression';
+
 export async function uploadToCloudinary(file: File, folder: string): Promise<string> {
+  let fileToUpload = file;
+  
+  // Cloudinary free tier has a 10MB limit for images.
+  // We compress images larger than 2MB down to < 8MB automatically.
+  if (file.type.startsWith('image/') && file.size > 2 * 1024 * 1024) {
+    try {
+      const options = {
+        maxSizeMB: 8,
+        maxWidthOrHeight: 4000,
+        useWebWorker: true,
+      };
+      const compressedBlob = await imageCompression(file, options);
+      // Convert back to File to retain original name/type properties for FormData
+      fileToUpload = new File([compressedBlob], file.name, { type: file.type });
+    } catch (error) {
+      console.warn('Image compression failed, proceeding with original file', error);
+    }
+  }
+
   const cloudinaryFolder = `saurashtra-honey/${folder}`;
   const fileExt = file.name.split('.').pop();
   const uniqueId = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}`;
@@ -10,7 +31,7 @@ export async function uploadToCloudinary(file: File, folder: string): Promise<st
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET || "zpt6ts5g";
 
   const formData = new FormData();
-  formData.append("file", file);
+  formData.append("file", fileToUpload);
   formData.append("upload_preset", uploadPreset);
   formData.append("folder", cloudinaryFolder);
   
