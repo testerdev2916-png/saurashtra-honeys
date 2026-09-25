@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { ShopPage } from "@/components/shop/ShopPage";
 import { fetchShopCategories } from "@/lib/category-catalog";
 import { fetchProducts } from "@/lib/product-catalog";
+import { fetchHeroSlides } from "@/lib/hero-catalog";
 import { z } from "zod";
 
 const searchSchema = z
@@ -14,11 +15,12 @@ const searchSchema = z
 export const Route = createFileRoute("/shop/")({
   validateSearch: (s) => searchSchema.parse(s),
   loader: async () => {
-    const [categories, products] = await Promise.all([
+    const [categories, products, heroSlides] = await Promise.all([
       fetchShopCategories(),
       fetchProducts(),
+      fetchHeroSlides("shop"),
     ]);
-    return { categories, products };
+    return { categories, products, heroSlides };
   },
   head: () => ({
     meta: [
@@ -28,6 +30,6 @@ export const Route = createFileRoute("/shop/")({
   }),
   component: () => {
     const data = Route.useLoaderData();
-    return <ShopPage initialCategories={data.categories} initialProducts={data.products} />;
+    return <ShopPage initialCategories={data.categories} initialProducts={data.products} initialHeroSlides={data.heroSlides} />;
   },
 });

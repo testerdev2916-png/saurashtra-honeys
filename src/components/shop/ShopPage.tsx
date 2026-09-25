@@ -18,6 +18,7 @@ import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { ShopHeroSlider } from "@/components/shop/ShopHeroSlider";
 import { CategoryHeroSlider } from "@/components/shop/CategoryHeroSlider";
 import { type Product } from "@/lib/products";
+import type { HeroSlide } from "@/components/site/HeroSlider";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
   fetchShopCategories,
@@ -44,11 +45,13 @@ import familyHoneyImg from "@/assets/family-honey.jpg";
 export function ShopPage({ 
   overrideCategorySlug, 
   initialCategories = DEFAULT_SHOP_CATEGORIES, 
-  initialProducts = [] 
+  initialProducts = [],
+  initialHeroSlides
 }: { 
   overrideCategorySlug?: string;
   initialCategories?: ShopCategory[];
   initialProducts?: Product[];
+  initialHeroSlides?: HeroSlide[];
 }) {
   // Temporary development diagnostic
   console.table(
@@ -297,7 +300,7 @@ export function ShopPage({
           2. SHOP HERO (3-Slide Carousel, 1920x600 proportion)
          ========================================================================= */}
       {!overrideCategorySlug ? (
-        <ShopHeroSlider />
+        <ShopHeroSlider initialSlides={initialHeroSlides} />
       ) : (
         <CategoryHeroSlider 
           categorySlug={overrideCategorySlug} 

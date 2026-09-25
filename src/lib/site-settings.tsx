@@ -16,7 +16,7 @@ export type SiteSettings = {
 };
 
 const DEFAULTS: SiteSettings = {
-  company: { name: "Saurashtra Honey", tagline: "Raw, unfiltered honey.", logo_url: "", favicon_url: "" },
+  company: { name: "Saurashtra Honey", tagline: "Raw, unfiltered honey.", logo_url: "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png", favicon_url: "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748301/saurashtra-honey/logos/fevicon%20for%20bees_fx43rb3etoc_1789748299254.png" },
   contact: { email: "hello@saurastrahoney.com", phone: "+91-96873-28404", whatsapp: "+91-96873-28404", address: "" },
   seo: { default_title: "Saurashtra Honey", default_description: "Raw, unfiltered honey from Saurashtra.", default_keywords: "", default_og_image: "" },
   analytics: { ga4_measurement_id: "", meta_pixel_id: "", clarity_id: "", gsc_verification: "" },

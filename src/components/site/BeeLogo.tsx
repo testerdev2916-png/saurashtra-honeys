@@ -16,7 +16,7 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
   const [srcIndex, setSrcIndex] = useState(0);
   const settings = useSiteSettings();
   const logoUrl = settings.company?.logo_url;
-  const sources = logoUrl ? [logoUrl, "/saurashtra-honey-logo-complete.png"] : ["/saurashtra-honey-logo-complete.png"];
+  const sources = logoUrl ? [logoUrl, "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"] : ["https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"];
 
   if (srcIndex >= sources.length) {
     return <FallbackBeeIcon className={className} />;
@@ -46,7 +46,7 @@ export function BrandMark() {
   const [srcIndex, setSrcIndex] = useState(0);
   const settings = useSiteSettings();
   const logoUrl = settings.company?.logo_url;
-  const sources = logoUrl ? [logoUrl, "/saurashtra-honey-logo-complete.png"] : ["/saurashtra-honey-logo-complete.png"];
+  const sources = logoUrl ? [logoUrl, "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"] : ["https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"];
 
   if (srcIndex >= sources.length) {
     return <FallbackBeeIcon className="w-[100px] lg:w-[130px] h-auto object-contain" />;

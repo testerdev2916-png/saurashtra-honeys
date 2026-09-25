@@ -6,16 +6,18 @@ import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import type { HeroSlide } from "@/components/site/HeroSlider";
 
-export function ShopHeroSlider() {
-  const [slides, setSlides] = useState<HeroSlide[]>(() => getDefaultHeroSlides("shop"));
+export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] } = {}) {
+  const [slides, setSlides] = useState<HeroSlide[]>(() => initialSlides || getDefaultHeroSlides("shop"));
   
   useEffect(() => {
-    void fetchHeroSlides("shop").then((loaded) => {
-      if (loaded && loaded.length > 0) {
-        setSlides(loaded);
-      }
-    });
-  }, []);
+    if (!initialSlides) {
+      void fetchHeroSlides("shop").then((loaded) => {
+        if (loaded && loaded.length > 0) {
+          setSlides(loaded);
+        }
+      });
+    }
+  }, [initialSlides]);
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true, align: "start", duration: 50 },
