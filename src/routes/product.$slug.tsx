@@ -354,11 +354,33 @@ function ProductPage() {
           <p className="mt-5 text-sm md:text-base text-muted-foreground leading-relaxed">{p.description}</p>
 
           <div className="mt-6">
-            <div className="text-xs font-bold uppercase tracking-widest text-espresso">Select Pack Size</div>
-            <div className="mt-2.5 flex gap-2.5 flex-wrap">
-              {p.sizes.map((s) => (
-                <button key={s} onClick={() => setSize(s)} className={`px-5 py-2.5 rounded-full text-sm border font-semibold transition-all ${size === s ? "border-burnt-orange text-burnt-orange bg-cream shadow-xs" : "border-border text-muted-foreground hover:border-burnt-orange"}`}>{s}</button>
-              ))}
+            <div className="text-xs font-bold uppercase tracking-widest text-espresso mb-3">Select Pack Size</div>
+            <div className="flex gap-3 flex-wrap">
+              {p.sizes.map((s) => {
+                const normalized = s.toLowerCase().replace(/\s/g, '');
+                let packaging = '';
+                if (normalized === '1kg') packaging = 'Plastic Jar';
+                else if (normalized === '250g' || normalized === '500g') packaging = 'Glass Jar';
+
+                return (
+                  <button 
+                    key={s} 
+                    onClick={() => setSize(s)} 
+                    className={`min-w-[110px] flex flex-col items-center justify-center px-4 py-2.5 rounded-xl border transition-all ${
+                      size === s 
+                        ? "border-burnt-orange bg-cream shadow-sm ring-1 ring-burnt-orange/20" 
+                        : "border-border bg-white hover:border-burnt-orange/60 hover:bg-cream/30"
+                    }`}
+                  >
+                    <span className={`text-base font-bold ${size === s ? "text-burnt-orange" : "text-espresso"}`}>{s}</span>
+                    {packaging && (
+                      <span className={`text-[10px] mt-0.5 font-bold uppercase tracking-wider ${size === s ? "text-burnt-orange/80" : "text-muted-foreground/70"}`}>
+                        {packaging}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
