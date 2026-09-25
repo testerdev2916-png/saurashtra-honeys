@@ -648,7 +648,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
           const cur = [...(f.images ?? [])];
           if (typeof replaceIdx === "number") {
             cur[replaceIdx] = url;
-          } else if (cur.length < 9) {
+          } else {
             cur.push(url);
           }
           setF((prev) => ({
@@ -1024,7 +1024,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                {[0, 1, 2, 3].map((idx) => {
+                {Array.from({ length: Math.max(4, (f.images?.length || 0) + 1) }).map((_, idx) => {
                   const u = (f.images ?? [])[idx] || "";
                   return (
                     <div
@@ -1041,8 +1041,8 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           <button
                             type="button"
                             onClick={() => {
-                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
-                              cur[idx] = "";
+                              const cur = [...(f.images || [])];
+                              cur.splice(idx, 1);
                               setF({ ...f, images: cur, image_url: cur[0] || null });
                             }}
                             className="text-destructive text-[10px] hover:underline font-semibold"
@@ -1071,8 +1071,6 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             if (file) {
-                              const cur = Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "");
-                              setF({ ...f, images: cur }); // pad array first
                               void handleMediaUpload(file, "gallery", idx);
                             }
                             e.target.value = "";
@@ -1098,17 +1096,16 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 })}
               </div>
 
-              <Field label="Or paste Gallery URLs (one per line, exactly 4 lines mapping to slots 1-4)">
+              <Field label="Or paste Gallery URLs (one per line)">
                 <textarea
-                  rows={4}
-                  value={Array.from({ length: 4 }, (_, i) => (f.images ?? [])[i] || "").join("\n")}
+                  rows={Math.max(4, (f.images?.length || 0) + 1)}
+                  value={(f.images ?? []).join("\n")}
                   onChange={(e) => {
                     const lines = e.target.value.split("\n").map(s => s.trim());
-                    const cur = Array.from({ length: 4 }, (_, i) => lines[i] || "");
-                    setF({ ...f, images: cur, image_url: cur[0] || null });
+                    setF({ ...f, images: lines, image_url: lines[0] || null });
                   }}
                   className={`${inp} font-mono text-xs`}
-                  placeholder="Paste exactly 4 image URLs, one per line (leave blank line for empty slot)"
+                  placeholder="Paste image URLs, one per line"
                 />
               </Field>
             </div>
@@ -1118,12 +1115,12 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
               <div>
                 <h3 className="font-serif text-lg font-bold text-espresso">Additional Common Images</h3>
                 <p className="text-xs text-muted-foreground">
-                  Upload up to 8 additional common images.
+                  Upload unlimited additional common images.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {[0, 1, 2, 3, 4, 5, 6, 7].map((idx) => {
+                {Array.from({ length: Math.max(4, (f.additional_images?.length || 0) + 1) }).map((_, idx) => {
                   const url = (f.additional_images ?? [])[idx];
                   return (
                     <div
@@ -1139,7 +1136,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                             type="button"
                             onClick={() => {
                               const cur = [...(f.additional_images ?? [])];
-                              cur[idx] = "";
+                              cur.splice(idx, 1);
                               setF({ ...f, additional_images: cur });
                             }}
                             className="text-destructive text-xs hover:underline font-semibold"
