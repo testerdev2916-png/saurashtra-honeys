@@ -183,7 +183,7 @@ export function Navbar() {
       <div className="bg-cream/95 backdrop-blur-xl border-b border-border/80 shadow-soft transition-all">
         <div className="container-page">
         {/* Mobile row: MENU + LOGO | SEARCH + CART */}
-        <div className="flex items-center justify-between h-[64px] px-4 lg:hidden w-full relative">
+        <div className="flex items-center justify-between h-[76px] px-4 lg:hidden w-full relative">
           {/* Left group: Hamburger */}
           <div className="flex items-center min-w-0 z-10">
             <button
