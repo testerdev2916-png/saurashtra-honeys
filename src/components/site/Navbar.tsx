@@ -268,7 +268,7 @@ export function Navbar() {
             })}
           </nav>
 
-          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 shrink-0">
+          <Link to="/" aria-label="Saurashtra Honey home" className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 shrink-0 z-20">
             <BrandMark />
           </Link>
 

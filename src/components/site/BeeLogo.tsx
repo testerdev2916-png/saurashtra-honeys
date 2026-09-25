@@ -56,7 +56,7 @@ export function BrandMark() {
     <img
       src={sources[srcIndex]}
       alt="Saurashtra Honey Logo"
-      className="w-auto max-w-[130px] lg:max-w-[160px] max-h-[60px] lg:max-h-[80px] object-contain"
+      className="w-auto max-w-[130px] lg:max-w-[260px] max-h-[60px] lg:max-h-[125px] object-contain"
       style={{
         backgroundColor: "transparent",
       }}
