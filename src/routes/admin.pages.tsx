@@ -32,6 +32,7 @@ const PAGE_GROUPS = {
       { slug: "bulk-orders", title: "Bulk Orders", desc: "Wholesale supplies and bulk purchasing." },
       { slug: "corporate-gifting", title: "Corporate Gifting", desc: "Corporate gifting solutions and features." },
       { slug: "private-label", title: "Private Label", desc: "OEM and private label manufacturing." },
+      { slug: "gift-hampers", title: "Gift Hampers", desc: "Curated premium honey gift hampers." },
       { slug: "become-a-partner", title: "Become a Partner", desc: "Partnership programs and benefits." },
     ],
   },

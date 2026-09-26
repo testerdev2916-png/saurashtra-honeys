@@ -12,6 +12,7 @@ import { z } from "zod";
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroHoneyImg from "@/assets/hero-honey.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
+import { fetchPageSections } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/gift-hampers")({
@@ -29,6 +30,7 @@ export const Route = createFileRoute("/gift-hampers")({
       { property: "og:type", content: "website" },
     ],
   }),
+  loader: () => fetchPageSections("gift-hampers"),
   component: GiftHampersPage,
 });
 
@@ -43,6 +45,10 @@ const schema = z.object({
 });
 
 function GiftHampersPage() {
+  const sections = Route.useLoaderData();
+  const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+  const gallerySettings = sections.find((s) => s.section_key === "gallery")?.settings || {};
+  
   const settings = useSiteSettings();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -95,13 +101,13 @@ function GiftHampersPage() {
         <div className="container-page max-w-5xl mx-auto flex flex-col md:flex-row gap-12 items-center">
           <div className="flex-1 space-y-6">
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
-              Meaningful Gifting
+              {introSettings.eyebrow || "Meaningful Gifting"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight">
-              Curated with Care, Wrapped with Love
+            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+              {introSettings.heading || "Curated with Care, Wrapped with Love"}
             </h2>
-            <p className="text-[#6B6257] leading-relaxed text-[16px]">
-              Gift health, taste, and purity. Our premium honey hampers are designed to make your special occasions unforgettable. Whether it's a wedding return gift or a festive family present, Saurashtra Honey delivers joy in every jar.
+            <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
+              {introSettings.description || "Gift health, taste, and purity. Our premium honey hampers are designed to make your special occasions unforgettable. Whether it's a wedding return gift or a festive family present, Saurashtra Honey delivers joy in every jar."}
             </p>
             <ul className="space-y-4 pt-4">
               {['Beautiful Luxury Packaging', 'Personalized Handwritten Notes', 'Premium Satin Ribbon Options', 'Selection of Exotic Flora Honey'].map((item, i) => (
@@ -112,7 +118,7 @@ function GiftHampersPage() {
             </ul>
           </div>
           <div className="flex-1 w-full relative aspect-[4/5] rounded-[24px] overflow-hidden shadow-lg">
-            <img src={heroHoneyImg} alt="Luxury Honey Hamper" className="w-full h-full object-cover" />
+            <img src={introSettings.image || heroHoneyImg} alt="Luxury Honey Hamper" className="w-full h-full object-cover" />
           </div>
         </div>
       </section>
@@ -180,7 +186,11 @@ function GiftHampersPage() {
       <section className="py-20 bg-[#2B2118]">
         <div className="container-page">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {[heroHoneyImg, giftPackImg, beeFlowerImg].map((img, idx) => (
+            {[
+              gallerySettings.gallery_img_1 || heroHoneyImg,
+              gallerySettings.gallery_img_2 || giftPackImg,
+              gallerySettings.gallery_img_3 || beeFlowerImg
+            ].map((img, idx) => (
               <div key={idx} className="aspect-square overflow-hidden rounded-[16px]">
                 <img src={img} alt="Gift Hampers" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               </div>

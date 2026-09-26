@@ -41,6 +41,7 @@ export const Route = createFileRoute("/bulk-orders")({
         .from("products")
         .select("*")
         .eq("published", true)
+        // @ts-expect-error - The is_wholesale column might not exist in the generated types yet
         .eq("is_wholesale", true)
         .order("sort_order", { ascending: true });
         
@@ -69,6 +70,7 @@ const schema = z.object({
 function BulkOrdersPage() {
   const { sections, wholesaleProducts } = Route.useLoaderData();
   const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+  const gallerySettings = sections.find((s) => s.section_key === "gallery")?.settings || {};
   const settings = useSiteSettings();
 
   const [loading, setLoading] = useState(false);
@@ -251,7 +253,11 @@ function BulkOrdersPage() {
       <section className="py-20 bg-[#2B2118]">
         <div className="container-page">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {[heroProductsImg, beeFarmImg, familyHoneyImg].map((img, idx) => (
+            {[
+              gallerySettings.gallery_img_1 || heroProductsImg,
+              gallerySettings.gallery_img_2 || beeFarmImg,
+              gallerySettings.gallery_img_3 || familyHoneyImg
+            ].map((img, idx) => (
               <div key={idx} className="aspect-square overflow-hidden rounded-[16px]">
                 <img src={img} alt="Gallery" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               </div>

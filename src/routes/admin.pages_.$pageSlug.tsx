@@ -222,6 +222,15 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
         ]
+      },
+      "gallery": {
+        title: "Gallery",
+        description: "Images to display in the gallery section.",
+        fields: [
+          { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
+        ]
       }
     }
   },
@@ -237,6 +246,15 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
         ]
+      },
+      "gallery": {
+        title: "Gallery",
+        description: "Images to display in the gallery section.",
+        fields: [
+          { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
+        ]
       }
     }
   },
@@ -251,6 +269,39 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
+        ]
+      },
+      "gallery": {
+        title: "Gallery",
+        description: "Images to display in the gallery section.",
+        fields: [
+          { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
+        ]
+      }
+    }
+  },
+  "gift-hampers": {
+    title: "Gift Hampers",
+    sections: {
+      "intro": {
+        title: "Introduction Section",
+        description: "The main introductory text and image.",
+        fields: [
+          { type: "text", key: "eyebrow", label: "Eyebrow Text" },
+          { type: "text", key: "heading", label: "Heading" },
+          { type: "textarea", key: "description", label: "Description" },
+          { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
+        ]
+      },
+      "gallery": {
+        title: "Gallery",
+        description: "Images to display in the gallery section.",
+        fields: [
+          { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
+          { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
         ]
       }
     }

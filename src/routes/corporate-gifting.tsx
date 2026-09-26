@@ -46,6 +46,7 @@ const schema = z.object({
 function CorporateGiftingPage() {
   const sections = Route.useLoaderData();
   const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+  const gallerySettings = sections.find((s) => s.section_key === "gallery")?.settings || {};
   const settings = useSiteSettings();
 
   const [loading, setLoading] = useState(false);
@@ -184,7 +185,11 @@ function CorporateGiftingPage() {
       <section className="py-20 bg-[#2B2118]">
         <div className="container-page">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {[heroProductsImg, giftPackImg, familyHoneyImg].map((img, idx) => (
+            {[
+              gallerySettings.gallery_img_1 || heroProductsImg,
+              gallerySettings.gallery_img_2 || giftPackImg,
+              gallerySettings.gallery_img_3 || familyHoneyImg
+            ].map((img, idx) => (
               <div key={idx} className="aspect-[4/5] overflow-hidden rounded-[16px]">
                 <img src={img} alt="Corporate Gifting" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               </div>

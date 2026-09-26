@@ -49,6 +49,7 @@ const schema = z.object({
 function PrivateLabelPage() {
   const sections = Route.useLoaderData();
   const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
+  const gallerySettings = sections.find((s) => s.section_key === "gallery")?.settings || {};
   const settings = useSiteSettings();
 
   const [loading, setLoading] = useState(false);
@@ -200,7 +201,11 @@ function PrivateLabelPage() {
       <section className="py-20 bg-[#2B2118]">
         <div className="container-page">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-            {[ajwainImg, beeFarmImg, honeycombBeesImg].map((img, idx) => (
+            {[
+              gallerySettings.gallery_img_1 || ajwainImg,
+              gallerySettings.gallery_img_2 || beeFarmImg,
+              gallerySettings.gallery_img_3 || honeycombBeesImg
+            ].map((img, idx) => (
               <div key={idx} className="aspect-square overflow-hidden rounded-[16px]">
                 <img src={img} alt="Manufacturing" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               </div>
