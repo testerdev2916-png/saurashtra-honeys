@@ -285,6 +285,38 @@ function OurStory() {
     Autoplay({ delay: 3000, stopOnInteraction: true }),
   ]);
 
+  // Prepare slider images (unlimited array)
+  let sliderImages = gallery.images?.map((imgItem: any) => ({ img: imgItem.url, caption: imgItem.caption })) || [];
+  
+  if (sliderImages.length === 0) {
+    // Fallback to legacy structure or placeholders
+    const legacyImages = [
+      gallery.gallery_img_1,
+      gallery.gallery_img_4,
+      gallery.gallery_img_2,
+      gallery.gallery_img_3,
+      gallery.gallery_img_5,
+      gallery.gallery_img_6
+    ].filter(Boolean);
+
+    if (legacyImages.length > 0) {
+      sliderImages = legacyImages.map((img: string) => ({ img }));
+    } else {
+      sliderImages = [
+        { img: beeFarmImg },
+        { img: honeycombBeesImg },
+        { img: honeyDrizzleImg },
+        { img: beeFlowerImg }
+      ];
+    }
+  }
+
+  // Duplicate for infinite loop if there are not enough images to fill the screen
+  let displayImages = [...sliderImages];
+  while (displayImages.length > 0 && displayImages.length < 10) {
+    displayImages = [...displayImages, ...sliderImages];
+  }
+
   // Scroll animations
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -604,33 +636,31 @@ function OurStory() {
                 {gallery.heading || "Moments from our everyday life."}
               </h2>
             </div>
+          </div>
 
-            <div className="overflow-hidden w-full -mx-4 px-4 md:mx-0 md:px-0 py-8 reveal opacity-0 translate-y-8 transition-all duration-1000" ref={emblaRef}>
-              <div className="flex gap-4 md:gap-6 items-center">
-                {[
-                  { img: gallery.gallery_img_1 || beeFarmImg },
-                  { img: gallery.gallery_img_4 || honeycombBeesImg },
-                  { img: gallery.gallery_img_2 || honeyDrizzleImg },
-                  { img: gallery.gallery_img_3 || beeFlowerImg },
-                  { img: gallery.gallery_img_1 || beeFarmImg },
-                  { img: gallery.gallery_img_4 || honeycombBeesImg },
-                  { img: gallery.gallery_img_2 || honeyDrizzleImg },
-                  { img: gallery.gallery_img_3 || beeFlowerImg },
-                ].map((item, i) => (
+          <div className="w-full overflow-hidden py-8 reveal opacity-0 translate-y-8 transition-all duration-1000" ref={emblaRef}>
+            <div className="flex gap-4 md:gap-6 items-center px-4 md:px-8">
+              {displayImages.map((item, i) => (
                   <div 
                     key={i} 
-                    className="flex-[0_0_85%] sm:flex-[0_0_60%] md:flex-[0_0_40%] lg:flex-[0_0_30%] min-w-0 aspect-square overflow-hidden rounded-[24px] bg-[#F8F5EF] flex items-center justify-center relative group shadow-sm hover:shadow-md transition-shadow"
+                    className="flex-[0_0_70%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_18%] min-w-0 flex flex-col items-center group"
                   >
-                    <img
-                      src={item.img}
-                      className="w-full h-full object-contain p-4 md:p-8 group-hover:scale-105 transition-transform duration-700"
-                      alt={`Gallery ${i + 1}`}
-                    />
+                    <div className="w-full aspect-square overflow-hidden flex items-center justify-center relative">
+                      <img
+                        src={item.img}
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                        alt={`Gallery ${i + 1}`}
+                      />
+                    </div>
+                    {item.caption && (
+                      <div className="mt-4 text-center px-2">
+                        <span className="font-serif italic text-lg text-[#2B2118]">{item.caption}</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
-          </div>
         </section>
 
         {/* 10. OUR PROMISE */}

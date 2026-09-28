@@ -158,16 +158,19 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
       },
       "life_around_hives": {
         title: "Life Around the Hives",
-        description: "Masonry gallery.",
+        description: "Infinite image slider gallery.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
-          { type: "image", key: "gallery_img_1", label: "Gallery Image 1 (Large)", folder: "pages/our-story" },
-          { type: "image", key: "gallery_img_2", label: "Gallery Image 2 (Small)", folder: "pages/our-story" },
-          { type: "image", key: "gallery_img_3", label: "Gallery Image 3 (Small)", folder: "pages/our-story" },
-          { type: "image", key: "gallery_img_4", label: "Gallery Image 4 (Horizontal)", folder: "pages/our-story" },
-          { type: "image", key: "gallery_img_5", label: "Gallery Image 5 (Horizontal)", folder: "pages/our-story" },
-          { type: "image", key: "gallery_img_6", label: "Gallery Image 6 (Horizontal)", folder: "pages/our-story" },
+          { 
+            type: "list", 
+            key: "images", 
+            label: "Gallery Images",
+            itemFields: [
+              { type: "image", key: "url", label: "Image", folder: "pages/our-story" },
+              { type: "text", key: "caption", label: "Caption (Optional)" }
+            ]
+          }
         ]
       },
       "final_cta": {
