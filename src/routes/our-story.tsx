@@ -16,6 +16,8 @@ import { fetchPageSections } from "@/lib/page-cms.functions";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { supabase } from "@/integrations/supabase/client";
 import { AchievementsGallery, type Achievement } from "@/components/site/AchievementsGallery";
+import useEmblaCarousel from "embla-carousel-react";
+import Autoplay from "embla-carousel-autoplay";
 
 // Photographic assets
 import heroHoneyImg from "@/assets/hero-honey.jpg";
@@ -277,6 +279,11 @@ function OurStory() {
   const people = getS("the_people");
   const gallery = getS("life_around_hives");
   const finalCta = getS("final_cta");
+
+  // Infinite slider hook
+  const [emblaRef] = useEmblaCarousel({ loop: true, align: "center", dragFree: true }, [
+    Autoplay({ delay: 3000, stopOnInteraction: true }),
+  ]);
 
   // Scroll animations
   useEffect(() => {
@@ -598,38 +605,29 @@ function OurStory() {
               </h2>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-              {/* Large vertical */}
-              <div className="col-span-2 row-span-2 overflow-hidden rounded-[16px] reveal opacity-0 translate-y-8 transition-all duration-1000 delay-75">
-                <img
-                  src={gallery.gallery_img_1 || beeFarmImg}
-                  className="w-full h-full object-cover min-h-[300px] md:min-h-[600px] hover:scale-105 transition-transform duration-700"
-                  alt="Gallery 1"
-                />
-              </div>
-              {/* Horizontal */}
-              <div className="col-span-2 overflow-hidden rounded-[16px] reveal opacity-0 translate-y-8 transition-all duration-1000 delay-100">
-                <img
-                  src={gallery.gallery_img_4 || honeycombBeesImg}
-                  className="w-full h-full object-cover min-h-[150px] md:min-h-[300px] hover:scale-105 transition-transform duration-700"
-                  alt="Gallery 4"
-                />
-              </div>
-              {/* Small square */}
-              <div className="col-span-1 overflow-hidden rounded-[16px] reveal opacity-0 translate-y-8 transition-all duration-1000 delay-150">
-                <img
-                  src={gallery.gallery_img_2 || honeyDrizzleImg}
-                  className="w-full h-full object-cover min-h-[150px] md:min-h-[284px] hover:scale-105 transition-transform duration-700"
-                  alt="Gallery 2"
-                />
-              </div>
-              {/* Small square */}
-              <div className="col-span-1 overflow-hidden rounded-[16px] reveal opacity-0 translate-y-8 transition-all duration-1000 delay-200">
-                <img
-                  src={gallery.gallery_img_3 || beeFlowerImg}
-                  className="w-full h-full object-cover min-h-[150px] md:min-h-[284px] hover:scale-105 transition-transform duration-700"
-                  alt="Gallery 3"
-                />
+            <div className="overflow-hidden w-full -mx-4 px-4 md:mx-0 md:px-0 py-8 reveal opacity-0 translate-y-8 transition-all duration-1000" ref={emblaRef}>
+              <div className="flex gap-4 md:gap-6 items-center">
+                {[
+                  { img: gallery.gallery_img_1 || beeFarmImg },
+                  { img: gallery.gallery_img_4 || honeycombBeesImg },
+                  { img: gallery.gallery_img_2 || honeyDrizzleImg },
+                  { img: gallery.gallery_img_3 || beeFlowerImg },
+                  { img: gallery.gallery_img_1 || beeFarmImg },
+                  { img: gallery.gallery_img_4 || honeycombBeesImg },
+                  { img: gallery.gallery_img_2 || honeyDrizzleImg },
+                  { img: gallery.gallery_img_3 || beeFlowerImg },
+                ].map((item, i) => (
+                  <div 
+                    key={i} 
+                    className="flex-[0_0_85%] sm:flex-[0_0_60%] md:flex-[0_0_40%] lg:flex-[0_0_30%] min-w-0 aspect-square overflow-hidden rounded-[24px] bg-[#F8F5EF] flex items-center justify-center relative group shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <img
+                      src={item.img}
+                      className="w-full h-full object-contain p-4 md:p-8 group-hover:scale-105 transition-transform duration-700"
+                      alt={`Gallery ${i + 1}`}
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
