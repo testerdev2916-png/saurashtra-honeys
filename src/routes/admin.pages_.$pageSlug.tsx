@@ -182,6 +182,17 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "cta_text", label: "CTA Button Text" },
           { type: "text", key: "cta_link", label: "CTA Button Link (e.g. /shop)" },
         ]
+      },
+      "story_video_gallery": {
+        title: "Story Video",
+        description: "A section with a video that appears above the achievements gallery.",
+        fields: [
+          { type: "text", key: "eyebrow", label: "Eyebrow Text" },
+          { type: "text", key: "heading", label: "Heading" },
+          { type: "textarea", key: "description", label: "Description" },
+          { type: "video", key: "video_url", label: "Video File", folder: "pages/our-story/video" },
+          { type: "image", key: "video_poster", label: "Video Poster Image", folder: "pages/our-story/video" }
+        ]
       }
     }
   },

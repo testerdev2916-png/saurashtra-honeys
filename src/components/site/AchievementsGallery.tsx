@@ -12,7 +12,7 @@ export type Achievement = {
   description: string | null;
 };
 
-export function AchievementsGallery({ items }: { items: Achievement[] }) {
+export function AchievementsGallery({ items, videoNode }: { items: Achievement[], videoNode?: React.ReactNode }) {
   const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start" }, [
@@ -119,6 +119,7 @@ export function AchievementsGallery({ items }: { items: Achievement[] }) {
             Every milestone reflects our commitment to quality, responsible beekeeping, and naturally ripened honey.
           </p>
         </div>
+        {videoNode}
       </div>
 
       {/* Embla Carousel Slider - Full Width (Edge to Edge) */}

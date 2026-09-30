@@ -279,6 +279,7 @@ function OurStory() {
   const people = getS("the_people");
   const gallery = getS("life_around_hives");
   const finalCta = getS("final_cta");
+  const storyVideoGallery = getS("story_video_gallery");
 
   // Infinite slider hook
   const [emblaRef] = useEmblaCarousel({ loop: true, align: "center", dragFree: true }, [
@@ -709,8 +710,50 @@ function OurStory() {
           </div>
         </section>
 
-        {/* 11. ACHIEVEMENTS & AWARDS GALLERY */}
-        <AchievementsGallery items={achievements} />
+        {/* 11 & 12. ACHIEVEMENTS & STORY VIDEO */}
+        <AchievementsGallery 
+          items={achievements} 
+          videoNode={
+            sections.find(s => s.section_key === "story_video_gallery")?.enabled !== false ? (
+              <div className="w-full max-w-5xl mx-auto mb-16">
+                {(storyVideoGallery.eyebrow || storyVideoGallery.heading || storyVideoGallery.description) && (
+                  <div className="text-center mb-12 reveal opacity-0 translate-y-8 transition-all duration-1000">
+                    {storyVideoGallery.eyebrow && (
+                      <span className="text-[11px] uppercase tracking-[0.25em] text-[#3B5241] font-bold block mb-4">
+                        {storyVideoGallery.eyebrow}
+                      </span>
+                    )}
+                    {storyVideoGallery.heading && (
+                      <h2 className="font-serif text-[36px] sm:text-[48px] leading-tight text-[#2B2118] mb-6">
+                        {storyVideoGallery.heading}
+                      </h2>
+                    )}
+                    {storyVideoGallery.description && (
+                      <p className="text-[16px] md:text-[18px] text-[#2B2118]/70 leading-relaxed font-light max-w-2xl mx-auto">
+                        {storyVideoGallery.description}
+                      </p>
+                    )}
+                  </div>
+                )}
+                {storyVideoGallery.video_url ? (
+                  <div className="w-full aspect-video rounded-[24px] overflow-hidden shadow-xl reveal opacity-0 translate-y-8 transition-all duration-1000">
+                    <video
+                      src={storyVideoGallery.video_url}
+                      poster={storyVideoGallery.video_poster}
+                      controls
+                      className="w-full h-full object-cover"
+                      playsInline
+                    />
+                  </div>
+                ) : (
+                  <div className="w-full aspect-video rounded-[24px] bg-[#EBEFE9] border-2 border-dashed border-[#3B5241]/20 flex items-center justify-center reveal opacity-0 translate-y-8 transition-all duration-1000">
+                    <span className="text-[#3B5241]/50 font-medium">Video Placeholder</span>
+                  </div>
+                )}
+              </div>
+            ) : null
+          }
+        />
       </main>
     </SiteLayout>
   );
