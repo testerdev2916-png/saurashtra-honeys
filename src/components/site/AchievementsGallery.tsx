@@ -126,18 +126,18 @@ export function AchievementsGallery({ items }: { items: Achievement[] }) {
         <div className="overflow-hidden px-4 sm:px-6 lg:px-8" ref={emblaRef}>
           <div className="flex gap-4 sm:gap-6 lg:gap-8 py-4 items-stretch">
             {displayItems.map((item, idx) => (
-              <div
-                key={`${item.id}-${idx}`}
-                className="flex-[0_0_85%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_15%] min-w-0 relative bg-white cursor-pointer rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500 border border-[#EBEFE9] flex flex-col"
-                onClick={() => setSelectedIdx(idx)}
-              >
-                <div className="relative w-full aspect-square bg-[#EBEFE9] overflow-hidden group/item flex-shrink-0 flex items-center justify-center">
+                <div
+                  key={`${item.id}-${idx}`}
+                  className="flex-[0_0_85%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_15%] min-w-0 relative cursor-pointer group flex flex-col"
+                  onClick={() => setSelectedIdx(idx)}
+                >
+                  <div className="relative w-full aspect-square overflow-hidden flex-shrink-0 flex items-center justify-center">
                   {item.media_type === "image" ? (
                     <img
                       src={item.media_url}
                       alt={item.title || "Achievement"}
                       loading="lazy"
-                      className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover/item:scale-105 p-4"
+                      className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-105"
                     />
                   ) : (
                     <>
@@ -145,10 +145,10 @@ export function AchievementsGallery({ items }: { items: Achievement[] }) {
                         src={item.thumbnail_url || item.media_url.replace(".mp4", ".jpg")} // Fallback if supported
                         alt={item.title || "Video thumbnail"}
                         loading="lazy"
-                        className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover/item:scale-105 p-4"
+                        className="w-full h-full object-contain transition-transform duration-700 ease-out group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/5 group-hover/item:bg-black/10 transition-colors duration-300">
-                        <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#3B5241] shadow-lg transform group-hover/item:scale-110 transition-transform duration-300">
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/5 group-hover:bg-black/10 transition-colors duration-300">
+                        <div className="w-14 h-14 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-[#3B5241] shadow-lg transform group-hover:scale-110 transition-transform duration-300">
                           <Play className="size-6 ml-1" fill="currentColor" />
                         </div>
                       </div>
@@ -157,7 +157,7 @@ export function AchievementsGallery({ items }: { items: Achievement[] }) {
                 </div>
                 
                 {(item.title || item.description) && (
-                  <div className="p-6 bg-white flex-grow flex flex-col justify-center text-center">
+                  <div className="pt-4 flex-grow flex flex-col justify-center text-center">
                     {item.title && (
                       <h3 className="font-serif text-lg text-[#2B2118] mb-2 leading-tight">
                         {item.title}
