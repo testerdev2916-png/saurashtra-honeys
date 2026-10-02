@@ -94,6 +94,18 @@ function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) 
   const [tn, setTn] = useState(order.tracking_number ?? "");
   const [carrier, setCarrier] = useState(order.shipping_carrier ?? "");
   const [refund, setRefund] = useState<string>("");
+  const [printMode, setPrintMode] = useState<"order" | "customer" | null>(null);
+
+  const handlePrint = (mode: "order" | "customer") => {
+    setPrintMode(mode);
+    const oldTitle = document.title;
+    if (mode === "customer") document.title = "Customer Details";
+    setTimeout(() => {
+      window.print();
+      if (mode === "customer") document.title = oldTitle;
+      setPrintMode(null);
+    }, 100);
+  };
 
   async function save() {
     try {
@@ -108,49 +120,99 @@ function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) 
 
   return (
     <div>
-      <button onClick={onClose} className="inline-flex items-center gap-1 text-xs font-bold text-forest-dark mb-4"><ArrowLeft className="size-4" /> BACK</button>
-      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6">
-        <Card className="p-6">
-          <div className="flex justify-between items-start gap-3 flex-wrap">
-            <div>
-              <div className="text-xs font-bold tracking-widest text-gold-deep">ORDER</div>
-              <h2 className="mt-1 font-serif text-2xl text-forest-dark">{order.order_number ?? `#${order.id.slice(0, 8)}`}</h2>
-              <div className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString()}</div>
+      {printMode === "customer" && (
+        <style>{`
+          @media print {
+            @page { margin: 0; }
+            body { padding: 2cm; }
+          }
+        `}</style>
+      )}
+      <button onClick={onClose} className="inline-flex items-center gap-1 text-xs font-bold text-forest-dark mb-4 print:hidden"><ArrowLeft className="size-4" /> BACK</button>
+      <div className="grid lg:grid-cols-[1.4fr_1fr] gap-6 print:block">
+        <div className="space-y-6">
+          <Card className={`p-6 ${printMode === 'customer' ? 'print:hidden' : 'print:border-none print:shadow-none print:p-0'}`}>
+            <div className="flex justify-between items-start gap-3 flex-wrap">
+              <div>
+                <div className="text-xs font-bold tracking-widest text-gold-deep">ORDER</div>
+                <h2 className="mt-1 font-serif text-2xl text-forest-dark">{order.order_number ?? `#${order.id.slice(0, 8)}`}</h2>
+                <div className="text-xs text-muted-foreground">{new Date(order.created_at).toLocaleString()}</div>
+              </div>
+              <button onClick={() => handlePrint('order')} className="inline-flex items-center gap-1 border border-border rounded-lg px-3 py-1.5 text-xs font-semibold hover:border-gold-deep print:hidden"><Printer className="size-3.5" /> PRINT INVOICE</button>
             </div>
-            <button onClick={() => window.print()} className="inline-flex items-center gap-1 border border-border rounded-lg px-3 py-1.5 text-xs font-semibold hover:border-gold-deep"><Printer className="size-3.5" /> PRINT INVOICE</button>
-          </div>
-          <div className="mt-6 grid sm:grid-cols-2 gap-6 text-sm">
-            <div><div className="text-xs text-muted-foreground">Customer</div>
-              <div className="font-medium text-forest-dark">{order.full_name}</div><div>{order.email}</div><div>{order.phone}</div></div>
-            <div><div className="text-xs text-muted-foreground">Shipping</div>
-              <div>{order.shipping.line1}{order.shipping.line2 ? `, ${order.shipping.line2}` : ""}</div>
-              <div>{order.shipping.city}, {order.shipping.state} — {order.shipping.pincode}</div></div>
-          </div>
-          <div className="mt-6">
-            <div className="text-xs text-muted-foreground mb-2">Items</div>
-            <table className="w-full text-sm"><tbody className="divide-y divide-border">
-              {order.items.map((i, idx) => (
-                <tr key={idx}><td className="py-2">{i.name} <span className="text-xs text-muted-foreground">({i.size})</span></td><td className="py-2 text-right">× {i.qty}</td><td className="py-2 text-right font-medium">₹{i.price * i.qty}</td></tr>
-              ))}
-            </tbody></table>
-          </div>
-          <div className="mt-4 text-sm space-y-1 max-w-xs ml-auto">
-            <div className="flex justify-between"><span>Subtotal</span><span>{paise(order.subtotal_paise)}</span></div>
-            <div className="flex justify-between"><span>Shipping</span><span>{paise(order.shipping_paise)}</span></div>
-            <div className="flex justify-between font-serif text-lg pt-2 border-t border-border"><span>Total</span><span>{paise(order.total_paise)}</span></div>
-          </div>
-          <div className="mt-4 text-xs text-muted-foreground">
-            Payment: <span className="uppercase font-semibold">{order.payment_method}</span>
-            {order.razorpay_payment_id && <> • Razorpay: <span className="font-mono">{order.razorpay_payment_id}</span></>}
-          </div>
-          {order.timeline && order.timeline.length > 0 && (
-            <div className="mt-6"><div className="text-xs text-muted-foreground mb-2">Timeline</div>
-              <ul className="space-y-1 text-xs">
-                {order.timeline.map((t, i) => <li key={i}><span className="font-mono">{new Date(t.at).toLocaleString()}</span> — <StatusPill s={t.status} /> {t.note && <span className="text-muted-foreground">— {t.note}</span>}</li>)}
-              </ul></div>
-          )}
-        </Card>
-        <aside className="bg-cream rounded-2xl p-6 h-fit">
+            <div className="mt-6 grid sm:grid-cols-2 gap-6 text-sm">
+              <div><div className="text-xs text-muted-foreground">Customer</div>
+                <div className="font-medium text-forest-dark">{order.full_name}</div><div>{order.email}</div><div>{order.phone}</div></div>
+              <div><div className="text-xs text-muted-foreground">Shipping</div>
+                <div>{order.shipping.line1}{order.shipping.line2 ? `, ${order.shipping.line2}` : ""}</div>
+                <div>{order.shipping.city}, {order.shipping.state} — {order.shipping.pincode}</div></div>
+            </div>
+            <div className="mt-6">
+              <div className="text-xs text-muted-foreground mb-2">Items</div>
+              <table className="w-full text-sm"><tbody className="divide-y divide-border">
+                {order.items.map((i, idx) => (
+                  <tr key={idx}><td className="py-2">{i.name} <span className="text-xs text-muted-foreground">({i.size})</span></td><td className="py-2 text-right">× {i.qty}</td><td className="py-2 text-right font-medium">₹{i.price * i.qty}</td></tr>
+                ))}
+              </tbody></table>
+            </div>
+            <div className="mt-4 text-sm space-y-1 max-w-xs ml-auto">
+              <div className="flex justify-between"><span>Subtotal</span><span>{paise(order.subtotal_paise)}</span></div>
+              <div className="flex justify-between"><span>Shipping</span><span>{paise(order.shipping_paise)}</span></div>
+              <div className="flex justify-between font-serif text-lg pt-2 border-t border-border"><span>Total</span><span>{paise(order.total_paise)}</span></div>
+            </div>
+            <div className="mt-4 text-xs text-muted-foreground">
+              Payment: <span className="uppercase font-semibold">{order.payment_method}</span>
+              {order.razorpay_payment_id && <> • Razorpay: <span className="font-mono">{order.razorpay_payment_id}</span></>}
+            </div>
+            {order.timeline && order.timeline.length > 0 && (
+              <div className="mt-6 print:hidden"><div className="text-xs text-muted-foreground mb-2">Timeline</div>
+                <ul className="space-y-1 text-xs">
+                  {order.timeline.map((t, i) => <li key={i}><span className="font-mono">{new Date(t.at).toLocaleString()}</span> — <StatusPill s={t.status} /> {t.note && <span className="text-muted-foreground">— {t.note}</span>}</li>)}
+                </ul></div>
+            )}
+          </Card>
+
+          <Card className={`p-6 ${printMode === 'order' ? 'print:hidden' : 'print:border-none print:shadow-none print:p-0'}`}>
+            <div className="flex justify-between items-center gap-3 flex-wrap print:hidden mb-6">
+              <h3 className="font-serif text-xl text-forest-dark">Customer Invoice</h3>
+              <button onClick={() => handlePrint('customer')} className="inline-flex items-center gap-1 border border-border rounded-lg px-3 py-1.5 text-xs font-semibold hover:border-gold-deep text-forest-dark">
+                <Printer className="size-3.5" /> PRINT CUSTOMER INVOICE
+              </button>
+            </div>
+            <div className="border border-border rounded-xl p-6 max-w-xl print:border-none print:p-0 print:max-w-none">
+              <div className="text-xs font-bold tracking-widest text-gold-deep mb-4 print:text-black">CUSTOMER DETAILS</div>
+              
+              <div className="space-y-4 text-sm">
+                <div>
+                  <div className="text-xs text-muted-foreground mb-1">Name</div>
+                  <div className="font-medium text-forest-dark text-base">{order.full_name}</div>
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Email</div>
+                    <div>{order.email}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs text-muted-foreground mb-1">Phone</div>
+                    <div>{order.phone}</div>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-border">
+                  <div className="text-xs text-muted-foreground mb-2">Shipping Address</div>
+                  <div className="font-medium bg-cream/40 p-4 rounded-lg border border-border print:bg-transparent print:border-none print:p-0">
+                    {order.shipping.line1}
+                    {order.shipping.line2 && <><br />{order.shipping.line2}</>}
+                    <br />{order.shipping.city}, {order.shipping.state} — {order.shipping.pincode}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        </div>
+
+        <aside className="bg-cream rounded-2xl p-6 h-fit print:hidden">
           <h3 className="font-serif text-xl text-forest-dark">Manage</h3>
           <Field label="Status" className="mt-4">
             <select value={status} onChange={(e) => setStatus(e.target.value)} className={inp}>

@@ -177,7 +177,7 @@ export function AdminShell() {
     <div className="min-h-screen bg-cream/40 flex">
       {/* Sidebar */}
       <aside
-        className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-forest-dark text-cream flex flex-col transition-transform`}
+        className={`${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-forest-dark text-cream flex flex-col transition-transform print:hidden`}
       >
         <div className="px-5 h-14 flex items-center border-b border-white/10">
           <Link to="/" className="font-serif text-lg tracking-wide">
@@ -239,13 +239,13 @@ export function AdminShell() {
         <button
           aria-label="Close menu"
           onClick={() => setOpen(false)}
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden print:hidden"
         />
       )}
 
       {/* Main */}
-      <div className="flex-1 min-w-0">
-        <header className="h-14 bg-white border-b border-border sticky top-0 z-20 flex items-center gap-3 px-4 lg:px-6">
+      <div className="flex-1 min-w-0 print:w-full print:m-0 print:p-0">
+        <header className="h-14 bg-white border-b border-border sticky top-0 z-20 flex items-center gap-3 px-4 lg:px-6 print:hidden">
           <button className="lg:hidden" onClick={() => setOpen((o) => !o)} aria-label="Menu">
             {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
@@ -264,7 +264,7 @@ export function AdminShell() {
             )}
           </div>
         </header>
-        <main className="p-4 lg:p-6">
+        <main className="p-4 lg:p-6 print:p-0">
           <Outlet />
         </main>
       </div>

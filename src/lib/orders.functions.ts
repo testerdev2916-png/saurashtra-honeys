@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { supabaseAdmin as supabase } from "@/integrations/supabase/client.server";
+import { sendWhatsAppOrderAlert } from "./whatsapp.functions";
 
 const itemSchema = z.object({
   slug: z.string().max(120),
@@ -125,6 +126,17 @@ async function insertOrderRow(supabaseClient: any, data: z.infer<typeof createSc
     await supabaseClient.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
     return { orderId: row.id, orderNumber: row.order_number, razorpay: { keyId: process.env.RAZORPAY_KEY_ID!.trim(), orderId: rp.id, amount: rp.amount, currency: rp.currency }, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
   }
+
+  if (data.payment_method === "cod") {
+    await sendWhatsAppOrderAlert({
+      customerName: data.full_name,
+      orderNumber: row.order_number || "N/A",
+      phone: data.phone,
+      paymentMethod: "cod",
+      total: totalPaise,
+    });
+  }
+
   return { orderId: row.id, orderNumber: row.order_number, razorpay: null as null, totals: { subtotalPaise, shippingPaise, totalPaise, discountPaise: coupon.discount } };
 }
 
@@ -154,7 +166,7 @@ export async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeo
 
   const { data: existing } = await supabaseClient
     .from("orders")
-    .select("user_id, razorpay_order_id, timeline, status, items")
+    .select("user_id, razorpay_order_id, timeline, status, items, full_name, order_number, phone, payment_method, total_paise")
     .eq("id", data.order_id)
     .single();
 
@@ -175,6 +187,14 @@ export async function verifyAndMarkPaid(supabaseClient: any, data: z.infer<typeo
     status: "paid", razorpay_payment_id: data.razorpay_payment_id, timeline: newTimeline as never,
   }).eq("id", data.order_id);
   if (error) throw new Error(error.message);
+
+  await sendWhatsAppOrderAlert({
+    customerName: existing.full_name,
+    orderNumber: existing.order_number || "N/A",
+    phone: existing.phone,
+    paymentMethod: existing.payment_method || "razorpay",
+    total: existing.total_paise || 0,
+  });
 
   // Inventory Deduction
   if (Array.isArray(existing.items)) {
