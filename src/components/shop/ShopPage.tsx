@@ -212,9 +212,9 @@ export function ShopPage({
 
     // Search query filter
     if (q.trim()) {
-      const term = q.trim().toLowerCase();
-      list = list.filter((p) =>
-        [
+      const terms = q.trim().toLowerCase().split(/\s+/);
+      list = list.filter((p) => {
+        const searchableText = [
           p.name,
           p.tagline,
           p.description,
@@ -223,9 +223,9 @@ export function ShopPage({
           ...(p.benefits ?? []),
         ]
           .join(" ")
-          .toLowerCase()
-          .includes(term),
-      );
+          .toLowerCase();
+        return terms.every((term) => searchableText.includes(term));
+      });
     }
 
     // Sort

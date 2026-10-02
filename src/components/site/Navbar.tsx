@@ -160,10 +160,14 @@ export function Navbar() {
   const suggestions = useMemo(() => {
     const t = q.trim().toLowerCase();
     if (!t) return [];
+    const terms = t.split(/\s+/);
     return products
-      .filter((p) => [p.name, p.category, p.flora ?? "", ...(p.benefits ?? [])].join(" ").toLowerCase().includes(t))
+      .filter((p) => {
+        const searchableText = [p.name, p.category, p.flora ?? "", ...(p.benefits ?? [])].join(" ").toLowerCase();
+        return terms.every(term => searchableText.includes(term));
+      })
       .slice(0, 6);
-  }, [q]);
+  }, [q, products]);
 
   const doSearch = (term?: string) => {
     const t = (term ?? q).trim();
