@@ -101,7 +101,7 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
         const matched = fallbackItems.find(f => f.label.toLowerCase() === item.title.toLowerCase());
         return {
           label: item.title,
-          img: matched ? matched.img : "/images/trust/pure_no_additives.png" // fallback image
+          img: item.icon || (matched ? matched.img : "/images/trust/pure_no_additives.png") // use uploaded image or fallback
         };
       })
     : fallbackItems;
@@ -430,14 +430,14 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
       img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.png"
     },
     {
-      title: settings?.point1_title ?? "HIVE TO HOME",
-      desc: settings?.point1_desc ?? "We harvest raw honey from pristine Saurashtra flora, ensuring it never touches a factory.",
-      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.webp"
+      title: settings?.point3_title ?? "HIVE TO HOME",
+      desc: settings?.point3_desc ?? "We harvest raw honey from pristine Saurashtra flora, ensuring it never touches a factory.",
+      img: settings?.point3_icon ?? "/images/heritage/illus_hive_to_home.webp"
     },
     {
-      title: settings?.point2_title ?? "WILDFLOWER RICH",
-      desc: settings?.point2_desc ?? "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
-      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.webp"
+      title: settings?.point4_title ?? "WILDFLOWER RICH",
+      desc: settings?.point4_desc ?? "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
+      img: settings?.point4_icon ?? "/images/heritage/illus_wildflower.webp"
     }
   ];
 

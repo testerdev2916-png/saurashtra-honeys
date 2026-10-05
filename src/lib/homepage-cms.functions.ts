@@ -287,9 +287,34 @@ export async function deleteHomepageTrustItem(id: string) {
 }
 
 export async function fetchAllHomepageTrustItems(): Promise<HomepageTrustItem[]> {
-  const { data, error } = await supabase.from("homepage_trust_items").select("*").order("sort_order");
+  let { data, error } = await supabase.from("homepage_trust_items").select("*").order("sort_order");
   if (error) throw error;
-  return data as HomepageTrustItem[];
+  
+  if (!data || data.length === 0) {
+    try {
+      const defaults = [
+        { title: "Pure No Additives", icon: "/images/trust/pure_no_additives.png", enabled: true, sort_order: 1 },
+        { title: "Raw & Unprocessed", icon: "/images/trust/raw_unprocessed.png", enabled: true, sort_order: 2 },
+        { title: "Natural Floral Sources", icon: "/images/trust/natural_floral.png", enabled: true, sort_order: 3 },
+        { title: "Rich in Nutrients", icon: "/images/trust/rich_nutrients.png", enabled: true, sort_order: 4 },
+        { title: "Lab Tested", icon: "/images/trust/lab_tested.png", enabled: true, sort_order: 5 },
+        { title: "Ethical Beekeeping", icon: "/images/trust/ethical_beekeeping.png", enabled: true, sort_order: 6 },
+      ];
+      const insertRes = await supabase.from("homepage_trust_items").insert(defaults);
+      if (insertRes.error) {
+        console.error("Failed to insert default trust items:", insertRes.error);
+      } else {
+        const { data: refetched } = await supabase.from("homepage_trust_items").select("*").order("sort_order");
+        if (refetched) {
+          data = refetched;
+        }
+      }
+    } catch (err) {
+      console.error("Exception during trust items seeding:", err);
+    }
+  }
+  
+  return (data || []) as HomepageTrustItem[];
 }
 
 export async function updateHomepageTrustItemOrder(updates: { id: string; sort_order: number }[]) {

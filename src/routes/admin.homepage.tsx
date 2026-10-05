@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
   fetchHomepageSections,
   updateSectionOrder,
@@ -334,7 +335,39 @@ function HomepageManagement() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const data = await fetchHomepageSections();
+      let data = await fetchHomepageSections();
+      
+      const CANONICAL_SECTIONS = [
+        "hero",
+        "trust_strip",
+        "shop_by_category",
+        "featured_products",
+        "shoppable_videos",
+        "farm_banner",
+        "heritage_video",
+        "testimonials",
+        "journal",
+      ];
+      const existingKeys = new Set(data.map(d => d.section_key));
+      const missingSections = CANONICAL_SECTIONS.filter(k => !existingKeys.has(k));
+      
+      if (missingSections.length > 0) {
+        let order = data.length;
+        const inserts = missingSections.map(k => {
+          order++;
+          return {
+            section_key: k,
+            enabled: true,
+            sort_order: order,
+            settings: {}
+          };
+        });
+        
+        await supabase.from('homepage_sections').insert(inserts);
+        // re-fetch after inserting
+        data = await fetchHomepageSections();
+      }
+      
       setSections(data);
     } catch (e) {
       toast.error("Failed to load homepage sections");

@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Card, BtnPrimary, BtnGhost, Field, inp } from "@/components/admin/ui";
+import { ImageUpload } from "@/components/admin/ImageUpload";
 import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit, Save, X } from "lucide-react";
 import {
   fetchAllHomepageTrustItems,
@@ -133,8 +134,12 @@ function AdminTrustItems() {
               <Field label="Title *">
                 <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={inp} placeholder="e.g. Pure Honey" />
               </Field>
-              <Field label="Icon Name (Lucide icon name)">
-                <input value={formData.icon} onChange={(e) => setFormData({ ...formData, icon: e.target.value })} className={inp} placeholder="e.g. ShieldCheck" />
+              <Field label="Illustration Image">
+                <ImageUpload
+                  value={formData.icon}
+                  onChange={(url) => setFormData({ ...formData, icon: url || "" })}
+                  folder="trust_badges"
+                />
               </Field>
               <div className="md:col-span-2">
                 <Field label="Description">
@@ -155,12 +160,15 @@ function AdminTrustItems() {
           <div className="p-8 text-center text-muted-foreground bg-white border border-border rounded-2xl">No badges configured.</div>
         ) : (
           items.map((item, index) => {
-            const IconComponent = item.icon && (Icons as any)[item.icon] ? (Icons as any)[item.icon] : Icons.Check;
             return (
               <Card key={item.id} className={`p-4 flex items-center justify-between ${editingId === item.id ? "border-gold-deep" : ""}`}>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange">
-                    <IconComponent className="size-5" />
+                  <div className="w-16 h-16 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange overflow-hidden p-2">
+                    {item.icon && (item.icon.startsWith("http") || item.icon.startsWith("/") || item.icon.startsWith("data:")) ? (
+                      <img src={item.icon} alt={item.title} className="w-full h-full object-contain" />
+                    ) : (
+                      <Icons.Check className="size-5" />
+                    )}
                   </div>
                   <div>
                     <h3 className="font-bold text-forest-dark">{item.title}</h3>
