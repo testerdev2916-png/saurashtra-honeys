@@ -2,6 +2,8 @@ import ImageKit from "imagekit-javascript";
 import imageCompression from 'browser-image-compression';
 import { supabase } from "@/integrations/supabase/client";
 
+import { getImageKitAuthParams } from "./imagekit.functions";
+
 // Cache the ImageKit instance so we don't recreate it on every upload
 let ikInstance: ImageKit | null = null;
 
@@ -13,20 +15,8 @@ const getIkConfig = async () => {
       throw new Error("Not authenticated for ImageKit API");
   }
 
-  // Fetch the configuration (public key) and initial signature from our secure server endpoint
-  const response = await fetch("/api/imagekit/auth", {
-    headers: {
-      "Authorization": `Bearer ${sessionToken}`
-    }
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    console.error("ImageKit Auth API error:", response.status, errorText);
-    throw new Error(`Authentication request failed: ${response.status}`);
-  }
-
-  const data = await response.json();
+  // Fetch the configuration (public key) and initial signature from our secure server function
+  const data = await getImageKitAuthParams();
   const { signature, expire, token, publicKey, urlEndpoint } = data;
 
   if (!publicKey) {
