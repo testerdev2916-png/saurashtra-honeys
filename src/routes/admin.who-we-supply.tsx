@@ -41,7 +41,7 @@ import {
   PlusCircle,
   XCircle,
 } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 export const Route = createFileRoute("/admin/who-we-supply")({ component: WhoWeSupplyPage });
 
 const AVAILABLE_ICONS = [
@@ -261,7 +261,7 @@ function Editor({
     }
     setUploading(true);
     try {
-      const finalUrl = await uploadToCloudinary(file, "who_we_supply");
+      const finalUrl = await uploadToImageKit(file, "who_we_supply");
       setF((prev) => ({ ...prev, image_url: finalUrl, image_key: null }));
       toast.success("Image uploaded successfully");
     } catch (e) {

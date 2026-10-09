@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { listPosts, upsertPost, deletePost } from "@/lib/admin-cms.functions";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, Pencil, Plus, RefreshCcw, Trash2, Star, Sparkles, Upload, Heading2, Heading3, Bold, Italic, List, Quote, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export const Route = createFileRoute("/admin/blog")({ component: BlogPage });
 
@@ -230,7 +230,7 @@ function Editor({
     }
     setUploading(true);
     try {
-      const finalUrl = await uploadToCloudinary(file, "blog");
+      const finalUrl = await uploadToImageKit(file, "blog");
       setF((prev) => ({ ...prev, cover_image_url: finalUrl }));
       toast.success("Featured image uploaded successfully");
     } catch (e) {

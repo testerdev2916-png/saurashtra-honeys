@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 type ReviewMedia = { path: string; type: "image" | "video"; url?: string };
 type ReviewRow = {
@@ -143,7 +143,7 @@ export function ReviewsSection({ productSlug, productName }: { productSlug?: str
       const media: ReviewMedia[] = [];
       for (let i = 0; i < files.length; i++) {
         const f = files[i];
-        const url = await uploadToCloudinary(f, "reviews");
+        const url = await uploadToImageKit(f, "reviews");
         if (!url) throw new Error(`Failed to upload ${f.name}`);
         uploaded.push(url);
         media.push({ path: url, type: f.type.startsWith("video/") ? "video" : "image" });

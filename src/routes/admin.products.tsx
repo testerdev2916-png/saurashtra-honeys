@@ -11,7 +11,7 @@ import {
   type VariantItem,
 } from "@/lib/admin-catalog.functions";
 import { listCategories, upsertCategory } from "@/lib/admin-cms.functions";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { resolveImage } from "@/lib/product-images";
 import { IMAGE_KEYS } from "@/lib/product-images";
 import {
@@ -642,7 +642,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
   async function handleMediaUpload(file: File, mode: "gallery" | number, replaceIdx?: number) {
     setUploadingMedia(true);
     try {
-      const url = await uploadToCloudinary(file, "products");
+      const url = await uploadToImageKit(file, "products");
       if (url) {
         if (mode === "gallery") {
           const cur = [...(f.images ?? [])];
@@ -1726,7 +1726,7 @@ function VariantsEditor({
   async function handleVariantMediaUpload(file: File, variantIndex: number, type: "primary" | "gallery", galleryIndex?: number) {
     setUploadingVariantIndex(variantIndex);
     try {
-      const url = await uploadToCloudinary(file, "products");
+      const url = await uploadToImageKit(file, "products");
       if (url) {
         const v = variants[variantIndex];
         if (type === "primary") {

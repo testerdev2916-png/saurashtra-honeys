@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BtnGhost,
@@ -228,7 +228,7 @@ function Editor({ doc, onCancel, onSaved }: { doc: Partial<CategoryHeroSlide>; o
     if (!file) return;
     setUploadingDesktop(true);
     try {
-      const url = await uploadToCloudinary(file, "categories");
+      const url = await uploadToImageKit(file, "categories");
       setF({ ...f, image_url: url });
       toast.success("Desktop image uploaded");
     } catch (err) {
@@ -243,7 +243,7 @@ function Editor({ doc, onCancel, onSaved }: { doc: Partial<CategoryHeroSlide>; o
     if (!file) return;
     setUploadingMobile(true);
     try {
-      const url = await uploadToCloudinary(file, "categories");
+      const url = await uploadToImageKit(file, "categories");
       setF({ ...f, mobile_image_url: url });
       toast.success("Mobile image uploaded");
     } catch (err) {

@@ -236,7 +236,7 @@ export const deleteCategory = createServerFn({ method: "POST" })
   });
 
 // uploadCategoryImage and uploadProductImage have been removed. 
-// They are now handled directly on the frontend via uploadToCloudinary.
+// They are now handled directly on the frontend via uploadToImageKit.
 
 /* -------------------- COUPONS -------------------- */
 

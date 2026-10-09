@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { listHomepageVideos, upsertHomepageVideo, deleteHomepageVideo, reorderHomepageVideos } from "@/lib/admin-cms.functions";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, ArrowUp, ArrowDown, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Video, Play, Pause } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 
@@ -280,7 +280,7 @@ function Editor({
     setVideoProgress(5);
     try {
       setVideoProgress(30);
-      const url = await uploadToCloudinary(file, "stories_videos");
+      const url = await uploadToImageKit(file, "stories_videos");
       setVideoProgress(90);
 
       setF((prev) => ({ ...prev, video_url: url }));
@@ -305,7 +305,7 @@ function Editor({
 
     setThumbUploading(true);
     try {
-      const url = await uploadToCloudinary(file, "stories_thumbnails");
+      const url = await uploadToImageKit(file, "stories_thumbnails");
       setF((prev) => ({ ...prev, thumbnail_url: url }));
       toast.success("Poster/thumbnail uploaded successfully");
     } catch (e) {

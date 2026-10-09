@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { listMedia, deleteMedia, saveCloudinaryMedia } from "@/lib/admin-cms.functions";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { BtnGhost, BtnPrimary, Card, PageHeader } from "@/components/admin/ui";
 import { Copy, RefreshCcw, Search, Trash2, Upload } from "lucide-react";
 
@@ -37,7 +37,7 @@ function MediaPage() {
   async function onFile(f: File) {
     if (f.size > 20 * 1024 * 1024) return toast.error("File too large (max 20MB)");
     try {
-      const url = await uploadToCloudinary(f, uploadBucket === "media" ? uploadFolder : "products");
+      const url = await uploadToImageKit(f, uploadBucket === "media" ? uploadFolder : "products");
       if (url) {
         await saveMedia({ data: { url, filename: f.name, contentType: f.type || "application/octet-stream", sizeBytes: f.size } });
         toast.success("Uploaded to Cloudinary"); void load();

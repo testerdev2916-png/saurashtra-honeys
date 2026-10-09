@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ArrowLeft, Upload, Video, Save, Eye, Trash2, Pause, Play, CheckCircle2, ImageOff } from "lucide-react";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { 
   fetchAdminHeritageVideo, 
   upsertHeritageVideo, 
@@ -87,7 +87,7 @@ function HeritageManager() {
 
   // ---- File Upload Helpers ----
   async function uploadFile(file: File, folder: string): Promise<string> {
-    return await uploadToCloudinary(file, `heritage_${folder}`);
+    return await uploadToImageKit(file, `heritage_${folder}`);
   }
 
   async function onUploadVideo(file: File) {

@@ -12,7 +12,7 @@ import {
   logAudit,
   type HomepageCustomerStory,
 } from "@/lib/homepage-cms.functions";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export const Route = createFileRoute("/admin/homepage_/stories")({
   component: AdminCustomerStories,
@@ -80,7 +80,7 @@ function AdminCustomerStories() {
     setUploading(true);
     toast.loading(`Uploading ${type}...`);
     try {
-      const finalUrl = await uploadToCloudinary(file, "homepage_stories");
+      const finalUrl = await uploadToImageKit(file, "homepage_stories");
       
       if (type === "video") {
         setFormData(prev => ({ ...prev, media_url: finalUrl }));

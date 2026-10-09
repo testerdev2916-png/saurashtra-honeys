@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { listCategories, upsertCategory, deleteCategory } from "@/lib/admin-cms.functions";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
 import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload } from "lucide-react";
 
@@ -93,7 +93,7 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
     if (file.size > 10 * 1024 * 1024) return toast.error("Image too large (max 10MB)");
     setUploading(true);
     try {
-      const url = await uploadToCloudinary(file, "categories");
+      const url = await uploadToImageKit(file, "categories");
       if (url) { setF((prev) => ({ ...prev, image_url: url })); toast.success("Image uploaded"); }
     } catch (e) { toast.error((e as Error).message); } finally { setUploading(false); }
   }

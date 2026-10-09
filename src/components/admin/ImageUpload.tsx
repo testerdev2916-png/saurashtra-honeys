@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export function ImageUpload({
   value,
@@ -29,7 +29,7 @@ export function ImageUpload({
       
       const fileExt = file.name.split('.').pop();
       // Upload to Cloudinary
-      const finalUrl = await uploadToCloudinary(file, folder);
+      const finalUrl = await uploadToImageKit(file, folder);
 
       onChange(finalUrl);
     } catch (error: any) {

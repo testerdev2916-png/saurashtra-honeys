@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listSettings, upsertSetting } from "@/lib/admin-cms.functions";
 import { BtnPrimary, Card, Field, inp, PageHeader } from "@/components/admin/ui";
-import { uploadToCloudinary } from "@/lib/cloudinary-upload";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { Upload } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 export const Route = createFileRoute("/admin/settings")({ component: SettingsPage });
@@ -47,7 +47,7 @@ function SettingsPage() {
 
   async function onUploadBranding(rowKey: string, fieldKey: string, file: File) {
     try {
-      const finalUrl = await uploadToCloudinary(file, "settings");
+      const finalUrl = await uploadToImageKit(file, "settings");
       setValues((v) => ({
         ...v,
         [rowKey]: {
