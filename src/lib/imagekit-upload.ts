@@ -76,7 +76,7 @@ export async function uploadToImageKit(file: File, folder: string): Promise<stri
       signature,
       expire,
       token,
-    }, function(err, result) {
+    }, function(err: any, result: any) {
       if (err) {
         console.error("ImageKit Upload Error:", err);
         reject(new Error(err.message || "Failed to upload to ImageKit"));

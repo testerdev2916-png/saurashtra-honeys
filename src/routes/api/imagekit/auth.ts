@@ -44,10 +44,21 @@ export const APIRoute = createAPIFileRoute("/api/imagekit/auth")({
         return new Response(JSON.stringify({ error: "Forbidden: Admin access required" }), { status: 403, headers: { "content-type": "application/json" } });
       }
 
+      const pubKey = process.env.IMAGEKIT_PUBLIC_KEY || process.env.VITE_IMAGEKIT_PUBLIC_KEY;
+      const privKey = process.env.IMAGEKIT_PRIVATE_KEY;
+      const urlEp = process.env.IMAGEKIT_URL_ENDPOINT || process.env.VITE_IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/fqbnkx3tz';
+
+      if (!pubKey) console.error("[ImageKit API] Error: Missing IMAGEKIT_PUBLIC_KEY in environment variables");
+      if (!privKey) console.error("[ImageKit API] Error: Missing IMAGEKIT_PRIVATE_KEY in environment variables");
+
       const authenticationParameters = imagekit.getAuthenticationParameters();
 
       return new Response(
-        JSON.stringify(authenticationParameters),
+        JSON.stringify({
+          ...authenticationParameters,
+          publicKey: pubKey,
+          urlEndpoint: urlEp,
+        }),
         { headers: { "content-type": "application/json" } }
       );
     } catch (e) {
