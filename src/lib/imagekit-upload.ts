@@ -2,42 +2,47 @@ import ImageKit from "imagekit-javascript";
 import imageCompression from 'browser-image-compression';
 import { supabase } from "@/integrations/supabase/client";
 
-const publicKey = import.meta.env.VITE_IMAGEKIT_PUBLIC_KEY || "";
-const urlEndpoint = import.meta.env.VITE_IMAGEKIT_URL_ENDPOINT || "https://ik.imagekit.io/fqbnkx3tz";
+// Cache the ImageKit instance so we don't recreate it on every upload
+let ikInstance: ImageKit | null = null;
 
-const authenticator = async () => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    const token = session?.access_token;
-    
-    if (!token) {
-        throw new Error("Not authenticated");
-    }
-
-    const response = await fetch("/api/imagekit/auth", {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Authentication request failed: ${response.status} ${errorText}`);
-    }
-
-    const data = await response.json();
-    const { signature, expire, token: auth_token } = data;
-    return { signature, expire, token: auth_token };
-  } catch (error: any) {
-    throw new Error(`Authentication request failed: ${error.message}`);
+const getIkConfig = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  const sessionToken = session?.access_token;
+  
+  if (!sessionToken) {
+      throw new Error("Not authenticated for ImageKit API");
   }
-};
 
-const ik = new ImageKit({
-  publicKey,
-  urlEndpoint,
-  authenticator,
-});
+  // Fetch the configuration (public key) and initial signature from our secure server endpoint
+  const response = await fetch("/api/imagekit/auth", {
+    headers: {
+      "Authorization": `Bearer ${sessionToken}`
+    }
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("ImageKit Auth API error:", response.status, errorText);
+    throw new Error(`Authentication request failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const { signature, expire, token, publicKey, urlEndpoint } = data;
+
+  if (!publicKey) {
+    console.error("[ImageKit Client] Missing publicKey in API response. The server environment is missing IMAGEKIT_PUBLIC_KEY.");
+    throw new Error("Missing public key for upload configuration");
+  }
+
+  if (!ikInstance) {
+    ikInstance = new ImageKit({
+      publicKey,
+      urlEndpoint,
+    });
+  }
+
+  return { ikInstance, signature, expire, token };
+};
 
 export async function uploadToImageKit(file: File, folder: string): Promise<string> {
   let fileToUpload = file;
@@ -60,12 +65,17 @@ export async function uploadToImageKit(file: File, folder: string): Promise<stri
 
   const imagekitFolder = `/saurashtra-honey/${folder}`;
   
+  const { ikInstance, signature, expire, token } = await getIkConfig();
+
   return new Promise((resolve, reject) => {
-    ik.upload({
+    ikInstance.upload({
       file: fileToUpload,
       fileName: fileToUpload.name,
       folder: imagekitFolder,
       useUniqueFileName: true,
+      signature,
+      expire,
+      token,
     }, function(err, result) {
       if (err) {
         console.error("ImageKit Upload Error:", err);
