@@ -386,7 +386,7 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         customer_state: "Gujarat",
         review_text: "Bahut achha honey hai. Taste aur quality dono bahut genuine lage.",
         rating: 5,
-        poster_image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=600&fit=crop", // placeholder photo
+        poster_image: "",
         verified: true,
         published: true,
         sort_order: 1
@@ -399,7 +399,7 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         customer_state: "Maharashtra",
         review_text: "I use this honey every morning in my tea. It's incredibly pure and has a very rich texture. Highly recommended!",
         rating: 5,
-        poster_image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500&h=600&fit=crop",
+        poster_image: "",
         verified: true,
         published: true,
         sort_order: 2
@@ -412,7 +412,7 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         customer_state: "Maharashtra",
         review_text: "I was skeptical about buying honey online, but Saurashtra Honey proved me wrong. Authentic and fresh.",
         rating: 5,
-        poster_image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=600&fit=crop",
+        poster_image: "",
         verified: true,
         published: true,
         sort_order: 3

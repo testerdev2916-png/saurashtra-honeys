@@ -18,6 +18,7 @@ import {
   FileText,
   ChevronLeft,
   ChevronRight,
+  Quote,
 } from "lucide-react";
 import React, { useCallback, useEffect, useState, Fragment } from "react";
 import useEmblaCarousel from "embla-carousel-react";
@@ -555,7 +556,7 @@ export function HomeCustomerStories({
   const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
 
-  const photoStories = stories.filter((s) => s.type === "photo");
+  const photoStories = stories.filter((s) => s.type === "photo" || s.type === "review" || !s.type);
 
   const cs_eyebrow = settings?.eyebrow ?? "FROM OUR HIVE TO YOUR HOME";
   const cs_heading = settings?.heading ?? "REAL PEOPLE. REAL HONEY.";
@@ -600,79 +601,64 @@ export function HomeCustomerStories({
       {/* Carousel */}
       <div className="relative z-10 px-4 sm:px-6 md:px-8 lg:px-12 mx-auto w-full max-w-[1600px]">
         <div className="overflow-hidden w-full" ref={emblaRef}>
-          <div className="flex gap-[12px] sm:gap-6">
+          <div className="flex gap-4 sm:gap-6">
             {photoStories.length === 0 ? (
               <div className="w-full py-20 flex flex-col items-center justify-center text-center px-4">
                 <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center text-brand-orange/40 mb-4">
-                  <PhotoIcon className="w-8 h-8" />
+                  <Star className="w-8 h-8" />
                 </div>
                 <h3 className="font-serif text-xl font-medium text-espresso mb-2">No testimonials yet</h3>
-                <p className="text-muted-foreground">Admin: Add customer photo testimonials in the dashboard to populate this section.</p>
+                <p className="text-muted-foreground">Admin: Add customer testimonials in the dashboard to populate this section.</p>
               </div>
             ) : (
               photoStories.map((story) => (
                 <div
                   key={story.id}
-                  // Mobile: exactly 2 cards side-by-side. Tablet: 2 cards. Desktop: 3 cards.
-                  className="flex-[0_0_calc(50%_-_6px)] sm:flex-[0_0_calc(50%_-_12px)] lg:flex-[0_0_calc(33.33333%_-_16px)] min-w-0"
+                  className="flex-[0_0_calc(85%)] sm:flex-[0_0_calc(50%_-_12px)] lg:flex-[0_0_calc(33.33333%_-_16px)] min-w-0"
                 >
-                  <div className="w-full h-full flex flex-col bg-white rounded-[16px] sm:rounded-[24px] overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-border/50">
-                    
-                    {/* CUSTOMER PHOTO */}
-                    <div className="w-full aspect-[4/5] bg-cream relative">
-                      {story.poster_image ? (
-                        <img
-                          src={story.poster_image}
-                          alt={`Photo shared by ${story.customer_name} from ${story.customer_city || "their city"}`}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-muted-foreground/30">
-                          <PhotoIcon className="w-16 h-16" />
+                  <div className="w-full h-full flex flex-col justify-between bg-white rounded-[20px] sm:rounded-[24px] p-6 sm:p-8 shadow-[0_4px_20px_rgba(0,0,0,0.04)] border border-border/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:border-brand-orange/20 transition-all">
+                    <div>
+                      {/* Rating + Quote Icon */}
+                      <div className="flex items-center justify-between mb-4 sm:mb-5">
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-0.5 text-brand-orange">
+                            {[...Array(story.rating || 5)].map((_, i) => (
+                              <Star key={i} className="w-[14px] sm:w-[16px] h-[14px] sm:h-[16px] fill-current" />
+                            ))}
+                          </div>
+                          <span className="text-[12px] sm:text-[13px] font-bold text-espresso tracking-wide">
+                            {(story.rating || 5).toFixed(1)}
+                          </span>
                         </div>
-                      )}
-                    </div>
-                    
-                    {/* REVIEW CONTENT */}
-                    <div className="p-4 sm:p-6 md:p-8 flex flex-col flex-1">
-                      {/* Rating */}
-                      <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4">
-                        <div className="flex gap-0.5 text-brand-orange">
-                          {[...Array(story.rating || 5)].map((_, i) => (
-                            <Star key={i} className="w-[12px] sm:w-[14px] md:w-[16px] h-[12px] sm:h-[14px] md:h-[16px] fill-current" />
-                          ))}
-                        </div>
-                        <span className="text-[11px] sm:text-[13px] font-bold text-espresso tracking-wide">
-                          {(story.rating || 5).toFixed(1)}
-                        </span>
+                        <Quote className="w-6 h-6 text-brand-orange/25 rotate-180" />
                       </div>
-                      
+
                       {/* Customer Review Quote */}
                       {story.review_text && (
-                        <blockquote className="text-[13px] sm:text-[16px] md:text-[18px] font-medium text-espresso leading-[1.6] mb-4 sm:mb-6 line-clamp-6">
+                        <blockquote className="text-[14px] sm:text-[16px] md:text-[17px] font-medium text-espresso leading-[1.65] mb-6">
                           "{story.review_text}"
                         </blockquote>
                       )}
-                      
-                      <div className="mt-auto pt-3 sm:pt-4 border-t border-border/40">
-                        <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                          <span className="font-bold text-[14px] sm:text-[16px] text-espresso capitalize">
-                            {story.customer_name}
+                    </div>
+
+                    {/* Author & Verification */}
+                    <div className="mt-auto pt-4 border-t border-border/40">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-bold text-[14px] sm:text-[16px] text-espresso capitalize">
+                          {story.customer_name}
+                        </span>
+                        {story.verified && (
+                          <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold tracking-wide text-green-700 bg-green-50 px-2 py-0.5 rounded-full border border-green-200/50 uppercase">
+                            <CheckCircle2 className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
+                            Verified
                           </span>
-                          {story.verified && (
-                            <span className="inline-flex items-center gap-1 text-[9px] sm:text-[10px] font-semibold tracking-wide text-green-700 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full border border-green-200/50 uppercase">
-                              <CheckCircle2 className="w-2.5 sm:w-3 h-2.5 sm:h-3" />
-                              Verified
-                            </span>
-                          )}
-                        </div>
-                        {(story.customer_city || story.customer_state) && (
-                          <div className="text-[12px] sm:text-[14px] text-muted-foreground mt-1 capitalize truncate">
-                            {[story.customer_city, story.customer_state].filter(Boolean).join(", ")}
-                          </div>
                         )}
                       </div>
+                      {(story.customer_city || story.customer_state) && (
+                        <div className="text-[12px] sm:text-[14px] text-muted-foreground mt-1 capitalize truncate">
+                          {[story.customer_city, story.customer_state].filter(Boolean).join(", ")}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

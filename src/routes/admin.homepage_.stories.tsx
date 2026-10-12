@@ -220,13 +220,6 @@ function AdminCustomerStories() {
         <Card className="p-5 mb-6 bg-cream/40 border-gold-deep/30">
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <div className="bg-brand-orange/5 border border-brand-orange/20 rounded-md p-3 text-sm text-brand-orange flex items-center gap-2">
-                  <ImageIcon className="size-4 shrink-0" />
-                  <span><strong>Important:</strong> Upload a vertical/portrait customer photo. (Recommended aspect ratio 4:5).</span>
-                </div>
-              </div>
-
               <Field label="Rating">
                 <input type="number" min="1" max="5" required value={formData.rating || 5} onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })} className={inp} />
               </Field>
@@ -240,7 +233,7 @@ function AdminCustomerStories() {
                 </div>
               </Field>
               
-              <Field label="Customer Photo *">
+              <Field label="Customer Photo (Optional)">
                 <div className="flex flex-col gap-2">
                   <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileUpload(e, "poster")} className="text-sm" disabled={uploading} />
                   {formData.poster_image && <div className="text-xs text-green-600 truncate">Uploaded: {formData.poster_image}</div>}
