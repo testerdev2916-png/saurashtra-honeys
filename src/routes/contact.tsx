@@ -121,10 +121,10 @@ function ContactPage() {
     },
     {
       title: "Visit Us",
-      value: settings.contact?.address || "Saurashtra Honey Bee Farm, Saurashtra, Gujarat, India",
+      value: settings.contact?.address || "At. Farm, Nicha Kotda, Ta. Mahuva, Dist. Bhavnagar, Gujarat – 364130",
       subtext: "Our apiary & dispatch center",
       Icon: MapPin,
-      href: "https://www.google.com/maps",
+      href: "https://www.google.com/maps/search/?api=1&query=Saurashtra+Honey+Bee+Farm+Nicha+Kotda+Mahuva+Gujarat",
     },
     {
       title: "WhatsApp Us",
@@ -322,10 +322,10 @@ function ContactPage() {
       >
         <div className="container-page">
           <div className="relative w-full rounded-3xl sm:rounded-[2.5rem] overflow-hidden border border-border/80 shadow-soft bg-cream-deep min-h-[400px] sm:min-h-0 aspect-auto sm:aspect-[21/8]">
-            {/* Interactive OpenStreetMap iframe centered on exact farm location */}
+            {/* Interactive OpenStreetMap iframe centered on exact Mahuva farm location */}
             <iframe
-              title="Saurashtra Honey Bee Farm Map Location"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=71.366%2C22.891%2C71.566%2C23.091&layer=mapnik&marker=22.9914%2C71.4664"
+              title="Saurashtra Honey Bee Farm Map Location - Mahuva"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=71.662%2C21.011%2C71.862%2C21.171&layer=mapnik&marker=21.0914%2C71.7622"
               className="w-full h-full border-0 absolute inset-0"
               loading="lazy"
             />
@@ -340,16 +340,16 @@ function ContactPage() {
                   <h4 className="font-serif text-lg font-bold text-espresso">
                     Our Location
                   </h4>
-                  <p className="text-xs sm:text-sm text-espresso/75 mt-0.5 leading-relaxed">
-                    Saurashtra Honey Bee Farm
-                    <br />
-                    Saurashtra, Gujarat, India
+                  <p className="text-xs sm:text-sm text-espresso/75 mt-0.5 leading-relaxed whitespace-pre-line">
+                    <span className="font-semibold text-espresso">Saurashtra Honey Bee Farm</span>
+                    {"\n"}
+                    {settings.contact?.address || "At. Farm, Nicha Kotda,\nTa. Mahuva, Dist. Bhavnagar,\nGujarat – 364130"}
                   </p>
                 </div>
               </div>
 
               <a
-                href="https://www.google.com/maps/search/?api=1&query=22.9914292,71.4663753"
+                href="https://www.google.com/maps/search/?api=1&query=Saurashtra+Honey+Bee+Farm+Nicha+Kotda+Mahuva+Gujarat"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-brand-orange hover:translate-x-1 transition-transform mt-4 pt-3 border-t border-border/60 w-full"
