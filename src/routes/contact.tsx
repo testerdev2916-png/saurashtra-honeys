@@ -21,7 +21,7 @@ import { z } from "zod";
 
 // Assets matching our warm golden farm-origin photography
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
-import heroProductsImg from "@/assets/hero-products.jpg";
+import faqSupportImg from "@/assets/faq-support.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 
 export const Route = createFileRoute("/contact")({
@@ -416,8 +416,8 @@ function ContactPage() {
                 <div className="relative z-10">
                   <div className="size-24 sm:size-28 rounded-2xl overflow-hidden shadow-sm border border-border/60 mb-5">
                     <img
-                      src={heroProductsImg}
-                      alt="Saurashtra Honey — Pure Raw Honey Support"
+                      src={faqSupportImg}
+                      alt="Saurashtra Honey — Customer Support"
                       className="w-full h-full object-cover"
                     />
                   </div>
