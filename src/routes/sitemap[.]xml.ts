@@ -19,13 +19,6 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/contact", changefreq: "monthly", priority: "0.5" },
           { path: "/blog", changefreq: "weekly", priority: "0.7" },
           { path: "/auth", changefreq: "yearly", priority: "0.3" },
-          { path: "/collections", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/raw-honey", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/beeswax", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/bee-pollen", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/beeswax-candles", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/beauty", changefreq: "weekly", priority: "0.8" },
-          { path: "/collections/gift-hampers", changefreq: "weekly", priority: "0.8" },
         ];
 
         let dynamic: Entry[] = [];
@@ -52,7 +45,7 @@ export const Route = createFileRoute("/sitemap.xml")({
             dynamic = [
               ...((products ?? []).map((p) => ({ path: `/product/${p.slug}`, changefreq: "weekly", priority: "0.8" }))),
               ...((posts ?? []).map((p) => ({ path: `/blog/${p.slug}`, changefreq: "monthly", priority: "0.6" }))),
-              ...((cats ?? []).map((c) => ({ path: `/collections/${c.slug}`, changefreq: "weekly", priority: "0.7" }))),
+              ...((cats ?? []).map((c) => ({ path: `/shop/${c.slug}`, changefreq: "weekly", priority: "0.8" }))),
             ];
           }
         } catch { /* fall back to static-only sitemap */ }

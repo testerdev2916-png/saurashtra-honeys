@@ -99,6 +99,67 @@ export function getCategorySlug(nameOrSlug: string): string {
   return clean.replace(/\s+/g, "-");
 }
 
+export function getCategoryShopSlug(nameOrSlug: string): string {
+  const clean = (nameOrSlug || "").toLowerCase().trim();
+  if (
+    clean === "raw honey" ||
+    clean === "honey" ||
+    clean === "raw-honey" ||
+    clean === "single flora"
+  ) {
+    return "honey";
+  }
+  if (
+    clean === "beeswax" ||
+    clean === "beeswax block" ||
+    clean === "beeswax pellets" ||
+    clean === "pure beeswax"
+  ) {
+    return "beeswax";
+  }
+  if (clean === "bee pollen" || clean === "bee-pollen" || clean === "pollen") {
+    return "bee-pollen";
+  }
+  if (
+    clean === "beeswax candle" ||
+    clean === "beeswax candles" ||
+    clean === "beeswax-candle" ||
+    clean === "beeswax-candles" ||
+    clean === "candles"
+  ) {
+    return "beeswax-candle";
+  }
+  if (
+    clean === "beauty products" ||
+    clean === "beauty" ||
+    clean === "beauty-products" ||
+    clean === "beauty & personal care" ||
+    clean === "body-care" ||
+    clean === "skin-care" ||
+    clean === "lip-care"
+  ) {
+    return "beauty-products";
+  }
+  if (
+    clean === "beeswax products" ||
+    clean === "beeswax-products"
+  ) {
+    return "beeswax-products";
+  }
+  if (
+    clean === "gift hampers" ||
+    clean === "gift packs" ||
+    clean === "gift-hampers" ||
+    clean === "gift-packs" ||
+    clean === "gift packs & combos" ||
+    clean === "gift hamper"
+  ) {
+    return "gift-hampers";
+  }
+  return clean.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+
 const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
   "raw-honey": {
     slug: "raw-honey",

@@ -20,7 +20,7 @@ import { toast } from "sonner";
 import { ReviewsSection } from "@/components/site/ReviewsSection";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
-import { getCategorySlug } from "@/lib/collection-helpers";
+import { getCategoryShopSlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
 import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
@@ -243,7 +243,7 @@ function ProductPage() {
       <div className="container-product py-4 md:py-6 text-xs text-muted-foreground flex items-center gap-1 flex-wrap">
         <Link to="/" className="hover:text-gold-deep">Home</Link> <ChevronRight className="size-3" />
         <Link to="/shop" className="hover:text-gold-deep">Shop</Link> <ChevronRight className="size-3" />
-        <Link to="/collections/$slug" params={{ slug: getCategorySlug(p.category) }} className="hover:text-gold-deep">{p.category}</Link> <ChevronRight className="size-3" />
+        <Link to="/shop/$slug" params={{ slug: getCategoryShopSlug(p.category) }} className="hover:text-gold-deep">{p.category}</Link> <ChevronRight className="size-3" />
         <span className="text-forest-dark truncate">{p.name}</span>
       </div>
 
@@ -607,7 +607,7 @@ function ProductPage() {
       />
 
       <StructuredData data={productLd({ name: p.name, description: p.description, image: p.image, slug: p.slug, price: p.price, rating: p.rating, reviews: p.reviews })} />
-      <StructuredData data={breadcrumbLd([{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }, { name: p.category, url: `/shop?category=${encodeURIComponent(p.category)}` }, { name: p.name, url: `/product/${p.slug}` }])} />
+      <StructuredData data={breadcrumbLd([{ name: "Home", url: "/" }, { name: "Shop", url: "/shop" }, { name: p.category, url: `/shop/${getCategoryShopSlug(p.category)}` }, { name: p.name, url: `/product/${p.slug}` }])} />
       <StructuredData data={{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: FAQS.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })) }} />
 
       {/* PROMISE STRIP */}

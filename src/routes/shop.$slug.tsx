@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ShopPage } from "@/components/shop/ShopPage";
 import { fetchShopCategories } from "@/lib/category-catalog";
 import { fetchProducts } from "@/lib/product-catalog";
@@ -13,6 +13,14 @@ const searchSchema = z
 
 export const Route = createFileRoute("/shop/$slug")({
   validateSearch: (s) => searchSchema.parse(s),
+  beforeLoad: ({ params }) => {
+    if (params.slug === "raw-honey") {
+      throw redirect({
+        to: "/shop/$slug",
+        params: { slug: "honey" },
+      });
+    }
+  },
   loader: async () => {
     const [categories, products] = await Promise.all([
       fetchShopCategories(),
