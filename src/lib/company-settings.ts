@@ -17,6 +17,13 @@ export type CompanySettings = {
   updated_at?: string;
 };
 
+export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
+  name: "Saurashtra Honey",
+  tagline: "Pure • Traceable • Lab-tested",
+  logo_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+  favicon_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/fevicon_for_bees_9AwWZ6YRm.png",
+};
+
 export const companySettingsQueryOptions = {
   queryKey: ["company-settings"],
   queryFn: async (): Promise<CompanySettings | null> => {
@@ -26,36 +33,45 @@ export const companySettingsQueryOptions = {
       .eq("key", "company")
       .maybeSingle();
 
-    if (error || !data?.value) return null;
-    const val = data.value as CompanySettings;
+    if (error || !data?.value) return DEFAULT_COMPANY_SETTINGS;
+    const val = { ...DEFAULT_COMPANY_SETTINGS, ...(data.value as CompanySettings) };
     if (data.updated_at) {
       val.updated_at = data.updated_at;
     }
+    if (val.logo_url?.includes("res.cloudinary.com/yzmffalu/")) {
+      val.logo_url = DEFAULT_COMPANY_SETTINGS.logo_url;
+    }
+    if (val.favicon_url?.includes("res.cloudinary.com/yzmffalu/")) {
+      val.favicon_url = DEFAULT_COMPANY_SETTINGS.favicon_url;
+    }
     return val;
   },
-  // staleTime removed so that queries fetch fresh data instantly on navigation
+  staleTime: 1000 * 60 * 5,
+  initialData: DEFAULT_COMPANY_SETTINGS,
 };
 
 /**
- * Returns the dynamic company settings once loaded (undefined until then).
- * Consumers should fall back to their own bundled defaults while this is
- * undefined/empty, so there is no layout shift while the fetch is in flight.
+ * Returns the dynamic company settings once loaded (falls back to DEFAULT_COMPANY_SETTINGS).
+ * There is no layout shift or missing branding while the fetch is in flight.
  */
-export function useCompanySettings(): CompanySettings | undefined {
+export function useCompanySettings(): CompanySettings {
   const { data } = useQuery(companySettingsQueryOptions);
-  return data ?? undefined;
+  return data ?? DEFAULT_COMPANY_SETTINGS;
 }
 
-/** Convenience hook for just the logo URL (empty/missing -> undefined). */
-export function useCompanyLogoUrl(): string | undefined {
+/** Convenience hook for just the logo URL (falls back to default ImageKit logo). */
+export function useCompanyLogoUrl(): string {
   const settings = useCompanySettings();
   const url = settings?.logo_url?.trim();
-  return url ? url : undefined;
+  return url || DEFAULT_COMPANY_SETTINGS.logo_url!;
 }
 
 /** Central helper for getting the cache-busted favicon URL */
 export function getFaviconUrl(settings?: CompanySettings | null): string {
-  const rawUrl = settings?.favicon_url?.trim() || "/favicon-v2.ico";
+  let rawUrl = settings?.favicon_url?.trim() || DEFAULT_COMPANY_SETTINGS.favicon_url || "/favicon-v2.ico";
+  if (rawUrl.includes("res.cloudinary.com/yzmffalu/")) {
+    rawUrl = DEFAULT_COMPANY_SETTINGS.favicon_url || "/favicon-v2.ico";
+  }
   if (rawUrl === "/favicon-v2.ico") return rawUrl;
   
   const sep = rawUrl.includes("?") ? "&" : "?";

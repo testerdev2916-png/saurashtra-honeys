@@ -15,13 +15,32 @@ export type SiteSettings = {
   i18n: { default_locale: string; supported_locales: string[] };
 };
 
+const CACHE_KEY = "saurashtra_site_settings_v2";
+
 const DEFAULTS: SiteSettings = {
-  company: { name: "Saurashtra Honey", tagline: "Raw, unfiltered honey.", logo_url: "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png", favicon_url: "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748301/saurashtra-honey/logos/fevicon%20for%20bees_fx43rb3etoc_1789748299254.png" },
-  contact: { email: "hello@saurastrahoney.com", phone: "+91-96873-28404", whatsapp: "+91-96873-28404", address: "" },
-  seo: { default_title: "Saurashtra Honey", default_description: "Raw, unfiltered honey from Saurashtra.", default_keywords: "", default_og_image: "" },
+  company: { 
+    name: "Saurashtra Honey", 
+    tagline: "Pure • Traceable • Lab-tested", 
+    logo_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png", 
+    favicon_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/fevicon_for_bees_9AwWZ6YRm.png" 
+  },
+  contact: { 
+    email: "saurashtra.honey@gmail.com", 
+    phone: "+91 9664637665", 
+    whatsapp: "+91 9664637665", 
+    address: "At. Farm, Nicha Kotda,\nTa. Mahuva, Dist. Bhavnagar,\nGujarat – 364130" 
+  },
+  seo: { default_title: "Saurashtra Honey", default_description: "Pure, raw and unfiltered honey from Saurashtra.", default_keywords: "", default_og_image: "" },
   analytics: { ga4_measurement_id: "", meta_pixel_id: "", clarity_id: "", gsc_verification: "" },
-  social: { instagram: "", facebook: "", youtube: "", linkedin: "", x: "", pinterest: "" },
-  whatsapp: { enabled: true, number: "919687328404", default_message: "Hi! I would like to know more about your honey." },
+  social: { 
+    instagram: "https://www.instagram.com/saurashtra_honey?igsh=MTg1dnU5eDB1cWVoNg==", 
+    facebook: "https://www.facebook.com/Saurashtrahoneybeefarm/", 
+    youtube: "https://www.youtube.com/@saurashtrahoney2059", 
+    linkedin: "", 
+    x: "", 
+    pinterest: "" 
+  },
+  whatsapp: { enabled: true, number: "919664637665", default_message: "Hi! I would like to know more about your honey." },
   newsletter: { double_opt_in: true, welcome_reward_points: 0 },
   loyalty: { enabled: true, points_per_rupee: 1, redeem_rate_paise: 100, signup_bonus: 0, referral_reward: 100, referred_reward: 50 },
   features: { recently_purchased_popup: true, trust_badges: true, low_stock_message: true, exit_intent_ready: true },
@@ -29,11 +48,41 @@ const DEFAULTS: SiteSettings = {
   i18n: { default_locale: "en", supported_locales: ["en", "hi", "gu"] },
 };
 
+function getInitialSettings(): SiteSettings {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const merged = { ...DEFAULTS } as SiteSettings;
+        for (const [k, v] of Object.entries(parsed)) {
+          if (merged[k as keyof SiteSettings] && typeof v === "object" && v !== null) {
+            (merged as Record<string, unknown>)[k] = {
+              ...(DEFAULTS[k as keyof SiteSettings] as object),
+              ...(v as object),
+            };
+          }
+        }
+        if (merged.company.logo_url?.includes("res.cloudinary.com/yzmffalu/")) {
+          merged.company.logo_url = DEFAULTS.company.logo_url;
+        }
+        if (merged.company.favicon_url?.includes("res.cloudinary.com/yzmffalu/")) {
+          merged.company.favicon_url = DEFAULTS.company.favicon_url;
+        }
+        return merged;
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return DEFAULTS;
+}
+
 const Ctx = createContext<SiteSettings>(DEFAULTS);
 export const useSiteSettings = () => useContext(Ctx);
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
-  const [s, setS] = useState<SiteSettings>(DEFAULTS);
+  const [s, setS] = useState<SiteSettings>(getInitialSettings);
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -46,7 +95,18 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             (merged as Record<string, unknown>)[k] = { ...(DEFAULTS[k] as object), ...(row.value as object) };
           }
         }
+        if (merged.company.logo_url?.includes("res.cloudinary.com/yzmffalu/")) {
+          merged.company.logo_url = DEFAULTS.company.logo_url;
+        }
+        if (merged.company.favicon_url?.includes("res.cloudinary.com/yzmffalu/")) {
+          merged.company.favicon_url = DEFAULTS.company.favicon_url;
+        }
         setS(merged);
+        try {
+          localStorage.setItem(CACHE_KEY, JSON.stringify(merged));
+        } catch {
+          // ignore
+        }
       }
     })();
     return () => { cancelled = true; };

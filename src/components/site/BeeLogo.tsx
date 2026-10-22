@@ -1,5 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSiteSettings } from "@/lib/site-settings";
+import { useCompanySettings, DEFAULT_COMPANY_SETTINGS } from "@/lib/company-settings";
+
+const DEFAULT_IMAGEKIT_LOGO = DEFAULT_COMPANY_SETTINGS.logo_url || "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
+const LOCAL_FALLBACK_LOGO = "/saurashtra-honey-logo-complete.png";
+
+function resolveLogoSources(customUrl?: string): string[] {
+  const list: string[] = [];
+  if (customUrl && typeof customUrl === "string" && customUrl.trim()) {
+    const trimmed = customUrl.trim();
+    if (!trimmed.includes("res.cloudinary.com/yzmffalu/")) {
+      list.push(trimmed);
+    }
+  }
+  list.push(DEFAULT_IMAGEKIT_LOGO);
+  list.push(LOCAL_FALLBACK_LOGO);
+  return Array.from(new Set(list));
+}
 
 function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
   return (
@@ -13,10 +30,15 @@ function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
 }
 
 export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink-0" }: { className?: string }) {
-  const [srcIndex, setSrcIndex] = useState(0);
+  const company = useCompanySettings();
   const settings = useSiteSettings();
-  const logoUrl = settings.company?.logo_url;
-  const sources = logoUrl ? [logoUrl, "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"] : ["https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"];
+  const logoUrl = company?.logo_url || settings.company?.logo_url;
+  const sources = resolveLogoSources(logoUrl);
+  const [srcIndex, setSrcIndex] = useState(0);
+
+  useEffect(() => {
+    setSrcIndex(0);
+  }, [sources[0]]);
 
   if (srcIndex >= sources.length) {
     return <FallbackBeeIcon className={className} />;
@@ -24,6 +46,7 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
 
   return (
     <img
+      key={sources[srcIndex]}
       src={sources[srcIndex]}
       alt="Saurashtra Honey Bee Farm"
       className={className}
@@ -43,10 +66,15 @@ export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink
 }
 
 export function BrandMark() {
-  const [srcIndex, setSrcIndex] = useState(0);
+  const company = useCompanySettings();
   const settings = useSiteSettings();
-  const logoUrl = settings.company?.logo_url;
-  const sources = logoUrl ? [logoUrl, "https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"] : ["https://res.cloudinary.com/yzmffalu/image/upload/f_auto,q_auto/v1789748130/saurashtra-honey/logos/HONEY%20BEE%20FARM_86j00i10jpt_1789748128840.png"];
+  const logoUrl = company?.logo_url || settings.company?.logo_url;
+  const sources = resolveLogoSources(logoUrl);
+  const [srcIndex, setSrcIndex] = useState(0);
+
+  useEffect(() => {
+    setSrcIndex(0);
+  }, [sources[0]]);
 
   if (srcIndex >= sources.length) {
     return <FallbackBeeIcon className="w-[100px] lg:w-[130px] h-auto object-contain" />;
@@ -54,6 +82,7 @@ export function BrandMark() {
 
   return (
     <img
+      key={sources[srcIndex]}
       src={sources[srcIndex]}
       alt="Saurashtra Honey Logo"
       className="w-auto max-w-[150px] lg:max-w-[260px] max-h-[68px] lg:max-h-[125px] object-contain"

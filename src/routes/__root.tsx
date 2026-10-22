@@ -87,13 +87,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             ? "image/svg+xml" 
             : rawUrl.split('?')[0].toLowerCase().endsWith(".png") 
               ? "image/png" 
-              : "image/x-icon" 
+              : "image/x-icon",
         },
-      { rel: "manifest", href: "/manifest.webmanifest" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" },
-    ],
+        {
+          rel: "preload",
+          as: "image",
+          href: loaderData?.settings?.logo_url || "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+        },
+        { rel: "manifest", href: "/manifest.webmanifest" },
+        { rel: "preconnect", href: "https://fonts.googleapis.com" },
+        { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+        { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" },
+      ],
     scripts: [
       {
         type: "application/ld+json",
