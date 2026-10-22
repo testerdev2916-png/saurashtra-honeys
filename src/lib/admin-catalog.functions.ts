@@ -404,6 +404,76 @@ export const deleteSlide = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// -------- CATEGORY HERO SLIDES (1920x600) --------
+
+export const listCategoryHeroSlides = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d?: { category_slug?: string }) => d)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    let q = supabaseAdmin
+      .from("category_hero_slides")
+      .select("*")
+      .order("category_slug", { ascending: true })
+      .order("sort_order", { ascending: true });
+    if (data?.category_slug) {
+      q = q.ilike("category_slug", data.category_slug);
+    }
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const categorySlideSchema = z.object({
+  id: z.string().uuid().optional(),
+  category_slug: z.string().min(1).max(80),
+  image_url: z.string().min(1, "Image URL is required").max(2000),
+  mobile_image_url: z.string().max(2000).nullable().optional(),
+  title: z.string().max(120).nullable().optional(),
+  subtitle: z.string().max(300).nullable().optional(),
+  cta_label: z.string().max(60).nullable().optional(),
+  cta_href: z.string().max(300).nullable().optional(),
+  sort_order: z.number().int().default(1),
+  active: z.boolean().default(true),
+});
+
+export const upsertCategoryHeroSlide = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof categorySlideSchema>) => categorySlideSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { id, ...rest } = data;
+    if (id) {
+      const { error } = await supabaseAdmin
+        .from("category_hero_slides")
+        .update({ ...rest, updated_at: new Date().toISOString() } as never)
+        .eq("id", id);
+      if (error) throw new Error(error.message);
+      return { ok: true };
+    }
+    const { error } = await supabaseAdmin
+      .from("category_hero_slides")
+      .insert([rest as never]);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteCategoryHeroSlide = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("category_hero_slides")
+      .delete()
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 // -------- REVIEWS --------
 
 export const listAdminReviews = createServerFn({ method: "POST" })

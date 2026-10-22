@@ -52,6 +52,7 @@ const NAV: NavItem[] = [
   // ── Catalog ──
   { label: "Products", to: "/admin/products", icon: Package, perm: "products.manage", dividerBefore: "CATALOG" },
   { label: "Categories", to: "/admin/categories", icon: Tags, perm: "categories.manage" },
+  { label: "Category Banners", to: "/admin/category-hero", icon: ImageIcon, perm: "categories.manage" },
   { label: "Inventory", to: "/admin/inventory", icon: Boxes, perm: "products.manage" },
   
   // ── Sales & Customers ──
@@ -63,7 +64,7 @@ const NAV: NavItem[] = [
   // ── CMS (Content Management) ──
   { label: "Homepage", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "CMS" },
   { label: "↳ Main Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
-  { label: "↳ Category Hero", to: "/admin/category-hero", icon: Layers, perm: "settings.manage", indent: true },
+  { label: "↳ Category Banners (1920×600)", to: "/admin/category-hero", icon: Layers, perm: "categories.manage", indent: true },
   { label: "↳ Trust Strip", to: "/admin/homepage/trust", icon: ShieldCheck, perm: "settings.manage", indent: true },
   { label: "↳ Videos & Stories", to: "/admin/stories", icon: Film, perm: "settings.manage", indent: true },
   { label: "↳ Customer Stories", to: "/admin/homepage/stories", icon: Video, perm: "settings.manage", indent: true },

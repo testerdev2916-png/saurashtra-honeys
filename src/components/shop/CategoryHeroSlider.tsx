@@ -32,7 +32,7 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
         const { data, error } = await supabase
           .from("category_hero_slides")
           .select("*")
-          .eq("category_slug", categorySlug)
+          .ilike("category_slug", categorySlug)
           .eq("active", true)
           .order("sort_order", { ascending: true })
           .limit(3);
@@ -115,55 +115,72 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
     >
       <div className="overflow-hidden w-full" ref={emblaRef}>
         <div className="flex touch-pan-y">
-          {slides.map((s, idx) => (
-            <div 
-              key={s.id || idx} 
-              className="relative flex-none w-full aspect-[4/5] md:aspect-[16/5] min-w-0"
-              role="group" 
-              aria-roledescription="slide"
-            >
-              <picture className="w-full h-full block">
-                {s.mobile_image_url && (
-                  <source 
-                    media="(max-width: 767px)" 
-                    srcSet={s.mobile_image_url} 
+          {slides.map((s, idx) => {
+            const hasText = Boolean(s.title || s.subtitle || s.cta_label);
+            const slideEl = (
+              <div 
+                key={s.id || idx} 
+                className={`relative flex-none w-full min-w-0 ${
+                  s.mobile_image_url ? "aspect-[4/5] md:aspect-[1920/600]" : "aspect-[16/9] sm:aspect-[21/9] md:aspect-[1920/600]"
+                }`}
+                role="group" 
+                aria-roledescription="slide"
+              >
+                <picture className="w-full h-full block">
+                  {s.mobile_image_url && (
+                    <source 
+                      media="(max-width: 767px)" 
+                      srcSet={s.mobile_image_url} 
+                      // @ts-ignore
+                      fetchpriority={idx === 0 ? "high" : "auto"}
+                    />
+                  )}
+                  <img
+                    src={s.image_url}
+                    alt={s.title || `Hero banner for ${categoryName || categorySlug}`}
+                    className="w-full h-full object-cover object-center"
+                    loading={idx === 0 ? "eager" : "lazy"}
                     // @ts-ignore
                     fetchpriority={idx === 0 ? "high" : "auto"}
                   />
-                )}
-                <img
-                  src={s.image_url}
-                  alt={s.title || `Hero banner for ${categorySlug}`}
-                  className="w-full h-full object-cover object-center"
-                  loading={idx === 0 ? "eager" : "lazy"}
-                  // @ts-ignore
-                  fetchpriority={idx === 0 ? "high" : "auto"}
-                />
-              </picture>
+                </picture>
 
-              {/* Text Overlay */}
-              <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center p-6 bg-black/10">
-                {s.title && (
-                  <h2 className="text-white text-3xl md:text-5xl lg:text-6xl font-serif font-medium mb-3 md:mb-4 drop-shadow-md">
-                    {s.title}
-                  </h2>
-                )}
-                {s.subtitle && (
-                  <p className="text-white/90 text-sm md:text-lg lg:text-xl max-w-2xl font-medium drop-shadow mb-6 md:mb-8">
-                    {s.subtitle}
-                  </p>
-                )}
-                {s.cta_label && s.cta_href && (
-                  <Link 
-                    to={s.cta_href} 
-                    className="bg-brand-orange text-white px-8 py-3 rounded-full text-sm font-bold tracking-widest hover:bg-white hover:text-brand-orange transition-all duration-300 shadow-lg"
-                  >
-                    {s.cta_label}
-                  </Link>
+                {/* Text Overlay (only darkened if text exists) */}
+                {hasText && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center p-6 bg-black/20">
+                    {s.title && (
+                      <h2 className="text-white text-3xl md:text-5xl lg:text-6xl font-serif font-medium mb-3 md:mb-4 drop-shadow-md">
+                        {s.title}
+                      </h2>
+                    )}
+                    {s.subtitle && (
+                      <p className="text-white/90 text-sm md:text-lg lg:text-xl max-w-2xl font-medium drop-shadow mb-6 md:mb-8">
+                        {s.subtitle}
+                      </p>
+                    )}
+                    {s.cta_label && s.cta_href && (
+                      <Link 
+                        to={s.cta_href} 
+                        className="bg-brand-orange text-white px-8 py-3 rounded-full text-sm font-bold tracking-widest hover:bg-white hover:text-brand-orange transition-all duration-300 shadow-lg"
+                      >
+                        {s.cta_label}
+                      </Link>
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+
+            if (s.cta_href && !s.cta_label) {
+              return (
+                <Link key={s.id || idx} to={s.cta_href} className="block w-full flex-none">
+                  {slideEl}
+                </Link>
+              );
+            }
+
+            return slideEl;
+          })}
         </div>
       </div>
 

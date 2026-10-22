@@ -1,11 +1,11 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { listCategories, upsertCategory, deleteCategory } from "@/lib/admin-cms.functions";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
-import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload } from "lucide-react";
+import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Image as ImageIcon } from "lucide-react";
 
 export const Route = createFileRoute("/admin/categories")({ component: CategoriesPage });
 
@@ -45,7 +45,10 @@ function CategoriesPage() {
             <Td><StatusPill s={r.show_in_shop_nav ? "active" : "disabled"} /></Td>
             <Td className="text-xs">{r.shop_nav_sort_order}</Td>
             <Td><StatusPill s={r.active ? "active" : "disabled"} /></Td>
-            <Td className="text-right">
+            <Td className="text-right whitespace-nowrap">
+              <Link to="/admin/category-hero" search={{ category: r.slug }} className="text-brand-orange hover:underline text-xs font-bold mr-3 inline-flex items-center gap-1">
+                <ImageIcon className="size-3.5 inline" /> BANNER (1920×600)
+              </Link>
               <button onClick={() => setEdit(r)} className="text-gold-deep hover:underline text-xs font-bold mr-3"><Pencil className="size-3.5 inline" /> EDIT</button>
               {r.slug !== "all-products" && (
                 <button onClick={async () => { if (!confirm("Delete?")) return; try { await del({ data: { id: r.id } }); toast.success("Deleted"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="text-destructive hover:underline text-xs font-bold"><Trash2 className="size-3.5 inline" /></button>
@@ -62,6 +65,11 @@ function CategoriesPage() {
       <PageHeader title="Categories" subtitle={`${rows.length} categories`} actions={
         <>
           <BtnGhost onClick={load}><RefreshCcw className="size-3.5" /> REFRESH</BtnGhost>
+          <Link to="/admin/category-hero">
+            <BtnGhost className="text-brand-orange border-brand-orange/40 hover:bg-brand-orange/10 gap-1.5">
+              <ImageIcon className="size-3.5" /> CATEGORY BANNERS (1920×600)
+            </BtnGhost>
+          </Link>
           <BtnPrimary onClick={() => setEdit(EMPTY)}><Plus className="size-3.5" /> NEW CATEGORY</BtnPrimary>
         </>
       } />
@@ -149,6 +157,23 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
                 <input type="number" value={f.shop_nav_sort_order ?? 0} onChange={(e) => setF({ ...f, shop_nav_sort_order: Number(e.target.value) })} className={inp} />
               </Field>
             </div>
+          </div>
+
+          <div className="md:col-span-2 p-4 rounded-xl border border-brand-orange/30 bg-brand-orange/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 my-2">
+            <div>
+              <div className="font-semibold text-espresso flex items-center gap-2 text-sm">
+                <ImageIcon className="size-4 text-brand-orange" />
+                Category Hero Banner (1920 × 600 px)
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Manage the full-width 1920×600 header banner shown on <code>/shop/{f.slug || "category"}</code>.
+              </p>
+            </div>
+            <Link to="/admin/category-hero" search={{ category: f.slug || "honey" }}>
+              <BtnPrimary type="button" className="text-xs shrink-0">
+                MANAGE BANNER (1920×600)
+              </BtnPrimary>
+            </Link>
           </div>
 
           <label className="flex items-center gap-2 text-xs md:col-span-2 mt-2"><input type="checkbox" checked={!!f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} /> Active</label>
