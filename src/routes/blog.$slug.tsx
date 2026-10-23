@@ -27,6 +27,8 @@ export const Route = createFileRoute("/blog/$slug")({
   },
   head: ({ loaderData }) => {
     const post = loaderData?.post;
+    const imageSrc = post ? resolvePostImage(post.cover_image_url, post.category_name || post.slug) : "";
+    const canonicalUrl = post ? `https://saurastrahoney.com/blog/${post.slug}` : "";
     return {
       meta: post
         ? [
@@ -35,13 +37,19 @@ export const Route = createFileRoute("/blog/$slug")({
             { property: "og:title", content: post.title },
             { property: "og:description", content: post.excerpt || "" },
             { property: "og:type", content: "article" },
+            { property: "og:url", content: canonicalUrl },
+            ...(imageSrc ? [{ property: "og:image", content: imageSrc }] : []),
             { property: "article:published_time", content: post.published_at || post.created_at },
             { property: "article:section", content: post.category_name || "Honey & Health" },
             { name: "twitter:card", content: "summary_large_image" },
+            { name: "twitter:title", content: post.title },
+            { name: "twitter:description", content: post.excerpt || "" },
+            ...(imageSrc ? [{ name: "twitter:image", content: imageSrc }] : []),
           ]
         : [
             { title: "Article Not Found | Saurashtra Honey Journal" },
           ],
+      links: post && canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : [],
     };
   },
   notFoundComponent: () => (
@@ -110,7 +118,7 @@ function BlogPost() {
       name: "Saurashtra Honey",
       logo: { "@type": "ImageObject", url: faviconUrl },
     },
-    mainEntityOfPage: `/blog/${post.slug}`,
+    mainEntityOfPage: `https://saurastrahoney.com/blog/${post.slug}`,
   };
 
   const handleShare = (type: string) => {

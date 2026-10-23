@@ -44,7 +44,15 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
       { property: "og:description", content: "Raw. Natural. Unfiltered. From our farms to your home, with care." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
+      { name: "twitter:description", content: "Raw. Natural. Unfiltered. From our farms to your home, with care." },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/" },
     ],
   }),
   component: Home,
@@ -324,6 +332,7 @@ function Home() {
 
   return (
     <SiteLayout>
+      <h1 className="sr-only">Saurashtra Honey — Pure, Raw & Unfiltered Honey from Saurashtra</h1>
       <StructuredData data={organizationLd()} />
       <StructuredData data={breadcrumbLd([{ name: "Home", url: "/" }])} />
 

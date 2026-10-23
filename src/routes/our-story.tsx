@@ -241,6 +241,18 @@ export const Route = createFileRoute("/our-story")({
         content:
           "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
       },
+      { property: "og:title", content: "Our Story — Saurashtra Honey" },
+      {
+        property: "og:description",
+        content: "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/our-story" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/our-story" },
     ],
   }),
   loader: async () => {
@@ -369,9 +381,9 @@ function OurStory() {
               <span className="text-[11px] uppercase tracking-[0.25em] text-[#3B5241] font-bold block">
                 {origin.eyebrow || "WHERE IT BEGAN"}
               </span>
-              <h2 className="font-serif text-[36px] sm:text-[48px] leading-tight text-[#2B2118]">
+              <h1 className="font-serif text-[36px] sm:text-[48px] leading-tight text-[#2B2118]">
                 {origin.heading || "It started with the bees."}
-              </h2>
+              </h1>
               <div className="space-y-4 text-[16px] text-[#2B2118]/70 leading-relaxed font-light whitespace-pre-wrap">
                 {origin.description ||
                   "In the heart of Saurashtra, where the land blooms with wildflowers and the winds carry stories of tradition, our journey began with a deep respect for nature.\n\nEstablished in 2016, what started with just 5 beehives and a vision for naturally prepared honey has grown into a promise to deliver honey that is pure and honest.\n\nEvery jar you hold is a reflection of our love for bees, our land, and our commitment to quality.\n\nThis is where our story begins."}

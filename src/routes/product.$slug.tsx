@@ -44,10 +44,16 @@ export const Route = createFileRoute("/product/$slug")({
         { property: "og:title", content: `${loaderData.product.name} — Saurashtra Honey` },
         { property: "og:description", content: loaderData.product.tagline },
         { property: "og:type", content: "product" },
+        { property: "og:url", content: `https://saurastrahoney.com/product/${loaderData.product.slug}` },
         { property: "og:image", content: image },
         { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: `${loaderData.product.name} — Saurashtra Honey` },
+        { name: "twitter:description", content: loaderData.product.tagline },
         { name: "twitter:image", content: image },
-      ]
+      ],
+      links: [
+        { rel: "canonical", href: `https://saurastrahoney.com/product/${loaderData.product.slug}` },
+      ],
     };
   },
   notFoundComponent: () => (

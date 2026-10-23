@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = ""; // resolves relative-safely; set once a canonical domain is defined
+const BASE_URL = (process.env.SITE_URL || "https://saurastrahoney.com").replace(/\/$/, "");
 
 type Entry = { path: string; changefreq?: string; priority?: string };
 

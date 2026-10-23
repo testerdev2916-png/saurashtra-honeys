@@ -31,6 +31,13 @@ export const Route = createFileRoute("/bulk-orders")({
       { property: "og:title", content: "Wholesale Honey Supply — Saurashtra Honey" },
       { property: "og:description", content: "Premium bulk honey for businesses." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/bulk-orders" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/bulk-orders" },
     ],
   }),
   loader: async () => {
@@ -146,9 +153,9 @@ function BulkOrdersPage() {
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
               {introSettings.eyebrow || "Trusted Supply Partner"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+            <h1 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
               {introSettings.heading || "Uncompromising Quality at Scale"}
-            </h2>
+            </h1>
             <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
               {introSettings.description || "When you partner with Saurashtra Honey, you are guaranteed pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
             </p>

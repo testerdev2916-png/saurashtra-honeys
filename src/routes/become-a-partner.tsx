@@ -17,10 +17,10 @@ export const Route = createFileRoute("/become-a-partner")({
       { property: "og:title", content: "Become a Partner — Saurashtra Honey" },
       { property: "og:description", content: "Let's grow naturally, together. Build a business rooted in purity and trust." },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://id-preview--f7347c5b-4839-4afc-a6bf-ed617bd76e1d.lovable.app/become-a-partner" },
+      { property: "og:url", content: "https://saurastrahoney.com/become-a-partner" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [{ rel: "canonical", href: "https://id-preview--f7347c5b-4839-4afc-a6bf-ed617bd76e1d.lovable.app/become-a-partner" }],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/become-a-partner" }],
   }),
   component: Partner,
 });

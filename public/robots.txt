@@ -1,4 +1,56 @@
 User-agent: *
 Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+Disallow: /lovable
 
-Sitemap: https://id-preview--f7347c5b-4839-4afc-a6bf-ed617bd76e1d.lovable.app/sitemap.xml
+# AI Search & RAG Crawlers
+User-agent: GPTBot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /admin
+Disallow: /account
+Disallow: /checkout
+Disallow: /order
+
+# Machine-Readable AI Context
+# Standard: https://llmstxt.org
+# Documentation: https://saurastrahoney.com/llms.txt
+
+Sitemap: https://saurastrahoney.com/sitemap.xml

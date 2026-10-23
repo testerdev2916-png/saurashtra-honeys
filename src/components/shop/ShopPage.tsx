@@ -28,6 +28,7 @@ import {
 import { track, toItem } from "@/lib/analytics";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 import { IllustratedBrandSection } from "@/components/site/IllustratedBrandSection";
+import { AiHoneyFinder } from "@/components/site/AiHoneyFinder";
 
 // Assets for Shop Hero and Discover By Shop collections
 import heroProductsImg from "@/assets/hero-products.jpg";
@@ -53,16 +54,6 @@ export function ShopPage({
   initialProducts?: Product[];
   initialHeroSlides?: HeroSlide[];
 }) {
-  // Temporary development diagnostic
-  console.table(
-    initialCategories.map(c => ({
-      slug: c.slug,
-      name: c.name,
-      image_url: c.image_url,
-      image: (c as any).image,
-      updated_at: c.updated_at
-    }))
-  );
 
   const search = useSearch({ strict: false }) as Record<string, any>;
   const navigate = useNavigate();
@@ -445,12 +436,15 @@ export function ShopPage({
         <div className="container-page relative z-10">
 
           {/* Toolbar (Desktop & Mobile) - NO STICKY */}
-          <div className="relative z-30 bg-cream py-4 mb-8 border-b sm:border-none border-border/80 flex flex-wrap items-center justify-between gap-4">
-            
-            <div className="hidden sm:block text-[15px] text-espresso/80 font-medium">
+          <div className="relative z-30 bg-cream py-4 mb-4 border-b sm:border-none border-border/80 flex flex-wrap items-center justify-between gap-4">
+            <div className="text-[15px] text-espresso/80 font-medium">
               Showing {filtered.length} products
             </div>
+            <AiHoneyFinder products={initialProducts} triggerVariant="button" />
           </div>
+
+          {/* AI SOMMELIER INTERACTIVE BANNER */}
+          <AiHoneyFinder products={initialProducts} triggerVariant="banner" />
 
           {/* Product Grid — 5 columns on desktop matching reference image */}
           {filtered.length === 0 ? (
@@ -515,7 +509,8 @@ export function ShopPage({
       {/* QUICK VIEW MODAL */}
       <QuickView product={quick} onClose={() => setQuick(null)} />
 
-
+      {/* FLOATING AI SOMMELIER LAUNCHER */}
+      <AiHoneyFinder products={initialProducts} triggerVariant="floating" />
     </SiteLayout>
   );
 }

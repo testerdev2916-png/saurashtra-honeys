@@ -28,6 +28,13 @@ export const Route = createFileRoute("/bulk-gifting")({
       { property: "og:title", content: "B2B Ecosystem — Saurashtra Honey" },
       { property: "og:description", content: "Partner with a trusted premium honey manufacturer." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/bulk-gifting" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/bulk-gifting" },
     ],
   }),
   loader: () => fetchPageSections("bulk-gifting"),
@@ -160,9 +167,9 @@ function BulkGiftingHubPage() {
           <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706] mb-4">
             BUSINESS PARTNERSHIPS
           </div>
-          <h2 className="font-serif text-[34px] sm:text-[44px] md:text-[56px] text-[#2B2118] font-[500] leading-tight mb-6 max-w-4xl mx-auto">
+          <h1 className="font-serif text-[34px] sm:text-[44px] md:text-[56px] text-[#2B2118] font-[500] leading-tight mb-6 max-w-4xl mx-auto">
             A Trusted Manufacturer of Pure Natural Honey
-          </h2>
+          </h1>
           <p className="text-[#6B6257] text-[16px] sm:text-[18px] max-w-2xl mx-auto leading-relaxed">
             We provide end-to-end premium honey solutions for businesses worldwide. 
             Select a service below to explore dedicated offerings, minimum order quantities, and custom solutions tailored for your business.

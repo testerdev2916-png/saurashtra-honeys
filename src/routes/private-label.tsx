@@ -26,9 +26,16 @@ export const Route = createFileRoute("/private-label")({
         name: "description",
         content: "Start your own honey brand with our end-to-end white label manufacturing. From raw honey sourcing to lab testing, bottle selection, and custom labeling.",
       },
-      { property: "og:title", content: "Private Label Honey Manufacturing" },
+      { property: "og:title", content: "Private Label Honey Manufacturing — Saurashtra Honey" },
       { property: "og:description", content: "Your Brand, Our Pure Honey. Complete OEM Solutions." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/private-label" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/private-label" },
     ],
   }),
   loader: () => fetchPageSections("private-label"),
@@ -105,9 +112,9 @@ function PrivateLabelPage() {
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
               {introSettings.eyebrow || "White Label Manufacturing"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+            <h1 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
               {introSettings.heading || "Your Brand. Our Pure Honey."}
-            </h2>
+            </h1>
             <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
               {introSettings.description || "Building a premium food brand requires a partner you can completely trust. We provide fully certified OEM/White Label manufacturing services, empowering entrepreneurs and established brands to launch world-class honey products without the hassle of setting up a facility."}
             </p>

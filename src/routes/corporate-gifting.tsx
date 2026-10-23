@@ -24,9 +24,16 @@ export const Route = createFileRoute("/corporate-gifting")({
         name: "description",
         content: "Elevate your corporate gifting with premium natural honey hampers. Custom branding, greeting cards, and bulk delivery for clients and employees.",
       },
-      { property: "og:title", content: "Corporate Gifting — Saurashtra Honey" },
+      { property: "og:title", content: "Corporate Gifting & Luxury Hampers — Saurashtra Honey" },
       { property: "og:description", content: "Thoughtful luxury honey gifts that leave a sweet impression." },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/corporate-gifting" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/corporate-gifting" },
     ],
   }),
   loader: () => fetchPageSections("corporate-gifting"),
@@ -105,9 +112,9 @@ function CorporateGiftingPage() {
             <div className="text-[12px] font-bold uppercase tracking-[0.25em] text-[#D97706]">
               {introSettings.eyebrow || "A Gift of Health"}
             </div>
-            <h2 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
+            <h1 className="font-serif text-[34px] sm:text-[44px] text-[#2B2118] leading-tight whitespace-pre-wrap">
               {introSettings.heading || "Gifts That Leave a Lasting Impression"}
-            </h2>
+            </h1>
             <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
               {introSettings.description || "Corporate gifting should be more than just a formality. At Saurashtra Honey, we craft premium, health-conscious gifts that reflect your company's values and genuine appreciation. From Diwali to work anniversaries, our pure honey hampers stand out."}
             </p>

@@ -46,7 +46,13 @@ export const Route = createFileRoute("/contact")({
           "We're Here for You. Let's Connect. Have a question, feedback or special request? We'd love to hear from you.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurastrahoney.com/contact" },
+      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://saurastrahoney.com/contact" },
     ],
   }),
   component: ContactPage,
@@ -184,9 +190,9 @@ function ContactPage() {
                 <div className="text-xs font-bold tracking-[0.25em] uppercase text-brand-orange mb-2">
                   CONTACT US
                 </div>
-                <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-espresso tracking-tight leading-tight">
+                <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-espresso tracking-tight leading-tight">
                   We&apos;d Love to Hear From You!
-                </h2>
+                </h1>
                 <p className="text-sm sm:text-base text-espresso/80 leading-relaxed mt-3 mb-8">
                   Reach out to us for any queries, support or bulk orders. Our
                   team will get back to you as soon as possible.
