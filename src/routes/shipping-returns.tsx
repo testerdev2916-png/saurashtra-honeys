@@ -93,11 +93,11 @@ function ShippingReturnsPage() {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="bg-white rounded-lg p-5 border border-[#E6DDCF] flex items-center justify-between">
                       <span className="font-medium">Inside Gujarat</span>
-                      <span className="font-bold text-[#D97706]">₹{settings?.shipping?.free_shipping_min_gujarat || "1,500"}</span>
+                      <span className="font-bold text-[#D97706]">₹{(settings as any)?.shipping?.free_shipping_min_gujarat || "1,500"}</span>
                     </div>
                     <div className="bg-white rounded-lg p-5 border border-[#E6DDCF] flex items-center justify-between">
                       <span className="font-medium">Rest of India</span>
-                      <span className="font-bold text-[#D97706]">₹{settings?.shipping?.free_shipping_min_india || "2,500"}</span>
+                      <span className="font-bold text-[#D97706]">₹{(settings as any)?.shipping?.free_shipping_min_india || "2,500"}</span>
                     </div>
                   </div>
                 </div>

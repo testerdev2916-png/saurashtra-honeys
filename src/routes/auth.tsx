@@ -49,17 +49,25 @@ function AuthPage() {
       if (mode === "signup") {
         const p = signupSchema.safeParse(form);
         if (!p.success) { toast.error(p.error.issues[0].message); return; }
-        const { error } = await supabase.auth.signUp({
+        const searchParams = new URLSearchParams(window.location.search);
+        const intended = safeRedirectPath(searchParams.get("redirect") || "/account");
+        const callbackUrl = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(intended)}`;
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email: p.data.email,
           password: p.data.password,
           options: {
             data: { full_name: p.data.full_name },
-            emailRedirectTo: `${window.location.origin}/account`,
+            emailRedirectTo: callbackUrl,
           },
         });
         if (error) throw error;
-        toast.success("Account created", { description: "Check your inbox to verify your email, then sign in." });
-        setMode("signin");
+        if (signUpData.session) {
+          toast.success("Account created and signed in!");
+          navigate({ to: intended as never });
+        } else {
+          toast.success("Account created", { description: "Check your inbox to verify your email, then sign in." });
+          setMode("signin");
+        }
       } else {
         const p = signinSchema.safeParse(form);
         if (!p.success) { toast.error(p.error.issues[0].message); return; }

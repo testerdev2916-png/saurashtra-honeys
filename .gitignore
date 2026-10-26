@@ -42,6 +42,6 @@ dist-ssr
 # Deployment Zips
 *.zip
 
-*.zip
-
 .output
+test-results/
+playwright-report/

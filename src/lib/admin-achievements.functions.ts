@@ -32,7 +32,7 @@ export const listAchievements = createServerFn()
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase } = context;
-    const { data, error } = await supabase
+    const { data, error } = await (supabase as any)
       .from("achievements_gallery")
       .select("*")
       .order("display_order", { ascending: true })
@@ -67,7 +67,7 @@ export const upsertAchievement = createServerFn()
     await assertPerm(supabase, userId, "settings.manage");
     
     if (payload.id) {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("achievements_gallery")
         .update(payload)
         .eq("id", payload.id)
@@ -87,7 +87,7 @@ export const upsertAchievement = createServerFn()
       }
       throw new Error("Update failed: no data returned");
     } else {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("achievements_gallery")
         .insert(payload)
         .select()
@@ -101,7 +101,7 @@ export const upsertAchievement = createServerFn()
       }
       
       if (data) {
-        await audit(supabase, userId, "create_achievement", "achievements_gallery", data.id, { title: payload.title });
+        await audit(supabase, userId, "create_achievement", "achievements_gallery", (data as any).id, { title: payload.title });
         return { success: true, item: data };
       }
       throw new Error("Insert failed: no data returned");
@@ -115,7 +115,7 @@ export const deleteAchievement = createServerFn()
     const { supabase, userId } = context;
     await assertPerm(supabase, userId, "settings.manage");
 
-    const { error } = await supabase.from("achievements_gallery").delete().eq("id", id);
+    const { error } = await (supabase as any).from("achievements_gallery").delete().eq("id", id);
     if (error) throw new Error(error.message);
     
     await audit(supabase, userId, "delete_achievement", "achievements_gallery", id);
@@ -133,7 +133,7 @@ export const reorderAchievements = createServerFn()
     const { supabase, userId } = context;
     await assertPerm(supabase, userId, "settings.manage");
     for (const item of items) {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("achievements_gallery")
         .update({ display_order: item.display_order })
         .eq("id", item.id);

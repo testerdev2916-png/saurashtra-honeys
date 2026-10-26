@@ -9,6 +9,7 @@
     "build:dev": "vite build --mode development",
     "start": "node .output/server/index.mjs",
     "preview": "vite preview",
+    "test": "tsx --test tests/guest-orders-auth.test.ts",
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "format": "prettier --write ."

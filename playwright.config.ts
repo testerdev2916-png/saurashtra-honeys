@@ -5,6 +5,7 @@ const sandboxChromium = "/chromium-1194/chrome-linux/chrome";
 
 export default defineConfig({
   testDir: "./tests",
+  testMatch: /.*\.spec\.ts/,
   timeout: 30_000,
   expect: { timeout: 10_000 },
   use: {
