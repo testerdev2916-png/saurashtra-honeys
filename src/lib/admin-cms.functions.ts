@@ -1,6 +1,15 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import {
+  notifyOrderProcessing,
+  notifyOrderDispatched,
+  notifyOutForDelivery,
+  notifyOrderDelivered,
+  notifyOrderCancelled,
+  notifyOrderRefunded,
+} from "./email/email-service";
+import type { EmailOrderData, EmailOrderItem, EmailShippingAddress } from "./email/templates";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SB = any;
@@ -19,14 +28,14 @@ async function assertPerm(supabase: SB, userId: string, key: string) {
   if (!data) throw new Error(`Forbidden: missing permission ${key}`);
 }
 async function audit(
-  supabase: any,
+  supabase: SB,
   actor: string,
   action: string,
   entity_type?: string,
   entity_id?: string,
   metadata: Record<string, unknown> = {},
 ) {
-    await supabase
+  await supabase
     .from("audit_logs")
     .insert({ actor_id: actor, action, entity_type, entity_id, metadata } as never);
 }
@@ -118,7 +127,7 @@ export const listCategories = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertStaff(context.supabase, context.userId);
-        await seedDefaultCategoriesIfEmpty(context.supabase);
+    await seedDefaultCategoriesIfEmpty(context.supabase);
     const { data, error } = await context.supabase
       .from("categories")
       .select("*")
@@ -137,7 +146,7 @@ export const listCategories = createServerFn({ method: "POST" })
     ];
     return {
       rows: (data ?? []).filter(
-        (r) => !DISALLOWED_SLUGS.includes(String(r.slug).toLowerCase().trim())
+        (r) => !DISALLOWED_SLUGS.includes(String(r.slug).toLowerCase().trim()),
       ),
     };
   });
@@ -147,7 +156,7 @@ export const upsertCategory = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof catSchema>) => catSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "categories.manage");
-        const { id, ...rest } = data;
+    const { id, ...rest } = data;
     const cleanSlug = data.slug
       .toLowerCase()
       .trim()
@@ -201,9 +210,16 @@ export const upsertCategory = createServerFn({ method: "POST" })
         .ilike("category", oldName.trim());
     }
 
-    await audit(context.supabase, context.userId, id ? "category.update" : "category.create", "category", id, {
-      slug: cleanSlug,
-    });
+    await audit(
+      context.supabase,
+      context.userId,
+      id ? "category.update" : "category.create",
+      "category",
+      id,
+      {
+        slug: cleanSlug,
+      },
+    );
     return { ok: true };
   });
 
@@ -212,7 +228,7 @@ export const deleteCategory = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "categories.manage");
-        const { data: cat } = await context.supabase
+    const { data: cat } = await context.supabase
       .from("categories")
       .select("name, slug")
       .eq("id", data.id)
@@ -235,7 +251,7 @@ export const deleteCategory = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-// uploadCategoryImage and uploadProductImage have been removed. 
+// uploadCategoryImage and uploadProductImage have been removed.
 // They are now handled directly on the frontend via uploadToImageKit.
 
 /* -------------------- COUPONS -------------------- */
@@ -263,7 +279,7 @@ export const listCoupons = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { data, error } = await context.supabase
+    const { data, error } = await context.supabase
       .from("coupons")
       .select("*")
       .order("created_at", { ascending: false });
@@ -276,7 +292,7 @@ export const upsertCoupon = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof couponSchema>) => couponSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "coupons.manage");
-        const { id, ...rest } = data;
+    const { id, ...rest } = data;
     const payload = { ...rest, created_by: context.userId } as never;
     const q = id
       ? context.supabase
@@ -286,9 +302,16 @@ export const upsertCoupon = createServerFn({ method: "POST" })
       : context.supabase.from("coupons").insert(payload);
     const { error } = await q;
     if (error) throw new Error(error.message);
-    await audit(context.supabase, context.userId, id ? "coupon.update" : "coupon.create", "coupon", id, {
-      code: data.code,
-    });
+    await audit(
+      context.supabase,
+      context.userId,
+      id ? "coupon.update" : "coupon.create",
+      "coupon",
+      id,
+      {
+        code: data.code,
+      },
+    );
     return { ok: true };
   });
 
@@ -297,7 +320,7 @@ export const deleteCoupon = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "coupons.manage");
-        const { error } = await context.supabase.from("coupons").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("coupons").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     await audit(context.supabase, context.userId, "coupon.delete", "coupon", data.id);
     return { ok: true };
@@ -329,7 +352,7 @@ export const listPosts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { data, error } = await context.supabase
+    const { data, error } = await context.supabase
       .from("blog_posts")
       .select("*")
       .is("deleted_at", null)
@@ -343,7 +366,7 @@ export const upsertPost = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof postSchema>) => postSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "blog.manage");
-        const { id, ...rest } = data;
+    const { id, ...rest } = data;
     const payload = { ...rest, author_id: context.userId } as never;
     const q = id
       ? context.supabase
@@ -365,7 +388,7 @@ export const deletePost = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "blog.manage");
-        const { error } = await context.supabase
+    const { error } = await context.supabase
       .from("blog_posts")
       .update({ deleted_at: new Date().toISOString() } as never)
       .eq("id", data.id);
@@ -381,7 +404,7 @@ export const listCustomers = createServerFn({ method: "POST" })
   .inputValidator((d: { q?: string }) => z.object({ q: z.string().max(200).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        let q = context.supabase
+    let q = context.supabase
       .from("profiles")
       .select("*")
       .order("created_at", { ascending: false })
@@ -436,7 +459,7 @@ export const updateCustomer = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        const patch: Record<string, unknown> = {};
+    const patch: Record<string, unknown> = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
     const { error } = await context.supabase
@@ -454,7 +477,7 @@ export const listSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { data, error } = await context.supabase.from("site_settings").select("*").order("key");
+    const { data, error } = await context.supabase.from("site_settings").select("*").order("key");
     if (error) throw new Error(error.message);
     return { rows: data ?? [] };
   });
@@ -472,7 +495,7 @@ export const upsertSetting = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "settings.manage");
-        const payload = {
+    const payload = {
       key: data.key,
       value: data.value,
       is_public: data.is_public ?? true,
@@ -493,7 +516,7 @@ export const listMedia = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        let q = context.supabase
+    let q = context.supabase
       .from("media_library")
       .select("*")
       .order("created_at", { ascending: false })
@@ -509,7 +532,7 @@ export const listMedia = createServerFn({ method: "POST" })
         }
         const { data: pub } = context.supabase.storage
           .from(r.bucket)
-          .getPublicUrl(r.path, { transform: { quality: 80, format: 'webp' as any } });
+          .getPublicUrl(r.path, { transform: { quality: 80, format: "webp" as never } });
         return { ...r, url: pub?.publicUrl ?? null };
       }),
     );
@@ -521,7 +544,7 @@ export const deleteMedia = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "media.manage");
-        const { data: row, error: e0 } = await context.supabase
+    const { data: row, error: e0 } = await context.supabase
       .from("media_library")
       .select("bucket,path")
       .eq("id", data.id)
@@ -538,25 +561,19 @@ export const deleteMedia = createServerFn({ method: "POST" })
 
 export const saveCloudinaryMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (d: {
-      url: string;
-      filename: string;
-      contentType: string;
-      sizeBytes: number;
-    }) =>
-      z
-        .object({
-          url: z.string().url(),
-          filename: z.string().min(1).max(200),
-          contentType: z.string().max(120),
-          sizeBytes: z.number().int().nonnegative(),
-        })
-        .parse(d),
+  .inputValidator((d: { url: string; filename: string; contentType: string; sizeBytes: number }) =>
+    z
+      .object({
+        url: z.string().url(),
+        filename: z.string().min(1).max(200),
+        contentType: z.string().max(120),
+        sizeBytes: z.number().int().nonnegative(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "media.manage");
-    
+
     const { data: row, error } = await context.supabase
       .from("media_library")
       .insert({
@@ -569,14 +586,14 @@ export const saveCloudinaryMedia = createServerFn({ method: "POST" })
       } as never)
       .select("id,bucket,path")
       .single();
-      
+
     if (error) throw new Error(error.message);
-    
+
     await audit(context.supabase, context.userId, "media.upload", "media", row.id, {
       filename: data.filename,
       bucket: "cloudinary",
     });
-    
+
     return { id: row.id, url: data.url, path: data.url };
   });
 
@@ -586,7 +603,7 @@ export const listUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        const { data: roles } = await context.supabase.from("user_roles").select("user_id,role");
+    const { data: roles } = await context.supabase.from("user_roles").select("user_id,role");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({
       page: 1,
@@ -637,7 +654,9 @@ export const setUserRole = createServerFn({ method: "POST" })
         .eq("role", data.role);
       if (error) throw new Error(error.message);
     }
-    await audit(context.supabase, context.userId, `role.${data.action}`, "user", data.user_id, { role: data.role });
+    await audit(context.supabase, context.userId, `role.${data.action}`, "user", data.user_id, {
+      role: data.role,
+    });
     return { ok: true };
   });
 
@@ -648,8 +667,8 @@ export const inviteUser = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { data: inv, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: inv, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(data.email);
     if (error) throw new Error(error.message);
     if (data.role && inv.user) {
       // supabaseAdmin is already imported above for inviteUserByEmail
@@ -669,8 +688,8 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
   .inputValidator((d: { email: string }) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "users.manage");
-        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { error } = await supabaseAdmin.auth.admin.generateLink({
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
       email: data.email,
     });
@@ -689,7 +708,7 @@ export const listAudit = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "audit.read");
-        let q = context.supabase
+    let q = context.supabase
       .from("audit_logs")
       .select("*")
       .order("created_at", { ascending: false })
@@ -725,6 +744,7 @@ export const updateOrderExtended = createServerFn({ method: "POST" })
               "processing",
               "packed",
               "shipped",
+              "out_for_delivery",
               "delivered",
               "cancelled",
               "refunded",
@@ -739,7 +759,7 @@ export const updateOrderExtended = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "orders.manage");
-        const patch: Record<string, unknown> = {};
+    const patch: Record<string, unknown> = {};
     (
       [
         "status",
@@ -755,7 +775,7 @@ export const updateOrderExtended = createServerFn({ method: "POST" })
     if (data.status === "refunded") patch.refunded_at = new Date().toISOString();
     const { data: cur } = await context.supabase
       .from("orders")
-      .select("timeline")
+      .select("*")
       .eq("id", data.id)
       .single();
     const timeline = Array.isArray((cur as { timeline?: unknown })?.timeline)
@@ -775,6 +795,53 @@ export const updateOrderExtended = createServerFn({ method: "POST" })
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     await audit(context.supabase, context.userId, "order.update", "order", data.id, patch);
+
+    // Dispatch status change transactional email
+    if (data.status && cur && data.status !== cur.status) {
+      try {
+        const emailOrderData: EmailOrderData = {
+          id: data.id,
+          order_number: cur.order_number,
+          created_at: cur.created_at,
+          full_name: cur.full_name,
+          email: cur.email,
+          phone: cur.phone,
+          shipping: cur.shipping as unknown as EmailShippingAddress,
+          items: (Array.isArray(cur.items) ? cur.items : []) as unknown as EmailOrderItem[],
+          subtotal_paise: cur.subtotal_paise || 0,
+          discount_paise: cur.discount_paise || 0,
+          coupon_code: cur.coupon_code,
+          shipping_paise: cur.shipping_paise || 0,
+          total_paise: cur.total_paise || 0,
+          payment_method: cur.payment_method,
+          razorpay_payment_id: cur.razorpay_payment_id,
+          status: data.status,
+          tracking_number: data.tracking_number ?? cur.tracking_number,
+          shipping_carrier: data.shipping_carrier ?? cur.shipping_carrier,
+          estimated_delivery: cur.estimated_delivery,
+          refund_amount_paise: data.refund_amount_paise ?? cur.refund_amount_paise,
+          notes: data.admin_notes ?? cur.notes,
+          gift_note: cur.gift_note,
+        };
+
+        if (data.status === "processing") {
+          await notifyOrderProcessing(emailOrderData);
+        } else if (data.status === "shipped") {
+          await notifyOrderDispatched(emailOrderData);
+        } else if (data.status === "out_for_delivery") {
+          await notifyOutForDelivery(emailOrderData);
+        } else if (data.status === "delivered") {
+          await notifyOrderDelivered(emailOrderData);
+        } else if (data.status === "cancelled") {
+          await notifyOrderCancelled(emailOrderData);
+        } else if (data.status === "refunded") {
+          await notifyOrderRefunded(emailOrderData);
+        }
+      } catch (err) {
+        console.error(`[Email] Error dispatching status change (${data.status}) email:`, err);
+      }
+    }
+
     return { ok: true };
   });
 
@@ -793,7 +860,7 @@ export const adjustStock = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "products.manage");
-        const { data: p, error: e0 } = await context.supabase
+    const { data: p, error: e0 } = await context.supabase
       .from("products")
       .select("stock_quantity")
       .eq("id", data.product_id)
@@ -842,7 +909,7 @@ export const listHomepageVideos = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { data, error } = await context.supabase
+    const { data, error } = await context.supabase
       .from("homepage_videos")
       .select("*")
       .order("display_order", { ascending: true })
@@ -881,9 +948,15 @@ export const deleteHomepageVideo = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { error } = await context.supabase.from("homepage_videos").delete().eq("id", data.id);
+    const { error } = await context.supabase.from("homepage_videos").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
-    await audit(context.supabase, context.userId, "homepage_video.delete", "homepage_video", data.id);
+    await audit(
+      context.supabase,
+      context.userId,
+      "homepage_video.delete",
+      "homepage_video",
+      data.id,
+    );
     return { ok: true };
   });
 
@@ -898,15 +971,22 @@ export const reorderHomepageVideos = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        for (const item of data.items) {
+    for (const item of data.items) {
       const { error } = await context.supabase
         .from("homepage_videos")
         .update({ display_order: item.display_order } as never)
         .eq("id", item.id);
       if (error) throw new Error(error.message);
     }
-    await audit(context.supabase, context.userId, "homepage_video.reorder", "homepage_video", undefined, {
-      count: data.items.length,
-    });
+    await audit(
+      context.supabase,
+      context.userId,
+      "homepage_video.reorder",
+      "homepage_video",
+      undefined,
+      {
+        count: data.items.length,
+      },
+    );
     return { ok: true };
   });

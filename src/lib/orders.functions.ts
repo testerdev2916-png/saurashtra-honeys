@@ -5,6 +5,12 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { supabaseAdmin as supabase } from "@/integrations/supabase/client.server";
 import { sendWhatsAppOrderAlert } from "./whatsapp.functions";
+import {
+  notifyOrderCreated,
+  notifyPaymentConfirmed,
+  notifyOrderCancelled,
+} from "./email/email-service";
+import type { EmailOrderData, EmailOrderItem, EmailShippingAddress } from "./email/templates";
 
 const itemSchema = z.object({
   slug: z.string().max(120),
@@ -185,6 +191,33 @@ async function insertOrderRow(
     metadata: { order_id: row.id, order_number: row.order_number },
   } as never);
 
+  // Dispatch transactional emails (Customer Confirmation & Store Owner Alert)
+  try {
+    const emailOrderData: EmailOrderData = {
+      id: row.id,
+      order_number: row.order_number,
+      created_at: new Date().toISOString(),
+      full_name: data.full_name,
+      email: data.email,
+      phone: data.phone,
+      shipping: data.shipping,
+      items: data.items,
+      subtotal_paise: subtotalPaise,
+      discount_paise: coupon.discount,
+      coupon_code: coupon.codeText,
+      shipping_paise: shippingPaise,
+      total_paise: totalPaise,
+      payment_method: data.payment_method,
+      status: insert.status,
+      estimated_delivery: estDelivery.toISOString().slice(0, 10),
+      notes: data.notes ?? null,
+      gift_note: data.gift_note ?? null,
+    };
+    await notifyOrderCreated(emailOrderData);
+  } catch (err) {
+    console.error("[Email] Error dispatching order creation emails:", err);
+  }
+
   if (data.payment_method === "razorpay") {
     const rp = await razorpayCreateOrder(totalPaise, `order_${row.id.slice(0, 30)}`);
     await supabaseClient.from("orders").update({ razorpay_order_id: rp.id }).eq("id", row.id);
@@ -259,7 +292,7 @@ export async function verifyAndMarkPaid(
   const { data: existing } = await supabaseClient
     .from("orders")
     .select(
-      "user_id, razorpay_order_id, timeline, status, items, full_name, order_number, phone, payment_method, total_paise",
+      "id, user_id, razorpay_order_id, timeline, status, items, full_name, order_number, phone, payment_method, total_paise, email, shipping, subtotal_paise, shipping_paise, discount_paise, coupon_code, created_at, estimated_delivery, notes, gift_note",
     )
     .eq("id", data.order_id)
     .single();
@@ -343,6 +376,34 @@ export async function verifyAndMarkPaid(
         });
       }
     }
+  }
+
+  // Dispatch payment confirmation transactional email
+  try {
+    const emailOrderData: EmailOrderData = {
+      id: existing.id || data.order_id,
+      order_number: existing.order_number,
+      created_at: existing.created_at || new Date().toISOString(),
+      full_name: existing.full_name,
+      email: existing.email,
+      phone: existing.phone,
+      shipping: existing.shipping as unknown as EmailShippingAddress,
+      items: (Array.isArray(existing.items) ? existing.items : []) as unknown as EmailOrderItem[],
+      subtotal_paise: existing.subtotal_paise || 0,
+      discount_paise: existing.discount_paise || 0,
+      coupon_code: existing.coupon_code,
+      shipping_paise: existing.shipping_paise || 0,
+      total_paise: existing.total_paise || 0,
+      payment_method: "razorpay",
+      razorpay_payment_id: data.razorpay_payment_id,
+      status: "paid",
+      estimated_delivery: existing.estimated_delivery,
+      notes: existing.notes,
+      gift_note: existing.gift_note,
+    };
+    await notifyPaymentConfirmed(emailOrderData);
+  } catch (err) {
+    console.error("[Email] Error dispatching payment confirmation email:", err);
   }
 
   return { ok: true };
@@ -871,6 +932,32 @@ export const cancelOrder = createServerFn({ method: "POST" })
       link: `/order/${order.id}`,
       metadata: { order_id: order.id, order_number: order.order_number },
     } as never);
+
+    // Dispatch cancellation transactional emails (Customer & Owner alert)
+    try {
+      const emailOrderData: EmailOrderData = {
+        id: order.id,
+        order_number: order.order_number,
+        created_at: order.created_at || new Date().toISOString(),
+        full_name: order.full_name,
+        email: order.email,
+        phone: order.phone,
+        shipping: order.shipping as unknown as EmailShippingAddress,
+        items: (Array.isArray(order.items) ? order.items : []) as unknown as EmailOrderItem[],
+        subtotal_paise: order.subtotal_paise || 0,
+        discount_paise: order.discount_paise || 0,
+        coupon_code: order.coupon_code,
+        shipping_paise: order.shipping_paise || 0,
+        total_paise: order.total_paise || 0,
+        payment_method: order.payment_method,
+        razorpay_payment_id: order.razorpay_payment_id,
+        status: "cancelled",
+        notes: data.reason ? `Cancellation reason: ${data.reason}` : null,
+      };
+      await notifyOrderCancelled(emailOrderData);
+    } catch (err) {
+      console.error("[Email] Error dispatching cancellation emails:", err);
+    }
 
     return {
       ok: true,
