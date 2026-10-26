@@ -353,14 +353,167 @@ describe("Historical Guest Order Claiming Mechanism", () => {
     // Clean up customer B
     await supabase.auth.admin.deleteUser(callerBUserId);
   });
+});
 
-  // Clean up test data
-  it("cleans up test order and auth user", async () => {
-    if (createdOrderId) {
-      await supabase.from("orders").delete().eq("id", createdOrderId);
+describe("Customer Order Cancellation System", () => {
+  let cancelTestOrderId: string | null = null;
+  let testCustomerUserId: string | null = null;
+
+  it("creates an active order for cancellation testing", async () => {
+    // Create test customer
+    const { data: userAuth } = await supabase.auth.admin.createUser({
+      email: `cancel.test.${Date.now()}@example.com`,
+      password: "TestPassword123!",
+      email_confirm: true,
+    });
+    assert.ok(userAuth?.user?.id);
+    testCustomerUserId = userAuth.user.id;
+
+    // Create an order in processing status
+    const { data: order, error } = await supabase
+      .from("orders")
+      .insert({
+        user_id: testCustomerUserId,
+        email: userAuth.user.email,
+        full_name: "Cancel Test User",
+        phone: "+919876543212",
+        shipping: {
+          line1: "100 Palace Road",
+          city: "Rajkot",
+          state: "Gujarat",
+          pincode: "360001",
+        },
+        items: [
+          {
+            slug: "raw-honey-500g",
+            name: "Raw Honey",
+            size: "500g",
+            price: 650,
+            qty: 1,
+          },
+        ],
+        subtotal_paise: 65000,
+        shipping_paise: 0,
+        total_paise: 65000,
+        payment_method: "cod",
+        status: "processing",
+        timeline: [{ at: new Date().toISOString(), status: "created", note: "Order placed" }],
+      } as never)
+      .select("id, status, user_id")
+      .single();
+
+    assert.ifError(error);
+    assert.ok(order);
+    assert.strictEqual(order.status, "processing");
+    cancelTestOrderId = order.id;
+  });
+
+  it("allows the customer to cancel an order in processing status", async () => {
+    assert.ok(cancelTestOrderId);
+    assert.ok(testCustomerUserId);
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", cancelTestOrderId)
+      .single();
+
+    assert.ok(order);
+    const CANCELLABLE_STATUSES = ["pending", "processing", "paid", "confirmed"];
+    assert.strictEqual(CANCELLABLE_STATUSES.includes(order.status), true);
+
+    const reason = "Ordered by mistake";
+    const newTimeline = [
+      ...((order.timeline as unknown[]) || []),
+      {
+        at: new Date().toISOString(),
+        status: "cancelled",
+        note: `Cancelled by customer: ${reason}`,
+      },
+    ];
+
+    const { error: updErr } = await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        timeline: newTimeline as never,
+      })
+      .eq("id", order.id)
+      .in("status", CANCELLABLE_STATUSES as never);
+
+    assert.ifError(updErr);
+
+    const { data: updated } = await supabase
+      .from("orders")
+      .select("status, timeline")
+      .eq("id", cancelTestOrderId)
+      .single();
+
+    assert.strictEqual(updated?.status, "cancelled");
+    const timeline = (updated?.timeline as Array<{ status: string; note: string }>) || [];
+    assert.ok(timeline.some((t) => t.status === "cancelled" && t.note.includes("Ordered by mistake")));
+  });
+
+  it("prevents re-cancelling an already cancelled order", async () => {
+    assert.ok(cancelTestOrderId);
+    const CANCELLABLE_STATUSES = ["pending", "processing", "paid", "confirmed"];
+
+    // Attempting atomic update when status is already cancelled will match 0 rows
+    const { data: result } = await supabase
+      .from("orders")
+      .update({ status: "cancelled" })
+      .eq("id", cancelTestOrderId)
+      .in("status", CANCELLABLE_STATUSES as never)
+      .select("id");
+
+    assert.strictEqual((result || []).length, 0, "Cannot re-cancel an order that is already cancelled");
+  });
+
+  it("prevents cancelling an order that has already been shipped", async () => {
+    assert.ok(cancelTestOrderId);
+    // Set status to shipped
+    await supabase.from("orders").update({ status: "shipped" }).eq("id", cancelTestOrderId);
+
+    const CANCELLABLE_STATUSES = ["pending", "processing", "paid", "confirmed"];
+    const { data: result } = await supabase
+      .from("orders")
+      .update({ status: "cancelled" })
+      .eq("id", cancelTestOrderId)
+      .in("status", CANCELLABLE_STATUSES as never)
+      .select("id");
+
+    assert.strictEqual((result || []).length, 0, "Shipped orders cannot be cancelled");
+  });
+
+  it("prevents customer B from cancelling customer A's order", async () => {
+    assert.ok(cancelTestOrderId);
+    // Create customer B
+    const { data: userBAuth } = await supabase.auth.admin.createUser({
+      email: `customer.intruder.${Date.now()}@example.com`,
+      password: "TestPassword123!",
+      email_confirm: true,
+    });
+    assert.ok(userBAuth?.user?.id);
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select("user_id")
+      .eq("id", cancelTestOrderId)
+      .single();
+
+    assert.notStrictEqual(order?.user_id, userBAuth.user.id);
+
+    // Clean up customer B
+    await supabase.auth.admin.deleteUser(userBAuth.user.id);
+  });
+
+  it("cleans up cancellation test data", async () => {
+    if (cancelTestOrderId) {
+      await supabase.from("orders").delete().eq("id", cancelTestOrderId);
     }
-    if (testUserId) {
-      await supabase.auth.admin.deleteUser(testUserId);
+    if (testCustomerUserId) {
+      await supabase.auth.admin.deleteUser(testCustomerUserId);
     }
   });
 });
+

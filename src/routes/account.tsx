@@ -12,10 +12,21 @@ import { toast } from "sonner";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
+  cancelOrder,
   claimGuestOrders,
   requestSecondaryEmailClaimCode,
   verifySecondaryEmailClaimCode,
 } from "@/lib/orders.functions";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import {
   User,
   MapPin,
@@ -765,6 +776,7 @@ function OrdersTab({
   const claimPrimary = useServerFn(claimGuestOrders);
   const requestCode = useServerFn(requestSecondaryEmailClaimCode);
   const verifyCode = useServerFn(verifySecondaryEmailClaimCode);
+  const cancelOrderFn = useServerFn(cancelOrder);
 
   const [checking, setChecking] = useState(false);
   const [showSecondary, setShowSecondary] = useState(false);
@@ -772,6 +784,32 @@ function OrdersTab({
   const [otpCode, setOtpCode] = useState("");
   const [codeSent, setCodeSent] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<Order | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+
+  async function handleCancelTarget() {
+    if (!cancelTarget) return;
+    setCancelling(true);
+    try {
+      const res = await cancelOrderFn({
+        data: {
+          order_id: cancelTarget.id,
+          reason: cancelReason.trim() || undefined,
+        },
+      });
+      if (res && res.ok) {
+        toast.success(res.message);
+        setCancelTarget(null);
+        setCancelReason("");
+        onRefresh();
+      }
+    } catch (e) {
+      toast.error((e as Error).message || "Failed to cancel order.");
+    } finally {
+      setCancelling(false);
+    }
+  }
 
   async function handleCheckPrimary() {
     setChecking(true);
@@ -958,14 +996,14 @@ function OrdersTab({
         )}
         {orders.map((o) => {
           const items = (o.items as { name: string; qty: number; size: string }[]) ?? [];
+          const isCancellable = ["pending", "processing", "paid", "confirmed"].includes(o.status);
+          const isCancelled = o.status === "cancelled";
           return (
-            <Link
-              to="/order/$id"
-              params={{ id: o.id }}
+            <div
               key={o.id}
               className="bg-card border border-border rounded-xl p-4 flex justify-between flex-wrap gap-3 hover:border-gold-deep transition-colors"
             >
-              <div className="min-w-0">
+              <Link to="/order/$id" params={{ id: o.id }} className="min-w-0 flex-1">
                 <div className="text-xs text-muted-foreground font-mono">
                   {o.order_number ?? `#${o.id.slice(0, 8)}`} •{" "}
                   {new Date(o.created_at).toLocaleDateString()}
@@ -977,19 +1015,101 @@ function OrdersTab({
                   {o.payment_method}
                   {o.tracking_number && ` · Tracking ${o.tracking_number}`}
                 </div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-serif text-forest-dark">
-                  ₹{(o.total_paise / 100).toFixed(0)}
+              </Link>
+              <div className="text-right flex flex-col justify-between items-end">
+                <div>
+                  <div className="text-lg font-serif text-forest-dark">
+                    ₹{(o.total_paise / 100).toFixed(0)}
+                  </div>
+                  <span
+                    className={`inline-block text-[10px] font-bold tracking-wider uppercase rounded px-2 py-0.5 ${
+                      isCancelled
+                        ? "bg-destructive/15 text-destructive"
+                        : o.status === "delivered"
+                          ? "bg-emerald-500/15 text-emerald-700"
+                          : "bg-gold/20 text-gold-deep"
+                    }`}
+                  >
+                    {o.status}
+                  </span>
                 </div>
-                <span className="text-[10px] font-bold tracking-wider uppercase bg-gold/20 text-gold-deep rounded px-2 py-1">
-                  {o.status}
-                </span>
+                <div className="mt-3 flex items-center gap-2">
+                  {isCancellable && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setCancelTarget(o);
+                      }}
+                      className="text-xs text-destructive hover:underline font-semibold cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <Link
+                    to="/order/$id"
+                    params={{ id: o.id }}
+                    className="text-xs text-gold-deep hover:underline font-semibold"
+                  >
+                    Details →
+                  </Link>
+                </div>
               </div>
-            </Link>
+            </div>
           );
         })}
       </div>
+
+      {/* Cancellation Confirmation Dialog */}
+      <AlertDialog open={!!cancelTarget} onOpenChange={(open) => !open && setCancelTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Order?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel order #
+              {cancelTarget?.order_number ?? cancelTarget?.id.slice(0, 8)}?
+              {cancelTarget?.payment_method === "razorpay" && (
+                <span className="block mt-2 font-medium text-amber-700 bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                  Prepaid Razorpay orders will be refunded to your original payment method within
+                  5–7 business days.
+                </span>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="py-2 space-y-1.5">
+            <label className="text-xs font-semibold text-forest-dark">
+              Reason for cancellation (optional):
+            </label>
+            <select
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              className="w-full border border-border rounded-lg p-2 text-xs bg-background focus:outline-none focus:border-gold-deep"
+            >
+              <option value="">Select a reason...</option>
+              <option value="Ordered by mistake">Ordered by mistake</option>
+              <option value="Changed my mind">Changed my mind</option>
+              <option value="Delivery time is too long">Delivery time is too long</option>
+              <option value="Need to change shipping address">
+                Need to change shipping address
+              </option>
+              <option value="Found a better price / alternative">
+                Found a better price / alternative
+              </option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={cancelling}>Keep Order</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={cancelling}
+              onClick={handleCancelTarget}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {cancelling ? "Cancelling…" : "Yes, Cancel Order"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }

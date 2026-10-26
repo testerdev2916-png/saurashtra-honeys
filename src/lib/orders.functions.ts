@@ -713,3 +713,172 @@ export const getOrderDetails = createServerFn({ method: "POST" })
 
     return { ok: true, order };
   });
+
+const cancelSchema = z.object({
+  order_id: z.string().uuid(),
+  reason: z.string().trim().max(500).optional(),
+});
+
+/**
+ * Cancel an order by customer or staff.
+ * Customers can only cancel orders in pending, processing, paid, or confirmed status.
+ * Restocks inventory and records cancellation in audit_logs, notifications, and timeline.
+ */
+export const cancelOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: z.infer<typeof cancelSchema>) => cancelSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+    if (!userId) throw new Error("Unauthorized");
+
+    const { data: order, error: fetchErr } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("id", data.order_id)
+      .maybeSingle();
+
+    if (fetchErr || !order) {
+      throw new Error("Order not found.");
+    }
+
+    const isOwner = order.user_id === userId;
+    let isStaff = false;
+    if (!isOwner) {
+      const { data: roleData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .in("role", ["admin", "super_admin", "manager"])
+        .maybeSingle();
+      isStaff = !!roleData;
+    }
+
+    if (!isOwner && !isStaff) {
+      throw new Error("Forbidden: You do not have permission to cancel this order.");
+    }
+
+    const CANCELLABLE_STATUSES = ["pending", "processing", "paid", "confirmed"];
+    if (!CANCELLABLE_STATUSES.includes(order.status)) {
+      if (order.status === "cancelled") {
+        throw new Error("This order is already cancelled.");
+      }
+      if (order.status === "shipped" || order.status === "delivered") {
+        throw new Error(
+          "This order has already been shipped and cannot be cancelled online. Please contact customer support for returns.",
+        );
+      }
+      if (order.status === "packed") {
+        throw new Error(
+          "This order is already packed for shipment and cannot be cancelled online. Please contact customer support.",
+        );
+      }
+      throw new Error(`Order cannot be cancelled in its current status (${order.status}).`);
+    }
+
+    const reasonText = data.reason?.trim() ? `: ${data.reason.trim()}` : "";
+    const note = isOwner ? `Cancelled by customer${reasonText}` : `Cancelled by staff${reasonText}`;
+
+    const existingTimeline = Array.isArray(order.timeline) ? (order.timeline as unknown[]) : [];
+    const newTimeline = [
+      ...existingTimeline,
+      {
+        at: new Date().toISOString(),
+        status: "cancelled",
+        note,
+      },
+    ];
+
+    const { error: updErr } = await supabase
+      .from("orders")
+      .update({
+        status: "cancelled",
+        timeline: newTimeline as never,
+      })
+      .eq("id", order.id)
+      .in("status", CANCELLABLE_STATUSES as never);
+
+    if (updErr) {
+      throw new Error(updErr.message);
+    }
+
+    // Restock inventory
+    if (Array.isArray(order.items)) {
+      const itemsList = order.items as unknown as Array<{
+        slug?: string;
+        size?: string;
+        qty?: number;
+      }>;
+      for (const item of itemsList) {
+        if (!item.slug || !item.size || !item.qty) continue;
+
+        try {
+          const { data: pData } = await supabase
+            .from("products")
+            .select("id")
+            .eq("canonical_url", item.slug)
+            .maybeSingle();
+          if (!pData) continue;
+
+          const { data: vData } = await supabase
+            .from("product_variants")
+            .select("id, stock_quantity")
+            .eq("product_id", pData.id)
+            .eq("label", item.size)
+            .maybeSingle();
+
+          if (vData) {
+            const restoredStock = (vData.stock_quantity || 0) + item.qty;
+            await supabase
+              .from("product_variants")
+              .update({ stock_quantity: restoredStock })
+              .eq("id", vData.id);
+
+            await supabase.from("inventory_history").insert({
+              product_id: pData.id,
+              change: item.qty,
+              reason: "cancellation",
+              reference_id: order.id,
+            });
+          }
+        } catch (e) {
+          console.warn("Failed to restock item on order cancellation:", e);
+        }
+      }
+    }
+
+    // Audit log
+    await supabase.from("audit_logs").insert({
+      actor_id: userId,
+      action: isOwner ? "order.cancelled_by_customer" : "order.cancelled_by_staff",
+      entity_type: "order",
+      entity_id: order.id,
+      metadata: {
+        order_number: order.order_number,
+        previous_status: order.status,
+        reason: data.reason || "Customer requested cancellation",
+      },
+    });
+
+    // Customer in-app notification
+    await supabase.from("notifications").insert({
+      user_id: order.user_id || userId,
+      kind: "order",
+      title: `Order #${order.order_number || order.id.slice(0, 8)} Cancelled`,
+      body:
+        order.payment_method === "razorpay" && order.status === "paid"
+          ? "Your order has been cancelled. Any prepaid amount will be refunded to your source account within 5-7 business days."
+          : "Your order has been cancelled successfully.",
+      link: `/order/${order.id}`,
+      metadata: { order_id: order.id, order_number: order.order_number },
+    } as never);
+
+    return {
+      ok: true,
+      order_id: order.id,
+      status: "cancelled",
+      message:
+        order.payment_method === "razorpay" && order.status === "paid"
+          ? "Order cancelled. Your payment will be refunded to your original payment method within 5-7 business days."
+          : "Your order has been cancelled successfully.",
+    };
+  });
