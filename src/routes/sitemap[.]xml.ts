@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-const BASE_URL = (process.env.SITE_URL || "https://saurastrahoney.com").replace(/\/$/, "");
+const BASE_URL = (process.env.SITE_URL || "https://saurashtrahoney.com").replace(/\/$/, "");
 
 type Entry = { path: string; changefreq?: string; priority?: string };
 
@@ -31,7 +31,8 @@ export const Route = createFileRoute("/sitemap.xml")({
               global: {
                 fetch: (input, init) => {
                   const h = new Headers(init?.headers);
-                  if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+                  if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+                    h.delete("Authorization");
                   h.set("apikey", key);
                   return fetch(input, { ...init, headers: h });
                 },
@@ -43,21 +44,39 @@ export const Route = createFileRoute("/sitemap.xml")({
               supa.from("categories").select("slug").eq("active", true),
             ]);
             dynamic = [
-              ...((products ?? []).map((p) => ({ path: `/product/${p.slug}`, changefreq: "weekly", priority: "0.8" }))),
-              ...((posts ?? []).map((p) => ({ path: `/blog/${p.slug}`, changefreq: "monthly", priority: "0.6" }))),
-              ...((cats ?? []).map((c) => ({ path: `/shop/${c.slug}`, changefreq: "weekly", priority: "0.8" }))),
+              ...(products ?? []).map((p) => ({
+                path: `/product/${p.slug}`,
+                changefreq: "weekly",
+                priority: "0.8",
+              })),
+              ...(posts ?? []).map((p) => ({
+                path: `/blog/${p.slug}`,
+                changefreq: "monthly",
+                priority: "0.6",
+              })),
+              ...(cats ?? []).map((c) => ({
+                path: `/shop/${c.slug}`,
+                changefreq: "weekly",
+                priority: "0.8",
+              })),
             ];
           }
-        } catch { /* fall back to static-only sitemap */ }
+        } catch {
+          /* fall back to static-only sitemap */
+        }
 
         const all = [...staticEntries, ...dynamic];
-        const urls = all.map((e) => [
-          `  <url>`,
-          `    <loc>${BASE_URL}${e.path}</loc>`,
-          e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
-          e.priority ? `    <priority>${e.priority}</priority>` : null,
-          `  </url>`,
-        ].filter(Boolean).join("\n"));
+        const urls = all.map((e) =>
+          [
+            `  <url>`,
+            `    <loc>${BASE_URL}${e.path}</loc>`,
+            e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
+            e.priority ? `    <priority>${e.priority}</priority>` : null,
+            `  </url>`,
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        );
         const xml = [
           `<?xml version="1.0" encoding="UTF-8"?>`,
           `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`,

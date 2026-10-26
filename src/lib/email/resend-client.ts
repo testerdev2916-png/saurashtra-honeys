@@ -39,8 +39,8 @@ export function getEmailConfig(): EmailConfig {
   const apiKey = process.env.RESEND_API_KEY?.trim();
   const fromAddress =
     process.env.EMAIL_FROM_ADDRESS?.trim() || "Saurashtra Honey <onboarding@resend.dev>";
-  const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL?.trim() || "orders@saurastrahoney.com";
-  const rawSiteUrl = process.env.SITE_URL?.trim() || "https://saurastrahoney.com";
+  const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL?.trim() || "orders@saurashtrahoney.com";
+  const rawSiteUrl = process.env.SITE_URL?.trim() || "https://saurashtrahoney.com";
   const siteUrl = rawSiteUrl.replace(/\/+$/, "");
 
   const isConfigured = Boolean(apiKey && apiKey.startsWith("re_"));
