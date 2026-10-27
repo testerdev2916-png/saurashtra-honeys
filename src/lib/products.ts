@@ -43,6 +43,7 @@ export type ProductVariant = {
   isDefault?: boolean;
   sku?: string;
   weightG?: number;
+  packaging?: string;
   image?: string;
   image_url?: string | null;
   images?: string[];
@@ -1118,4 +1119,48 @@ export function sortVariantsBySize(variants: ProductVariant[]): ProductVariant[]
     if (valA === valB) return 0;
     return valA - valB;
   });
+}
+
+/**
+ * Resolves the accurate packaging type label for a given variant or size label.
+ * Requirements:
+ * - 28kg / 10kg bucket -> "Plastic Bucket" (Never label a bucket as a jar!)
+ * - 1kg -> "Plastic Jar"
+ * - 250g / 500g -> "Glass Jar"
+ * - 30g / 50g / 100g / 350g -> "Glass Jar"
+ */
+export function getVariantPackaging(labelOrVariant?: string | ProductVariant): string {
+  if (!labelOrVariant) return "";
+  if (typeof labelOrVariant === "object" && labelOrVariant.packaging) {
+    return labelOrVariant.packaging;
+  }
+  const label = typeof labelOrVariant === "string" ? labelOrVariant : labelOrVariant.label || "";
+  const norm = label.toLowerCase().replace(/[\s_\-]/g, "");
+
+  if (norm.includes("28kg") || norm.includes("28k")) {
+    return "Plastic Bucket";
+  }
+  if (norm.includes("10kg") || norm.includes("10k")) {
+    return "Plastic Bucket";
+  }
+  if (norm.includes("1kg") || norm.includes("1k") || norm.includes("1000g")) {
+    return "Plastic Jar";
+  }
+  if (
+    norm.includes("500g") ||
+    norm.includes("500gm") ||
+    norm.includes("250g") ||
+    norm.includes("250gm")
+  ) {
+    return "Glass Jar";
+  }
+  if (
+    norm.includes("50g") ||
+    norm.includes("30g") ||
+    norm.includes("100g") ||
+    norm.includes("350g")
+  ) {
+    return "Glass Jar";
+  }
+  return "";
 }

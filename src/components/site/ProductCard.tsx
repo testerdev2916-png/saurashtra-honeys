@@ -106,7 +106,7 @@ export function ProductCard({
           className="block w-full h-full"
         >
           <img
-            key={p.updatedAt || activeImage}
+            key={activeImage}
             src={activeImage}
             alt={displayName}
             loading="lazy"

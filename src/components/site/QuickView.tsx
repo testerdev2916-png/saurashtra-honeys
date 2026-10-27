@@ -42,6 +42,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                 </span>
               )}
               <img
+                key={activeImage}
                 loading="lazy"
                 src={activeImage}
                 alt={displayName}

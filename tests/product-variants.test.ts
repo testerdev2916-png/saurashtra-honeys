@@ -8,6 +8,8 @@ import {
   cleanProductName,
   getVariantByLabel,
   sortVariantsBySize,
+  getVariantPackaging,
+  resolveActiveImage,
   type Product,
 } from "../src/lib/products.ts";
 import { fetchProducts, fetchProduct } from "../src/lib/product-catalog.ts";
@@ -125,5 +127,50 @@ describe("Product Variants & Dynamic Size Selection", () => {
     assert.ok(aliased.sizes.includes("250g"));
     assert.ok(aliased.sizes.includes("500g"));
     assert.ok(aliased.sizes.includes("1kg"));
+  });
+
+  it("accurately assigns packaging labels (28kg -> Plastic Bucket, 1kg -> Plastic Jar, 250g/500g -> Glass Jar)", () => {
+    assert.equal(getVariantPackaging("28kg"), "Plastic Bucket");
+    assert.equal(getVariantPackaging("28 KG"), "Plastic Bucket");
+    assert.equal(getVariantPackaging("10kg"), "Plastic Bucket");
+    assert.notEqual(getVariantPackaging("28kg"), "Plastic Jar");
+    assert.notEqual(getVariantPackaging("28kg"), "Glass Jar");
+
+    assert.equal(getVariantPackaging("1kg"), "Plastic Jar");
+    assert.equal(getVariantPackaging("1 KG"), "Plastic Jar");
+
+    assert.equal(getVariantPackaging("500g"), "Glass Jar");
+    assert.equal(getVariantPackaging("500 GM"), "Glass Jar");
+    assert.equal(getVariantPackaging("250g"), "Glass Jar");
+    assert.equal(getVariantPackaging("250 GM"), "Glass Jar");
+    assert.equal(getVariantPackaging("350g"), "Glass Jar");
+  });
+
+  it("verifies live variants have valid ImageKit packaging images for all sizes", async () => {
+    const products = await fetchProducts();
+    const multi = products.find((p) => p.flora === "Multiflora" && p.showOnHomepage);
+    assert.ok(multi, "Expected Multiflora Honey to be found");
+
+    const v250 = getVariantByLabel(multi, "250g");
+    const v500 = getVariantByLabel(multi, "500g");
+    const v1kg = getVariantByLabel(multi, "1kg");
+    const v28kg = getVariantByLabel(multi, "28kg");
+
+    assert.equal(v250.packaging, "Glass Jar");
+    assert.equal(v500.packaging, "Glass Jar");
+    assert.equal(v1kg.packaging, "Plastic Jar");
+    assert.equal(v28kg.packaging, "Plastic Bucket");
+
+    const img250 = resolveActiveImage(multi, v250);
+    const img500 = resolveActiveImage(multi, v500);
+    const img1kg = resolveActiveImage(multi, v1kg);
+    const img28kg = resolveActiveImage(multi, v28kg);
+
+    assert.ok(img250.includes("5_7LQIRcqFer"), `Expected 250g jar image, got ${img250}`);
+    assert.ok(img500.includes("3_ccoQw3oqa"), `Expected 500g jar image, got ${img500}`);
+    assert.ok(img1kg.includes("1_fIrYppI9P"), `Expected 1kg plastic jar image, got ${img1kg}`);
+    assert.ok(img28kg.includes("2_GuyHNq6MQl"), `Expected 28kg plastic bucket image, got ${img28kg}`);
+    assert.notEqual(img28kg, img1kg, "28kg bucket image must NOT be the same as 1kg jar image");
+    assert.notEqual(img28kg, img500, "28kg bucket image must NOT be the same as 500g jar image");
   });
 });

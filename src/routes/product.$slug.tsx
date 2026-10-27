@@ -2,6 +2,7 @@ import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-ro
 import { SiteLayout } from "@/components/site/Layout";
 import {
   getVariantByLabel,
+  getVariantPackaging,
   getProductGallery,
   getProductAdditionalImages,
   formatSizeDisplay,
@@ -510,15 +511,16 @@ function ProductPage() {
             </div>
             <div className="flex gap-3 flex-wrap">
               {p.sizes.map((s) => {
-                const normalized = s.toLowerCase().replace(/\s/g, "");
-                let packaging = "";
-                if (normalized === "1kg") packaging = "Plastic Jar";
-                else if (normalized === "250g" || normalized === "500g") packaging = "Glass Jar";
+                const vForSize = getVariantByLabel(p, s);
+                const packaging = vForSize?.packaging || getVariantPackaging(s);
 
                 return (
                   <button
                     key={s}
-                    onClick={() => setSize(s)}
+                    onClick={() => {
+                      setSize(s);
+                      setHeroIdx(0);
+                    }}
                     className={`min-w-[110px] flex flex-col items-center justify-center px-4 py-2.5 rounded-xl border transition-all ${
                       size === s
                         ? "border-burnt-orange bg-cream shadow-sm ring-1 ring-burnt-orange/20"
@@ -1069,6 +1071,13 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
       setSelectedIndex(emblaApi.selectedScrollSnap());
     });
   }, [emblaApi]);
+
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.scrollTo(0, true);
+      setSelectedIndex(0);
+    }
+  }, [images, emblaApi]);
 
   const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 

@@ -1,5 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
-import { sortVariantsBySize, type Product, type ProductVariant } from "@/lib/products";
+import {
+  sortVariantsBySize,
+  getVariantPackaging,
+  type Product,
+  type ProductVariant,
+} from "@/lib/products";
 import { resolveImage } from "@/lib/product-images";
 
 type Row = {
@@ -62,7 +67,9 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
           isDefault: !!v.is_default,
           sku: v.sku ?? undefined,
           weightG: v.weight_g ?? undefined,
+          packaging: getVariantPackaging(v.label),
           image: v.image_url ? resolveImage(v.image_url, null, "", r.updated_at) : undefined,
+          image_url: v.image_url ? resolveImage(v.image_url, null, "", r.updated_at) : undefined,
           images: Array.isArray(v.images)
             ? (v.images as string[])
                 .filter((u) => typeof u === "string" && u.trim().length > 0)
@@ -237,7 +244,26 @@ export async function fetchProducts(): Promise<Product[]> {
 export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   const slug = decodeURIComponent(rawSlug).trim().replace(/\/+$/, "");
   try {
-    const { data, error } = await supabase
+    const aliasMap: Record<string, string> = {
+      "multiflora-honey": "multiflora-honey-250GM",
+      "multiflora-honey-500gm": "multiflora-honey-250GM",
+      "multiflora-honey-1kg": "multiflora-honey-250GM",
+      "multiflora-honey-28 kg": "multiflora-honey-250GM",
+      "multiflora-honey-28kg": "multiflora-honey-250GM",
+      "multiflora-honey-50g": "multiflora-honey-250GM",
+      "ajwain-honey": "ajwain-honey-500",
+      "ajwain-honey-250": "ajwain-honey-500",
+      "ajwain-honey-1 kg": "ajwain-honey-500",
+      "ajwain-honey-1kg": "ajwain-honey-500",
+      "ajwain-honey-28kg": "ajwain-honey-500",
+      "fennel-honey": "fennel-honey-250GM",
+      "fennel-honey-500gm": "fennel-honey-250GM",
+      "fennel-honey-28kg": "fennel-honey-250GM",
+      "bee wax-10kg": "Bee Wax",
+    };
+    const targetSlug = aliasMap[slug.toLowerCase()] || slug;
+
+    let { data, error } = await supabase
       .from("products")
       .select(
         `
@@ -256,7 +282,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
         updated_at
       `,
       )
-      .eq("slug", slug)
+      .eq("slug", targetSlug)
       .eq("status", "published")
       .maybeSingle();
 
@@ -265,52 +291,34 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
       throw error; // Let the router catch it as a real error
     }
 
-    let finalData = data;
-    if (!finalData) {
-      const aliasMap: Record<string, string> = {
-        "multiflora-honey": "multiflora-honey-250GM",
-        "multiflora-honey-500gm": "multiflora-honey-250GM",
-        "multiflora-honey-1kg": "multiflora-honey-250GM",
-        "multiflora-honey-28 kg": "multiflora-honey-250GM",
-        "multiflora-honey-28kg": "multiflora-honey-250GM",
-        "multiflora-honey-50g": "multiflora-honey-250GM",
-        "ajwain-honey": "ajwain-honey-500",
-        "ajwain-honey-250": "ajwain-honey-500",
-        "ajwain-honey-1 kg": "ajwain-honey-500",
-        "ajwain-honey-1kg": "ajwain-honey-500",
-        "ajwain-honey-28kg": "ajwain-honey-500",
-        "fennel-honey": "fennel-honey-250GM",
-        "fennel-honey-500gm": "fennel-honey-250GM",
-        "fennel-honey-28kg": "fennel-honey-250GM",
-        "bee wax-10kg": "Bee Wax",
-      };
-      const mappedSlug = aliasMap[slug.toLowerCase()];
-      if (mappedSlug) {
-        const { data: aliasData } = await supabase
-          .from("products")
-          .select(
-            `
-            id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
-            image_key,
-            image_url,
-            images,
-            attributes,
-            show_on_homepage,
-            home_sort_order,
-            story_description,
-            what_makes_special,
-            floral_source_notes,
-            storage_usage,
-            purity_lab_test,
-            updated_at
-          `,
-          )
-          .eq("slug", mappedSlug)
-          .eq("status", "published")
-          .maybeSingle();
-        finalData = aliasData;
-      }
+    if (!data && targetSlug !== slug) {
+      // If alias didn't match, fallback to original slug query
+      const { data: origData } = await supabase
+        .from("products")
+        .select(
+          `
+          id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+          image_key,
+          image_url,
+          images,
+          attributes,
+          show_on_homepage,
+          home_sort_order,
+          story_description,
+          what_makes_special,
+          floral_source_notes,
+          storage_usage,
+          purity_lab_test,
+          updated_at
+        `,
+        )
+        .eq("slug", slug)
+        .eq("status", "published")
+        .maybeSingle();
+      data = origData;
     }
+
+    const finalData = data;
 
     if (!finalData) {
       // No DB product found
