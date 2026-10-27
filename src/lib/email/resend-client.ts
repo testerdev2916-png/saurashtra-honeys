@@ -37,9 +37,14 @@ export function recordMockSentEmail(record: MockEmailRecord): void {
 
 export function getEmailConfig(): EmailConfig {
   const apiKey = process.env.RESEND_API_KEY?.trim();
+  const envFrom = process.env.EMAIL_FROM_ADDRESS?.trim();
+  // Auto-upgrade sandbox addresses (@resend.dev) to the verified custom domain
   const fromAddress =
-    process.env.EMAIL_FROM_ADDRESS?.trim() || "Saurashtra Honey <orders@saurashtrahoney.com>";
-  const ownerEmail = process.env.OWNER_NOTIFICATION_EMAIL?.trim() || "orders@saurashtrahoney.com";
+    !envFrom || envFrom.includes("@resend.dev")
+      ? "Saurashtra Honey <orders@saurashtrahoney.com>"
+      : envFrom;
+  const ownerEmail =
+    process.env.OWNER_NOTIFICATION_EMAIL?.trim() || "saurashtra.honey@gmail.com";
   const rawSiteUrl = process.env.SITE_URL?.trim() || "https://saurashtrahoney.com";
   const siteUrl = rawSiteUrl.replace(/\/+$/, "");
 
