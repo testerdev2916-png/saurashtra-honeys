@@ -261,4 +261,95 @@ describe("Product Variants & Dynamic Size Selection", () => {
     assert.ok(!slugs.includes("fennel-honey-500GM"));
     assert.ok(!slugs.includes("Bee Wax-10Kg"));
   });
+
+  it("synchronizes the entire gallery and thumbnails when switching variants for Multiflora Honey", async () => {
+    const p = await fetchProduct("multiflora-honey-250GM");
+    assert.ok(p, "Expected Multiflora Honey to be found");
+
+    const v250 = getVariantByLabel(p, "250g");
+    const v500 = getVariantByLabel(p, "500g");
+    const v1kg = getVariantByLabel(p, "1kg");
+    const v28kg = getVariantByLabel(p, "28kg");
+
+    // 250g gallery: Front & Back
+    assert.equal(v250.images?.length, 2, "250g must have 2 images (front and back)");
+    assert.ok(v250.images![0].includes("5_7LQIRcqFer"), "250g image 1 must be front label");
+    assert.ok(v250.images![1].includes("6_lhCFbDrYG"), "250g image 2 must be back label");
+
+    // 500g gallery: Front & Back (must NOT retain 250g back label!)
+    assert.equal(v500.images?.length, 2, "500g must have 2 images (front and back)");
+    assert.ok(v500.images![0].includes("3_ccoQw3oqa"), "500g image 1 must be front label");
+    assert.ok(v500.images![1].includes("4_bSus_02ot"), "500g image 2 must be back label");
+    assert.ok(!v500.images!.some((img) => img.includes("6_lhCFbDrYG")), "500g gallery must NOT contain 250g images");
+
+    // 1kg gallery: Front & Back (must NOT retain 250g or 500g images!)
+    assert.equal(v1kg.images?.length, 2, "1kg must have 2 images (front and back)");
+    assert.ok(v1kg.images![0].includes("1_fIrYppI9P"), "1kg image 1 must be front label");
+    assert.ok(v1kg.images![1].includes("2_j9611EO6XS"), "1kg image 2 must be back label");
+    assert.ok(!v1kg.images!.some((img) => img.includes("6_lhCFbDrYG")), "1kg gallery must NOT contain 250g images");
+
+    // 28kg gallery: 28kg plastic bucket
+    assert.equal(v28kg.images?.length, 1, "28kg must have 1 bucket image");
+    assert.ok(v28kg.images![0].includes("2_GuyHNq6MQl"), "28kg image must be 28kg bucket");
+    assert.ok(!v28kg.images!.some((img) => img.includes("6_lhCFbDrYG")), "28kg gallery must NOT contain 250g images");
+  });
+
+  it("synchronizes the entire gallery and thumbnails when switching variants for Ajwain Honey", async () => {
+    const p = await fetchProduct("ajwain-honey-500");
+    assert.ok(p, "Expected Ajwain Honey to be found");
+
+    const v250 = getVariantByLabel(p, "250g");
+    const v500 = getVariantByLabel(p, "500g");
+    const v1kg = getVariantByLabel(p, "1kg");
+    const v28kg = getVariantByLabel(p, "28kg");
+
+    // 250g gallery
+    assert.equal(v250.images?.length, 2);
+    assert.ok(v250.images![0].includes("250G_AJWAIN_FLORA_HONEY_FRONT"));
+    assert.ok(v250.images![1].includes("250G_AJWAIN_FLORA_HONEY_BACK"));
+
+    // 500g gallery
+    assert.equal(v500.images?.length, 2);
+    assert.ok(v500.images![0].includes("AJWAIN_FLORA_HONEY_FRONT"));
+    assert.ok(v500.images![1].includes("AJAWIN_FLORA_HONEY_BACK"));
+    assert.ok(!v500.images!.some((img) => img.includes("250G_AJWAIN")), "500g gallery must NOT contain 250g images");
+
+    // 1kg gallery
+    assert.equal(v1kg.images?.length, 2);
+    assert.ok(v1kg.images![0].includes("1KG_AJWAIN_FLORA_HONEY_FRONT"));
+    assert.ok(v1kg.images![1].includes("1KG_AJWAIN_HONEY_BACK"));
+
+    // 28kg gallery
+    assert.equal(v28kg.images?.length, 1);
+    assert.ok(v28kg.images![0].includes("1_T0GoQWaaK0"));
+  });
+
+  it("synchronizes the entire gallery and thumbnails when switching variants for Fennel Honey and Bee Wax", async () => {
+    const fennel = await fetchProduct("fennel-honey-250GM");
+    assert.ok(fennel, "Expected Fennel Honey to be found");
+
+    const f250 = getVariantByLabel(fennel, "250g");
+    const f500 = getVariantByLabel(fennel, "500g");
+    const f28kg = getVariantByLabel(fennel, "28kg");
+
+    assert.equal(f250.images?.length, 2);
+    assert.ok(f250.images![0].includes("250G_FENNEL_FLORA_HONEY_FRONT"));
+    assert.ok(f250.images![1].includes("250G_FENNEL_FLORA_HONEY_BACK"));
+
+    assert.equal(f500.images?.length, 2);
+    assert.ok(f500.images![0].includes("FENNEL_FLORA_HONEY_FRONT"));
+    assert.ok(f500.images![1].includes("FENNEL_FLORA_HONEY_BACK"));
+
+    assert.equal(f28kg.images?.length, 1);
+    assert.ok(f28kg.images![0].includes("3_fbzPJ5gqY"));
+
+    const wax = await fetchProduct("Bee Wax");
+    assert.ok(wax, "Expected Bee Wax to be found");
+    const w1kg = getVariantByLabel(wax, "1kg");
+    const w10kg = getVariantByLabel(wax, "10kg");
+
+    assert.equal(w1kg.images?.length, 1);
+    assert.equal(w10kg.images?.length, 2);
+    assert.ok(w10kg.images![0].includes("Bulk_YMGQvQAcZ"));
+  });
 });

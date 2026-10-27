@@ -222,72 +222,63 @@ function ProductPage() {
       return url.split("?")[0].trim();
     };
 
-    // 1. All Variant Images across the entire product (to exclude from common images)
-    const allVariantImages = new Set<string>();
-    if (p.variants && p.variants.length > 0) {
-      p.variants.forEach((v) => {
-        if (v.image) allVariantImages.add(normalize(v.image));
-        if (v.image_url) allVariantImages.add(normalize(v.image_url));
-        if (v.images && v.images.length > 0) {
-          v.images.forEach((img) => {
-            if (img) allVariantImages.add(normalize(img));
-          });
-        }
-      });
-    }
-
-    // 2. Currently Selected Variant Images (Max 2)
+    // 1. Gather all images belonging strictly to the currently selected variant
     const variantImages: string[] = [];
     if (activeVariant) {
       if (activeVariant.image) variantImages.push(activeVariant.image);
       if (activeVariant.image_url) variantImages.push(activeVariant.image_url);
-      if (activeVariant.images && activeVariant.images.length > 0) {
+      if (
+        activeVariant.images &&
+        Array.isArray(activeVariant.images) &&
+        activeVariant.images.length > 0
+      ) {
         variantImages.push(...activeVariant.images);
       }
     }
 
-    // Deduplicate variant images by normalized URL, keeping the original URL (with ?t=) for rendering
+    // Deduplicate variant images by normalized URL while preserving the original URL
     const seenVariant = new Set<string>();
     const finalVariantImages: string[] = [];
     for (const url of variantImages) {
-      if (!url || !url.trim()) continue;
+      if (!url || !url.trim() || url.includes("supabase.co")) continue;
       const norm = normalize(url);
       if (!seenVariant.has(norm)) {
         seenVariant.add(norm);
         finalVariantImages.push(url);
-        if (finalVariantImages.length >= 2) break;
       }
     }
 
-    // 3. Common Product Images (Unlimited)
-    const commonImages: string[] = [];
-    if (p.image) commonImages.push(p.image);
-    if (p.images && p.images.length > 0) commonImages.push(...p.images);
+    // If the active variant has its own images, use ONLY the active variant's images!
+    // Both the main hero image and the entire thumbnail gallery strictly match the selected variant.
+    // Images from previously selected variants or the default base size will never leak in.
+    if (finalVariantImages.length > 0) {
+      return finalVariantImages;
+    }
+
+    // 2. Fallback for single-variant / base products with no variant-specific images
+    const fallbackImages: string[] = [];
+    if (p.image) fallbackImages.push(p.image);
+    if (p.images && p.images.length > 0) fallbackImages.push(...p.images);
     if (p.additionalImages && p.additionalImages.length > 0)
-      commonImages.push(...p.additionalImages);
+      fallbackImages.push(...p.additionalImages);
 
-    // Deduplicate common images by normalized URL and EXCLUDE any image that is associated with ANY variant
-    const seenCommon = new Set<string>();
-    const finalCommonImages: string[] = [];
-    for (const url of commonImages) {
-      if (!url || !url.trim()) continue;
+    const seenFallback = new Set<string>();
+    const finalFallbackImages: string[] = [];
+    for (const url of fallbackImages) {
+      if (!url || !url.trim() || url.includes("supabase.co")) continue;
       const norm = normalize(url);
-      // Skip if it's already in common, OR if it's a known variant image
-      if (!seenCommon.has(norm) && !allVariantImages.has(norm)) {
-        seenCommon.add(norm);
-        finalCommonImages.push(url);
+      if (!seenFallback.has(norm)) {
+        seenFallback.add(norm);
+        finalFallbackImages.push(url);
       }
     }
 
-    // 4. Combine and ensure no empty strings or broken Supabase images sneak through
-    return [...finalVariantImages, ...finalCommonImages].filter(
-      (u) => typeof u === "string" && u.trim().length > 0 && !u.includes("supabase.co"),
-    );
+    return finalFallbackImages.length > 0 ? finalFallbackImages : [p.image].filter(Boolean);
   }, [p, activeVariant]);
 
   useEffect(() => {
     setHeroIdx(0);
-  }, [size]);
+  }, [size, activeVariant?.id]);
 
   const related = allProducts
     .filter((x) => x.slug !== p.slug && x.category === p.category)
@@ -1074,7 +1065,7 @@ function ProductPage() {
               ))}
             </div>
             <img
-              src={gallery[heroIdx]}
+              src={gallery[heroIdx] || gallery[0]}
               alt={p.name}
               className="w-full h-auto max-h-[85vh] object-contain"
             />
