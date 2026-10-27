@@ -343,25 +343,48 @@ export async function verifyAndMarkPaid(
       slug?: string;
       size?: string;
       qty?: number;
+      variantId?: string;
     }>;
     for (const item of itemsList) {
-      if (!item.slug || !item.size || !item.qty) continue;
+      if ((!item.slug && !item.variantId) || !item.qty) continue;
 
-      const { data: pData } = await supabaseClient
-        .from("products")
-        .select("id")
-        .eq("canonical_url", item.slug)
-        .maybeSingle();
-      if (!pData) continue;
+      let vData: { id: string; stock_quantity: number | null; product_id: string } | null = null;
+      let productId: string | null = null;
 
-      const { data: vData } = await supabaseClient
-        .from("product_variants")
-        .select("id, stock_quantity")
-        .eq("product_id", pData.id)
-        .eq("label", item.size)
-        .maybeSingle();
+      if (item.variantId) {
+        const { data: vRow } = await supabaseClient
+          .from("product_variants")
+          .select("id, stock_quantity, product_id")
+          .eq("id", item.variantId)
+          .maybeSingle();
+        if (vRow) {
+          vData = vRow;
+          productId = vRow.product_id;
+        }
+      }
 
-      if (vData) {
+      if (!vData && item.slug) {
+        const { data: pData } = await supabaseClient
+          .from("products")
+          .select("id")
+          .or(`slug.eq.${item.slug},canonical_url.eq.${item.slug}`)
+          .maybeSingle();
+
+        if (pData) {
+          productId = pData.id;
+          if (item.size) {
+            const { data: vRow } = await supabaseClient
+              .from("product_variants")
+              .select("id, stock_quantity, product_id")
+              .eq("product_id", pData.id)
+              .ilike("label", item.size)
+              .maybeSingle();
+            if (vRow) vData = vRow;
+          }
+        }
+      }
+
+      if (vData && productId) {
         const newStock = Math.max(0, (vData.stock_quantity || 0) - item.qty);
         await supabaseClient
           .from("product_variants")
@@ -369,7 +392,7 @@ export async function verifyAndMarkPaid(
           .eq("id", vData.id);
 
         await supabaseClient.from("inventory_history").insert({
-          product_id: pData.id,
+          product_id: productId,
           change: -item.qty,
           reason: "sale",
           reference_id: data.order_id,
@@ -868,26 +891,49 @@ export const cancelOrder = createServerFn({ method: "POST" })
         slug?: string;
         size?: string;
         qty?: number;
+        variantId?: string;
       }>;
       for (const item of itemsList) {
-        if (!item.slug || !item.size || !item.qty) continue;
+        if ((!item.slug && !item.variantId) || !item.qty) continue;
 
         try {
-          const { data: pData } = await supabase
-            .from("products")
-            .select("id")
-            .eq("canonical_url", item.slug)
-            .maybeSingle();
-          if (!pData) continue;
+          let vData: { id: string; stock_quantity: number | null; product_id: string } | null = null;
+          let productId: string | null = null;
 
-          const { data: vData } = await supabase
-            .from("product_variants")
-            .select("id, stock_quantity")
-            .eq("product_id", pData.id)
-            .eq("label", item.size)
-            .maybeSingle();
+          if (item.variantId) {
+            const { data: vRow } = await supabase
+              .from("product_variants")
+              .select("id, stock_quantity, product_id")
+              .eq("id", item.variantId)
+              .maybeSingle();
+            if (vRow) {
+              vData = vRow;
+              productId = vRow.product_id;
+            }
+          }
 
-          if (vData) {
+          if (!vData && item.slug) {
+            const { data: pData } = await supabase
+              .from("products")
+              .select("id")
+              .or(`slug.eq.${item.slug},canonical_url.eq.${item.slug}`)
+              .maybeSingle();
+
+            if (pData) {
+              productId = pData.id;
+              if (item.size) {
+                const { data: vRow } = await supabase
+                  .from("product_variants")
+                  .select("id, stock_quantity, product_id")
+                  .eq("product_id", pData.id)
+                  .ilike("label", item.size)
+                  .maybeSingle();
+                if (vRow) vData = vRow;
+              }
+            }
+          }
+
+          if (vData && productId) {
             const restoredStock = (vData.stock_quantity || 0) + item.qty;
             await supabase
               .from("product_variants")
@@ -895,7 +941,7 @@ export const cancelOrder = createServerFn({ method: "POST" })
               .eq("id", vData.id);
 
             await supabase.from("inventory_history").insert({
-              product_id: pData.id,
+              product_id: productId,
               change: item.qty,
               reason: "cancellation",
               reference_id: order.id,

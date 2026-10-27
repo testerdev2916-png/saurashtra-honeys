@@ -88,7 +88,11 @@ export type Product = {
 
 export function getProductGallery(product: Product): string[] {
   const list = Array.isArray(product.images)
-    ? Array.from(new Set(product.images.filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
+    ? Array.from(
+        new Set(
+          product.images.filter((u): u is string => typeof u === "string" && u.trim().length > 0),
+        ),
+      )
     : [];
   if (list.length > 0) {
     return list.slice(0, 9);
@@ -98,10 +102,24 @@ export function getProductGallery(product: Product): string[] {
 
 export function getProductAdditionalImages(product: Product): string[] {
   const list = Array.isArray(product.additionalImages)
-    ? Array.from(new Set(product.additionalImages.filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
-    : product.attributes && typeof product.attributes === "object" && Array.isArray((product.attributes as Record<string, unknown>).additional_images)
-    ? Array.from(new Set(((product.attributes as Record<string, unknown>).additional_images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)))
-    : [];
+    ? Array.from(
+        new Set(
+          product.additionalImages.filter(
+            (u): u is string => typeof u === "string" && u.trim().length > 0,
+          ),
+        ),
+      )
+    : product.attributes &&
+        typeof product.attributes === "object" &&
+        Array.isArray((product.attributes as Record<string, unknown>).additional_images)
+      ? Array.from(
+          new Set(
+            ((product.attributes as Record<string, unknown>).additional_images as unknown[]).filter(
+              (u): u is string => typeof u === "string" && u.trim().length > 0,
+            ),
+          ),
+        )
+      : [];
   return list.slice(0, 8);
 }
 
@@ -470,7 +488,7 @@ export const products: Product[] = [
   // ==========================================
   // NEW EXPANDED CATEGORIES
   // ==========================================
-  
+
   // BEESWAX
   {
     slug: "natural-beeswax-pellets",
@@ -484,8 +502,14 @@ export const products: Product[] = [
     category: "Beeswax",
     sizes: ["250g", "500g", "1kg"],
     image: beeswaxPellets,
-    benefits: ["Easy to measure & melt", "Perfect for DIY cosmetics", "Clean natural aroma", "Sustainably sourced"],
-    description: "Premium cosmetic-grade beeswax pellets. Ideal for crafting your own lip balms, lotions, and candles with a naturally sweet honey scent.",
+    benefits: [
+      "Easy to measure & melt",
+      "Perfect for DIY cosmetics",
+      "Clean natural aroma",
+      "Sustainably sourced",
+    ],
+    description:
+      "Premium cosmetic-grade beeswax pellets. Ideal for crafting your own lip balms, lotions, and candles with a naturally sweet honey scent.",
   },
   {
     slug: "premium-filtered-beeswax",
@@ -498,8 +522,14 @@ export const products: Product[] = [
     category: "Beeswax",
     sizes: ["500g"],
     image: beeswaxPellets,
-    benefits: ["Triple filtered for purity", "Cosmetic grade", "No debris or impurities", "Rich golden color"],
-    description: "Our highest quality triple-filtered beeswax. Perfect for professional cosmetic formulations and high-end candle making.",
+    benefits: [
+      "Triple filtered for purity",
+      "Cosmetic grade",
+      "No debris or impurities",
+      "Rich golden color",
+    ],
+    description:
+      "Our highest quality triple-filtered beeswax. Perfect for professional cosmetic formulations and high-end candle making.",
   },
   {
     slug: "handmade-beeswax-sheet",
@@ -512,8 +542,14 @@ export const products: Product[] = [
     category: "Beeswax",
     sizes: ["Pack of 5", "Pack of 10"],
     image: beeswaxPellets,
-    benefits: ["Ready to roll into candles", "Beautiful honeycomb texture", "Fun for kids' crafts", "100% natural"],
-    description: "Textured beeswax sheets perfect for rolling your own pillar candles at home. A wonderful craft activity with a beautiful, functional result.",
+    benefits: [
+      "Ready to roll into candles",
+      "Beautiful honeycomb texture",
+      "Fun for kids' crafts",
+      "100% natural",
+    ],
+    description:
+      "Textured beeswax sheets perfect for rolling your own pillar candles at home. A wonderful craft activity with a beautiful, functional result.",
   },
 
   // BEE POLLEN
@@ -529,8 +565,14 @@ export const products: Product[] = [
     category: "Bee Pollen",
     sizes: ["100g"],
     image: beePollen,
-    benefits: ["Rich in amino acids", "Natural energy booster", "Immune system support", "Add to smoothies or yogurt"],
-    description: "Golden granules of pure bee pollen, packed with vitamins, minerals, and protein. A perfect daily superfood supplement.",
+    benefits: [
+      "Rich in amino acids",
+      "Natural energy booster",
+      "Immune system support",
+      "Add to smoothies or yogurt",
+    ],
+    description:
+      "Golden granules of pure bee pollen, packed with vitamins, minerals, and protein. A perfect daily superfood supplement.",
   },
   {
     slug: "bee-pollen-250g",
@@ -544,8 +586,14 @@ export const products: Product[] = [
     category: "Bee Pollen",
     sizes: ["250g"],
     image: beePollen,
-    benefits: ["Rich in amino acids", "Natural energy booster", "Immune system support", "Great value size"],
-    description: "Our premium raw bee pollen in a larger value size. Sustainably harvested to ensure the bees have plenty left for themselves.",
+    benefits: [
+      "Rich in amino acids",
+      "Natural energy booster",
+      "Immune system support",
+      "Great value size",
+    ],
+    description:
+      "Our premium raw bee pollen in a larger value size. Sustainably harvested to ensure the bees have plenty left for themselves.",
   },
 
   // BEESWAX CANDLES
@@ -560,8 +608,14 @@ export const products: Product[] = [
     category: "Beeswax Candles",
     sizes: ["Medium", "Large"],
     image: beeswaxCandles,
-    benefits: ["Burns longer than soy/paraffin", "Naturally purifies air", "Warm golden glow", "Subtle honey fragrance"],
-    description: "An elegant, hand-poured solid beeswax pillar candle. Casts a beautiful warm light while naturally neutralizing airborne allergens.",
+    benefits: [
+      "Burns longer than soy/paraffin",
+      "Naturally purifies air",
+      "Warm golden glow",
+      "Subtle honey fragrance",
+    ],
+    description:
+      "An elegant, hand-poured solid beeswax pillar candle. Casts a beautiful warm light while naturally neutralizing airborne allergens.",
   },
   {
     slug: "pure-beeswax-tea-light-candle",
@@ -575,7 +629,8 @@ export const products: Product[] = [
     sizes: ["Pack of 12"],
     image: beeswaxCandles,
     benefits: ["Perfect for daily use", "Cotton wicks", "No toxic soot", "Cozy atmosphere"],
-    description: "A set of 12 pure beeswax tea lights. Perfect for dinner tables, baths, or meditation spaces. Clean-burning and natural.",
+    description:
+      "A set of 12 pure beeswax tea lights. Perfect for dinner tables, baths, or meditation spaces. Clean-burning and natural.",
   },
   {
     slug: "decorative-beeswax-candle",
@@ -588,8 +643,14 @@ export const products: Product[] = [
     category: "Beeswax Candles",
     sizes: ["Standard"],
     image: beeswaxCandles,
-    benefits: ["Beautiful intricate design", "Perfect for gifting", "Natural honey scent", "Clean burn"],
-    description: "A stunning sculptural candle cast from pure beeswax. Serves as a beautiful decor piece until you're ready to enjoy its warm light.",
+    benefits: [
+      "Beautiful intricate design",
+      "Perfect for gifting",
+      "Natural honey scent",
+      "Clean burn",
+    ],
+    description:
+      "A stunning sculptural candle cast from pure beeswax. Serves as a beautiful decor piece until you're ready to enjoy its warm light.",
   },
   {
     slug: "rolled-beeswax-candle",
@@ -601,8 +662,14 @@ export const products: Product[] = [
     category: "Beeswax Candles",
     sizes: ["Pair"],
     image: beeswaxCandles,
-    benefits: ["Distinctive honeycomb texture", "Drip-resistant", "Hand-rolled with care", "Natural aroma"],
-    description: "A pair of taper candles meticulously hand-rolled from pure beeswax sheets. Their distinctive honeycomb texture adds rustic elegance to any setting.",
+    benefits: [
+      "Distinctive honeycomb texture",
+      "Drip-resistant",
+      "Hand-rolled with care",
+      "Natural aroma",
+    ],
+    description:
+      "A pair of taper candles meticulously hand-rolled from pure beeswax sheets. Their distinctive honeycomb texture adds rustic elegance to any setting.",
   },
 
   // BEAUTY PRODUCTS
@@ -618,8 +685,14 @@ export const products: Product[] = [
     category: "Beauty Products",
     sizes: ["150ml"],
     image: beautyProducts,
-    benefits: ["Maintains skin's natural moisture", "Antibacterial properties", "Soothes redness", "Sulfate-free formula"],
-    description: "A luxurious, gentle daily cleanser infused with our raw honey. Leaves skin feeling fresh, clean, and deeply hydrated without tightness.",
+    benefits: [
+      "Maintains skin's natural moisture",
+      "Antibacterial properties",
+      "Soothes redness",
+      "Sulfate-free formula",
+    ],
+    description:
+      "A luxurious, gentle daily cleanser infused with our raw honey. Leaves skin feeling fresh, clean, and deeply hydrated without tightness.",
   },
   {
     slug: "honey-soap",
@@ -631,8 +704,14 @@ export const products: Product[] = [
     category: "Beauty Products",
     sizes: ["100g"],
     image: beautyProducts,
-    benefits: ["Cold-processed artisan soap", "Rich creamy lather", "Gentle on sensitive skin", "No synthetic fragrances"],
-    description: "Handcrafted cold-process soap made with raw honey and nourishing plant oils. A luxurious bathing experience that softens the skin.",
+    benefits: [
+      "Cold-processed artisan soap",
+      "Rich creamy lather",
+      "Gentle on sensitive skin",
+      "No synthetic fragrances",
+    ],
+    description:
+      "Handcrafted cold-process soap made with raw honey and nourishing plant oils. A luxurious bathing experience that softens the skin.",
   },
   {
     slug: "honey-moisturizing-cream",
@@ -646,8 +725,14 @@ export const products: Product[] = [
     category: "Beauty Products",
     sizes: ["50g"],
     image: beautyProducts,
-    benefits: ["Locks in moisture all day", "Rich in antioxidants", "Improves skin elasticity", "Velvety smooth finish"],
-    description: "An ultra-rich, deeply penetrating face cream formulated with raw honey, royal jelly, and botanical oils to restore and protect your skin.",
+    benefits: [
+      "Locks in moisture all day",
+      "Rich in antioxidants",
+      "Improves skin elasticity",
+      "Velvety smooth finish",
+    ],
+    description:
+      "An ultra-rich, deeply penetrating face cream formulated with raw honey, royal jelly, and botanical oils to restore and protect your skin.",
   },
   {
     slug: "honey-body-lotion",
@@ -659,8 +744,14 @@ export const products: Product[] = [
     category: "Beauty Products",
     sizes: ["250ml"],
     image: beautyProducts,
-    benefits: ["Fast absorbing", "Non-greasy hydration", "Subtle natural scent", "Soothes dry patches"],
-    description: "A lightweight yet deeply hydrating body lotion infused with natural honey extracts. Absorbs instantly to leave skin soft and glowing.",
+    benefits: [
+      "Fast absorbing",
+      "Non-greasy hydration",
+      "Subtle natural scent",
+      "Soothes dry patches",
+    ],
+    description:
+      "A lightweight yet deeply hydrating body lotion infused with natural honey extracts. Absorbs instantly to leave skin soft and glowing.",
   },
   {
     slug: "beeswax-hand-cream",
@@ -673,8 +764,14 @@ export const products: Product[] = [
     category: "Beauty Products",
     sizes: ["50g"],
     image: beautyProducts,
-    benefits: ["Heals cracked hands", "Creates a protective seal", "Withstands hand washing", "Nourishes cuticles"],
-    description: "A heavy-duty restorative hand cream. Natural beeswax creates a breathable protective barrier that locks in moisture and heals over-worked hands.",
+    benefits: [
+      "Heals cracked hands",
+      "Creates a protective seal",
+      "Withstands hand washing",
+      "Nourishes cuticles",
+    ],
+    description:
+      "A heavy-duty restorative hand cream. Natural beeswax creates a breathable protective barrier that locks in moisture and heals over-worked hands.",
   },
 
   // GIFT HAMPERS
@@ -690,8 +787,14 @@ export const products: Product[] = [
     category: "Gift Hampers",
     sizes: ["Standard"],
     image: luxuryHamper,
-    benefits: ["Exquisite wooden box", "4 rare single-flora honeys", "Includes wooden dipper", "Perfect corporate gift"],
-    description: "An elegant presentation of our finest, rarest single-flora honeys. Packaged in a handcrafted wooden box with a traditional wooden dipper.",
+    benefits: [
+      "Exquisite wooden box",
+      "4 rare single-flora honeys",
+      "Includes wooden dipper",
+      "Perfect corporate gift",
+    ],
+    description:
+      "An elegant presentation of our finest, rarest single-flora honeys. Packaged in a handcrafted wooden box with a traditional wooden dipper.",
   },
   {
     slug: "luxury-honey-hamper",
@@ -704,8 +807,14 @@ export const products: Product[] = [
     category: "Gift Hampers",
     sizes: ["Large"],
     image: luxuryHamper,
-    benefits: ["Complete collection", "Includes honey, pollen & candles", "Premium woven basket", "Unforgettable unboxing"],
-    description: "Our most opulent offering. A beautifully curated woven basket containing our finest honey, fresh bee pollen, and hand-poured beeswax candles.",
+    benefits: [
+      "Complete collection",
+      "Includes honey, pollen & candles",
+      "Premium woven basket",
+      "Unforgettable unboxing",
+    ],
+    description:
+      "Our most opulent offering. A beautifully curated woven basket containing our finest honey, fresh bee pollen, and hand-poured beeswax candles.",
   },
   {
     slug: "wellness-gift-box",
@@ -718,8 +827,14 @@ export const products: Product[] = [
     category: "Gift Hampers",
     sizes: ["Standard"],
     image: luxuryHamper,
-    benefits: ["Focuses on health benefits", "Includes pollen & raw honey", "Immunity boosting", "Thoughtful care package"],
-    description: "Give the gift of health. This thoughtfully assembled box includes our most potent raw honeys and nutrient-dense bee pollen to support overall wellness.",
+    benefits: [
+      "Focuses on health benefits",
+      "Includes pollen & raw honey",
+      "Immunity boosting",
+      "Thoughtful care package",
+    ],
+    description:
+      "Give the gift of health. This thoughtfully assembled box includes our most potent raw honeys and nutrient-dense bee pollen to support overall wellness.",
   },
   {
     slug: "festival-honey-gift-hamper",
@@ -732,8 +847,14 @@ export const products: Product[] = [
     category: "Gift Hampers",
     sizes: ["Standard"],
     image: luxuryHamper,
-    benefits: ["Festive premium packaging", "Variety of flavors", "Includes beeswax tea lights", "Perfect for Diwali or weddings"],
-    description: "Designed specifically for festive celebrations. A joyous collection of sweet honey varieties paired with natural beeswax tea lights to illuminate the occasion.",
+    benefits: [
+      "Festive premium packaging",
+      "Variety of flavors",
+      "Includes beeswax tea lights",
+      "Perfect for Diwali or weddings",
+    ],
+    description:
+      "Designed specifically for festive celebrations. A joyous collection of sweet honey varieties paired with natural beeswax tea lights to illuminate the occasion.",
   },
   {
     slug: "ajwain-multiflora-1kg-combo",
@@ -762,7 +883,8 @@ export const products: Product[] = [
     sizes: ["500g + Dipper"],
     image: multiflora,
     benefits: ["Daily wellness", "Traditional dipper included", "Raw and Natural"],
-    description: "Our classic Multiflora honey in a 500g jar, paired with a traditional wooden honey dipper.",
+    description:
+      "Our classic Multiflora honey in a 500g jar, paired with a traditional wooden honey dipper.",
   },
   {
     slug: "wooden-honey-dipper",
@@ -790,8 +912,9 @@ export const products: Product[] = [
     sizes: ["500g + Dipper"],
     image: fennel,
     benefits: ["Good for metabolism", "Traditional dipper included", "Raw and Natural"],
-    description: "Our premium Fennel honey in a 500g jar, paired with a traditional wooden honey dipper.",
-  }
+    description:
+      "Our premium Fennel honey in a 500g jar, paired with a traditional wooden honey dipper.",
+  },
 ];
 
 export const findProduct = (slug: string) => products.find((p) => p.slug === slug);
@@ -811,9 +934,15 @@ export function getProductVariants(product: Product): ProductVariant[] {
   };
 
   return sizes.map((s, idx) => {
-    const mult = multipliers[s] || { factor: idx === 0 ? 1 : idx === 1 ? 1.7 : 2.5, mrpFactor: 1.15, weight: 250 };
+    const mult = multipliers[s] || {
+      factor: idx === 0 ? 1 : idx === 1 ? 1.7 : 2.5,
+      mrpFactor: 1.15,
+      weight: 250,
+    };
     const price = Math.round(product.price * mult.factor);
-    const mrp = product.mrp ? Math.round(product.mrp * mult.factor) : Math.round(price * mult.mrpFactor);
+    const mrp = product.mrp
+      ? Math.round(product.mrp * mult.factor)
+      : Math.round(price * mult.mrpFactor);
     return {
       id: `${product.slug}-${s.toLowerCase()}`,
       label: s,
@@ -831,7 +960,9 @@ export function getProductVariants(product: Product): ProductVariant[] {
 export function getDefaultVariant(product: Product): ProductVariant {
   const vars = getProductVariants(product);
   return (
-    vars.find((v) => v.isDefault && v.inStock !== false && (v.stock === undefined || v.stock > 0)) ||
+    vars.find(
+      (v) => v.isDefault && v.inStock !== false && (v.stock === undefined || v.stock > 0),
+    ) ||
     vars.find((v) => v.inStock !== false && (v.stock === undefined || v.stock > 0)) ||
     vars.find((v) => v.isDefault) ||
     vars[0] || {
@@ -843,32 +974,103 @@ export function getDefaultVariant(product: Product): ProductVariant {
   );
 }
 
+export function normalizeSizeKey(s: string): string {
+  if (!s) return "";
+  return s.toLowerCase().replace(/[\s_\-]+/g, "").replace(/gm$/, "g");
+}
+
+export function formatSizeDisplay(label: string): string {
+  if (!label) return "";
+  const trimmed = label.trim();
+  // Check for patterns like "250g", "250 gm", "250GM", "1kg", "1 KG", "28kg", "500ml", "1l"
+  const m = trimmed.match(/^(\d+(?:\.\d+)?)\s*(g|gm|kg|ml|l)$/i);
+  if (m) {
+    const val = m[1];
+    const unit = m[2].toUpperCase();
+    if (unit === "G" || unit === "GM") return `${val} GM`;
+    if (unit === "KG") return `${val} KG`;
+    if (unit === "ML") return `${val} ML`;
+    if (unit === "L") return `${val} L`;
+  }
+  // Plain numeric weight like "250"
+  if (/^\d+$/.test(trimmed)) {
+    return `${trimmed} GM`;
+  }
+  return trimmed;
+}
+
+export function cleanProductName(name: string): string {
+  if (!name) return "";
+  return name
+    .replace(/\s*[-–—]\s*(\d+\s*(?:gm|g|kg|ml|l))\b/gi, "")
+    .replace(/\s+(\d+\s*(?:gm|g|kg))\s*$/i, "")
+    .replace(/\s+([0-9]+\s*GM)\s*$/i, "")
+    .replace(/\s+\d+\s*$/i, "")
+    .trim();
+}
+
 export function getVariantByLabel(product: Product, label?: string): ProductVariant {
   const vars = getProductVariants(product);
-  if (label) {
-    const found = vars.find((v) => v.label.toLowerCase() === label.toLowerCase());
-    if (found) return found;
+  if (label && vars.length > 0) {
+    // 1. Direct match
+    const exact = vars.find((v) => v.label.toLowerCase() === label.toLowerCase());
+    if (exact) return exact;
+
+    // 2. Normalized match (e.g. "250 GM" <=> "250g" <=> "250")
+    const normSearch = normalizeSizeKey(label);
+    const normMatch = vars.find((v) => normalizeSizeKey(v.label) === normSearch);
+    if (normMatch) return normMatch;
   }
   return getDefaultVariant(product);
 }
 
 export function resolveActiveImage(product: Product, variant?: ProductVariant): string {
-  const isSupabase = (url: string) => url.includes('supabase.co');
-  
+  const isSupabase = (url: string) => url.includes("supabase.co");
+
   const p = product as any;
 
   if (variant) {
-    if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url)) return variant.image_url;
-    if (variant.image && variant.image.trim().length > 0 && !isSupabase(variant.image)) return variant.image;
-    if (variant.images && variant.images.length > 0 && variant.images[0].trim().length > 0 && !isSupabase(variant.images[0])) return variant.images[0];
+    if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url))
+      return variant.image_url;
+    if (variant.image && variant.image.trim().length > 0 && !isSupabase(variant.image))
+      return variant.image;
+    if (
+      variant.images &&
+      variant.images.length > 0 &&
+      variant.images[0].trim().length > 0 &&
+      !isSupabase(variant.images[0])
+    )
+      return variant.images[0];
   }
-  
+
   if (p.image_url && p.image_url.trim().length > 0 && !isSupabase(p.image_url)) return p.image_url;
-  if (p.images && p.images.length > 0 && typeof p.images[0] === 'string' && p.images[0].trim().length > 0 && !isSupabase(p.images[0])) return p.images[0];
-  if (p.additionalImages && p.additionalImages.length > 0 && typeof p.additionalImages[0] === 'string' && p.additionalImages[0].trim().length > 0 && !isSupabase(p.additionalImages[0])) return p.additionalImages[0];
-  if (p.additional_images && Array.isArray(p.additional_images) && p.additional_images.length > 0 && typeof p.additional_images[0] === 'string' && p.additional_images[0].trim().length > 0 && !isSupabase(p.additional_images[0])) return p.additional_images[0];
+  if (
+    p.images &&
+    p.images.length > 0 &&
+    typeof p.images[0] === "string" &&
+    p.images[0].trim().length > 0 &&
+    !isSupabase(p.images[0])
+  )
+    return p.images[0];
+  if (
+    p.additionalImages &&
+    p.additionalImages.length > 0 &&
+    typeof p.additionalImages[0] === "string" &&
+    p.additionalImages[0].trim().length > 0 &&
+    !isSupabase(p.additionalImages[0])
+  )
+    return p.additionalImages[0];
+  if (
+    p.additional_images &&
+    Array.isArray(p.additional_images) &&
+    p.additional_images.length > 0 &&
+    typeof p.additional_images[0] === "string" &&
+    p.additional_images[0].trim().length > 0 &&
+    !isSupabase(p.additional_images[0])
+  )
+    return p.additional_images[0];
   if (p.image && p.image.trim().length > 0 && !isSupabase(p.image)) return p.image;
-  
+
   return p.image || "";
 }
 
@@ -879,8 +1081,8 @@ export function resolveActiveImage(product: Product, variant?: ProductVariant): 
  */
 export function parseSizeValue(label: string): number {
   if (!label) return Infinity;
-  const lower = label.toLowerCase().replace(/\s+/g, '');
-  
+  const lower = label.toLowerCase().replace(/\s+/g, "");
+
   // "3x250g" or "3*250g" or "3×250g"
   const multiMatch = lower.match(/^(\d+)[x*×]([\d.]+)(kg|g|l|ml)$/);
   if (multiMatch) {
@@ -888,20 +1090,20 @@ export function parseSizeValue(label: string): number {
     const val = parseFloat(multiMatch[2]);
     const unit = multiMatch[3];
     let multiplier = 1;
-    if (unit === 'kg' || unit === 'l') multiplier = 1000;
+    if (unit === "kg" || unit === "l") multiplier = 1000;
     return qty * val * multiplier;
   }
-  
+
   // "250g", "1.5kg", "500ml"
   const singleMatch = lower.match(/^([\d.]+)(kg|g|l|ml)$/);
   if (singleMatch) {
     const val = parseFloat(singleMatch[1]);
     const unit = singleMatch[2];
     let multiplier = 1;
-    if (unit === 'kg' || unit === 'l') multiplier = 1000;
+    if (unit === "kg" || unit === "l") multiplier = 1000;
     return val * multiplier;
   }
-  
+
   return Infinity;
 }
 

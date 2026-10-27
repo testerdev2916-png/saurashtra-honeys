@@ -48,7 +48,6 @@ type VariantRow = {
   images?: unknown;
 };
 
-
 function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
   let mappedVariants: ProductVariant[] | undefined =
@@ -87,32 +86,43 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     mappedVariants && mappedVariants.length > 0
       ? mappedVariants.map((v) => v.label)
       : Array.isArray(r.sizes)
-      ? (r.sizes as string[])
-      : [];
-
+        ? (r.sizes as string[])
+        : [];
 
   const rawImages = Array.isArray(r.images)
-    ? (r.images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
+    ? (r.images as unknown[]).filter(
+        (u): u is string => typeof u === "string" && u.trim().length > 0,
+      )
     : [];
   const galleryImages =
     rawImages.length > 0
-      ? Array.from(new Set(rawImages)).slice(0, 9).map(img => resolveImage(img, null, "", r.updated_at))
+      ? Array.from(new Set(rawImages))
+          .slice(0, 9)
+          .map((img) => resolveImage(img, null, "", r.updated_at))
       : [];
   const primaryImg = resolveImage(
     r.image_key,
     r.image_url,
     galleryImages && galleryImages.length > 0 ? galleryImages[0] : "",
-    r.updated_at
+    r.updated_at,
   );
 
   const rawAdditional = Array.isArray(r.additional_images)
-    ? (r.additional_images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
-    : r.attributes && typeof r.attributes === "object" && Array.isArray((r.attributes as Record<string, unknown>).additional_images)
-    ? ((r.attributes as Record<string, unknown>).additional_images as unknown[]).filter((u): u is string => typeof u === "string" && u.trim().length > 0)
-    : [];
+    ? (r.additional_images as unknown[]).filter(
+        (u): u is string => typeof u === "string" && u.trim().length > 0,
+      )
+    : r.attributes &&
+        typeof r.attributes === "object" &&
+        Array.isArray((r.attributes as Record<string, unknown>).additional_images)
+      ? ((r.attributes as Record<string, unknown>).additional_images as unknown[]).filter(
+          (u): u is string => typeof u === "string" && u.trim().length > 0,
+        )
+      : [];
   const additionalImages =
     rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional)).slice(0, 8).map(img => resolveImage(img, null, "", r.updated_at))
+      ? Array.from(new Set(rawAdditional))
+          .slice(0, 8)
+          .map((img) => resolveImage(img, null, "", r.updated_at))
       : [];
 
   return {
@@ -125,7 +135,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     badge: (r.badge ?? undefined) as Product["badge"],
     price: defaultVariant ? defaultVariant.price : r.price,
     priceMax: r.price_max ?? undefined,
-    mrp: defaultVariant ? defaultVariant.mrp : r.mrp ?? undefined,
+    mrp: defaultVariant ? defaultVariant.mrp : (r.mrp ?? undefined),
     rating: typeof r.rating === "string" ? Number(r.rating) : r.rating,
     reviews: r.reviews_count,
     sizes: activeSizes,
@@ -133,9 +143,7 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     image: primaryImg,
     images: galleryImages,
     additionalImages: additionalImages,
-    benefits: Array.isArray(r.benefits)
-      ? (r.benefits as string[])
-      : [],
+    benefits: Array.isArray(r.benefits) ? (r.benefits as string[]) : [],
     attributes:
       typeof r.attributes === "object" && r.attributes !== null
         ? (r.attributes as Record<string, string | string[]>)
@@ -143,7 +151,9 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
     showOnHomepage: !!r.show_on_homepage,
     homeSortOrder: r.home_sort_order ?? undefined,
     story_description: r.story_description ?? undefined,
-    what_makes_special: Array.isArray(r.what_makes_special) ? (r.what_makes_special as string[]) : undefined,
+    what_makes_special: Array.isArray(r.what_makes_special)
+      ? (r.what_makes_special as string[])
+      : undefined,
     floral_source_notes: r.floral_source_notes ?? undefined,
     storage_usage: r.storage_usage ?? undefined,
     purity_lab_test: r.purity_lab_test ?? undefined,
@@ -151,11 +161,15 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
   };
 }
 
-async function fetchAllVariantsMap(productIds?: string[]): Promise<Map<string, VariantRow[]> | undefined> {
+async function fetchAllVariantsMap(
+  productIds?: string[],
+): Promise<Map<string, VariantRow[]> | undefined> {
   try {
     let query = supabase
       .from("product_variants")
-      .select("id,product_id,label,price,mrp,stock_quantity,is_active,is_default,sku,sort_order,weight_g,image_url,images")
+      .select(
+        "id,product_id,label,price,mrp,stock_quantity,is_active,is_default,sku,sort_order,weight_g,image_url,images",
+      )
       .order("sort_order", { ascending: true });
 
     if (productIds && productIds.length > 0) {
@@ -181,7 +195,8 @@ export async function fetchProducts(): Promise<Product[]> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select(`
+      .select(
+        `
         id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
         image_key,
         image_url,
@@ -195,15 +210,16 @@ export async function fetchProducts(): Promise<Product[]> {
         storage_usage,
         purity_lab_test,
         updated_at
-      `)
+      `,
+      )
       .eq("status", "published")
       .order("sort_order", { ascending: true });
-    
+
     if (error) {
       console.error("[fetchProducts] Supabase error:", error);
       throw error;
     }
-    
+
     if (!data || data.length === 0) {
       console.warn("[fetchProducts] No products found in Supabase. Returning empty array.");
       return [];
@@ -223,7 +239,8 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   try {
     const { data, error } = await supabase
       .from("products")
-      .select(`
+      .select(
+        `
         id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
         image_key,
         image_url,
@@ -237,7 +254,8 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
         storage_usage,
         purity_lab_test,
         updated_at
-      `)
+      `,
+      )
       .eq("slug", slug)
       .eq("status", "published")
       .maybeSingle();
@@ -247,12 +265,59 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
       throw error; // Let the router catch it as a real error
     }
 
-    if (!data) {
+    let finalData = data;
+    if (!finalData) {
+      const aliasMap: Record<string, string> = {
+        "multiflora-honey": "multiflora-honey-250GM",
+        "multiflora-honey-500gm": "multiflora-honey-250GM",
+        "multiflora-honey-1kg": "multiflora-honey-250GM",
+        "multiflora-honey-28 kg": "multiflora-honey-250GM",
+        "multiflora-honey-28kg": "multiflora-honey-250GM",
+        "multiflora-honey-50g": "multiflora-honey-250GM",
+        "ajwain-honey": "ajwain-honey-500",
+        "ajwain-honey-250": "ajwain-honey-500",
+        "ajwain-honey-1 kg": "ajwain-honey-500",
+        "ajwain-honey-1kg": "ajwain-honey-500",
+        "ajwain-honey-28kg": "ajwain-honey-500",
+        "fennel-honey": "fennel-honey-250GM",
+        "fennel-honey-500gm": "fennel-honey-250GM",
+        "fennel-honey-28kg": "fennel-honey-250GM",
+        "bee wax-10kg": "Bee Wax",
+      };
+      const mappedSlug = aliasMap[slug.toLowerCase()];
+      if (mappedSlug) {
+        const { data: aliasData } = await supabase
+          .from("products")
+          .select(
+            `
+            id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+            image_key,
+            image_url,
+            images,
+            attributes,
+            show_on_homepage,
+            home_sort_order,
+            story_description,
+            what_makes_special,
+            floral_source_notes,
+            storage_usage,
+            purity_lab_test,
+            updated_at
+          `,
+          )
+          .eq("slug", mappedSlug)
+          .eq("status", "published")
+          .maybeSingle();
+        finalData = aliasData;
+      }
+    }
+
+    if (!finalData) {
       // No DB product found
       return null;
     }
 
-    const row = data as unknown as Row;
+    const row = finalData as unknown as Row;
     const varMap = await fetchAllVariantsMap(row.id ? [row.id] : undefined);
     return toProduct(row, varMap);
   } catch (err) {
@@ -260,4 +325,3 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
     throw err;
   }
 }
-

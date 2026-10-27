@@ -1,6 +1,12 @@
 import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/site/Layout";
-import { getVariantByLabel, getProductGallery, getProductAdditionalImages } from "@/lib/products";
+import {
+  getVariantByLabel,
+  getProductGallery,
+  getProductAdditionalImages,
+  formatSizeDisplay,
+  cleanProductName,
+} from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { fetchProduct, fetchProducts } from "@/lib/product-catalog";
 import {
@@ -522,7 +528,7 @@ function ProductPage() {
                     <span
                       className={`text-base font-bold ${size === s ? "text-burnt-orange" : "text-espresso"}`}
                     >
-                      {s}
+                      {formatSizeDisplay(s)}
                     </span>
                     {packaging && (
                       <span
