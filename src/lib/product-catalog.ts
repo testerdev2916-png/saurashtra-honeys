@@ -3,8 +3,11 @@ import {
   sortVariantsBySize,
   getVariantPackaging,
   normalizeSizeKey,
+  isComboOrHamper,
+  extractInfographics,
   type Product,
   type ProductVariant,
+  type SharedProductContent,
 } from "@/lib/products";
 import { resolveImage } from "@/lib/product-images";
 
@@ -55,27 +58,73 @@ type VariantRow = {
 };
 
 export const aliasMap: Record<string, string> = {
+  // Multiflora Honey (250 GM is the parent content source)
   "multiflora-honey": "multiflora-honey-250GM",
   "multiflora-honey-500gm": "multiflora-honey-250GM",
   "multiflora-honey-1kg": "multiflora-honey-250GM",
   "multiflora-honey-28 kg": "multiflora-honey-250GM",
   "multiflora-honey-28kg": "multiflora-honey-250GM",
   "multiflora-honey-50g": "multiflora-honey-250GM",
+
+  // Ajwain Honey (ajwain-honey is the 250 GM variant content source, ajwain-honey-500 is canonical)
   "ajwain-honey": "ajwain-honey-500",
   "ajwain-honey-250": "ajwain-honey-500",
+  "ajwain-honey-250g": "ajwain-honey-500",
+  "ajwain-honey-250gm": "ajwain-honey-500",
+  "ajwain-honey-500": "ajwain-honey-500",
+  "ajwain-honey-500g": "ajwain-honey-500",
+  "ajwain-honey-500gm": "ajwain-honey-500",
   "ajwain-honey-1 kg": "ajwain-honey-500",
   "ajwain-honey-1kg": "ajwain-honey-500",
   "ajwain-honey-28kg": "ajwain-honey-500",
+  "ajwain-honey-28KG": "ajwain-honey-500",
+
+  // Fennel Honey (fennel-honey-250GM is the parent content source)
   "fennel-honey": "fennel-honey-250GM",
+  "fennel-honey-250": "fennel-honey-250GM",
+  "fennel-honey-250g": "fennel-honey-250GM",
+  "fennel-honey-250gm": "fennel-honey-250GM",
+  "fennel-honey-500": "fennel-honey-250GM",
   "fennel-honey-500gm": "fennel-honey-250GM",
+  "fennel-honey-500g": "fennel-honey-250GM",
   "fennel-honey-28kg": "fennel-honey-250GM",
+  "fennel-honey-28KG": "fennel-honey-250GM",
+
+  // Bee Wax
   "bee wax-10kg": "Bee Wax",
+  "bee-wax-10kg": "Bee Wax",
 };
+
+export function find250GmVariantSlug(product: {
+  slug?: string | null;
+  name?: string | null;
+  category?: string | null;
+  flora?: string | null;
+}): string | null {
+  if (isComboOrHamper(product)) {
+    return null;
+  }
+  const s = (product.slug || "").toLowerCase();
+  const n = (product.name || "").toLowerCase();
+  const f = (product.flora || "").toLowerCase();
+
+  if (s.includes("multiflora") || n.includes("multiflora") || f.includes("multiflora")) {
+    return "multiflora-honey-250GM";
+  }
+  if (s.includes("ajwain") || n.includes("ajwain") || f.includes("ajwain")) {
+    return "ajwain-honey";
+  }
+  if (s.includes("fennel") || n.includes("fennel") || f.includes("fennel")) {
+    return "fennel-honey-250GM";
+  }
+  return null;
+}
 
 function toProduct(
   r: Row,
   varMap?: Map<string, VariantRow[]>,
   requestedSizeHint?: string,
+  parent250Row?: Row | null,
 ): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
   let mappedVariants: ProductVariant[] | undefined =
@@ -157,6 +206,43 @@ function toProduct(
           .map((img) => resolveImage(img, null, "", r.updated_at))
       : [];
 
+  // Content Source: The 250 GM variant is the single source of truth for shared educational and trust content
+  const contentSource = !isComboOrHamper(r) && parent250Row ? parent250Row : r;
+  const rawSharedImages = Array.isArray(contentSource.images)
+    ? (contentSource.images as unknown[]).filter(
+        (u): u is string => typeof u === "string" && u.trim().length > 0,
+      )
+    : [];
+  const infographics = extractInfographics(
+    rawSharedImages.map((img) => resolveImage(img, null, "", contentSource.updated_at)),
+  );
+
+  const sharedContent: SharedProductContent = {
+    sourceVariant: "250 GM",
+    sourceSlug: contentSource.slug,
+    story_description: contentSource.story_description ?? undefined,
+    what_makes_special: Array.isArray(contentSource.what_makes_special)
+      ? (contentSource.what_makes_special as string[])
+      : undefined,
+    floral_source_notes: contentSource.floral_source_notes ?? undefined,
+    storage_usage: contentSource.storage_usage ?? undefined,
+    purity_lab_test: contentSource.purity_lab_test ?? undefined,
+    usage_instructions:
+      (contentSource as Record<string, unknown>).usage_instructions &&
+      typeof (contentSource as Record<string, unknown>).usage_instructions === "string"
+        ? ((contentSource as Record<string, unknown>).usage_instructions as string)
+        : undefined,
+    ingredients:
+      (contentSource as Record<string, unknown>).ingredients &&
+      typeof (contentSource as Record<string, unknown>).ingredients === "string"
+        ? ((contentSource as Record<string, unknown>).ingredients as string)
+        : undefined,
+    benefits: Array.isArray(contentSource.benefits)
+      ? (contentSource.benefits as string[])
+      : undefined,
+    infographics,
+  };
+
   return {
     slug: r.slug,
     name: r.name,
@@ -175,21 +261,28 @@ function toProduct(
     image: primaryImg,
     images: galleryImages,
     additionalImages: additionalImages,
-    benefits: Array.isArray(r.benefits) ? (r.benefits as string[]) : [],
+    benefits: Array.isArray(contentSource.benefits)
+      ? (contentSource.benefits as string[])
+      : Array.isArray(r.benefits)
+        ? (r.benefits as string[])
+        : [],
     attributes:
       typeof r.attributes === "object" && r.attributes !== null
         ? (r.attributes as Record<string, string | string[]>)
         : undefined,
     showOnHomepage: !!r.show_on_homepage,
     homeSortOrder: r.home_sort_order ?? undefined,
-    story_description: r.story_description ?? undefined,
-    what_makes_special: Array.isArray(r.what_makes_special)
-      ? (r.what_makes_special as string[])
-      : undefined,
-    floral_source_notes: r.floral_source_notes ?? undefined,
-    storage_usage: r.storage_usage ?? undefined,
-    purity_lab_test: r.purity_lab_test ?? undefined,
+    story_description: contentSource.story_description ?? r.story_description ?? undefined,
+    what_makes_special: Array.isArray(contentSource.what_makes_special)
+      ? (contentSource.what_makes_special as string[])
+      : Array.isArray(r.what_makes_special)
+        ? (r.what_makes_special as string[])
+        : undefined,
+    floral_source_notes: contentSource.floral_source_notes ?? r.floral_source_notes ?? undefined,
+    storage_usage: contentSource.storage_usage ?? r.storage_usage ?? undefined,
+    purity_lab_test: contentSource.purity_lab_test ?? r.purity_lab_test ?? undefined,
     updatedAt: r.updated_at,
+    sharedContent,
   };
 }
 
@@ -270,9 +363,24 @@ export async function fetchProducts(): Promise<Product[]> {
       return true;
     });
 
+    const parent250Map = new Map<string, Row>();
+    for (const r of rows) {
+      if (
+        r.slug === "multiflora-honey-250GM" ||
+        r.slug === "ajwain-honey" ||
+        r.slug === "fennel-honey-250GM"
+      ) {
+        parent250Map.set(r.slug.toLowerCase(), r);
+      }
+    }
+
     const productIds = canonicalRows.map((r) => r.id).filter(Boolean);
     const varMap = await fetchAllVariantsMap(productIds);
-    return canonicalRows.map((r) => toProduct(r, varMap));
+    return canonicalRows.map((r) => {
+      const pSlug = find250GmVariantSlug(r);
+      const parentRow = pSlug ? parent250Map.get(pSlug.toLowerCase()) : null;
+      return toProduct(r, varMap, undefined, parentRow);
+    });
   } catch (err) {
     console.error("[fetchProducts] Exception:", err);
     throw err;
@@ -356,8 +464,38 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
     }
 
     const row = finalData as unknown as Row;
+    let parent250Row: Row | null = null;
+    const parentSlug = find250GmVariantSlug(row);
+    if (parentSlug && parentSlug.toLowerCase() !== row.slug.toLowerCase()) {
+      const { data: p250Data } = await supabase
+        .from("products")
+        .select(
+          `
+          id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+          image_key,
+          image_url,
+          images,
+          attributes,
+          show_on_homepage,
+          home_sort_order,
+          story_description,
+          what_makes_special,
+          floral_source_notes,
+          storage_usage,
+          purity_lab_test,
+          updated_at
+        `,
+        )
+        .eq("slug", parentSlug)
+        .eq("status", "published")
+        .maybeSingle();
+      if (p250Data) {
+        parent250Row = p250Data as unknown as Row;
+      }
+    }
+
     const varMap = await fetchAllVariantsMap(row.id ? [row.id] : undefined);
-    return toProduct(row, varMap, requestedSizeHint);
+    return toProduct(row, varMap, requestedSizeHint, parent250Row);
   } catch (err) {
     console.error("[fetchProduct] Exception:", err);
     throw err;

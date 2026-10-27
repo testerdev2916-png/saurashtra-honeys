@@ -8,6 +8,7 @@ import {
   getProductAdditionalImages,
   formatSizeDisplay,
   cleanProductName,
+  isInfographicImage,
 } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { fetchProduct, fetchProducts } from "@/lib/product-catalog";
@@ -288,11 +289,15 @@ function ProductPage() {
     }
 
     // 2. Fallback for single-variant / base products with no variant-specific images
+    // Strictly filter out any infographic images so packaging gallery remains pure packaging
     const fallbackImages: string[] = [];
-    if (p.image) fallbackImages.push(p.image);
-    if (p.images && p.images.length > 0) fallbackImages.push(...p.images);
-    if (p.additionalImages && p.additionalImages.length > 0)
-      fallbackImages.push(...p.additionalImages);
+    if (p.image && !isInfographicImage(p.image, p)) fallbackImages.push(p.image);
+    if (p.images && p.images.length > 0) {
+      fallbackImages.push(...p.images.slice(0, 2).filter((u) => !isInfographicImage(u, p)));
+    }
+    if (p.additionalImages && p.additionalImages.length > 0) {
+      fallbackImages.push(...p.additionalImages.filter((u) => !isInfographicImage(u, p)));
+    }
 
     const seenFallback = new Set<string>();
     const finalFallbackImages: string[] = [];
@@ -305,7 +310,9 @@ function ProductPage() {
       }
     }
 
-    return finalFallbackImages.length > 0 ? finalFallbackImages : [p.image].filter(Boolean);
+    return finalFallbackImages.length > 0
+      ? finalFallbackImages
+      : [p.image].filter((img): img is string => Boolean(img) && !isInfographicImage(img, p));
   }, [p, activeVariant]);
 
   useEffect(() => {
@@ -763,12 +770,13 @@ function ProductPage() {
             {tab === "Description" || (tab as string) === "Story / Description" ? (
               <>
                 <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                  {p.story_description ||
-                    `Our ${p.name} is collected by bees from the nectar of ${p.flora ?? "wild"} blossoms grown across the rich floral regions of Saurashtra. It is raw, unheated and unfiltered—preserving every natural enzyme, antioxidant, and subtle aroma present in the hive.`}
+                  {p.sharedContent?.story_description ||
+                    p.story_description ||
+                    `Our ${cleanProductName(p.name)} is collected by bees from the nectar of ${p.flora ?? "wild"} blossoms grown across the rich floral regions of Saurashtra. It is raw, unheated and unfiltered—preserving every natural enzyme, antioxidant, and subtle aroma present in the hive.`}
                 </p>
-                {!p.story_description && (
+                {!(p.sharedContent?.story_description || p.story_description) && (
                   <ul className="mt-5 grid sm:grid-cols-2 gap-3 text-sm font-medium text-espresso">
-                    {p.benefits.map((b) => (
+                    {(p.sharedContent?.benefits || p.benefits).map((b) => (
                       <li key={b} className="flex items-center gap-2.5">
                         <span className="size-5 rounded-full bg-cream-deep text-burnt-orange flex items-center justify-center text-xs font-bold">
                           ✓
@@ -783,38 +791,30 @@ function ProductPage() {
 
             {tab === "Benefits" || (tab as string) === "What Makes It Special" ? (
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm font-medium text-espresso">
-                {p.what_makes_special && p.what_makes_special.length > 0 ? (
-                  p.what_makes_special.map((b, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>{b}</span>
-                    </li>
-                  ))
-                ) : (
-                  <>
-                    {p.benefits.map((b) => (
-                      <li key={b} className="flex items-start gap-3">
-                        <Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" />{" "}
-                        <span>{b}</span>
-                      </li>
-                    ))}
-                    <li className="flex items-start gap-3">
-                      <Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" />{" "}
-                      <span>Rich in natural antimicrobial properties & enzymes</span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                      <Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" />{" "}
-                      <span>Never heated above natural hive temperature</span>
-                    </li>
-                  </>
-                )}
+                {(p.sharedContent?.what_makes_special && p.sharedContent.what_makes_special.length > 0
+                  ? p.sharedContent.what_makes_special
+                  : p.what_makes_special && p.what_makes_special.length > 0
+                    ? p.what_makes_special
+                    : p.sharedContent?.benefits || p.benefits
+                ).map((b, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <Leaf className="size-4 text-burnt-orange mt-0.5 shrink-0" /> <span>{b}</span>
+                  </li>
+                ))}
               </ul>
             ) : null}
 
             {tab === "How to Use" || (tab as string) === "Storage & Usage" ? (
               <>
-                {p.storage_usage ? (
+                {p.sharedContent?.storage_usage ||
+                p.storage_usage ||
+                p.sharedContent?.usage_instructions ||
+                (p as Record<string, unknown>).usage_instructions ? (
                   <div className="space-y-4 text-sm font-medium text-espresso leading-relaxed whitespace-pre-wrap">
-                    {p.storage_usage}
+                    {p.sharedContent?.storage_usage ||
+                      p.storage_usage ||
+                      p.sharedContent?.usage_instructions ||
+                      ((p as Record<string, unknown>).usage_instructions as string)}
                   </div>
                 ) : (
                   <ol className="space-y-4 text-sm font-medium text-espresso">
@@ -838,9 +838,15 @@ function ProductPage() {
 
             {tab === "Ingredients" || (tab as string) === "Floral Source & Notes" ? (
               <div className="space-y-3">
-                {p.floral_source_notes ? (
+                {p.sharedContent?.floral_source_notes ||
+                p.floral_source_notes ||
+                p.sharedContent?.ingredients ||
+                (p as Record<string, unknown>).ingredients ? (
                   <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {p.floral_source_notes}
+                    {p.sharedContent?.floral_source_notes ||
+                      p.floral_source_notes ||
+                      p.sharedContent?.ingredients ||
+                      ((p as Record<string, unknown>).ingredients as string)}
                   </p>
                 ) : (
                   <>
@@ -861,9 +867,9 @@ function ProductPage() {
 
             {tab === "Lab Report" || (tab as string) === "Purity & Lab Test" ? (
               <div className="space-y-4">
-                {p.purity_lab_test ? (
+                {p.sharedContent?.purity_lab_test || p.purity_lab_test ? (
                   <p className="text-sm md:text-base text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                    {p.purity_lab_test}
+                    {p.sharedContent?.purity_lab_test || p.purity_lab_test}
                   </p>
                 ) : (
                   <>
@@ -896,7 +902,70 @@ function ProductPage() {
         </div>
       </section>
 
-      {/* Honey Process Infographic */}
+      {/* ============================================================== */}
+      {/* 250 GM SHARED CONTENT: THE 6 CORE COMMON CONTENT SECTIONS      */}
+      {/* Fetched from 250 GM variant & displayed ONCE across all sizes  */}
+      {/* ============================================================== */}
+
+      {/* 1. HOW TO USE */}
+      {p.sharedContent?.infographics?.howToUse && (
+        <section className="container-product pb-12">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
+            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+                Everyday Rituals
+              </span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+                How to Use & Daily Rituals
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                {p.sharedContent?.usage_instructions ||
+                  ((p as Record<string, unknown>).usage_instructions as string) ||
+                  "Enjoy Saurashtra Honey directly by the spoonful, stirred into warm infusions, or as a wholesome natural sweetener for everyday wellness."}
+              </p>
+            </div>
+            <div className="p-4 md:p-8 flex justify-center bg-white">
+              <img
+                src={p.sharedContent.infographics.howToUse}
+                alt={`${cleanProductName(p.name)} - How to Use`}
+                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 2. INGREDIENTS */}
+      {p.sharedContent?.infographics?.ingredients && (
+        <section className="container-product pb-12">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
+            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+                Floral Terroir
+              </span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+                Ingredients & Botanical Purity
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                {p.sharedContent?.floral_source_notes ||
+                  p.floral_source_notes ||
+                  "100% Raw, Unheated, and Unfiltered Honey ethically harvested from the wild blossoms of Saurashtra. Pure nectar with natural enzymes, antioxidants, and trace pollens preserved."}
+              </p>
+            </div>
+            <div className="p-4 md:p-8 flex justify-center bg-white">
+              <img
+                src={p.sharedContent.infographics.ingredients}
+                alt={`${cleanProductName(p.name)} - Ingredients & Nutritional Info`}
+                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 3. OUR PROCESS */}
       <section
         className="pb-14 relative"
         style={{
@@ -908,14 +977,108 @@ function ProductPage() {
           paddingRight: "0",
         }}
       >
+        <div className="container-product mb-4">
+          <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+            Traceable Craftsmanship
+          </span>
+          <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+            Our Process: From Hive to Home
+          </h2>
+        </div>
         <img
-          src={honeyProcessImg}
-          alt="From Hive to Home, Pure Honey for You - Honey extraction process"
+          src={p.sharedContent?.infographics?.ourProcess || honeyProcessImg}
+          alt={`${cleanProductName(p.name)} - Honey extraction and processing infographic`}
           style={{ width: "100%", display: "block", height: "auto" }}
           className="w-full h-auto block object-contain"
           loading="lazy"
         />
       </section>
+
+      {/* 4. OUR FARM */}
+      {p.sharedContent?.infographics?.ourFarm && (
+        <section className="container-product pb-12">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
+            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+                Apiary Terroir
+              </span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+                Our Farm & Wild Apiaries
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                Harvested across the biodiverse flora of Saurashtra, Gujarat. Our beekeeping
+                practices nurture thriving bee colonies and honor the seasonal flowering cycles of the
+                region.
+              </p>
+            </div>
+            <div className="p-4 md:p-8 flex justify-center bg-white">
+              <img
+                src={p.sharedContent.infographics.ourFarm}
+                alt={`${cleanProductName(p.name)} - Our Farm and Apiaries`}
+                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 5. CERTIFICATES */}
+      {p.sharedContent?.infographics?.certificates && (
+        <section className="container-product pb-12">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
+            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+                Verified Quality
+              </span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+                Quality Certificates & Lab Purity
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                {p.sharedContent?.purity_lab_test ||
+                  p.purity_lab_test ||
+                  "Every batch is certified by NABL-accredited laboratories for zero sugar adulteration, optimal moisture parameters, and true botanical pollen identity."}
+              </p>
+            </div>
+            <div className="p-4 md:p-8 flex justify-center bg-white">
+              <img
+                src={p.sharedContent.infographics.certificates}
+                alt={`${cleanProductName(p.name)} - Purity Lab Test and Certificates`}
+                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 6. LIFESTYLE */}
+      {p.sharedContent?.infographics?.lifestyle && (
+        <section className="container-product pb-14">
+          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
+            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
+                Everyday Living
+              </span>
+              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
+                Lifestyle & Holistic Nutrition
+              </h2>
+              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
+                Make pure raw honey an essential companion to your balanced lifestyle—for morning
+                vitality, pre-workout natural carbohydrates, and wholesome family nourishment.
+              </p>
+            </div>
+            <div className="p-4 md:p-8 flex justify-center bg-white">
+              <img
+                src={p.sharedContent.infographics.lifestyle}
+                alt={`${cleanProductName(p.name)} - Lifestyle and Wellness`}
+                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
+                loading="lazy"
+              />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* FAQ Accordion */}
       <section className="container-product pb-14">

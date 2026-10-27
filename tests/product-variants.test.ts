@@ -507,5 +507,186 @@ describe("Product Variants & Dynamic Size Selection", () => {
     assert.equal(desc[0].name, "Multiflora Honey – 28 KG");
     assert.equal(desc[3].name, "Multiflora Honey – 250 GM");
   });
+
+  it("stores shared content (How to Use, Ingredients, Process, Farm, Certificates, Lifestyle) with 250 GM variant and shares across Multiflora Honey sizes", async () => {
+    // 1. Fetch 250 GM variant directly
+    const p250 = await fetchProduct("multiflora-honey-250GM");
+    assert.ok(p250, "Expected multiflora-honey-250GM to exist");
+    assert.ok(p250.sharedContent, "Expected sharedContent to be present on 250 GM variant");
+    assert.equal(p250.sharedContent.sourceVariant, "250 GM");
+    assert.ok(p250.sharedContent.story_description?.includes("Multiflora Honey is a naturally sourced"));
+    assert.ok(p250.sharedContent.what_makes_special && p250.sharedContent.what_makes_special.length > 0);
+    assert.ok(p250.sharedContent.infographics, "Expected infographics on 250 GM variant");
+    assert.ok(p250.sharedContent.infographics.howToUse?.includes("3_HC7BJal6E"));
+    assert.ok(p250.sharedContent.infographics.ingredients?.includes("2_cIZjSdzrVm"));
+    assert.ok(p250.sharedContent.infographics.ourProcess?.includes("5_HyAoNB9B0"));
+    assert.ok(p250.sharedContent.infographics.ourFarm?.includes("6_Ix51y_0X3"));
+    assert.ok(p250.sharedContent.infographics.certificates?.includes("7_w2_WJV7_B"));
+    assert.ok(p250.sharedContent.infographics.lifestyle?.includes("4_VJqxZP_QFB"));
+
+    // 2. Fetch 500 GM variant directly via slug
+    const p500 = await fetchProduct("multiflora-honey-500GM");
+    assert.ok(p500, "Expected multiflora-honey-500GM to resolve");
+    assert.equal(p500.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(p500.sharedContent.story_description, p250.sharedContent.story_description);
+    assert.deepEqual(p500.sharedContent.infographics, p250.sharedContent.infographics);
+
+    // 3. Fetch 1 KG variant directly via slug
+    const p1kg = await fetchProduct("multiflora-honey-1KG");
+    assert.ok(p1kg, "Expected multiflora-honey-1KG to resolve");
+    assert.equal(p1kg.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(p1kg.sharedContent.story_description, p250.sharedContent.story_description);
+    assert.deepEqual(p1kg.sharedContent.infographics, p250.sharedContent.infographics);
+
+    // 4. Fetch 28 KG variant directly via slug
+    const p28kg = await fetchProduct("multiflora-honey-28 Kg");
+    assert.ok(p28kg, "Expected multiflora-honey-28 Kg to resolve");
+    assert.equal(p28kg.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(p28kg.sharedContent.story_description, p250.sharedContent.story_description);
+    assert.deepEqual(p28kg.sharedContent.infographics, p250.sharedContent.infographics);
+
+    // 5. Keep variant-specific data strictly separate
+    const v250 = getVariantByLabel(p250, "250g");
+    const v500 = getVariantByLabel(p250, "500g");
+    const v1kg = getVariantByLabel(p250, "1kg");
+    const v28kg = getVariantByLabel(p250, "28kg");
+
+    assert.equal(v250.price, 190);
+    assert.equal(v500.price, 350);
+    assert.equal(v1kg.price, 650);
+    assert.equal(v28kg.price, 7000);
+
+    assert.equal(v250.packaging, "Glass Jar");
+    assert.equal(v500.packaging, "Glass Jar");
+    assert.equal(v1kg.packaging, "Plastic Jar");
+    assert.equal(v28kg.packaging, "Plastic Bucket");
+
+    assert.notEqual(v250.image_url, v1kg.image_url);
+    assert.notEqual(v1kg.image_url, v28kg.image_url);
+  });
+
+  it("automatically fetches and displays shared 250 GM content across Ajwain Honey variants", async () => {
+    // 1. Fetch 250 GM Ajwain variant directly
+    const ajw250 = await fetchProduct("ajwain-honey");
+    assert.ok(ajw250, "Expected ajwain-honey to exist");
+    assert.equal(ajw250.sharedContent?.sourceVariant, "250 GM");
+    assert.ok(ajw250.sharedContent.story_description?.includes("Ajwain Honey is a distinctive floral honey"));
+    assert.ok(ajw250.sharedContent.infographics?.howToUse?.includes("3_qvQR-sZFa"));
+    assert.ok(ajw250.sharedContent.infographics?.ingredients?.includes("2_AFTXXnznu"));
+    assert.ok(ajw250.sharedContent.infographics?.ourProcess?.includes("5_tbV1gdagY"));
+    assert.ok(ajw250.sharedContent.infographics?.ourFarm?.includes("6_OrEaNYIfK"));
+    assert.ok(ajw250.sharedContent.infographics?.certificates?.includes("7_ALY8EtVL9B"));
+    assert.ok(ajw250.sharedContent.infographics?.lifestyle?.includes("4_G_lfbuXdl"));
+
+    // 2. Fetch 500 GM Ajwain variant
+    const ajw500 = await fetchProduct("ajwain-honey-500");
+    assert.ok(ajw500, "Expected ajwain-honey-500 to resolve");
+    assert.equal(ajw500.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(ajw500.sharedContent.story_description, ajw250.sharedContent.story_description);
+    assert.deepEqual(ajw500.sharedContent.infographics, ajw250.sharedContent.infographics);
+
+    // 3. Fetch 1 KG Ajwain variant
+    const ajw1kg = await fetchProduct("ajwain-honey-1 kg");
+    assert.ok(ajw1kg, "Expected ajwain-honey-1 kg to resolve");
+    assert.equal(ajw1kg.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(ajw1kg.sharedContent.story_description, ajw250.sharedContent.story_description);
+    assert.deepEqual(ajw1kg.sharedContent.infographics, ajw250.sharedContent.infographics);
+
+    // 4. Fetch 28 KG Ajwain variant
+    const ajw28kg = await fetchProduct("ajwain-honey-28KG");
+    assert.ok(ajw28kg, "Expected ajwain-honey-28KG to resolve");
+    assert.equal(ajw28kg.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(ajw28kg.sharedContent.story_description, ajw250.sharedContent.story_description);
+    assert.deepEqual(ajw28kg.sharedContent.infographics, ajw250.sharedContent.infographics);
+
+    // 5. Verify packaging separation
+    const v250 = getVariantByLabel(ajw250, "250g");
+    const v500 = getVariantByLabel(ajw250, "500g");
+    const v1kg = getVariantByLabel(ajw250, "1kg");
+    const v28kg = getVariantByLabel(ajw250, "28kg");
+
+    assert.equal(v250.price, 190);
+    assert.equal(v500.price, 350);
+    assert.equal(v1kg.price, 600);
+    assert.equal(v28kg.price, 6720);
+
+    assert.equal(v250.packaging, "Glass Jar");
+    assert.equal(v500.packaging, "Glass Jar");
+    assert.equal(v1kg.packaging, "Plastic Jar");
+    assert.equal(v28kg.packaging, "Plastic Bucket");
+  });
+
+  it("automatically fetches and displays shared 250 GM content across Fennel Honey variants", async () => {
+    const fen250 = await fetchProduct("fennel-honey-250GM");
+    assert.ok(fen250, "Expected fennel-honey-250GM to exist");
+    assert.equal(fen250.sharedContent?.sourceVariant, "250 GM");
+    assert.ok(fen250.sharedContent.story_description?.includes("Fennel Honey is a distinctive floral honey"));
+    assert.ok(fen250.sharedContent.infographics?.howToUse?.includes("3_40tE4Ib7i"));
+    assert.ok(fen250.sharedContent.infographics?.ingredients?.includes("2_BVWKSWrT6"));
+    assert.ok(fen250.sharedContent.infographics?.ourProcess?.includes("5_YX14iCCDx"));
+    assert.ok(fen250.sharedContent.infographics?.certificates?.includes("7_O5GDjHf-Iq"));
+    assert.ok(fen250.sharedContent.infographics?.lifestyle?.includes("4_9LRK4Dxe_"));
+
+    // 500 GM Fennel variant inherits shared content from 250 GM
+    const fen500 = await fetchProduct("fennel-honey-500GM");
+    assert.ok(fen500);
+    assert.equal(fen500.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(fen500.sharedContent.story_description, fen250.sharedContent.story_description);
+    assert.deepEqual(fen500.sharedContent.infographics, fen250.sharedContent.infographics);
+
+    // 28 KG Fennel variant inherits shared content from 250 GM
+    const fen28kg = await fetchProduct("fennel-honey-28KG");
+    assert.ok(fen28kg);
+    assert.equal(fen28kg.sharedContent?.sourceVariant, "250 GM");
+    assert.equal(fen28kg.sharedContent.story_description, fen250.sharedContent.story_description);
+    assert.deepEqual(fen28kg.sharedContent.infographics, fen250.sharedContent.infographics);
+  });
+
+  it("ensures combo products and gift hampers remain independent and never inherit from 250 GM honey", async () => {
+    const products = await fetchProducts();
+    const combosAndHampers = products.filter(
+      (p) =>
+        p.category === "Gift Hamper" ||
+        p.name.toLowerCase().includes("combo") ||
+        p.name.toLowerCase().includes("hamper") ||
+        p.slug.toLowerCase().includes("combo") ||
+        p.slug.toLowerCase().includes("hamper"),
+    );
+
+    assert.ok(combosAndHampers.length >= 4, "Expected at least 4 combo or hamper products");
+
+    for (const item of combosAndHampers) {
+      assert.notEqual(
+        item.sharedContent?.sourceSlug,
+        "multiflora-honey-250GM",
+        `Expected ${item.name} not to inherit from Multiflora 250GM`,
+      );
+      assert.notEqual(
+        item.sharedContent?.sourceSlug,
+        "ajwain-honey",
+        `Expected ${item.name} not to inherit from Ajwain 250GM`,
+      );
+      assert.notEqual(
+        item.sharedContent?.sourceSlug,
+        "fennel-honey-250GM",
+        `Expected ${item.name} not to inherit from Fennel 250GM`,
+      );
+    }
+  });
+
+  it("handles products without a 250 GM variant gracefully without throwing or assuming existence", async () => {
+    // Pure Honey Gulkand (350g only)
+    const gulkand = await fetchProduct("Pure Honey gulkand");
+    assert.ok(gulkand, "Expected Pure Honey Gulkand to load");
+    assert.equal(gulkand.sizes.length, 1);
+    assert.equal(gulkand.sizes[0], "350g");
+
+    // Bee Wax (1kg, 10kg)
+    const beeWax = await fetchProduct("Bee Wax");
+    assert.ok(beeWax, "Expected Bee Wax to load");
+    assert.ok(beeWax.sizes.includes("1kg"));
+    assert.ok(beeWax.sizes.includes("10kg"));
+    assert.equal(beeWax.sharedContent?.sourceSlug, "Bee Wax");
+  });
 });
 

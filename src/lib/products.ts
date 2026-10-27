@@ -49,6 +49,30 @@ export type ProductVariant = {
   images?: string[];
 };
 
+export type SharedInfographics = {
+  benefits?: string;
+  ingredients?: string;
+  howToUse?: string;
+  lifestyle?: string;
+  ourProcess?: string;
+  ourFarm?: string;
+  certificates?: string;
+};
+
+export type SharedProductContent = {
+  sourceVariant: string; // e.g. "250 GM"
+  sourceSlug?: string;
+  story_description?: string;
+  what_makes_special?: string[];
+  usage_instructions?: string;
+  storage_usage?: string;
+  ingredients?: string;
+  floral_source_notes?: string;
+  purity_lab_test?: string;
+  benefits?: string[];
+  infographics?: SharedInfographics;
+};
+
 export type Product = {
   slug: string;
   name: string;
@@ -85,20 +109,73 @@ export type Product = {
   storage_usage?: string;
   purity_lab_test?: string;
   updatedAt?: string;
+  sharedContent?: SharedProductContent;
 };
+
+export function isComboOrHamper(product: {
+  name?: string | null;
+  slug?: string | null;
+  category?: string | null;
+}): boolean {
+  const cat = (product.category || "").toLowerCase();
+  const slug = (product.slug || "").toLowerCase();
+  const name = (product.name || "").toLowerCase();
+
+  if (cat.includes("hamper") || cat.includes("combo")) return true;
+  if (slug.includes("combo") || slug.includes("hamper") || slug.includes("dipper")) return true;
+  if (name.includes("combo") || name.includes("hamper") || name.includes("dipper")) return true;
+
+  return false;
+}
+
+export function extractInfographics(images?: string[]): SharedInfographics {
+  if (!images || !Array.isArray(images)) return {};
+  const res: SharedInfographics = {};
+  // Infographics are at index 2 or higher when indices 0 and 1 are front/back packaging jar photos
+  const pool = images.length > 2 ? images.slice(2) : images;
+  for (const img of pool) {
+    if (!img || typeof img !== "string") continue;
+    if (img.includes("/1_")) res.benefits = img;
+    else if (img.includes("/2_")) res.ingredients = img;
+    else if (img.includes("/3_")) res.howToUse = img;
+    else if (img.includes("/4_")) res.lifestyle = img;
+    else if (img.includes("/5_")) {
+      if (!res.ourProcess) res.ourProcess = img;
+      else if (!res.ourFarm) res.ourFarm = img;
+    } else if (img.includes("/6_")) res.ourFarm = img;
+    else if (img.includes("/7_")) res.certificates = img;
+  }
+  return res;
+}
+
+export function isInfographicImage(url: string, product?: Product): boolean {
+  if (!url || typeof url !== "string") return false;
+  if (product?.sharedContent?.infographics) {
+    const list = Object.values(product.sharedContent.infographics).filter(Boolean);
+    if (list.some((u) => url.split("?")[0].trim() === (u as string).split("?")[0].trim())) {
+      return true;
+    }
+  }
+  // Secondary check for typical ImageKit infographic pattern
+  return /\/(?:1_|2_|3_|4_|5_HyAo|5_tbV1|5_YX14|5_bzMH|6_Ix51|6_OrEa|6_oVC4|7_)\w+\.(?:jpg|png|webp|jpeg)/i.test(
+    url,
+  );
+}
 
 export function getProductGallery(product: Product): string[] {
   const list = Array.isArray(product.images)
     ? Array.from(
         new Set(
-          product.images.filter((u): u is string => typeof u === "string" && u.trim().length > 0),
+          product.images
+            .slice(0, 2)
+            .filter((u): u is string => typeof u === "string" && u.trim().length > 0 && !isInfographicImage(u, product)),
         ),
       )
     : [];
   if (list.length > 0) {
-    return list.slice(0, 9);
+    return list;
   }
-  return product.image ? [product.image] : [];
+  return product.image && !isInfographicImage(product.image, product) ? [product.image] : [];
 }
 
 export function getProductAdditionalImages(product: Product): string[] {

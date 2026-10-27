@@ -335,7 +335,9 @@ function ProductsPage() {
         subtitle={edit ? (edit.id ? "Edit product" : "New product") : `${rows.length} in catalogue`}
         actions={
           <div className="flex items-center gap-2">
-            {isDirty && <span className="text-xs font-bold text-burnt-orange mr-2">Unsaved changes</span>}
+            {isDirty && (
+              <span className="text-xs font-bold text-burnt-orange mr-2">Unsaved changes</span>
+            )}
             <BtnPrimary
               disabled={!isDirty || !edit}
               onClick={() => {
@@ -375,7 +377,8 @@ function ProductsPage() {
           initial={edit}
           onDirtyChange={setIsDirty}
           onCancel={() => {
-            if (isDirty && !confirm("You have unsaved changes. Are you sure you want to leave?")) return;
+            if (isDirty && !confirm("You have unsaved changes. Are you sure you want to leave?"))
+              return;
             setEdit(null);
             setIsDirty(false);
           }}
@@ -391,171 +394,189 @@ function ProductsPage() {
       ) : (
         <>
           <div className="flex flex-col sm:flex-row gap-3 mb-6 items-start sm:items-center">
-        <input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Search products..."
-          className="flex-1 w-full sm:max-w-xs border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
-        />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
-        >
-          <option value="all">All Categories</option>
-          {cats.map((c) => (
-            <option key={c.id} value={c.name}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
-        >
-          <option value="all">All Statuses</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </select>
-      </div>
-
-      {selected.size > 0 && (
-        <Card className="p-3 mb-6 flex flex-wrap gap-4 items-center bg-cream-deep border-brand-orange/30 shadow-sm rounded-xl">
-          <span className="text-sm font-bold text-forest-dark pl-2">{selected.size} selected</span>
-          <div className="flex items-center gap-2">
-            <BtnGhost onClick={() => bulkPublish(true)} className="bg-white hover:bg-cream border border-border">
-              PUBLISH
-            </BtnGhost>
-            <BtnGhost onClick={() => bulkPublish(false)} className="bg-white hover:bg-cream border border-border">
-              DRAFT
-            </BtnGhost>
-            <BtnGhost
-              onClick={bulkDelete}
-              className="bg-white border border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Search products..."
+              className="flex-1 w-full sm:max-w-xs border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all"
+            />
+            <select
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
             >
-              DELETE
-            </BtnGhost>
+              <option value="all">All Categories</option>
+              {cats.map((c) => (
+                <option key={c.id} value={c.name}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="border border-border rounded-xl px-4 py-2.5 text-sm bg-white shadow-sm focus:outline-none focus:border-brand-orange focus:ring-1 focus:ring-brand-orange transition-all cursor-pointer w-full sm:w-auto"
+            >
+              <option value="all">All Statuses</option>
+              <option value="published">Published</option>
+              <option value="draft">Draft</option>
+            </select>
           </div>
-        </Card>
-      )}
-      <TableWrap>
-        <thead>
-          <tr>
-            <Th>
-              <input
-                type="checkbox"
-                checked={selected.size === filtered.length && filtered.length > 0}
-                onChange={(e) =>
-                  setSelected(e.target.checked ? new Set(filtered.map((r) => r.id)) : new Set())
-                }
-              />
-            </Th>
-            {["PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS", "ACTIONS"].map((h) => (
-              <Th key={h}>{h}</Th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
-          {loading && (
-            <tr>
-              <Td className="text-center py-12 text-muted-foreground">Loading…</Td>
-            </tr>
-          )}
-          {!loading && filtered.length === 0 && (
-            <tr>
-              <Td className="text-center py-12 text-muted-foreground">No products.</Td>
-            </tr>
-          )}
-          {!loading &&
-            filtered.map((r) => {
-              const displayImage = resolveImage(
-                r.image_key,
-                r.image_url,
-                r.images && r.images.length > 0 ? r.images[0] : "",
-                (r as any).updated_at
-              );
 
-              return (
-              <tr key={r.id} className="hover:bg-cream/40">
-                <Td>
+          {selected.size > 0 && (
+            <Card className="p-3 mb-6 flex flex-wrap gap-4 items-center bg-cream-deep border-brand-orange/30 shadow-sm rounded-xl">
+              <span className="text-sm font-bold text-forest-dark pl-2">
+                {selected.size} selected
+              </span>
+              <div className="flex items-center gap-2">
+                <BtnGhost
+                  onClick={() => bulkPublish(true)}
+                  className="bg-white hover:bg-cream border border-border"
+                >
+                  PUBLISH
+                </BtnGhost>
+                <BtnGhost
+                  onClick={() => bulkPublish(false)}
+                  className="bg-white hover:bg-cream border border-border"
+                >
+                  DRAFT
+                </BtnGhost>
+                <BtnGhost
+                  onClick={bulkDelete}
+                  className="bg-white border border-destructive/20 text-destructive hover:bg-destructive hover:text-white transition-colors"
+                >
+                  DELETE
+                </BtnGhost>
+              </div>
+            </Card>
+          )}
+          <TableWrap>
+            <thead>
+              <tr>
+                <Th>
                   <input
                     type="checkbox"
-                    checked={selected.has(r.id)}
-                    onChange={(e) => {
-                      const s = new Set(selected);
-                      e.target.checked ? s.add(r.id) : s.delete(r.id);
-                      setSelected(s);
-                    }}
+                    checked={selected.size === filtered.length && filtered.length > 0}
+                    onChange={(e) =>
+                      setSelected(e.target.checked ? new Set(filtered.map((r) => r.id)) : new Set())
+                    }
                   />
-                </Td>
-                <Td>
-                  <div className="flex items-center gap-3">
-                    {displayImage ? (
-                      <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
-                        <img src={displayImage} alt={r.name} className="w-full h-full object-cover" loading="lazy" />
-                      </div>
-                    ) : (
-                      <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
-                        <ImageOff className="size-4" />
-                      </div>
-                    )}
-                    <div>
-                      <div className="font-bold text-forest-dark text-[15px]">{r.name}</div>
-                      <div className="text-xs text-muted-foreground font-mono mt-0.5">
-                        {r.sku ? `${r.sku} • ${r.slug}` : r.slug}
-                      </div>
-                    </div>
-                  </div>
-                </Td>
-                <Td className="text-xs">{r.category ?? "—"}</Td>
-                <Td className="text-xs">
-                  ₹{r.price}
-                  {r.price_max ? `–₹${r.price_max}` : ""}
-                </Td>
-                <Td
-                  className={`text-xs ${r.stock_quantity <= r.low_stock_limit ? "text-destructive font-bold" : ""}`}
-                >
-                  {r.stock_quantity}
-                </Td>
-                <Td>
-                  <StatusPill s={r.status} />
-                </Td>
-                <Td className="text-right whitespace-nowrap">
-                  <button
-                    onClick={() => setEdit(r)}
-                    className="text-gold-deep hover:underline text-xs font-bold mr-3"
-                  >
-                    <Pencil className="size-3.5 inline" />
-                  </button>
-                  <button
-                    onClick={() => duplicate(r)}
-                    className="text-forest-dark hover:underline text-xs font-bold mr-3"
-                  >
-                    <Copy className="size-3.5 inline" />
-                  </button>
-                  <button
-                    onClick={async () => {
-                      if (!confirm("Are you sure you want to permanently delete this product? This action cannot be undone.")) return;
-                      try {
-                        await del({ data: { id: r.id } });
-                        toast.success("Product permanently deleted.");
-                        void load();
-                      } catch (e) {
-                        toast.error("Unable to delete product. Please try again.");
-                      }
-                    }}
-                    className="text-destructive hover:underline text-xs font-bold"
-                  >
-                    <Trash2 className="size-3.5 inline" />
-                  </button>
-                </Td>
+                </Th>
+                {["PRODUCT", "CATEGORY", "PRICE", "STOCK", "STATUS", "ACTIONS"].map((h) => (
+                  <Th key={h}>{h}</Th>
+                ))}
               </tr>
-            );
-          })}
-        </tbody>
-      </TableWrap>
-      </>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading && (
+                <tr>
+                  <Td className="text-center py-12 text-muted-foreground">Loading…</Td>
+                </tr>
+              )}
+              {!loading && filtered.length === 0 && (
+                <tr>
+                  <Td className="text-center py-12 text-muted-foreground">No products.</Td>
+                </tr>
+              )}
+              {!loading &&
+                filtered.map((r) => {
+                  const displayImage = resolveImage(
+                    r.image_key,
+                    r.image_url,
+                    r.images && r.images.length > 0 ? r.images[0] : "",
+                    (r as any).updated_at,
+                  );
+
+                  return (
+                    <tr key={r.id} className="hover:bg-cream/40">
+                      <Td>
+                        <input
+                          type="checkbox"
+                          checked={selected.has(r.id)}
+                          onChange={(e) => {
+                            const s = new Set(selected);
+                            e.target.checked ? s.add(r.id) : s.delete(r.id);
+                            setSelected(s);
+                          }}
+                        />
+                      </Td>
+                      <Td>
+                        <div className="flex items-center gap-3">
+                          {displayImage ? (
+                            <div className="size-10 rounded-lg overflow-hidden border border-border/50 shrink-0 bg-cream">
+                              <img
+                                src={displayImage}
+                                alt={r.name}
+                                className="w-full h-full object-cover"
+                                loading="lazy"
+                              />
+                            </div>
+                          ) : (
+                            <div className="size-10 rounded-lg border border-border/50 shrink-0 bg-cream flex items-center justify-center text-muted-foreground">
+                              <ImageOff className="size-4" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="font-bold text-forest-dark text-[15px]">{r.name}</div>
+                            <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                              {r.sku ? `${r.sku} • ${r.slug}` : r.slug}
+                            </div>
+                          </div>
+                        </div>
+                      </Td>
+                      <Td className="text-xs">{r.category ?? "—"}</Td>
+                      <Td className="text-xs">
+                        ₹{r.price}
+                        {r.price_max ? `–₹${r.price_max}` : ""}
+                      </Td>
+                      <Td
+                        className={`text-xs ${r.stock_quantity <= r.low_stock_limit ? "text-destructive font-bold" : ""}`}
+                      >
+                        {r.stock_quantity}
+                      </Td>
+                      <Td>
+                        <StatusPill s={r.status} />
+                      </Td>
+                      <Td className="text-right whitespace-nowrap">
+                        <button
+                          onClick={() => setEdit(r)}
+                          className="text-gold-deep hover:underline text-xs font-bold mr-3"
+                        >
+                          <Pencil className="size-3.5 inline" />
+                        </button>
+                        <button
+                          onClick={() => duplicate(r)}
+                          className="text-forest-dark hover:underline text-xs font-bold mr-3"
+                        >
+                          <Copy className="size-3.5 inline" />
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (
+                              !confirm(
+                                "Are you sure you want to permanently delete this product? This action cannot be undone.",
+                              )
+                            )
+                              return;
+                            try {
+                              await del({ data: { id: r.id } });
+                              toast.success("Product permanently deleted.");
+                              void load();
+                            } catch (e) {
+                              toast.error("Unable to delete product. Please try again.");
+                            }
+                          }}
+                          className="text-destructive hover:underline text-xs font-bold"
+                        >
+                          <Trash2 className="size-3.5 inline" />
+                        </button>
+                      </Td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </TableWrap>
+        </>
       )}
     </div>
   );
@@ -563,12 +584,15 @@ function ProductsPage() {
 
 import { forwardRef, useImperativeHandle } from "react";
 
-const ProductForm = forwardRef<{ save: () => Promise<void> }, {
-  initial: Partial<P>;
-  onCancel: () => void;
-  onSave: (p: Partial<P>, variants?: VariantItem[]) => Promise<void>;
-  onDirtyChange: (isDirty: boolean) => void;
-}>(({ initial, onCancel, onSave, onDirtyChange }, ref) => {
+const ProductForm = forwardRef<
+  { save: () => Promise<void> },
+  {
+    initial: Partial<P>;
+    onCancel: () => void;
+    onSave: (p: Partial<P>, variants?: VariantItem[]) => Promise<void>;
+    onDirtyChange: (isDirty: boolean) => void;
+  }
+>(({ initial, onCancel, onSave, onDirtyChange }, ref) => {
   const [f, setF] = useState<Partial<P>>({ ...initial });
   const [pendingVariants, setPendingVariants] = useState<VariantItem[]>([]);
   const [busy, setBusy] = useState(false);
@@ -608,7 +632,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
   useImperativeHandle(ref, () => ({
     save: triggerSave,
   }));
-  const [tab, setTab] = useState<"general" | "pricing" | "media" | "seo" | "details" | "story">("general");
+  const [tab, setTab] = useState<"general" | "pricing" | "media" | "seo" | "details" | "story">(
+    "general",
+  );
   const tabs = [
     ["general", "General"],
     ["pricing", "Pricing & Stock"],
@@ -626,8 +652,8 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
       if (r.rows) {
         setCats(
           (r.rows as any[])
-            .filter(x => x.slug !== "all-products")
-            .map((x) => ({ name: x.name, slug: x.slug }))
+            .filter((x) => x.slug !== "all-products")
+            .map((x) => ({ name: x.name, slug: x.slug })),
         );
       }
     });
@@ -788,7 +814,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                     Dynamic Category Filter Attributes
                   </h4>
                   <p className="text-[11px] text-muted-foreground mt-0.5">
-                    Define attribute groups (e.g., &ldquo;Product Type&rdquo;, &ldquo;Skin Type&rdquo;, &ldquo;Candle Type&rdquo;) and values (e.g., &ldquo;Lip Care&rdquo;) to power faceted filtering on the Shop page.
+                    Define attribute groups (e.g., &ldquo;Product Type&rdquo;, &ldquo;Skin
+                    Type&rdquo;, &ldquo;Candle Type&rdquo;) and values (e.g., &ldquo;Lip
+                    Care&rdquo;) to power faceted filtering on the Shop page.
                   </p>
                 </div>
                 <button
@@ -806,7 +834,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 </button>
               </div>
               {Object.entries(f.attributes || {}).length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">No custom attributes defined yet.</p>
+                <p className="text-xs text-muted-foreground italic">
+                  No custom attributes defined yet.
+                </p>
               ) : (
                 <div className="space-y-2">
                   {Object.entries(f.attributes || {}).map(([key, val], idx) => (
@@ -836,7 +866,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                       <button
                         type="button"
                         onClick={() => {
-                          const entries = Object.entries(f.attributes || {}).filter((_, i) => i !== idx);
+                          const entries = Object.entries(f.attributes || {}).filter(
+                            (_, i) => i !== idx,
+                          );
                           setF({ ...f, attributes: Object.fromEntries(entries) });
                         }}
                         className="p-2 text-muted-foreground hover:text-red-600"
@@ -1017,7 +1049,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
             {/* A. PRODUCT GALLERY IMAGES */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
               <div>
-                <h3 className="font-serif text-lg font-bold text-espresso">Common Product Images</h3>
+                <h3 className="font-serif text-lg font-bold text-espresso">
+                  Common Product Images
+                </h3>
                 <p className="text-xs text-muted-foreground">
                   Upload common product images. Recommended size: 1080 × 1080 px.
                 </p>
@@ -1034,7 +1068,9 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                       }`}
                     >
                       <div className="flex items-center justify-between">
-                        <span className={`text-[10px] font-bold uppercase tracking-wider ${idx === 0 ? "text-burnt-orange" : "text-espresso"}`}>
+                        <span
+                          className={`text-[10px] font-bold uppercase tracking-wider ${idx === 0 ? "text-burnt-orange" : "text-espresso"}`}
+                        >
                           {idx === 0 ? "Primary (Main)" : `Gallery ${idx + 1}`}
                         </span>
                         {u && (
@@ -1054,7 +1090,11 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
 
                       <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
                         {u ? (
-                          <img src={resolveImage(u, null)} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                          <img
+                            src={resolveImage(u, null)}
+                            alt={`Gallery ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <div className="text-center text-muted-foreground/60 p-4">
                             <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
@@ -1081,7 +1121,10 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                             type="button"
                             disabled={uploadingMedia}
                             onClick={(e) => {
-                              const input = e.currentTarget.parentElement?.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                              const input =
+                                e.currentTarget.parentElement?.parentElement?.querySelector(
+                                  "input[type='file']",
+                                ) as HTMLInputElement;
                               if (input) input.click();
                             }}
                             className={`flex-1 border-border font-semibold text-xs py-2 px-1 ${idx === 0 ? "text-burnt-orange" : "text-espresso"}`}
@@ -1101,7 +1144,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                   rows={Math.max(4, (f.images?.length || 0) + 1)}
                   value={(f.images ?? []).join("\n")}
                   onChange={(e) => {
-                    const lines = e.target.value.split("\n").map(s => s.trim());
+                    const lines = e.target.value.split("\n").map((s) => s.trim());
                     setF({ ...f, images: lines, image_url: lines[0] || null });
                   }}
                   className={`${inp} font-mono text-xs`}
@@ -1113,89 +1156,100 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
             {/* B. ADDITIONAL COMMON IMAGES */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
               <div>
-                <h3 className="font-serif text-lg font-bold text-espresso">Additional Common Images</h3>
+                <h3 className="font-serif text-lg font-bold text-espresso">
+                  Additional Common Images
+                </h3>
                 <p className="text-xs text-muted-foreground">
                   Upload unlimited additional common images.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {Array.from({ length: Math.max(4, (f.additional_images?.length || 0) + 1) }).map((_, idx) => {
-                  const url = (f.additional_images ?? [])[idx];
-                  return (
-                    <div
-                      key={idx}
-                      className="rounded-2xl border border-border/80 p-3 bg-white flex flex-col justify-between space-y-3"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-espresso">
-                          Additional Image {idx + 1}
-                        </span>
-                        {url && (
-                          <button
-                            type="button"
-                            onClick={() => {
+                {Array.from({ length: Math.max(4, (f.additional_images?.length || 0) + 1) }).map(
+                  (_, idx) => {
+                    const url = (f.additional_images ?? [])[idx];
+                    return (
+                      <div
+                        key={idx}
+                        className="rounded-2xl border border-border/80 p-3 bg-white flex flex-col justify-between space-y-3"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-bold uppercase tracking-wider text-espresso">
+                            Additional Image {idx + 1}
+                          </span>
+                          {url && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cur = [...(f.additional_images ?? [])];
+                                cur.splice(idx, 1);
+                                setF({ ...f, additional_images: cur });
+                              }}
+                              className="text-destructive text-xs hover:underline font-semibold"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
+                          {url ? (
+                            <img
+                              src={resolveImage(url, null)}
+                              alt={`Additional ${idx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="text-center text-muted-foreground/60 p-4">
+                              <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
+                              <span className="text-xs block">1080 × 1080 px</span>
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) void handleMediaUpload(file, idx);
+                              e.target.value = "";
+                            }}
+                          />
+                          <div className="flex gap-2">
+                            <BtnGhost
+                              type="button"
+                              disabled={uploadingMedia}
+                              onClick={(e) => {
+                                const input =
+                                  e.currentTarget.parentElement?.parentElement?.querySelector(
+                                    "input[type='file']",
+                                  ) as HTMLInputElement;
+                                if (input) input.click();
+                              }}
+                              className="flex-1 border-border text-espresso font-semibold text-xs py-2 px-1"
+                            >
+                              <Upload className="size-3.5" />
+                              {url ? "REPLACE" : "UPLOAD"}
+                            </BtnGhost>
+                          </div>
+                          <input
+                            value={url ?? ""}
+                            onChange={(e) => {
                               const cur = [...(f.additional_images ?? [])];
-                              cur.splice(idx, 1);
+                              cur[idx] = e.target.value;
                               setF({ ...f, additional_images: cur });
                             }}
-                            className="text-destructive text-xs hover:underline font-semibold"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">
-                        {url ? (
-                          <img src={resolveImage(url, null)} alt={`Additional ${idx + 1}`} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="text-center text-muted-foreground/60 p-4">
-                            <ImageOff className="size-6 mx-auto mb-1 opacity-40" />
-                            <span className="text-xs block">1080 × 1080 px</span>
-                          </div>
-                        )}
-                      </div>
-
-                      <div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) void handleMediaUpload(file, idx);
-                            e.target.value = "";
-                          }}
-                        />
-                        <div className="flex gap-2">
-                          <BtnGhost
-                            type="button"
-                            disabled={uploadingMedia}
-                            onClick={(e) => {
-                              const input = e.currentTarget.parentElement?.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
-                              if (input) input.click();
-                            }}
-                            className="flex-1 border-border text-espresso font-semibold text-xs py-2 px-1"
-                          >
-                            <Upload className="size-3.5" />
-                            {url ? "REPLACE" : "UPLOAD"}
-                          </BtnGhost>
+                            className={`${inp} mt-2 text-[10px] font-mono`}
+                            placeholder="Or paste URL…"
+                          />
                         </div>
-                        <input
-                          value={url ?? ""}
-                          onChange={(e) => {
-                            const cur = [...(f.additional_images ?? [])];
-                            cur[idx] = e.target.value;
-                            setF({ ...f, additional_images: cur });
-                          }}
-                          className={`${inp} mt-2 text-[10px] font-mono`}
-                          placeholder="Or paste URL…"
-                        />
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  },
+                )}
               </div>
             </div>
 
@@ -1285,12 +1339,35 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
         {tab === "story" && (
           <div className="grid md:grid-cols-2 gap-3 text-sm">
             <div className="md:col-span-2">
-              <h3 className="font-serif text-lg font-bold text-espresso mb-3">Product Story & Details</h3>
+              <h3 className="font-serif text-lg font-bold text-espresso mb-1">
+                Product Story & Shared Content
+              </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                These fields will dynamically appear in the product page tabs. Leave blank to hide the tab.
+                Educational tabs and common content sections (How to Use, Ingredients, Our Process, Our Farm, Certificates, Lifestyle).
               </p>
+              {(f.slug?.toLowerCase().includes("250") || f.slug === "ajwain-honey") && (
+                <div className="p-3.5 mb-4 rounded-xl bg-gold/15 border border-gold/40 text-xs text-espresso flex items-start gap-2.5">
+                  <span className="text-base leading-none">⭐️</span>
+                  <div>
+                    <span className="font-bold text-burnt-orange">250 GM Shared Content Hub:</span> Content stored here (How to Use, Ingredients, Our Process, Our Farm, Certificates, and Lifestyle) is automatically fetched and displayed across all sizes (500 GM, 1 KG, 28 KG) of this product family.
+                  </div>
+                </div>
+              )}
+              {!(f.slug?.toLowerCase().includes("250") || f.slug === "ajwain-honey") &&
+                !f.slug?.toLowerCase().includes("combo") &&
+                !f.slug?.toLowerCase().includes("hamper") &&
+                (f.slug?.toLowerCase().includes("500") ||
+                  f.slug?.toLowerCase().includes("1kg") ||
+                  f.slug?.toLowerCase().includes("28kg")) && (
+                  <div className="p-3.5 mb-4 rounded-xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 flex items-start gap-2.5">
+                    <span className="text-base leading-none">ℹ️</span>
+                    <div>
+                      <span className="font-bold">Shared Content Inherited:</span> Common content sections (How to Use, Ingredients, Our Process, Our Farm, Certificates, Lifestyle) for this variant are automatically inherited from the 250 GM variant of this honey family.
+                    </div>
+                  </div>
+                )}
             </div>
-            
+
             <div className="md:col-span-2">
               <Field label="Story / Description">
                 <textarea
@@ -1325,14 +1402,16 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                   + Add Point
                 </button>
               </div>
-              
+
               {!f.what_makes_special || f.what_makes_special.length === 0 ? (
                 <p className="text-xs text-muted-foreground italic">No points added yet.</p>
               ) : (
                 <div className="space-y-2">
                   {f.what_makes_special.map((val, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <span className="text-burnt-orange font-bold text-lg leading-none shrink-0">✓</span>
+                      <span className="text-burnt-orange font-bold text-lg leading-none shrink-0">
+                        ✓
+                      </span>
                       <input
                         type="text"
                         value={val}
@@ -1372,7 +1451,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 />
               </Field>
             </div>
-            
+
             <div className="md:col-span-2">
               <Field label="Storage & Usage">
                 <textarea
@@ -1384,7 +1463,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
                 />
               </Field>
             </div>
-            
+
             <div className="md:col-span-2">
               <Field label="Purity & Lab Test">
                 <textarea
@@ -1439,10 +1518,7 @@ const ProductForm = forwardRef<{ save: () => Promise<void> }, {
         )}
 
         <div className="mt-6 flex gap-3 border-t border-border pt-4">
-          <BtnPrimary
-            disabled={busy}
-            onClick={triggerSave}
-          >
+          <BtnPrimary disabled={busy} onClick={triggerSave}>
             {busy ? "SAVING…" : "SAVE"}
           </BtnPrimary>
           <BtnGhost onClick={onCancel}>CANCEL</BtnGhost>
@@ -1723,7 +1799,12 @@ function VariantsEditor({
   const saveV = useServerFn(saveProductVariants);
   const [uploadingVariantIndex, setUploadingVariantIndex] = useState<number | null>(null);
 
-  async function handleVariantMediaUpload(file: File, variantIndex: number, type: "primary" | "gallery", galleryIndex?: number) {
+  async function handleVariantMediaUpload(
+    file: File,
+    variantIndex: number,
+    type: "primary" | "gallery",
+    galleryIndex?: number,
+  ) {
     setUploadingVariantIndex(variantIndex);
     try {
       const url = await uploadToImageKit(file, "products");
@@ -2019,7 +2100,9 @@ function VariantsEditor({
               <div className="pt-4 border-t border-border mt-4">
                 <div className="mb-3">
                   <h4 className="text-sm font-bold text-forest-dark">Variant Images</h4>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">Maximum 2 variant images (1 primary, 1 gallery).</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">
+                    Maximum 2 variant images (1 primary, 1 gallery).
+                  </p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                   {/* Primary Image */}
@@ -2038,7 +2121,11 @@ function VariantsEditor({
                     )}
                     <div className="aspect-square rounded-lg overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center">
                       {v.image_url ? (
-                        <img src={resolveImage(v.image_url, null)} alt="Primary" className="w-full h-full object-cover" />
+                        <img
+                          src={resolveImage(v.image_url, null)}
+                          alt="Primary"
+                          className="w-full h-full object-cover"
+                        />
                       ) : (
                         <div className="text-center text-muted-foreground/60 p-2">
                           <ImageOff className="size-4 mx-auto opacity-40" />
@@ -2060,7 +2147,9 @@ function VariantsEditor({
                         type="button"
                         disabled={uploadingVariantIndex === i}
                         onClick={(e) => {
-                          const input = e.currentTarget.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                          const input = e.currentTarget.parentElement?.querySelector(
+                            "input[type='file']",
+                          ) as HTMLInputElement;
                           if (input) input.click();
                         }}
                         className="w-full border-border font-semibold text-[10px] py-1.5 px-1 text-burnt-orange h-auto min-h-0"
@@ -2074,7 +2163,10 @@ function VariantsEditor({
                   {[0].map((gIdx) => {
                     const u = (v.images ?? [])[gIdx] || "";
                     return (
-                      <div key={gIdx} className="rounded-xl border border-border p-2 bg-white flex flex-col justify-between space-y-2 relative">
+                      <div
+                        key={gIdx}
+                        className="rounded-xl border border-border p-2 bg-white flex flex-col justify-between space-y-2 relative"
+                      >
                         <span className="text-[10px] font-bold uppercase tracking-wider text-espresso">
                           Gallery {gIdx + 1}
                         </span>
@@ -2082,7 +2174,10 @@ function VariantsEditor({
                           <button
                             type="button"
                             onClick={() => {
-                              const cur = Array.from({ length: 1 }, (_, j) => (v.images ?? [])[j] || "");
+                              const cur = Array.from(
+                                { length: 1 },
+                                (_, j) => (v.images ?? [])[j] || "",
+                              );
                               cur[gIdx] = "";
                               updateVariant(i, { images: cur });
                             }}
@@ -2093,7 +2188,11 @@ function VariantsEditor({
                         )}
                         <div className="aspect-square rounded-lg overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center">
                           {u ? (
-                            <img src={resolveImage(u, null)} alt={`Gallery ${gIdx + 1}`} className="w-full h-full object-cover" />
+                            <img
+                              src={resolveImage(u, null)}
+                              alt={`Gallery ${gIdx + 1}`}
+                              className="w-full h-full object-cover"
+                            />
                           ) : (
                             <div className="text-center text-muted-foreground/60 p-2">
                               <ImageOff className="size-4 mx-auto opacity-40" />
@@ -2115,7 +2214,9 @@ function VariantsEditor({
                             type="button"
                             disabled={uploadingVariantIndex === i}
                             onClick={(e) => {
-                              const input = e.currentTarget.parentElement?.querySelector("input[type='file']") as HTMLInputElement;
+                              const input = e.currentTarget.parentElement?.querySelector(
+                                "input[type='file']",
+                              ) as HTMLInputElement;
                               if (input) input.click();
                             }}
                             className="w-full border-border font-semibold text-[10px] py-1.5 px-1 text-espresso h-auto min-h-0"
