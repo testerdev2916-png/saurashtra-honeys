@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import {
   getVariantByLabel,
   getVariantPackaging,
+  normalizeSizeKey,
   getProductGallery,
   getProductAdditionalImages,
   formatSizeDisplay,
@@ -145,8 +146,38 @@ function ProductPage() {
       const v = p.variants.find((x) => x.id === search.variant);
       if (v) return v.label;
     }
+    const def = p.variants?.find((x) => x.isDefault);
+    if (def) return def.label;
     return p.sizes[0] || "";
   });
+
+  useEffect(() => {
+    if (search.variant && p.variants) {
+      const v = p.variants.find((x) => x.id === search.variant);
+      if (v && v.label !== size) {
+        setSize(v.label);
+      }
+    }
+  }, [search.variant, p.variants]);
+
+  useEffect(() => {
+    if (search.variant && p.variants) {
+      const v = p.variants.find((x) => x.id === search.variant);
+      if (v) {
+        setSize(v.label);
+        return;
+      }
+    }
+    const def = p.variants?.find((x) => x.isDefault);
+    setSize(def ? def.label : p.sizes[0] || "");
+  }, [p.slug]);
+
+  if (p.sizes.length > 0 && !p.sizes.includes(size)) {
+    const nextSize = p.variants?.find((v) => v.isDefault)?.label || p.sizes[0] || "";
+    if (nextSize && nextSize !== size) {
+      setSize(nextSize);
+    }
+  }
 
   const [qty, setQty] = useState(1);
   const [tab, setTab] = useState<
@@ -263,11 +294,24 @@ function ProductPage() {
     .slice(0, 4);
   const activePrice = activeVariant.price ?? p.price;
   const activeMrp = activeVariant.mrp ?? p.mrp;
+  const activePackaging = activeVariant?.packaging || getVariantPackaging(activeVariant || size);
+  const discount =
+    activeMrp && activeMrp > activePrice
+      ? Math.round(((activeMrp - activePrice) / activeMrp) * 100)
+      : 0;
   const stock =
     activeVariant.stock ?? (p as unknown as { stock_quantity?: number }).stock_quantity ?? 100;
   const inStock =
     activeVariant.inStock !== false && ((p as unknown as { in_stock?: boolean }).in_stock ?? true);
   const lowStock = inStock && stock <= 10;
+  const stockUnit =
+    activePackaging.toLowerCase().includes("bucket") ||
+    size.toLowerCase().includes("28") ||
+    size.toLowerCase().includes("10kg")
+      ? "buckets"
+      : activePackaging.toLowerCase().includes("bottle")
+        ? "bottles"
+        : "jars";
 
   const handleAdd = () => {
     if (!inStock) {
@@ -471,9 +515,14 @@ function ProductPage() {
               <>
                 <span className="text-base text-muted-foreground line-through">₹{activeMrp}</span>
                 <span className="text-xs font-bold text-terracotta bg-cream-deep px-2 py-0.5 rounded-full shadow-xs">
-                  -{Math.round(((activeMrp - activePrice) / activeMrp) * 100)}% OFF
+                  -{discount}% OFF
                 </span>
               </>
+            )}
+            {activePackaging && (
+              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cream-deep border border-border/80 text-espresso/80">
+                {activePackaging}
+              </span>
             )}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -486,7 +535,9 @@ function ProductPage() {
               <span className="inline-flex items-center gap-1.5 text-botanical font-bold">
                 <Check className="size-4" /> In Stock & Ready to Harvest
                 {lowStock && (
-                  <span className="text-terracotta font-semibold">— only {stock} jars left</span>
+                  <span className="text-terracotta font-semibold">
+                    — only {stock} {stockUnit} left
+                  </span>
                 )}
               </span>
             ) : (
@@ -513,28 +564,47 @@ function ProductPage() {
               {p.sizes.map((s) => {
                 const vForSize = getVariantByLabel(p, s);
                 const packaging = vForSize?.packaging || getVariantPackaging(s);
+                const isSelected = size === s || normalizeSizeKey(size) === normalizeSizeKey(s);
+                const variantOos =
+                  vForSize?.inStock === false ||
+                  (vForSize?.stock !== undefined && vForSize.stock <= 0);
 
                 return (
                   <button
                     key={s}
+                    disabled={variantOos}
                     onClick={() => {
                       setSize(s);
                       setHeroIdx(0);
                     }}
                     className={`min-w-[110px] flex flex-col items-center justify-center px-4 py-2.5 rounded-xl border transition-all ${
-                      size === s
+                      isSelected
                         ? "border-burnt-orange bg-cream shadow-sm ring-1 ring-burnt-orange/20"
-                        : "border-border bg-white hover:border-burnt-orange/60 hover:bg-cream/30"
+                        : variantOos
+                          ? "border-border/40 bg-gray-50 opacity-50 cursor-not-allowed line-through"
+                          : "border-border bg-white hover:border-burnt-orange/60 hover:bg-cream/30"
                     }`}
                   >
                     <span
-                      className={`text-base font-bold ${size === s ? "text-burnt-orange" : "text-espresso"}`}
+                      className={`text-base font-bold ${
+                        isSelected
+                          ? "text-burnt-orange"
+                          : variantOos
+                            ? "text-muted-foreground"
+                            : "text-espresso"
+                      }`}
                     >
                       {formatSizeDisplay(s)}
                     </span>
                     {packaging && (
                       <span
-                        className={`text-[10px] mt-0.5 font-bold uppercase tracking-wider ${size === s ? "text-burnt-orange/80" : "text-muted-foreground/70"}`}
+                        className={`text-[10px] mt-0.5 font-bold uppercase tracking-wider ${
+                          isSelected
+                            ? "text-burnt-orange/80"
+                            : variantOos
+                              ? "text-muted-foreground/50"
+                              : "text-muted-foreground/70"
+                        }`}
                       >
                         {packaging}
                       </span>
@@ -954,7 +1024,7 @@ function ProductPage() {
         <div className="flex items-center gap-2 p-3">
           <div className="pl-1 pr-2 min-w-0">
             <div className="text-[10px] text-muted-foreground truncate font-bold uppercase tracking-wider">
-              {size}
+              {formatSizeDisplay(size)} {activePackaging ? `• ${activePackaging}` : ""}
             </div>
             <div className="text-base font-serif font-bold text-espresso">₹{totalPrice}</div>
           </div>

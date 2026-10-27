@@ -173,4 +173,92 @@ describe("Product Variants & Dynamic Size Selection", () => {
     assert.notEqual(img28kg, img1kg, "28kg bucket image must NOT be the same as 1kg jar image");
     assert.notEqual(img28kg, img500, "28kg bucket image must NOT be the same as 500g jar image");
   });
+
+  it("verifies dynamic variant pricing, discounts, and packaging across Ajwain Honey", async () => {
+    const products = await fetchProducts();
+    const ajwain = products.find((p) => p.slug === "ajwain-honey-500" || (p.flora === "Ajwain" && p.variants && p.variants.length > 1));
+    assert.ok(ajwain, "Expected master Ajwain Honey to be found");
+
+    const v250 = getVariantByLabel(ajwain, "250g");
+    const v500 = getVariantByLabel(ajwain, "500g");
+    const v1kg = getVariantByLabel(ajwain, "1kg");
+    const v28kg = getVariantByLabel(ajwain, "28kg");
+
+    assert.equal(v250.price, 190);
+    assert.equal(v250.mrp, 220);
+    assert.equal(Math.round(((v250.mrp! - v250.price) / v250.mrp!) * 100), 14); // 14% OFF
+    assert.equal(v250.packaging, "Glass Jar");
+
+    assert.equal(v500.price, 350);
+    assert.equal(v500.mrp, 400);
+    assert.equal(Math.round(((v500.mrp! - v500.price) / v500.mrp!) * 100), 13); // 13% OFF
+    assert.equal(v500.packaging, "Glass Jar");
+
+    assert.equal(v1kg.price, 600);
+    assert.equal(v1kg.mrp, 650);
+    assert.equal(Math.round(((v1kg.mrp! - v1kg.price) / v1kg.mrp!) * 100), 8); // 8% OFF
+    assert.equal(v1kg.packaging, "Plastic Jar");
+
+    assert.equal(v28kg.price, 6720);
+    assert.equal(v28kg.mrp, 7000);
+    assert.equal(Math.round(((v28kg.mrp! - v28kg.price) / v28kg.mrp!) * 100), 4); // 4% OFF
+    assert.equal(v28kg.packaging, "Plastic Bucket");
+  });
+
+  it("verifies dynamic variant pricing, discounts, and packaging across Fennel Honey", async () => {
+    const products = await fetchProducts();
+    const fennel = products.find((p) => p.slug === "fennel-honey-250GM" || (p.flora === "Fennel" && p.variants && p.variants.length > 1));
+    assert.ok(fennel, "Expected master Fennel Honey to be found");
+
+    const v250 = getVariantByLabel(fennel, "250g");
+    const v500 = getVariantByLabel(fennel, "500g");
+    const v28kg = getVariantByLabel(fennel, "28kg");
+
+    assert.equal(v250.price, 190);
+    assert.equal(v250.mrp, 220);
+    assert.equal(v250.packaging, "Glass Jar");
+
+    assert.equal(v500.price, 350);
+    assert.equal(v500.mrp, 400);
+    assert.equal(v500.packaging, "Glass Jar");
+
+    assert.equal(v28kg.price, 7000);
+    assert.equal(v28kg.mrp, 7500);
+    assert.equal(v28kg.packaging, "Plastic Bucket");
+  });
+
+  it("verifies Bee Wax variants (1kg and 10kg bucket)", async () => {
+    const products = await fetchProducts();
+    const wax = products.find((p) => p.slug === "Bee Wax");
+    assert.ok(wax, "Expected Bee Wax to be found");
+    assert.ok(wax.variants && wax.variants.length >= 2, "Expected at least 2 variants for Bee Wax");
+
+    const v1kg = getVariantByLabel(wax, "1kg");
+    const v10kg = getVariantByLabel(wax, "10kg");
+
+    assert.equal(v1kg.price, 450);
+    assert.equal(v1kg.mrp, 500);
+    assert.equal(v1kg.packaging, "Plastic Jar");
+
+    assert.equal(v10kg.price, 3500);
+    assert.equal(v10kg.mrp, 4000);
+    assert.equal(v10kg.packaging, "Plastic Bucket");
+  });
+
+  it("deduplicates alias products in fetchProducts so Shop page has clean cards", async () => {
+    const products = await fetchProducts();
+    const slugs = products.map((p) => p.slug);
+    // Master products must be present
+    assert.ok(slugs.includes("multiflora-honey-250GM"));
+    assert.ok(slugs.includes("ajwain-honey-500"));
+    assert.ok(slugs.includes("fennel-honey-250GM"));
+    assert.ok(slugs.includes("Bee Wax"));
+
+    // Redundant alias products should be omitted from list
+    assert.ok(!slugs.includes("multiflora-honey-1KG"));
+    assert.ok(!slugs.includes("multiflora-honey-500GM"));
+    assert.ok(!slugs.includes("ajwain-honey-1 kg"));
+    assert.ok(!slugs.includes("fennel-honey-500GM"));
+    assert.ok(!slugs.includes("Bee Wax-10Kg"));
+  });
 });

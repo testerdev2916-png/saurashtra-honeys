@@ -1,8 +1,9 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Heart, Eye, GitCompare, Star, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   getVariantByLabel,
+  getVariantPackaging,
   resolveActiveImage,
   formatSizeDisplay,
   cleanProductName,
@@ -34,6 +35,14 @@ export function ProductCard({
   const inCompare = cmp.has(p.slug);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const nextDefault =
+      p.variants?.find((v) => v.isDefault)?.label ||
+      p.sizes?.[0] ||
+      "";
+    setSize(nextDefault);
+  }, [p.slug]);
+
   async function toggleSave(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
@@ -62,6 +71,7 @@ export function ProductCard({
       : 0;
 
   const activeImage = resolveActiveImage(p, activeVariant);
+  const activePackaging = activeVariant?.packaging || getVariantPackaging(activeVariant || size);
   const displayBadge = p.badge || (p.is_wholesale ? "WHOLESALE" : null);
   const displayName = cleanProductName(p.name);
 
@@ -102,6 +112,7 @@ export function ProductCard({
         <Link
           to="/product/$slug"
           params={{ slug: p.slug }}
+          search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
           onClick={() => track("select_item", { items: [toItem(p, { size })] })}
           className="block w-full h-full"
         >
@@ -126,13 +137,19 @@ export function ProductCard({
         )}
       </div>
       <div className="p-3.5 md:p-5 flex flex-col gap-1.5 md:gap-2 flex-1">
-        <div className="text-[10px] md:text-xs font-bold tracking-widest uppercase text-brand-orange">
-          {p.flora || p.category}
+        <div className="flex items-center justify-between gap-2 text-[10px] md:text-xs font-bold tracking-widest uppercase">
+          <span className="text-brand-orange truncate">{p.flora || p.category}</span>
+          {activePackaging && (
+            <span className="text-[10px] font-semibold text-espresso/70 bg-cream-deep/80 px-2 py-0.5 rounded-full border border-border/60 shrink-0">
+              {activePackaging}
+            </span>
+          )}
         </div>
         <h3 className="font-serif text-sm md:text-base font-bold leading-snug text-espresso line-clamp-2 min-h-[2.5rem] md:min-h-[2.75rem]">
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
+            search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
             className="hover:text-brand-orange transition-colors"
           >
             {displayName}

@@ -1,9 +1,11 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import {
   getVariantByLabel,
+  getVariantPackaging,
   resolveActiveImage,
   formatSizeDisplay,
   cleanProductName,
+  normalizeSizeKey,
   type Product,
 } from "@/lib/products";
 import { useCart } from "@/lib/cart";
@@ -14,15 +16,26 @@ import { toast } from "sonner";
 
 export function QuickView({ product, onClose }: { product: Product | null; onClose: () => void }) {
   const { add } = useCart();
-  const [size, setSize] = useState<string>(product?.sizes[0] ?? "");
+  const [size, setSize] = useState<string>(
+    product?.variants?.find((v) => v.isDefault)?.label || product?.sizes[0] || "",
+  );
   const [qty, setQty] = useState(1);
 
   // reset when product changes
-  if (product && !product.sizes.includes(size)) setSize(product.sizes[0]);
+  if (product && !product.sizes.includes(size)) {
+    const nextSize =
+      product.variants?.find((v) => v.isDefault)?.label || product.sizes[0] || "";
+    setSize(nextSize);
+  }
 
   const activeVariant = product ? getVariantByLabel(product, size) : undefined;
   const activePrice = activeVariant?.price ?? product?.price ?? 0;
   const activeMrp = activeVariant?.mrp ?? product?.mrp;
+  const activePackaging = activeVariant?.packaging || getVariantPackaging(activeVariant || size);
+  const discount =
+    activeMrp && activeMrp > activePrice
+      ? Math.round(((activeMrp - activePrice) / activeMrp) * 100)
+      : 0;
   const isOutOfStock =
     activeVariant?.inStock === false ||
     (activeVariant?.stock !== undefined && activeVariant.stock <= 0);
@@ -73,10 +86,20 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                 <span className="font-semibold">{product.rating}</span>
                 <span className="text-muted-foreground">({product.reviews})</span>
               </div>
-              <div className="mt-3 flex items-baseline gap-2">
+              <div className="mt-3 flex items-baseline gap-2 flex-wrap">
                 <span className="text-2xl font-serif text-forest-dark">₹{activePrice}</span>
-                {activeMrp && (
-                  <span className="text-xs text-muted-foreground line-through">₹{activeMrp}</span>
+                {activeMrp && activeMrp > activePrice && (
+                  <>
+                    <span className="text-xs text-muted-foreground line-through">₹{activeMrp}</span>
+                    <span className="text-[11px] font-bold text-brand-orange bg-[#FEF3C7] px-2 py-0.5 rounded-full shadow-xs">
+                      -{discount}% OFF
+                    </span>
+                  </>
+                )}
+                {activePackaging && (
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-cream border border-border text-espresso/80">
+                    {activePackaging}
+                  </span>
                 )}
                 {isOutOfStock && (
                   <span className="text-xs font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-full ml-auto">
@@ -95,17 +118,37 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                 ))}
               </ul>
               <div className="mt-4">
-                <div className="text-xs font-semibold text-forest-dark">Size</div>
-                <div className="mt-1.5 flex flex-wrap gap-1.5">
-                  {product.sizes.map((s) => (
-                    <button
-                      key={s}
-                      onClick={() => setSize(s)}
-                      className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-colors ${size === s ? "border-brand-orange text-brand-orange bg-[#FEF3C7] ring-1 ring-brand-orange/40" : "border-border text-muted-foreground hover:border-brand-orange hover:text-brand-orange"}`}
-                    >
-                      {formatSizeDisplay(s)}
-                    </button>
-                  ))}
+                <div className="text-xs font-semibold text-forest-dark mb-1.5">Select Pack Size</div>
+                <div className="flex flex-wrap gap-2">
+                  {product.sizes.map((s) => {
+                    const v = getVariantByLabel(product, s);
+                    const vPackaging = v?.packaging || getVariantPackaging(s);
+                    const isSelected = size === s || normalizeSizeKey(size) === normalizeSizeKey(s);
+                    const variantOos =
+                      v?.inStock === false || (v?.stock !== undefined && v.stock <= 0);
+
+                    return (
+                      <button
+                        key={s}
+                        disabled={variantOos}
+                        onClick={() => setSize(s)}
+                        className={`text-xs px-3 py-1.5 rounded-full border font-semibold transition-all flex items-center gap-1.5 ${
+                          isSelected
+                            ? "border-brand-orange text-brand-orange bg-[#FEF3C7] ring-1 ring-brand-orange/40 font-bold shadow-xs"
+                            : variantOos
+                              ? "border-border/40 text-muted-foreground/40 bg-gray-50 line-through cursor-not-allowed"
+                              : "border-border text-espresso/85 bg-white hover:border-brand-orange hover:text-brand-orange hover:bg-cream/40"
+                        }`}
+                      >
+                        <span>{formatSizeDisplay(s)}</span>
+                        {vPackaging && (
+                          <span className={`text-[10px] ${isSelected ? "text-brand-orange/80" : "text-muted-foreground/70"}`}>
+                            • {vPackaging}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
               <div className="mt-4 flex items-center gap-2">
@@ -139,8 +182,9 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
               <Link
                 to="/product/$slug"
                 params={{ slug: product.slug }}
+                search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
                 onClick={onClose}
-                className="mt-3 text-center text-xs font-bold tracking-widest text-gold-deep border-b border-gold-deep self-start"
+                className="mt-3 text-center text-xs font-bold tracking-widest text-gold-deep border-b border-gold-deep self-start hover:text-brand-orange hover:border-brand-orange transition-colors"
               >
                 VIEW FULL DETAILS
               </Link>

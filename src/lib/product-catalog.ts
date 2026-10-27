@@ -2,6 +2,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   sortVariantsBySize,
   getVariantPackaging,
+  normalizeSizeKey,
   type Product,
   type ProductVariant,
 } from "@/lib/products";
@@ -53,7 +54,29 @@ type VariantRow = {
   images?: unknown;
 };
 
-function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
+export const aliasMap: Record<string, string> = {
+  "multiflora-honey": "multiflora-honey-250GM",
+  "multiflora-honey-500gm": "multiflora-honey-250GM",
+  "multiflora-honey-1kg": "multiflora-honey-250GM",
+  "multiflora-honey-28 kg": "multiflora-honey-250GM",
+  "multiflora-honey-28kg": "multiflora-honey-250GM",
+  "multiflora-honey-50g": "multiflora-honey-250GM",
+  "ajwain-honey": "ajwain-honey-500",
+  "ajwain-honey-250": "ajwain-honey-500",
+  "ajwain-honey-1 kg": "ajwain-honey-500",
+  "ajwain-honey-1kg": "ajwain-honey-500",
+  "ajwain-honey-28kg": "ajwain-honey-500",
+  "fennel-honey": "fennel-honey-250GM",
+  "fennel-honey-500gm": "fennel-honey-250GM",
+  "fennel-honey-28kg": "fennel-honey-250GM",
+  "bee wax-10kg": "Bee Wax",
+};
+
+function toProduct(
+  r: Row,
+  varMap?: Map<string, VariantRow[]>,
+  requestedSizeHint?: string,
+): Product {
   const dbVariants = r.id && varMap ? varMap.get(r.id) : undefined;
   let mappedVariants: ProductVariant[] | undefined =
     dbVariants && dbVariants.length > 0
@@ -64,7 +87,9 @@ function toProduct(r: Row, varMap?: Map<string, VariantRow[]>): Product {
           mrp: v.mrp ?? undefined,
           stock: v.stock_quantity ?? 100,
           inStock: v.is_active !== false && (v.stock_quantity ?? 100) > 0,
-          isDefault: !!v.is_default,
+          isDefault: requestedSizeHint
+            ? normalizeSizeKey(v.label) === normalizeSizeKey(requestedSizeHint)
+            : !!v.is_default,
           sku: v.sku ?? undefined,
           weightG: v.weight_g ?? undefined,
           packaging: getVariantPackaging(v.label),
@@ -232,9 +257,22 @@ export async function fetchProducts(): Promise<Product[]> {
       return [];
     }
     const rows = data as unknown as Row[];
-    const productIds = rows.map((r) => r.id).filter(Boolean);
+    const rowSlugSet = new Set(rows.map((r) => r.slug.toLowerCase()));
+    const canonicalRows = rows.filter((r) => {
+      const aliasTarget = aliasMap[r.slug.toLowerCase()];
+      if (
+        aliasTarget &&
+        aliasTarget.toLowerCase() !== r.slug.toLowerCase() &&
+        rowSlugSet.has(aliasTarget.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    const productIds = canonicalRows.map((r) => r.id).filter(Boolean);
     const varMap = await fetchAllVariantsMap(productIds);
-    return rows.map((r) => toProduct(r, varMap));
+    return canonicalRows.map((r) => toProduct(r, varMap));
   } catch (err) {
     console.error("[fetchProducts] Exception:", err);
     throw err;
@@ -244,24 +282,16 @@ export async function fetchProducts(): Promise<Product[]> {
 export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   const slug = decodeURIComponent(rawSlug).trim().replace(/\/+$/, "");
   try {
-    const aliasMap: Record<string, string> = {
-      "multiflora-honey": "multiflora-honey-250GM",
-      "multiflora-honey-500gm": "multiflora-honey-250GM",
-      "multiflora-honey-1kg": "multiflora-honey-250GM",
-      "multiflora-honey-28 kg": "multiflora-honey-250GM",
-      "multiflora-honey-28kg": "multiflora-honey-250GM",
-      "multiflora-honey-50g": "multiflora-honey-250GM",
-      "ajwain-honey": "ajwain-honey-500",
-      "ajwain-honey-250": "ajwain-honey-500",
-      "ajwain-honey-1 kg": "ajwain-honey-500",
-      "ajwain-honey-1kg": "ajwain-honey-500",
-      "ajwain-honey-28kg": "ajwain-honey-500",
-      "fennel-honey": "fennel-honey-250GM",
-      "fennel-honey-500gm": "fennel-honey-250GM",
-      "fennel-honey-28kg": "fennel-honey-250GM",
-      "bee wax-10kg": "Bee Wax",
-    };
     const targetSlug = aliasMap[slug.toLowerCase()] || slug;
+    let requestedSizeHint: string | undefined = undefined;
+    if (targetSlug !== slug) {
+      const match = slug.match(
+        /[-_\s](250gm|250g|500gm|500g|1\s*kg|28\s*kg|50g|10kg|250|500)/i,
+      );
+      if (match) {
+        requestedSizeHint = match[1].trim();
+      }
+    }
 
     let { data, error } = await supabase
       .from("products")
@@ -327,7 +357,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
 
     const row = finalData as unknown as Row;
     const varMap = await fetchAllVariantsMap(row.id ? [row.id] : undefined);
-    return toProduct(row, varMap);
+    return toProduct(row, varMap, requestedSizeHint);
   } catch (err) {
     console.error("[fetchProduct] Exception:", err);
     throw err;
