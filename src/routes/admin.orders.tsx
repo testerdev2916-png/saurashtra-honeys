@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listOrders } from "@/lib/admin.functions";
-import { updateOrderExtended } from "@/lib/admin-cms.functions";
+import { updateOrderExtended, deleteOrder, deleteOrdersBulk } from "@/lib/admin-cms.functions";
 import {
   BtnGhost,
   BtnPrimary,
@@ -18,7 +18,7 @@ import {
   Th,
   paise,
 } from "@/components/admin/ui";
-import { ArrowLeft, Download, Printer, RefreshCcw, Search } from "lucide-react";
+import { ArrowLeft, Download, Printer, RefreshCcw, Search, Trash2 } from "lucide-react";
 
 export const Route = createFileRoute("/admin/orders")({ component: OrdersPage });
 
@@ -60,7 +60,10 @@ const STATUSES = [
 
 function OrdersPage() {
   const list = useServerFn(listOrders);
+  const del = useServerFn(deleteOrder);
+  const delBulk = useServerFn(deleteOrdersBulk);
   const [rows, setRows] = useState<Order[]>([]);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<(typeof STATUSES)[number]>("all");
   const [q, setQ] = useState("");
@@ -89,6 +92,42 @@ function OrdersPage() {
   useEffect(() => {
     void load(); /* eslint-disable-next-line */
   }, []);
+
+  async function handleDeleteSingle(r: Order) {
+    const label = r.order_number ?? `#${r.id.slice(0, 8)}`;
+    if (!confirm(`Are you sure you want to delete order ${label}? This cannot be undone.`)) return;
+    try {
+      await del({ data: { id: r.id } });
+      toast.success(`Order ${label} deleted`);
+      setSelectedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(r.id);
+        return next;
+      });
+      void load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
+
+  async function handleBulkDelete() {
+    const count = selectedIds.size;
+    if (!count) return;
+    if (
+      !confirm(
+        `Are you sure you want to delete ${count} selected order(s)? This will permanently remove them.`,
+      )
+    )
+      return;
+    try {
+      await delBulk({ data: { ids: Array.from(selectedIds) } });
+      toast.success(`${count} order(s) deleted successfully`);
+      setSelectedIds(new Set());
+      void load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }
 
   if (current)
     return (
@@ -176,9 +215,48 @@ function OrdersPage() {
         <BtnPrimary onClick={load}>APPLY</BtnPrimary>
       </Card>
 
+      {selectedIds.size > 0 && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-2.5 mb-4 flex items-center justify-between">
+          <span className="text-xs font-semibold text-destructive">
+            {selectedIds.size} order{selectedIds.size > 1 ? "s" : ""} selected
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSelectedIds(new Set())}
+              className="text-xs font-semibold text-forest-dark hover:underline px-2 py-1"
+            >
+              Deselect All
+            </button>
+            <button
+              type="button"
+              onClick={handleBulkDelete}
+              className="inline-flex items-center gap-1.5 bg-destructive text-white rounded-lg px-3 py-1.5 text-xs font-bold hover:bg-destructive/90 transition-colors shadow-sm cursor-pointer"
+            >
+              <Trash2 className="size-3.5" /> Delete Selected ({selectedIds.size})
+            </button>
+          </div>
+        </div>
+      )}
+
       <TableWrap>
         <thead>
           <tr>
+            <Th className="w-10">
+              <input
+                type="checkbox"
+                aria-label="Select all orders"
+                checked={rows.length > 0 && selectedIds.size === rows.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedIds(new Set(rows.map((r) => r.id)));
+                  } else {
+                    setSelectedIds(new Set());
+                  }
+                }}
+                className="rounded border-border text-gold-deep focus:ring-gold-deep size-4 cursor-pointer"
+              />
+            </Th>
             {["Order", "Date", "Customer", "Payment", "Status", "Total", ""].map((h) => (
               <Th key={h}>{h}</Th>
             ))}
@@ -187,17 +265,41 @@ function OrdersPage() {
         <tbody className="divide-y divide-border">
           {loading && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">Loading…</Td>
+              <Td className="text-center py-12 text-muted-foreground" colSpan={8}>
+                Loading…
+              </Td>
             </tr>
           )}
           {!loading && rows.length === 0 && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">No orders.</Td>
+              <Td className="text-center py-12 text-muted-foreground" colSpan={8}>
+                No orders.
+              </Td>
             </tr>
           )}
           {!loading &&
             rows.map((r) => (
-              <tr key={r.id} className="hover:bg-cream/40">
+              <tr
+                key={r.id}
+                className={`hover:bg-cream/40 transition-colors ${selectedIds.has(r.id) ? "bg-cream/40" : ""}`}
+              >
+                <Td className="w-10">
+                  <input
+                    type="checkbox"
+                    aria-label={`Select order ${r.order_number ?? r.id}`}
+                    checked={selectedIds.has(r.id)}
+                    onChange={(e) => {
+                      const next = new Set(selectedIds);
+                      if (e.target.checked) {
+                        next.add(r.id);
+                      } else {
+                        next.delete(r.id);
+                      }
+                      setSelectedIds(next);
+                    }}
+                    className="rounded border-border text-gold-deep focus:ring-gold-deep size-4 cursor-pointer"
+                  />
+                </Td>
                 <Td className="font-mono text-xs">{r.order_number ?? `#${r.id.slice(0, 8)}`}</Td>
                 <Td className="text-xs text-muted-foreground whitespace-nowrap">
                   {new Date(r.created_at).toLocaleString()}
@@ -212,12 +314,22 @@ function OrdersPage() {
                 </Td>
                 <Td className="font-semibold">{paise(r.total_paise)}</Td>
                 <Td className="text-right">
-                  <button
-                    onClick={() => setCurrent(r)}
-                    className="text-xs font-bold text-gold-deep hover:underline"
-                  >
-                    OPEN →
-                  </button>
+                  <div className="flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => setCurrent(r)}
+                      className="text-xs font-bold text-gold-deep hover:underline cursor-pointer"
+                    >
+                      OPEN →
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteSingle(r)}
+                      title="Delete order"
+                      className="p-1.5 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md transition-colors cursor-pointer"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </Td>
               </tr>
             ))}
@@ -229,6 +341,7 @@ function OrdersPage() {
 
 function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) {
   const upd = useServerFn(updateOrderExtended);
+  const del = useServerFn(deleteOrder);
   const [status, setStatus] = useState(order.status);
   const [notes, setNotes] = useState(order.admin_notes ?? "");
   const [tn, setTn] = useState(order.tracking_number ?? "");
@@ -471,6 +584,29 @@ function OrderDetail({ order, onClose }: { order: Order; onClose: () => void }) 
           <BtnPrimary onClick={save} className="mt-4 w-full justify-center">
             SAVE
           </BtnPrimary>
+
+          <button
+            type="button"
+            onClick={async () => {
+              const label = order.order_number ?? `#${order.id.slice(0, 8)}`;
+              if (
+                !confirm(
+                  `Are you sure you want to delete order ${label}? This will permanently remove this test order.`,
+                )
+              )
+                return;
+              try {
+                await del({ data: { id: order.id } });
+                toast.success(`Order ${label} deleted`);
+                onClose();
+              } catch (e) {
+                toast.error((e as Error).message);
+              }
+            }}
+            className="mt-3 w-full py-2.5 text-xs font-bold text-destructive bg-destructive/10 border border-destructive/20 hover:bg-destructive hover:text-white rounded-lg transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <Trash2 className="size-3.5" /> DELETE ORDER
+          </button>
         </aside>
       </div>
     </div>

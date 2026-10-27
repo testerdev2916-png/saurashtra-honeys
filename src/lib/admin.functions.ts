@@ -30,7 +30,11 @@ export const listSubmissions = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof listSchema>) => listSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-        let q = context.supabase.from("form_submissions").select("*").order("created_at", { ascending: false }).limit(1000);
+    let q = context.supabase
+      .from("form_submissions")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
     if (data.form_type && data.form_type !== "all") q = q.eq("form_type", data.form_type);
     if (data.status && data.status !== "all") q = q.eq("status", data.status);
     if (data.from) q = q.gte("created_at", data.from);
@@ -40,9 +44,23 @@ export const listSubmissions = createServerFn({ method: "POST" })
     const term = (data.q ?? "").trim().toLowerCase();
     const filtered = term
       ? (rows ?? []).filter((r) =>
-          [r.name, r.email, r.phone, r.company, r.city, r.subject, r.message, r.product_interest, r.quantity]
-            .filter(Boolean).join(" ").toLowerCase().includes(term))
-      : rows ?? [];
+          [
+            r.name,
+            r.email,
+            r.phone,
+            r.company,
+            r.city,
+            r.subject,
+            r.message,
+            r.product_interest,
+            r.quantity,
+          ]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(term),
+        )
+      : (rows ?? []);
     return { rows: filtered };
   });
 
@@ -51,7 +69,11 @@ export const getSubmission = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-        const { data: row, error } = await context.supabase.from("form_submissions").select("*").eq("id", data.id).single();
+    const { data: row, error } = await context.supabase
+      .from("form_submissions")
+      .select("*")
+      .eq("id", data.id)
+      .single();
     if (error) throw new Error(error.message);
     return { row };
   });
@@ -59,13 +81,23 @@ export const getSubmission = createServerFn({ method: "POST" })
 export const updateSubmission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; status?: string; admin_notes?: string }) =>
-    z.object({ id: z.string().uuid(), status: z.string().max(40).optional(), admin_notes: z.string().max(4000).optional() }).parse(d))
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.string().max(40).optional(),
+        admin_notes: z.string().max(4000).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-        const patch: { status?: string; admin_notes?: string } = {};
+    const patch: { status?: string; admin_notes?: string } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
-    const { error } = await context.supabase.from("form_submissions").update(patch).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("form_submissions")
+      .update(patch)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -75,7 +107,12 @@ export const listOrders = createServerFn({ method: "POST" })
   .inputValidator((d: { status?: string; q?: string; from?: string; to?: string }) => d)
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-        let q = context.supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(1000);
+    let q = context.supabase
+      .from("orders")
+      .select("*")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false })
+      .limit(1000);
     if (data.status && data.status !== "all") q = q.eq("status", data.status as never);
     if (data.from) q = q.gte("created_at", data.from);
     if (data.to) q = q.lte("created_at", data.to);
@@ -84,21 +121,77 @@ export const listOrders = createServerFn({ method: "POST" })
     const term = (data.q ?? "").trim().toLowerCase();
     const filtered = term
       ? (rows ?? []).filter((r) =>
-          [r.email, r.phone, r.full_name, r.razorpay_order_id, r.id].filter(Boolean).join(" ").toLowerCase().includes(term))
-      : rows ?? [];
+          [r.email, r.phone, r.full_name, r.razorpay_order_id, r.id]
+            .filter(Boolean)
+            .join(" ")
+            .toLowerCase()
+            .includes(term),
+        )
+      : (rows ?? []);
     return { rows: filtered };
   });
 
 export const updateOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; status?: string; admin_notes?: string }) =>
-    z.object({ id: z.string().uuid(), status: z.string().max(40).optional(), admin_notes: z.string().max(4000).optional() }).parse(d))
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.string().max(40).optional(),
+        admin_notes: z.string().max(4000).optional(),
+      })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-        const patch: { status?: string; admin_notes?: string } = {};
+    const patch: { status?: string; admin_notes?: string } = {};
     if (data.status !== undefined) patch.status = data.status;
     if (data.admin_notes !== undefined) patch.admin_notes = data.admin_notes;
-    const { error } = await context.supabase.from("orders").update(patch as never).eq("id", data.id);
+    const { error } = await context.supabase
+      .from("orders")
+      .update(patch as never)
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const deleteOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    // Soft delete timestamp
+    await context.supabase
+      .from("orders")
+      .update({ deleted_at: new Date().toISOString() } as never)
+      .eq("id", data.id);
+
+    // Hard delete to remove test orders permanently
+    const { error } = await context.supabase.from("orders").delete().eq("id", data.id);
+    if (error) {
+      console.warn("[Admin] Hard delete could not delete row, retained as soft-deleted:", error.message);
+    }
+    return { ok: true };
+  });
+
+export const deleteOrdersBulk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ids: string[] }) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    // Soft delete timestamp
+    await context.supabase
+      .from("orders")
+      .update({ deleted_at: new Date().toISOString() } as never)
+      .in("id", data.ids);
+
+    // Hard delete
+    const { error } = await context.supabase.from("orders").delete().in("id", data.ids);
+    if (error) {
+      console.warn("[Admin] Bulk hard delete warning:", error.message);
+    }
+    return { ok: true, count: data.ids.length };
+  });
+

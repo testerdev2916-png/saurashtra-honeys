@@ -845,6 +845,52 @@ export const updateOrderExtended = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export const deleteOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertStaff(context.supabase, context.userId);
+    // Soft delete timestamp
+    await context.supabase
+      .from("orders")
+      .update({ deleted_at: new Date().toISOString() } as never)
+      .eq("id", data.id);
+
+    // Hard delete
+    const { error } = await context.supabase.from("orders").delete().eq("id", data.id);
+    if (error) {
+      console.warn("[Admin] Hard delete could not delete row, retained as soft-deleted:", error.message);
+    }
+    await audit(context.supabase, context.userId, "order.delete", "order", data.id);
+    return { ok: true };
+  });
+
+export const deleteOrdersBulk = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: { ids: string[] }) =>
+    z.object({ ids: z.array(z.string().uuid()).min(1) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertStaff(context.supabase, context.userId);
+    // Soft delete timestamp
+    await context.supabase
+      .from("orders")
+      .update({ deleted_at: new Date().toISOString() } as never)
+      .in("id", data.ids);
+
+    // Hard delete
+    const { error } = await context.supabase.from("orders").delete().in("id", data.ids);
+    if (error) {
+      console.warn("[Admin] Bulk hard delete warning:", error.message);
+    }
+    await audit(context.supabase, context.userId, "order.delete_bulk", "order", undefined, {
+      ids: data.ids,
+      count: data.ids.length,
+    });
+    return { ok: true, count: data.ids.length };
+  });
+
+
 /* -------------------- INVENTORY -------------------- */
 
 export const adjustStock = createServerFn({ method: "POST" })
