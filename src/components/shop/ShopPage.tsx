@@ -4,12 +4,13 @@ import { CategoryThumbnailNav } from "@/components/shop/CategoryThumbnailNav";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import { DesktopFilterSheet, MobileFilterDrawer, defaultFilters, type FilterState } from "@/components/shop/ShopFilters";
 import {
-  Search,
-  X,
-  Sparkles,
-} from "lucide-react";
+  DesktopFilterSheet,
+  MobileFilterDrawer,
+  defaultFilters,
+  type FilterState,
+} from "@/components/shop/ShopFilters";
+import { Search, X, Sparkles } from "lucide-react";
 import { z } from "zod";
 import { SiteLayout } from "@/components/site/Layout";
 import { ProductCard } from "@/components/site/ProductCard";
@@ -17,7 +18,7 @@ import { QuickView } from "@/components/site/QuickView";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { ShopHeroSlider } from "@/components/shop/ShopHeroSlider";
 import { CategoryHeroSlider } from "@/components/shop/CategoryHeroSlider";
-import { type Product } from "@/lib/products";
+import { type Product, getProductVariants, normalizeSizeKey } from "@/lib/products";
 import type { HeroSlide } from "@/components/site/HeroSlider";
 import { fetchProducts } from "@/lib/product-catalog";
 import {
@@ -43,36 +44,35 @@ import beeFlowerImg from "@/assets/bee-flower.jpg";
 import honeyDrizzleImg from "@/assets/honey-drizzle.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
 
-export function ShopPage({ 
-  overrideCategorySlug, 
-  initialCategories = DEFAULT_SHOP_CATEGORIES, 
+export function ShopPage({
+  overrideCategorySlug,
+  initialCategories = DEFAULT_SHOP_CATEGORIES,
   initialProducts = [],
-  initialHeroSlides
-}: { 
+  initialHeroSlides,
+}: {
   overrideCategorySlug?: string;
   initialCategories?: ShopCategory[];
   initialProducts?: Product[];
   initialHeroSlides?: HeroSlide[];
 }) {
-
   const search = useSearch({ strict: false }) as Record<string, any>;
   const navigate = useNavigate();
 
   const [emblaRef] = useEmblaCarousel(
-    { 
-      loop: true, 
-      align: "start", 
+    {
+      loop: true,
+      align: "start",
       duration: 60,
       skipSnaps: false,
-      breakpoints: { '(min-width: 768px)': { active: false } }
+      breakpoints: { "(min-width: 768px)": { active: false } },
     },
-    [Autoplay({ delay: 3000, stopOnInteraction: false })]
+    [Autoplay({ delay: 3000, stopOnInteraction: false })],
   );
 
   // Normalize products synchronously based on passed initialProducts
   const normalizedInitialProducts = useMemo(() => {
     const mergedMap = new Map<string, Product>();
-    
+
     // Add database products
     if (initialProducts && initialProducts.length > 0) {
       initialProducts.forEach((p) => {
@@ -81,28 +81,35 @@ export function ShopPage({
     }
 
     // Normalize categories to ensure exactly one of the 6 categories
-    const validCategories = ["Honey", "Beeswax", "Bee Pollen", "Beeswax Candles", "Beeswax Products", "Beauty Products"];
-    
+    const validCategories = [
+      "Honey",
+      "Beeswax",
+      "Bee Pollen",
+      "Beeswax Candles",
+      "Beeswax Products",
+      "Beauty Products",
+    ];
+
     return Array.from(mergedMap.values()).map((p) => {
       let finalCat = p.category;
-      
+
       // Fix legacy categories
       if (finalCat === "Beeswax Candle") finalCat = "Beeswax Candles";
       if (p.name.includes("Gift Pack")) finalCat = "Honey";
 
       // Fallback if somehow totally invalid
       if (!validCategories.includes(finalCat)) {
-         if (p.name.includes("Honey")) finalCat = "Honey";
-         else finalCat = "Honey"; // safe fallback
+        if (p.name.includes("Honey")) finalCat = "Honey";
+        else finalCat = "Honey"; // safe fallback
       }
-      
+
       return { ...p, category: finalCat };
     });
   }, [initialProducts]);
 
   const [products, setProducts] = useState<Product[]>(normalizedInitialProducts);
   const [categories, setCategories] = useState<ShopCategory[]>(initialCategories);
-  const [quick, setQuick] = useState<Product | null>(null);
+  const [quick, setQuick] = useState<{ product: Product; initialSize?: string } | null>(null);
 
   // Active state
   const initialCat = overrideCategorySlug || "All Products";
@@ -114,7 +121,7 @@ export function ShopPage({
   const [filters, setFilters] = useState<FilterState>(defaultFilters);
 
   const applyFilters = () => {
-    // Note: Filters state is updated via Sheet/Drawer. 
+    // Note: Filters state is updated via Sheet/Drawer.
     // In a real app we would refetch or filter the products list here.
   };
 
@@ -122,7 +129,7 @@ export function ShopPage({
   useEffect(() => {
     setProducts(normalizedInitialProducts);
   }, [normalizedInitialProducts]);
-  
+
   useEffect(() => {
     setCategories(initialCategories);
   }, [initialCategories]);
@@ -153,9 +160,12 @@ export function ShopPage({
   );
 
   const handleSelectCategory = (newCatName: string) => {
-    const slug = newCatName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    const slug = newCatName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
     const isAll = slug === "all-products" || slug === "all" || !slug;
-    
+
     navigate({
       to: isAll ? "/shop" : `/shop/${slug}`,
       search: (prev: any) => ({ ...prev }),
@@ -180,17 +190,29 @@ export function ShopPage({
 
     // Category filter
     let activeCat = overrideCategorySlug || cat;
-    if (activeCat !== "All Products" && activeCat !== "All" && activeCat !== "all" && activeCat !== "all-products") {
+    if (
+      activeCat !== "All Products" &&
+      activeCat !== "All" &&
+      activeCat !== "all" &&
+      activeCat !== "all-products"
+    ) {
       const catLower = activeCat.toLowerCase().trim();
-      
+
       // Match either the category slug or name
-      const matchedCatDef = categories.find(c => c.slug.toLowerCase() === catLower || c.name.toLowerCase() === catLower)
-        || DEFAULT_SHOP_CATEGORIES.find(c => c.slug.toLowerCase() === catLower || c.name.toLowerCase() === catLower);
+      const matchedCatDef =
+        categories.find(
+          (c) => c.slug.toLowerCase() === catLower || c.name.toLowerCase() === catLower,
+        ) ||
+        DEFAULT_SHOP_CATEGORIES.find(
+          (c) => c.slug.toLowerCase() === catLower || c.name.toLowerCase() === catLower,
+        );
 
       if (matchedCatDef) {
         list = list.filter((p) => {
           const pCat = p.category ? p.category.toLowerCase().trim() : "";
-          return pCat === matchedCatDef.slug.toLowerCase() || pCat === matchedCatDef.name.toLowerCase();
+          return (
+            pCat === matchedCatDef.slug.toLowerCase() || pCat === matchedCatDef.name.toLowerCase()
+          );
         });
       } else {
         // Fallback exact match on product category string if definition isn't found
@@ -219,35 +241,80 @@ export function ShopPage({
       });
     }
 
-    // Sort
+    return list;
+  }, [overrideCategorySlug, cat, categories, q, products]);
+
+  // Separate Product Cards: Expand each variant into an independent product card
+  const shopCards = useMemo(() => {
+    type ShopCardItem = {
+      cardKey: string;
+      product: Product;
+      initialSize: string;
+      effectivePrice: number;
+      effectiveMrp?: number;
+      rating: number;
+      badge?: string;
+    };
+
+    const cards: ShopCardItem[] = [];
+
+    for (const p of filtered) {
+      const vars = getProductVariants(p);
+      if (vars && vars.length > 1) {
+        for (const v of vars) {
+          cards.push({
+            cardKey: `${p.slug}-${normalizeSizeKey(v.label) || v.label}`,
+            product: p,
+            initialSize: v.label,
+            effectivePrice: v.price,
+            effectiveMrp: v.mrp,
+            rating: p.rating || 5,
+            badge: p.badge,
+          });
+        }
+      } else {
+        const initialSize = vars?.[0]?.label || p.sizes?.[0] || "";
+        cards.push({
+          cardKey: p.slug,
+          product: p,
+          initialSize,
+          effectivePrice: vars?.[0]?.price ?? p.price,
+          effectiveMrp: vars?.[0]?.mrp ?? p.mrp,
+          rating: p.rating || 5,
+          badge: p.badge,
+        });
+      }
+    }
+
+    // Sort expanded cards
     switch (sort) {
       case "price-asc":
-        list.sort((a, b) => a.price - b.price);
+        cards.sort((a, b) => a.effectivePrice - b.effectivePrice);
         break;
       case "price-desc":
-        list.sort((a, b) => b.price - a.price);
+        cards.sort((a, b) => b.effectivePrice - a.effectivePrice);
         break;
       case "rating":
-        list.sort((a, b) => (b.rating || 5) - (a.rating || 5));
+        cards.sort((a, b) => (b.rating || 5) - (a.rating || 5));
         break;
       case "newest":
-        list.sort((a, b) => (b.badge === "NEW" ? 1 : 0) - (a.badge === "NEW" ? 1 : 0));
+        cards.sort((a, b) => (b.badge === "NEW" ? 1 : 0) - (a.badge === "NEW" ? 1 : 0));
         break;
       default:
-        // By default, the list is already sorted by `sort_order` from the backend query.
-        // We preserve that manual sorting order here.
+        // Preserves backend query order and natural variant size order
         break;
     }
-    return list;
-  }, [cat, q, sort, products]);
+
+    return cards;
+  }, [filtered, sort]);
 
   // Analytics tracking
   useEffect(() => {
     track("view_item_list", {
       item_list_name: cat,
-      items: filtered.map((p) => toItem(p)),
+      items: shopCards.map((c) => toItem(c.product, { size: c.initialSize })),
     });
-  }, [cat, filtered]);
+  }, [cat, shopCards]);
 
   // 5 Discover By Shop photographic cards matching reference image
   const shopCollections = [
@@ -293,107 +360,167 @@ export function ShopPage({
       {!overrideCategorySlug ? (
         <ShopHeroSlider initialSlides={initialHeroSlides} />
       ) : (
-        <CategoryHeroSlider 
-          categorySlug={overrideCategorySlug} 
-          categoryName={categories.find(c => c.slug === overrideCategorySlug)?.name} 
+        <CategoryHeroSlider
+          categorySlug={overrideCategorySlug}
+          categoryName={categories.find((c) => c.slug === overrideCategorySlug)?.name}
         />
       )}
 
       {/* (Old ShopCategorySection removed in favor of the Premium Nav below) */}
-
 
       {/* =========================================================================
           4. SHOP BY CATEGORY (Only show on main /shop route)
          ========================================================================= */}
       {!overrideCategorySlug && (
         <section className="bg-cream pt-10 sm:pt-12 pb-10">
-        <div className="w-full max-w-[1700px] mx-auto px-4 md:px-8">
-          <div className="mb-8 flex flex-col items-center text-center">
-            <div className="text-xs uppercase tracking-widest text-brand-orange font-semibold mb-2 sm:mb-4">FROM THE HIVE</div>
-            <h1 className="font-serif text-[28px] sm:text-[36px] text-espresso font-[500]">Shop by Category</h1>
-            <p className="text-espresso/70 text-[15px] max-w-2xl mt-2 text-center">Explore our pure, authentic honey and bee-crafted essentials.</p>
-          </div>
-          <div className="w-full max-w-[1250px] mx-auto overflow-hidden md:overflow-visible" ref={emblaRef}>
-            <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center items-start gap-4 sm:gap-6 *:shrink-0 *:w-[140px] *:aspect-square md:*:w-[280px] md:*:h-[280px] pb-4 md:pb-0 touch-pan-y cursor-grab active:cursor-grabbing md:cursor-auto md:touch-auto">
-            {[
-              categories.find((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products") || 
-              { slug: "all-products", name: "All Products", image_url: heroProductsImg, hasCustomImage: false },
-              ...categories.filter((c) => c.slug !== "all-products" && c.name.toLowerCase() !== "all products")
-            ].map((c) => c.slug === "all-products" || c.name.toLowerCase() === "all products" ? (
-              <Link
-                key={c.slug}
-                to="/shop"
-                className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
-              >
-                <img
-                  src={c.image_url || undefined}
-                  alt={c.name}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
-                  loading="lazy"
-                  onError={(event) => {
-                    console.error("[CATEGORY IMAGE FAILED]", { slug: c.slug, name: c.name, src: event.currentTarget.src });
-                  }}
-                />
-              </Link>
-            ) : (
-              <Link
-                key={c.slug}
-                to="/shop/$slug"
-                params={{ slug: c.slug }}
-                className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
-              >
-                <img
-                  src={c.image_url || undefined}
-                  alt={c.name}
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
-                  loading="lazy"
-                  onError={(event) => {
-                    console.error("[CATEGORY IMAGE FAILED]", { slug: c.slug, name: c.name, src: event.currentTarget.src });
-                  }}
-                />
-              </Link>
-            ))}
+          <div className="w-full max-w-[1700px] mx-auto px-4 md:px-8">
+            <div className="mb-8 flex flex-col items-center text-center">
+              <div className="text-xs uppercase tracking-widest text-brand-orange font-semibold mb-2 sm:mb-4">
+                FROM THE HIVE
+              </div>
+              <h1 className="font-serif text-[28px] sm:text-[36px] text-espresso font-[500]">
+                Shop by Category
+              </h1>
+              <p className="text-espresso/70 text-[15px] max-w-2xl mt-2 text-center">
+                Explore our pure, authentic honey and bee-crafted essentials.
+              </p>
+            </div>
+            <div
+              className="w-full max-w-[1250px] mx-auto overflow-hidden md:overflow-visible"
+              ref={emblaRef}
+            >
+              <div className="flex flex-nowrap md:flex-wrap justify-start md:justify-center items-start gap-4 sm:gap-6 *:shrink-0 *:w-[140px] *:aspect-square md:*:w-[280px] md:*:h-[280px] pb-4 md:pb-0 touch-pan-y cursor-grab active:cursor-grabbing md:cursor-auto md:touch-auto">
+                {[
+                  categories.find(
+                    (c) => c.slug === "all-products" || c.name.toLowerCase() === "all products",
+                  ) || {
+                    slug: "all-products",
+                    name: "All Products",
+                    image_url: heroProductsImg,
+                    hasCustomImage: false,
+                  },
+                  ...categories.filter(
+                    (c) => c.slug !== "all-products" && c.name.toLowerCase() !== "all products",
+                  ),
+                ].map((c) =>
+                  c.slug === "all-products" || c.name.toLowerCase() === "all products" ? (
+                    <Link
+                      key={c.slug}
+                      to="/shop"
+                      className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
+                    >
+                      <img
+                        src={c.image_url || undefined}
+                        alt={c.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+                        loading="lazy"
+                        onError={(event) => {
+                          console.error("[CATEGORY IMAGE FAILED]", {
+                            slug: c.slug,
+                            name: c.name,
+                            src: event.currentTarget.src,
+                          });
+                        }}
+                      />
+                    </Link>
+                  ) : (
+                    <Link
+                      key={c.slug}
+                      to="/shop/$slug"
+                      params={{ slug: c.slug }}
+                      className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
+                    >
+                      <img
+                        src={c.image_url || undefined}
+                        alt={c.name}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+                        loading="lazy"
+                        onError={(event) => {
+                          console.error("[CATEGORY IMAGE FAILED]", {
+                            slug: c.slug,
+                            name: c.name,
+                            src: event.currentTarget.src,
+                          });
+                        }}
+                      />
+                    </Link>
+                  ),
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
       )}
 
       {/* =========================================================================
           PROMOTIONAL MARQUEE
          ========================================================================= */}
       <div className="w-full bg-announcement py-2.5 sm:py-3 overflow-hidden ticker-wrap border-y border-white/10">
-        <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '165s' }}>
+        <div
+          className="flex w-max items-center animate-ticker"
+          style={{ animationDuration: "165s" }}
+        >
           {[1, 2, 3, 4, 5, 6].map((group) => (
-            <div key={group} className="flex items-center whitespace-nowrap text-white text-[13px] sm:text-[14px] font-medium tracking-wide">
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Pure & Unfiltered Honey</span></span>
+            <div
+              key={group}
+              className="flex items-center whitespace-nowrap text-white text-[13px] sm:text-[14px] font-medium tracking-wide"
+            >
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🍯 <span>Pure & Unfiltered Honey</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6"><span>From the Wildflowers of Saurashtra</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                <span>From the Wildflowers of Saurashtra</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🐝 <span>Responsibly Harvested</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🐝 <span>Responsibly Harvested</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">✨ <span>100% Natural & Authentic</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                ✨ <span>100% Natural & Authentic</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Multi Flora | Ajwain Flora | Fennel Flora</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🍯 <span>Multi Flora | Ajwain Flora | Fennel Flora</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🎁 <span>Perfect for Gifting</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🎁 <span>Perfect for Gifting</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹1500</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🚚 <span>Free Delivery on Orders Above ₹1500</span>
+              </span>
               <span className="text-white/40">•</span>
               {/* Duplicate inner blocks once more to ensure it fills ultra-wide screens smoothly without ending early */}
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Pure & Unfiltered Honey</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🍯 <span>Pure & Unfiltered Honey</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6"><span>From the Wildflowers of Saurashtra</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                <span>From the Wildflowers of Saurashtra</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🐝 <span>Responsibly Harvested</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🐝 <span>Responsibly Harvested</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">✨ <span>100% Natural & Authentic</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                ✨ <span>100% Natural & Authentic</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🍯 <span>Multi Flora | Ajwain Flora | Fennel Flora</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🍯 <span>Multi Flora | Ajwain Flora | Fennel Flora</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🎁 <span>Perfect for Gifting</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🎁 <span>Perfect for Gifting</span>
+              </span>
               <span className="text-white/40">•</span>
-              <span className="flex items-center gap-2 mx-4 sm:mx-6">🚚 <span>Free Delivery on Orders Above ₹1500</span></span>
+              <span className="flex items-center gap-2 mx-4 sm:mx-6">
+                🚚 <span>Free Delivery on Orders Above ₹1500</span>
+              </span>
               <span className="text-white/40">•</span>
             </div>
           ))}
@@ -404,7 +531,6 @@ export function ShopPage({
           5. FILTER + SORT TOOLBAR & PRODUCT GRID (#products-grid)
          ========================================================================= */}
       <section id="products-grid" className="py-10 sm:py-12 bg-cream relative overflow-hidden">
-        
         {/* FULL-HEIGHT DECORATIVE ARTWORK - LEFT */}
         <div className="hidden xl:flex absolute top-16 bottom-0 lg:-left-20 xl:-left-10 2xl:left-4 w-[300px] xl:w-[350px] 2xl:w-[450px] flex-col gap-[700px] opacity-10 mix-blend-multiply pointer-events-none z-0 select-none overflow-visible">
           {[
@@ -413,9 +539,15 @@ export function ShopPage({
             "/images/bg_illustrations/bees_alpha.webp",
             "/images/heritage/illus_wildflower.webp",
             "/images/bg_illustrations/floral_alpha.webp",
-            "/images/heritage/illus_beekeeping.webp"
+            "/images/heritage/illus_beekeeping.webp",
           ].map((src, i) => (
-            <img key={`left-art-${i}`} src={src} alt="" className="w-full object-contain shrink-0" loading="lazy" />
+            <img
+              key={`left-art-${i}`}
+              src={src}
+              alt=""
+              className="w-full object-contain shrink-0"
+              loading="lazy"
+            />
           ))}
         </div>
 
@@ -427,18 +559,23 @@ export function ShopPage({
             "/images/bg_illustrations/dipper_alpha.webp",
             "/images/heritage/illus_pure.webp",
             "/images/bg_illustrations/honeycomb_alpha.webp",
-            "/images/heritage/illus_hive_to_home.webp"
+            "/images/heritage/illus_hive_to_home.webp",
           ].map((src, i) => (
-            <img key={`right-art-${i}`} src={src} alt="" className="w-full object-contain shrink-0" loading="lazy" />
+            <img
+              key={`right-art-${i}`}
+              src={src}
+              alt=""
+              className="w-full object-contain shrink-0"
+              loading="lazy"
+            />
           ))}
         </div>
 
         <div className="container-page relative z-10">
-
           {/* Toolbar (Desktop & Mobile) - NO STICKY */}
           <div className="relative z-30 bg-cream py-4 mb-4 border-b sm:border-none border-border/80 flex flex-wrap items-center justify-between gap-4">
             <div className="text-[15px] text-espresso/80 font-medium">
-              Showing {filtered.length} products
+              Showing {shopCards.length} products
             </div>
             <AiHoneyFinder products={initialProducts} triggerVariant="button" />
           </div>
@@ -447,14 +584,18 @@ export function ShopPage({
           <AiHoneyFinder products={initialProducts} triggerVariant="banner" />
 
           {/* Product Grid — 5 columns on desktop matching reference image */}
-          {filtered.length === 0 ? (
+          {shopCards.length === 0 ? (
             <div className="bg-white border border-border/80 rounded-3xl p-16 text-center shadow-soft max-w-xl mx-auto my-12">
               <div className="text-5xl mb-4">🐝</div>
               <h3 className="font-serif text-2xl font-bold text-espresso">
-                {overrideCategorySlug ? "No products found in this category." : "No honey matches your filter"}
+                {overrideCategorySlug
+                  ? "No products found in this category."
+                  : "No honey matches your filter"}
               </h3>
               <p className="mt-2 text-sm text-espresso/70">
-                {overrideCategorySlug ? "Please try checking back later or browse our other collections." : "Try selecting a different category or viewing all products."}
+                {overrideCategorySlug
+                  ? "Please try checking back later or browse our other collections."
+                  : "Try selecting a different category or viewing all products."}
               </p>
               {overrideCategorySlug ? (
                 <Link
@@ -479,18 +620,17 @@ export function ShopPage({
           ) : (
             <>
               {/* Unified Mobile & Desktop View */}
-              <div
-                className="grid gap-5 sm:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-              >
-                {filtered.map((product, idx) => (
-                  <div 
-                    key={`${product.slug}-${cat}`}
+              <div className="grid gap-5 sm:gap-8 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {shopCards.map((card, idx) => (
+                  <div
+                    key={`${card.cardKey}-${cat}`}
                     className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out fill-mode-both"
-                    style={{ animationDelay: `${idx * 40}ms` }}
+                    style={{ animationDelay: `${Math.min(idx * 30, 400)}ms` }}
                   >
                     <ProductCard
-                      p={product}
-                      onQuickView={(p) => setQuick(p)}
+                      p={card.product}
+                      initialSize={card.initialSize}
+                      onQuickView={(p, size) => setQuick({ product: p, initialSize: size })}
                     />
                   </div>
                 ))}
@@ -507,7 +647,11 @@ export function ShopPage({
         <IllustratedBrandSection />
       </section>
       {/* QUICK VIEW MODAL */}
-      <QuickView product={quick} onClose={() => setQuick(null)} />
+      <QuickView
+        product={quick?.product ?? null}
+        initialSize={quick?.initialSize}
+        onClose={() => setQuick(null)}
+      />
 
       {/* FLOATING AI SOMMELIER LAUNCHER */}
       <AiHoneyFinder products={initialProducts} triggerVariant="floating" />

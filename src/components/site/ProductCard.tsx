@@ -18,12 +18,15 @@ import { track, toItem } from "@/lib/analytics";
 
 export function ProductCard({
   p,
+  initialSize,
   onQuickView,
 }: {
   p: Product;
-  onQuickView?: (p: Product) => void;
+  initialSize?: string;
+  onQuickView?: (p: Product, size?: string) => void;
 }) {
   const defaultSize =
+    initialSize ||
     p.variants?.find((v) => v.isDefault)?.label ||
     p.sizes?.[0] ||
     "";
@@ -36,12 +39,16 @@ export function ProductCard({
   const navigate = useNavigate();
 
   useEffect(() => {
-    const nextDefault =
-      p.variants?.find((v) => v.isDefault)?.label ||
-      p.sizes?.[0] ||
-      "";
-    setSize(nextDefault);
-  }, [p.slug]);
+    if (initialSize) {
+      setSize(initialSize);
+    } else {
+      const nextDefault =
+        p.variants?.find((v) => v.isDefault)?.label ||
+        p.sizes?.[0] ||
+        "";
+      setSize(nextDefault);
+    }
+  }, [p.slug, initialSize]);
 
   async function toggleSave(e: React.MouseEvent) {
     e.preventDefault();
@@ -73,7 +80,20 @@ export function ProductCard({
   const activeImage = resolveActiveImage(p, activeVariant);
   const activePackaging = activeVariant?.packaging || getVariantPackaging(activeVariant || size);
   const displayBadge = p.badge || (p.is_wholesale ? "WHOLESALE" : null);
-  const displayName = cleanProductName(p.name);
+
+  const availableSizes =
+    p.sizes && p.sizes.length > 0
+      ? p.sizes
+      : p.variants && p.variants.length > 0
+        ? p.variants.map((v) => v.label)
+        : [];
+  const hasMultipleVariants =
+    (p.variants && p.variants.length > 1) || (availableSizes && availableSizes.length > 1);
+  const baseName = cleanProductName(p.name);
+  const displayName =
+    hasMultipleVariants && size ? `${baseName} – ${formatSizeDisplay(size)}` : baseName;
+
+  const variantParam = activeVariant?.id || activeVariant?.label || size;
 
   return (
     <div className="group bg-white rounded-2xl border border-border/90 overflow-hidden flex flex-col transition-all duration-300 hover:shadow-lift md:hover:-translate-y-1.5 h-full">
@@ -112,7 +132,7 @@ export function ProductCard({
         <Link
           to="/product/$slug"
           params={{ slug: p.slug }}
-          search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
+          search={variantParam ? { variant: variantParam } : undefined}
           onClick={() => track("select_item", { items: [toItem(p, { size })] })}
           className="block w-full h-full"
         >
@@ -128,7 +148,7 @@ export function ProductCard({
           <button
             onClick={(e) => {
               e.preventDefault();
-              onQuickView(p);
+              onQuickView(p, size);
             }}
             className="hidden md:inline-flex absolute bottom-3 left-1/2 -translate-x-1/2 z-10 items-center gap-1.5 bg-espresso text-cream text-[11px] font-bold tracking-widest px-4 py-2 rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-burnt-orange hover:text-white shadow-md"
           >
@@ -149,7 +169,7 @@ export function ProductCard({
           <Link
             to="/product/$slug"
             params={{ slug: p.slug }}
-            search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
+            search={variantParam ? { variant: variantParam } : undefined}
             className="hover:text-brand-orange transition-colors"
           >
             {displayName}
@@ -174,9 +194,9 @@ export function ProductCard({
         )}
 
         {/* Weight options - responsive selectable pills */}
-        {p.sizes && p.sizes.length > 0 && (
+        {availableSizes && availableSizes.length > 0 && (
           <div className="flex gap-1.5 flex-wrap items-center my-1">
-            {p.sizes.map((s) => {
+            {availableSizes.map((s) => {
               const isSelected = size === s || normalizeSizeKey(size) === normalizeSizeKey(s);
               const v = getVariantByLabel(p, s);
               const variantOos =
@@ -240,7 +260,7 @@ export function ProductCard({
               value: activePrice,
               items: [toItem(p, { size, qty: 1 })],
             });
-            toast.success(`Added ${displayName} (${formatSizeDisplay(size)}) to cart`);
+            toast.success(`Added ${displayName} to cart`);
           }}
           className={`mt-auto w-full border font-bold text-xs uppercase tracking-widest py-2.5 rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-xs group/btn ${
             isOutOfStock

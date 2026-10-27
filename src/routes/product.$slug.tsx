@@ -143,8 +143,21 @@ function ProductPage() {
 
   const [size, setSize] = useState(() => {
     if (search.variant && p.variants) {
-      const v = p.variants.find((x) => x.id === search.variant);
+      const v = p.variants.find(
+        (x) =>
+          x.id === search.variant ||
+          x.label.toLowerCase() === (search.variant as string).toLowerCase() ||
+          normalizeSizeKey(x.label) === normalizeSizeKey(search.variant as string),
+      );
       if (v) return v.label;
+    }
+    if (search.variant && p.sizes) {
+      const sMatch = p.sizes.find(
+        (s) =>
+          s.toLowerCase() === (search.variant as string).toLowerCase() ||
+          normalizeSizeKey(s) === normalizeSizeKey(search.variant as string),
+      );
+      if (sMatch) return sMatch;
     }
     const def = p.variants?.find((x) => x.isDefault);
     if (def) return def.label;
@@ -153,16 +166,35 @@ function ProductPage() {
 
   useEffect(() => {
     if (search.variant && p.variants) {
-      const v = p.variants.find((x) => x.id === search.variant);
+      const v = p.variants.find(
+        (x) =>
+          x.id === search.variant ||
+          x.label.toLowerCase() === (search.variant as string).toLowerCase() ||
+          normalizeSizeKey(x.label) === normalizeSizeKey(search.variant as string),
+      );
       if (v && v.label !== size) {
         setSize(v.label);
       }
+    } else if (search.variant && p.sizes) {
+      const sMatch = p.sizes.find(
+        (s) =>
+          s.toLowerCase() === (search.variant as string).toLowerCase() ||
+          normalizeSizeKey(s) === normalizeSizeKey(search.variant as string),
+      );
+      if (sMatch && sMatch !== size) {
+        setSize(sMatch);
+      }
     }
-  }, [search.variant, p.variants]);
+  }, [search.variant, p.variants, p.sizes]);
 
   useEffect(() => {
     if (search.variant && p.variants) {
-      const v = p.variants.find((x) => x.id === search.variant);
+      const v = p.variants.find(
+        (x) =>
+          x.id === search.variant ||
+          x.label.toLowerCase() === (search.variant as string).toLowerCase() ||
+          normalizeSizeKey(x.label) === normalizeSizeKey(search.variant as string),
+      );
       if (v) {
         setSize(v.label);
         return;

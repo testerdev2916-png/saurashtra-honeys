@@ -11,22 +11,39 @@ import {
 import { useCart } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { Leaf, ShoppingCart, Star, X } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-export function QuickView({ product, onClose }: { product: Product | null; onClose: () => void }) {
+export function QuickView({
+  product,
+  initialSize,
+  onClose,
+}: {
+  product: Product | null;
+  initialSize?: string;
+  onClose: () => void;
+}) {
   const { add } = useCart();
-  const [size, setSize] = useState<string>(
-    product?.variants?.find((v) => v.isDefault)?.label || product?.sizes[0] || "",
-  );
+  const defaultSize =
+    initialSize ||
+    product?.variants?.find((v) => v.isDefault)?.label ||
+    product?.sizes[0] ||
+    "";
+  const [size, setSize] = useState<string>(defaultSize);
   const [qty, setQty] = useState(1);
 
-  // reset when product changes
-  if (product && !product.sizes.includes(size)) {
-    const nextSize =
-      product.variants?.find((v) => v.isDefault)?.label || product.sizes[0] || "";
-    setSize(nextSize);
-  }
+  // reset when product or initialSize changes
+  useEffect(() => {
+    if (product) {
+      const nextSize =
+        initialSize ||
+        product.variants?.find((v) => v.isDefault)?.label ||
+        product.sizes[0] ||
+        "";
+      setSize(nextSize);
+      setQty(1);
+    }
+  }, [product, initialSize]);
 
   const activeVariant = product ? getVariantByLabel(product, size) : undefined;
   const activePrice = activeVariant?.price ?? product?.price ?? 0;
@@ -41,7 +58,18 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
     (activeVariant?.stock !== undefined && activeVariant.stock <= 0);
 
   const activeImage = product ? resolveActiveImage(product, activeVariant) : "";
-  const displayName = product ? cleanProductName(product.name) : "";
+  const availableSizes =
+    product?.sizes && product.sizes.length > 0
+      ? product.sizes
+      : product?.variants && product.variants.length > 0
+        ? product.variants.map((v) => v.label)
+        : [];
+  const hasMultipleVariants =
+    (product?.variants && product.variants.length > 1) || (availableSizes && availableSizes.length > 1);
+  const baseName = product ? cleanProductName(product.name) : "";
+  const displayName =
+    hasMultipleVariants && size ? `${baseName} – ${formatSizeDisplay(size)}` : baseName;
+  const variantParam = activeVariant?.id || activeVariant?.label || size;
 
   return (
     <Dialog open={!!product} onOpenChange={(o) => !o && onClose()}>
@@ -166,7 +194,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
                   onClick={() => {
                     if (isOutOfStock) return;
                     if (product) add(product, size, qty, activeVariant);
-                    toast.success(`Added ${displayName} (${formatSizeDisplay(size)}) to cart`);
+                    toast.success(`Added ${displayName} to cart`);
                     onClose();
                   }}
                   className={`flex-1 inline-flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-bold tracking-widest ${
@@ -182,7 +210,7 @@ export function QuickView({ product, onClose }: { product: Product | null; onClo
               <Link
                 to="/product/$slug"
                 params={{ slug: product.slug }}
-                search={activeVariant?.id ? { variant: activeVariant.id } : undefined}
+                search={variantParam ? { variant: variantParam } : undefined}
                 onClick={onClose}
                 className="mt-3 text-center text-xs font-bold tracking-widest text-gold-deep border-b border-gold-deep self-start hover:text-brand-orange hover:border-brand-orange transition-colors"
               >

@@ -352,4 +352,160 @@ describe("Product Variants & Dynamic Size Selection", () => {
     assert.equal(w10kg.images?.length, 2);
     assert.ok(w10kg.images![0].includes("Bulk_YMGQvQAcZ"));
   });
+
+  it("generates separate product cards for each weight variant with correct default selection and all pills", async () => {
+    const products = await fetchProducts();
+    const multi = products.find((p) => p.flora === "Multiflora" && p.showOnHomepage);
+    assert.ok(multi, "Multiflora Honey product should exist");
+
+    // Helper imitating shop cards expansion
+    function expandToShopCards(productList: Product[]) {
+      type ShopCardItem = {
+        cardKey: string;
+        product: Product;
+        initialSize: string;
+        effectivePrice: number;
+        effectiveMrp?: number;
+        displayName: string;
+        availableSizes: string[];
+      };
+      const cards: ShopCardItem[] = [];
+      for (const p of productList) {
+        const vars = p.variants && p.variants.length > 0 ? p.variants : [];
+        const hasMultiple = vars.length > 1 || (p.sizes && p.sizes.length > 1);
+        const baseName = cleanProductName(p.name);
+
+        if (hasMultiple && vars.length > 0) {
+          for (const v of vars) {
+            cards.push({
+              cardKey: `${p.slug}-${normalizeSizeKey(v.label) || v.label}`,
+              product: p,
+              initialSize: v.label,
+              effectivePrice: v.price,
+              effectiveMrp: v.mrp,
+              displayName: `${baseName} – ${formatSizeDisplay(v.label)}`,
+              availableSizes: vars.map((x) => x.label),
+            });
+          }
+        } else {
+          cards.push({
+            cardKey: p.slug,
+            product: p,
+            initialSize: p.sizes?.[0] || "",
+            effectivePrice: p.price,
+            effectiveMrp: p.mrp,
+            displayName: baseName,
+            availableSizes: p.sizes || [],
+          });
+        }
+      }
+      return cards;
+    }
+
+    const cards = expandToShopCards(products);
+    const multiCards = cards.filter((c) => c.product.slug === multi.slug);
+
+    // Multiflora Honey has 4 variants -> 4 separate cards
+    assert.equal(multiCards.length, 4, "Multiflora should produce exactly 4 cards");
+    assert.equal(multiCards[0].displayName, "Multiflora Honey – 250 GM");
+    assert.equal(multiCards[0].initialSize, "250g");
+    assert.equal(multiCards[1].displayName, "Multiflora Honey – 500 GM");
+    assert.equal(multiCards[1].initialSize, "500g");
+    assert.equal(multiCards[2].displayName, "Multiflora Honey – 1 KG");
+    assert.equal(multiCards[2].initialSize, "1kg");
+    assert.equal(multiCards[3].displayName, "Multiflora Honey – 28 KG");
+    assert.equal(multiCards[3].initialSize, "28kg");
+
+    // Every card has ALL available weight options as selectable pills
+    for (const card of multiCards) {
+      assert.deepEqual(
+        card.availableSizes.map(formatSizeDisplay),
+        ["250 GM", "500 GM", "1 KG", "28 KG"],
+        "Every Multiflora card must provide all 4 variant pills",
+      );
+    }
+
+    // Verify Ajwain Honey produces 4 cards
+    const ajwain = products.find((p) => p.flora === "Ajwain" && p.showOnHomepage);
+    assert.ok(ajwain, "Ajwain Honey product should exist");
+    const ajwainCards = cards.filter((c) => c.product.slug === ajwain.slug);
+    assert.equal(ajwainCards.length, 4, "Ajwain should produce 4 separate cards");
+    assert.equal(ajwainCards[0].displayName, "Ajwain Honey – 250 GM");
+    assert.equal(ajwainCards[3].displayName, "Ajwain Honey – 28 KG");
+
+    // Verify Fennel Honey produces 3 cards (250g, 500g, 28kg)
+    const fennel = products.find((p) => p.flora === "Fennel" && p.showOnHomepage);
+    assert.ok(fennel, "Fennel Honey product should exist");
+    const fennelCards = cards.filter((c) => c.product.slug === fennel.slug);
+    assert.equal(fennelCards.length, 3, "Fennel should produce 3 separate cards");
+    assert.equal(fennelCards[0].displayName, "Fennel Honey – 250 GM");
+    assert.equal(fennelCards[2].displayName, "Fennel Honey – 28 KG");
+
+    // Verify single-size product (Pure Honey Gulkand) produces exactly 1 card without suffix
+    const gulkand = products.find((p) => p.name.includes("Gulkand"));
+    if (gulkand) {
+      const gulkandCards = cards.filter((c) => c.product.slug === gulkand.slug);
+      assert.equal(gulkandCards.length, 1, "Gulkand should produce 1 card");
+      assert.ok(!gulkandCards[0].displayName.includes("–"), "Single-size card must not include a trailing size suffix");
+    }
+  });
+
+  it("dynamically updates individual card metadata when switching pills", async () => {
+    const p = await fetchProduct("multiflora-honey-250GM");
+    assert.ok(p, "Expected Multiflora product to exist");
+
+    function getCardState(product: Product, selectedSize: string) {
+      const variant = getVariantByLabel(product, selectedSize);
+      const activePrice = variant.price;
+      const activeMrp = variant.mrp;
+      const packaging = variant.packaging || getVariantPackaging(variant || selectedSize);
+      const image = resolveActiveImage(product, variant);
+      const displayName = `${cleanProductName(product.name)} – ${formatSizeDisplay(selectedSize)}`;
+      return { variant, activePrice, activeMrp, packaging, image, displayName };
+    }
+
+    // State on 250 GM card
+    const state250 = getCardState(p, "250g");
+    assert.equal(state250.displayName, "Multiflora Honey – 250 GM");
+    assert.equal(state250.activePrice, 190);
+    assert.equal(state250.packaging, "Glass Jar");
+    assert.ok(state250.image.includes("5_7LQIRcqFer"));
+
+    // Customer switches 250 GM card to 1 KG
+    const stateSwitchedTo1kg = getCardState(p, "1kg");
+    assert.equal(stateSwitchedTo1kg.displayName, "Multiflora Honey – 1 KG");
+    assert.equal(stateSwitchedTo1kg.activePrice, 650);
+    assert.equal(stateSwitchedTo1kg.packaging, "Plastic Jar");
+    assert.ok(stateSwitchedTo1kg.image.includes("1_fIrYppI9P"));
+
+    // Customer switches to 28 KG
+    const stateSwitchedTo28kg = getCardState(p, "28kg");
+    assert.equal(stateSwitchedTo28kg.displayName, "Multiflora Honey – 28 KG");
+    assert.equal(stateSwitchedTo28kg.activePrice, 7000);
+    assert.equal(stateSwitchedTo28kg.packaging, "Plastic Bucket");
+    assert.ok(stateSwitchedTo28kg.image.includes("2_GuyHNq6MQl"));
+  });
+
+  it("sorts expanded cards correctly by effective variant price", async () => {
+    const products = await fetchProducts();
+    const multi = products.find((p) => p.flora === "Multiflora" && p.showOnHomepage);
+    assert.ok(multi);
+
+    const vars = multi.variants || [];
+    const multiCards = vars.map((v) => ({
+      name: `${cleanProductName(multi.name)} – ${formatSizeDisplay(v.label)}`,
+      effectivePrice: v.price,
+    }));
+
+    // Price Ascending: 250g (190) -> 500g (350) -> 1kg (650) -> 28kg (7000)
+    const asc = [...multiCards].sort((a, b) => a.effectivePrice - b.effectivePrice);
+    assert.equal(asc[0].name, "Multiflora Honey – 250 GM");
+    assert.equal(asc[3].name, "Multiflora Honey – 28 KG");
+
+    // Price Descending: 28kg (7000) -> 1kg (650) -> 500g (350) -> 250g (190)
+    const desc = [...multiCards].sort((a, b) => b.effectivePrice - a.effectivePrice);
+    assert.equal(desc[0].name, "Multiflora Honey – 28 KG");
+    assert.equal(desc[3].name, "Multiflora Honey – 250 GM");
+  });
 });
+
