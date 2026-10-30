@@ -41,12 +41,12 @@ const getIkConfig = async () => {
 export async function uploadToImageKit(file: File, folder: string): Promise<string> {
   let fileToUpload = file;
 
-  // Compress images larger than 1.5MB
-  if (file.type.startsWith("image/") && file.size > 1.5 * 1024 * 1024) {
+  // Compress images larger than 400KB before uploading to keep ImageKit storage & bandwidth ultra-lean
+  if (file.type.startsWith("image/") && file.size > 400 * 1024) {
     try {
       const options = {
-        maxSizeMB: 1.5,
-        maxWidthOrHeight: 2560,
+        maxSizeMB: 0.6,
+        maxWidthOrHeight: 1600,
         useWebWorker: true,
       };
       const compressedBlob = await imageCompression(file, options);
