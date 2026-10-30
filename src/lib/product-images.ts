@@ -60,6 +60,23 @@ export type ImageOptimizeOptions = {
   format?: "auto" | "webp" | "avif" | "jpg" | "png";
 };
 
+export const ACTIVE_IMAGEKIT_ENDPOINT = "spuuavgve";
+export const LEGACY_IMAGEKIT_ENDPOINTS = ["fqbnkx3tz"];
+
+/**
+ * Automatically maps legacy ImageKit endpoints to the current active ImageKit account.
+ * This guarantees zero broken images even if database records still point to the old account endpoint.
+ */
+export function rewriteImageKitUrl(url: string): string {
+  let rewritten = url;
+  for (const legacy of LEGACY_IMAGEKIT_ENDPOINTS) {
+    if (rewritten.includes(`ik.imagekit.io/${legacy}`)) {
+      rewritten = rewritten.replace(`ik.imagekit.io/${legacy}`, `ik.imagekit.io/${ACTIVE_IMAGEKIT_ENDPOINT}`);
+    }
+  }
+  return rewritten;
+}
+
 /**
  * Transforms ImageKit URLs dynamically to modern WebP/AVIF with specified width and quality.
  * Prevents massive uncompressed image downloads and reduces ImageKit bandwidth consumption by up to 95%.
@@ -69,8 +86,10 @@ export function optimizeImage(
   opts?: ImageOptimizeOptions,
 ): string {
   if (!url || typeof url !== "string") return "";
-  const trimmed = url.trim();
+  let trimmed = url.trim();
   if (!trimmed) return "";
+
+  trimmed = rewriteImageKitUrl(trimmed);
 
   if (trimmed.includes("ik.imagekit.io")) {
     const width = opts?.width;
@@ -112,6 +131,7 @@ export function resolveImage(
 
   let resultUrl = fallback;
   if (cleanUrl) {
+    cleanUrl = rewriteImageKitUrl(cleanUrl);
     if (cleanUrl.includes("res.cloudinary.com")) {
       resultUrl = cleanUrl.startsWith("http")
         ? cleanUrl
@@ -177,7 +197,7 @@ export function getCategoryImageUrl(category: {
   const cleanUrl = category.image_url.trim();
   if (!cleanUrl) return null;
 
-  let resultUrl = cleanUrl;
+  let resultUrl = rewriteImageKitUrl(cleanUrl);
 
   if (cleanUrl.includes("res.cloudinary.com")) {
     resultUrl = cleanUrl.startsWith("http") ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, "")}`;

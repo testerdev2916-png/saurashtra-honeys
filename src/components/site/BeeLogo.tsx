@@ -4,7 +4,7 @@ import { useCompanySettings, DEFAULT_COMPANY_SETTINGS } from "@/lib/company-sett
 
 const DEFAULT_IMAGEKIT_LOGO =
   DEFAULT_COMPANY_SETTINGS.logo_url ||
-  "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
+  "https://ik.imagekit.io/spuuavgve/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
 const LOCAL_FALLBACK_LOGO = "/saurashtra-honey-logo-complete.png";
 
 function resolveLogoSources(customUrl?: string): string[] {

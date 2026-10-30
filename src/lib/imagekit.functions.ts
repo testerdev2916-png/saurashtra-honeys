@@ -24,7 +24,7 @@ export const getImageKitAuthParams = createServerFn({ method: "POST" })
     const urlEp =
       process.env.IMAGEKIT_URL_ENDPOINT ||
       process.env.VITE_IMAGEKIT_URL_ENDPOINT ||
-      "https://ik.imagekit.io/fqbnkx3tz";
+      "https://ik.imagekit.io/spuuavgve";
 
     if (!pubKey)
       console.error("[ImageKit API] Error: Missing IMAGEKIT_PUBLIC_KEY in environment variables");

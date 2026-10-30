@@ -127,7 +127,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           as: "image",
           href: optimizeImage(
             loaderData?.settings?.logo_url ||
-              "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+              "https://ik.imagekit.io/spuuavgve/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
             { width: 300, quality: 80, format: "auto" },
           ),
         },
