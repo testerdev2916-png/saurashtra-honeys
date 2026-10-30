@@ -34,7 +34,7 @@ const listInputSchema = z.object({
 export const listPublicPosts = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => listInputSchema.parse(d ?? {}))
   .handler(async ({ data }) => {
-        const page = data.page || 1;
+    const page = data.page || 1;
     const pageSize = data.pageSize || 6;
     const start = (page - 1) * pageSize;
     const end = start + pageSize - 1;
@@ -46,14 +46,14 @@ export const listPublicPosts = createServerFn({ method: "POST" })
       .is("deleted_at", null);
 
     if (data.cat && data.cat !== "All Posts") {
-      // NOTE: category_name does not exist in the blog_posts table directly. 
+      // NOTE: category_name does not exist in the blog_posts table directly.
       // If categories are needed, this should join with a categories table or use category_id.
     }
 
     if (data.q && data.q.trim()) {
       const term = data.q.trim().replace(/%/g, "");
       query = query.or(
-        `title.ilike.%${term}%,excerpt.ilike.%${term}%,body_markdown.ilike.%${term}%`
+        `title.ilike.%${term}%,excerpt.ilike.%${term}%,body_markdown.ilike.%${term}%`,
       );
     }
 
@@ -64,7 +64,7 @@ export const listPublicPosts = createServerFn({ method: "POST" })
 
     const { data: rows, error, count } = await query;
     if (error) {
-      if (error.code !== '42501') {
+      if (error.code !== "42501") {
         console.error("listPublicPosts error:", error.message);
       }
       return { rows: [], total: 0, page, totalPages: 1 };
@@ -84,7 +84,6 @@ export const listPublicPosts = createServerFn({ method: "POST" })
 export const getPublicPost = createServerFn({ method: "POST" })
   .inputValidator((d: { slug: string }) => z.object({ slug: z.string().min(1) }).parse(d))
   .handler(async ({ data }) => {
-    
     const { data: post, error } = await supabase
       .from("blog_posts")
       .select("*")
@@ -112,10 +111,18 @@ export const getPublicPost = createServerFn({ method: "POST" })
     const { data: relatedRows } = await relatedQuery;
     const allRelated = (relatedRows ?? []) as unknown as PublicBlogPost[];
     const sameCat = allRelated.filter(
-      (r) => r.category_name && currentPost.category_name && r.category_name.toLowerCase() === currentPost.category_name.toLowerCase()
+      (r) =>
+        r.category_name &&
+        currentPost.category_name &&
+        r.category_name.toLowerCase() === currentPost.category_name.toLowerCase(),
     );
     const otherCat = allRelated.filter(
-      (r) => !(r.category_name && currentPost.category_name && r.category_name.toLowerCase() === currentPost.category_name.toLowerCase())
+      (r) =>
+        !(
+          r.category_name &&
+          currentPost.category_name &&
+          r.category_name.toLowerCase() === currentPost.category_name.toLowerCase()
+        ),
     );
 
     const related = [...sameCat, ...otherCat].slice(0, 3);
@@ -128,10 +135,10 @@ export const getPublicPost = createServerFn({ method: "POST" })
 
 export const getPopularPosts = createServerFn({ method: "POST" })
   .inputValidator((d: { limit?: number } | undefined) =>
-    z.object({ limit: z.number().int().min(1).max(20).default(4) }).parse(d ?? {})
+    z.object({ limit: z.number().int().min(1).max(20).default(4) }).parse(d ?? {}),
   )
   .handler(async ({ data }) => {
-        const limit = data.limit || 4;
+    const limit = data.limit || 4;
 
     const { data: popularRows } = await supabase
       .from("blog_posts")
@@ -167,10 +174,18 @@ export const getPopularPosts = createServerFn({ method: "POST" })
     return { rows: rows.slice(0, limit) };
   });
 
-export const getFeaturedPost = createServerFn({ method: "POST" })
-  .handler(async () => {
-    
-    let { data: post } = await supabase
+export const getFeaturedPost = createServerFn({ method: "POST" }).handler(async () => {
+  let { data: post } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("status", "published")
+    .is("deleted_at", null)
+    .order("published_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (!post) {
+    const { data: latest } = await supabase
       .from("blog_posts")
       .select("*")
       .eq("status", "published")
@@ -178,18 +193,8 @@ export const getFeaturedPost = createServerFn({ method: "POST" })
       .order("published_at", { ascending: false })
       .limit(1)
       .maybeSingle();
+    post = latest;
+  }
 
-    if (!post) {
-      const { data: latest } = await supabase
-        .from("blog_posts")
-        .select("*")
-        .eq("status", "published")
-        .is("deleted_at", null)
-        .order("published_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      post = latest;
-    }
-
-    return { post: (post ?? null) as PublicBlogPost | null };
-  });
+  return { post: (post ?? null) as PublicBlogPost | null };
+});

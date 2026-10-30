@@ -30,7 +30,7 @@ export function PremiumMobileCarousel<T>({
         stopOnInteraction: true,
         playOnInit: false,
       }),
-    ]
+    ],
   );
 
   // Resume autoplay logic after 5 seconds of no interaction

@@ -66,13 +66,11 @@ describe("Mandatory Sign-In & Guest Checkout Elimination", () => {
 
 describe("Server-side Order Details Authorization", () => {
   it("rejects unauthenticated requests to getOrderDetails", async () => {
-    await assert.rejects(
-      async () => {
-        // Calling getOrderDetails with invalid or unauthenticated context
-        // @ts-expect-error testing server fn without valid session
-        await getOrderDetails({ data: { id: "00000000-0000-0000-0000-000000000000" } });
-      },
-    );
+    await assert.rejects(async () => {
+      // Calling getOrderDetails with invalid or unauthenticated context
+      // @ts-expect-error testing server fn without valid session
+      await getOrderDetails({ data: { id: "00000000-0000-0000-0000-000000000000" } });
+    });
   });
 });
 
@@ -215,7 +213,11 @@ describe("Historical Guest Order Claiming Mechanism", () => {
         o.user_id === null && (o.email || "").trim().toLowerCase() === normalizedEmail,
     );
 
-    assert.strictEqual(matching.length, 0, "No duplicate or already-claimed orders should be returned");
+    assert.strictEqual(
+      matching.length,
+      0,
+      "No duplicate or already-claimed orders should be returned",
+    );
   });
 
   it("never overwrites an order already assigned to another user", async () => {
@@ -323,7 +325,11 @@ describe("Historical Guest Order Claiming Mechanism", () => {
       .eq("email" as never, secondaryEmail as never)
       .is("used_at" as never, null);
 
-    assert.strictEqual((replayCheck || []).length, 0, "Token cannot be reused after being consumed");
+    assert.strictEqual(
+      (replayCheck || []).length,
+      0,
+      "Token cannot be reused after being consumed",
+    );
 
     // Clean up secondary order
     await supabase.from("orders").delete().eq("id", secOrder.id);
@@ -352,6 +358,14 @@ describe("Historical Guest Order Claiming Mechanism", () => {
 
     // Clean up customer B
     await supabase.auth.admin.deleteUser(callerBUserId);
+
+    // Clean up Customer A and the created test order so it never leaks into database
+    if (createdOrderId) {
+      await supabase.from("orders").delete().eq("id", createdOrderId);
+    }
+    if (testUserId) {
+      await supabase.auth.admin.deleteUser(testUserId);
+    }
   });
 });
 
@@ -451,7 +465,9 @@ describe("Customer Order Cancellation System", () => {
 
     assert.strictEqual(updated?.status, "cancelled");
     const timeline = (updated?.timeline as Array<{ status: string; note: string }>) || [];
-    assert.ok(timeline.some((t) => t.status === "cancelled" && t.note.includes("Ordered by mistake")));
+    assert.ok(
+      timeline.some((t) => t.status === "cancelled" && t.note.includes("Ordered by mistake")),
+    );
   });
 
   it("prevents re-cancelling an already cancelled order", async () => {
@@ -466,7 +482,11 @@ describe("Customer Order Cancellation System", () => {
       .in("status", CANCELLABLE_STATUSES as never)
       .select("id");
 
-    assert.strictEqual((result || []).length, 0, "Cannot re-cancel an order that is already cancelled");
+    assert.strictEqual(
+      (result || []).length,
+      0,
+      "Cannot re-cancel an order that is already cancelled",
+    );
   });
 
   it("prevents cancelling an order that has already been shipped", async () => {
@@ -516,4 +536,3 @@ describe("Customer Order Cancellation System", () => {
     }
   });
 });
-

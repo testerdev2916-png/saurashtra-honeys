@@ -2,25 +2,30 @@
 // Server-side Supabase client with service role key - bypasses RLS.
 // Use this for admin operations in server functions and server routes only.
 // For user-authenticated queries (with RLS), use the auth middleware instead.
-import { createClient } from '@supabase/supabase-js';
-import type { Database } from './types';
+import { createClient } from "@supabase/supabase-js";
+import type { Database } from "./types";
 
 function createSupabaseAdminClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  
+
   // Try to find the canonical variable first, fall back to the legacy one
   const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  
+
   const KEY_TO_USE = SUPABASE_SECRET_KEY || SUPABASE_SERVICE_ROLE_KEY;
-  
+
   const isNewSecret = KEY_TO_USE?.startsWith("sb_secret_");
   const isLegacyServiceRole = KEY_TO_USE?.startsWith("eyJ");
-  
+
   console.log("\n==================================================");
   console.log("TEMPORARY DEVELOPMENT-ONLY DIAGNOSTIC");
-  console.log("KEY VARIABLE: " + (SUPABASE_SECRET_KEY ? "SUPABASE_SECRET_KEY" : "SUPABASE_SERVICE_ROLE_KEY"));
-  console.log("KEY TYPE: " + (isNewSecret ? "NEW_SECRET" : (isLegacyServiceRole ? "LEGACY_SERVICE_ROLE_JWT" : "UNKNOWN")));
+  console.log(
+    "KEY VARIABLE: " + (SUPABASE_SECRET_KEY ? "SUPABASE_SECRET_KEY" : "SUPABASE_SERVICE_ROLE_KEY"),
+  );
+  console.log(
+    "KEY TYPE: " +
+      (isNewSecret ? "NEW_SECRET" : isLegacyServiceRole ? "LEGACY_SERVICE_ROLE_JWT" : "UNKNOWN"),
+  );
   console.log("PREFIX: " + (KEY_TO_USE ? KEY_TO_USE.substring(0, 10) + "..." : "missing"));
   console.log("LENGTH: " + (KEY_TO_USE ? KEY_TO_USE.length : 0));
   console.log("RUNTIME: " + (typeof window === "undefined" ? "SERVER" : "BROWSER"));
@@ -28,10 +33,10 @@ function createSupabaseAdminClient() {
 
   if (!SUPABASE_URL || !KEY_TO_USE) {
     const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!KEY_TO_USE ? ['SUPABASE_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY'] : []),
+      ...(!SUPABASE_URL ? ["SUPABASE_URL"] : []),
+      ...(!KEY_TO_USE ? ["SUPABASE_SECRET_KEY / SUPABASE_SERVICE_ROLE_KEY"] : []),
     ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
+    const message = `Missing Supabase environment variable(s): ${missing.join(", ")}. Connect Supabase in Lovable Cloud.`;
     console.error(`[Supabase] ${message}`);
     throw new Error(message);
   }

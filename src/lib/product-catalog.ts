@@ -177,9 +177,7 @@ function toProduct(
     : [];
   const galleryImages =
     rawImages.length > 0
-      ? Array.from(new Set(rawImages))
-          .slice(0, 9)
-          .map((img) => resolveImage(img, null, "", r.updated_at))
+      ? Array.from(new Set(rawImages)).map((img) => resolveImage(img, null, "", r.updated_at))
       : [];
   const primaryImg = resolveImage(
     r.image_key,
@@ -201,9 +199,7 @@ function toProduct(
       : [];
   const additionalImages =
     rawAdditional.length > 0
-      ? Array.from(new Set(rawAdditional))
-          .slice(0, 8)
-          .map((img) => resolveImage(img, null, "", r.updated_at))
+      ? Array.from(new Set(rawAdditional)).map((img) => resolveImage(img, null, "", r.updated_at))
       : [];
 
   // Content Source: The 250 GM variant is the single source of truth for shared educational and trust content
@@ -213,8 +209,13 @@ function toProduct(
         (u): u is string => typeof u === "string" && u.trim().length > 0,
       )
     : [];
-  const infographics = extractInfographics(
-    rawSharedImages.map((img) => resolveImage(img, null, "", contentSource.updated_at)),
+  const sharedGalleryImages = rawSharedImages.map((img) =>
+    resolveImage(img, null, "", contentSource.updated_at),
+  );
+  const infographics = extractInfographics(sharedGalleryImages);
+
+  const allProductCommonImages = Array.from(
+    new Set([...galleryImages, ...sharedGalleryImages]),
   );
 
   const sharedContent: SharedProductContent = {
@@ -259,7 +260,7 @@ function toProduct(
     sizes: activeSizes,
     variants: mappedVariants,
     image: primaryImg,
-    images: galleryImages,
+    images: allProductCommonImages,
     additionalImages: additionalImages,
     benefits: Array.isArray(contentSource.benefits)
       ? (contentSource.benefits as string[])

@@ -19,7 +19,9 @@ type EventName =
 type AnyRecord = Record<string, unknown>;
 
 declare global {
-  interface Window { dataLayer?: AnyRecord[] }
+  interface Window {
+    dataLayer?: AnyRecord[];
+  }
 }
 
 const seen = new Map<string, number>();
@@ -50,7 +52,9 @@ export function track(name: EventName, params: AnyRecord = {}) {
   window.dataLayer.push(payload);
   try {
     window.dispatchEvent(new CustomEvent(`analytics:${name}`, { detail: payload }));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 // GA4 item shape helper
@@ -63,9 +67,15 @@ export type AnalyticsItem = {
   quantity?: number;
 };
 
-export function toItem(p: {
-  slug: string; name: string; price: number; category?: string;
-}, opts: { size?: string; qty?: number } = {}): AnalyticsItem {
+export function toItem(
+  p: {
+    slug: string;
+    name: string;
+    price: number;
+    category?: string;
+  },
+  opts: { size?: string; qty?: number } = {},
+): AnalyticsItem {
   return {
     item_id: p.slug,
     item_name: p.name,

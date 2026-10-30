@@ -1,10 +1,10 @@
-import { createClient } from '@supabase/supabase-js';
-import { v2 as cloudinary } from 'cloudinary';
-import fs from 'fs';
-import path from 'path';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
-dotenv.config({ path: '.env' });
+import { createClient } from "@supabase/supabase-js";
+import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
+import path from "path";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
 // Setup Supabase
 const supabaseUrl = process.env.VITE_SUPABASE_URL;
@@ -21,10 +21,10 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const BUCKET = 'media';
-const CLOUDINARY_ROOT_FOLDER = 'saurashtra-honey';
+const BUCKET = "media";
+const CLOUDINARY_ROOT_FOLDER = "saurashtra-honey";
 
-async function listAllFiles(currentPath = ''): Promise<string[]> {
+async function listAllFiles(currentPath = ""): Promise<string[]> {
   let allFiles: string[] = [];
   const { data, error } = await supabase.storage.from(BUCKET).list(currentPath, { limit: 1000 });
   if (error) {
@@ -39,8 +39,8 @@ async function listAllFiles(currentPath = ''): Promise<string[]> {
       allFiles = allFiles.concat(subFiles);
     } else {
       // It's a file, ignore empty placeholders
-      if (item.name === '.emptyFolderPlaceholder') continue;
-      
+      if (item.name === ".emptyFolderPlaceholder") continue;
+
       const filePath = currentPath ? `${currentPath}/${item.name}` : item.name;
       allFiles.push(filePath);
     }
@@ -53,7 +53,7 @@ async function migrate() {
   const files = await listAllFiles();
   console.log(`Found ${files.length} files to migrate.`);
 
-  const migrationMap: Record<string, { public_id: string, secure_url: string }> = {};
+  const migrationMap: Record<string, { public_id: string; secure_url: string }> = {};
   let successCount = 0;
   let failCount = 0;
 
@@ -78,16 +78,16 @@ async function migrate() {
         public_id: uploadResult.public_id,
         secure_url: uploadResult.secure_url,
       };
-      
+
       // Also save mapping for encoded URL just in case DB has URL encoded spaces
-      const encodedSupabaseUrl = supabaseUrl.replace(/ /g, '%20');
+      const encodedSupabaseUrl = supabaseUrl.replace(/ /g, "%20");
       if (encodedSupabaseUrl !== supabaseUrl) {
-          migrationMap[encodedSupabaseUrl] = {
-              public_id: uploadResult.public_id,
-              secure_url: uploadResult.secure_url,
-          };
+        migrationMap[encodedSupabaseUrl] = {
+          public_id: uploadResult.public_id,
+          secure_url: uploadResult.secure_url,
+        };
       }
-      
+
       successCount++;
     } catch (err) {
       console.error(`Failed to upload ${filePath}:`, err);
@@ -95,11 +95,11 @@ async function migrate() {
     }
   }
 
-  fs.writeFileSync('scripts/migration/migration_map.json', JSON.stringify(migrationMap, null, 2));
+  fs.writeFileSync("scripts/migration/migration_map.json", JSON.stringify(migrationMap, null, 2));
   console.log(`\nMigration completed!`);
   console.log(`Success: ${successCount}`);
   console.log(`Failed: ${failCount}`);
   console.log(`Map saved to scripts/migration/migration_map.json`);
 }
 
-runMigration('product-images').catch(console.error);
+runMigration("product-images").catch(console.error);

@@ -12,14 +12,17 @@ declare global {
 function inject(src: string, id: string) {
   if (document.getElementById(id)) return;
   const s = document.createElement("script");
-  s.async = true; s.src = src; s.id = id;
+  s.async = true;
+  s.src = src;
+  s.id = id;
   document.head.appendChild(s);
 }
 
 function injectInline(code: string, id: string) {
   if (document.getElementById(id)) return;
   const s = document.createElement("script");
-  s.id = id; s.text = code;
+  s.id = id;
+  s.text = code;
   document.head.appendChild(s);
 }
 
@@ -30,15 +33,28 @@ export function AnalyticsScripts() {
   useEffect(() => {
     if (ga) {
       inject(`https://www.googletagmanager.com/gtag/js?id=${ga}`, "ga4-src");
-      injectInline(`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga}',{send_page_view:true});`, "ga4-init");
+      injectInline(
+        `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga}',{send_page_view:true});`,
+        "ga4-init",
+      );
     }
     if (cl) {
-      injectInline(`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${cl}");`, "clarity-init");
+      injectInline(
+        `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${cl}");`,
+        "clarity-init",
+      );
     }
     if (gsc) {
-      const m = document.querySelector('meta[name="google-site-verification"]') as HTMLMetaElement | null;
+      const m = document.querySelector(
+        'meta[name="google-site-verification"]',
+      ) as HTMLMetaElement | null;
       if (m) m.content = gsc;
-      else { const el = document.createElement("meta"); el.name = "google-site-verification"; el.content = gsc; document.head.appendChild(el); }
+      else {
+        const el = document.createElement("meta");
+        el.name = "google-site-verification";
+        el.content = gsc;
+        document.head.appendChild(el);
+      }
     }
   }, [ga, cl, gsc]);
 
@@ -46,10 +62,14 @@ export function AnalyticsScripts() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const map: Record<string, string> = {
-      view_item: "ViewContent", add_to_cart: "AddToCart", begin_checkout: "InitiateCheckout",
-      purchase: "Purchase", search: "Search", view_item_list: "ViewCategory",
+      view_item: "ViewContent",
+      add_to_cart: "AddToCart",
+      begin_checkout: "InitiateCheckout",
+      purchase: "Purchase",
+      search: "Search",
+      view_item_list: "ViewCategory",
     };
-    
+
     // Listen to route changes to fire PageView on SPA navigations
     let lastUrl = window.location.href;
     const observer = new MutationObserver(() => {
@@ -66,7 +86,7 @@ export function AnalyticsScripts() {
       const fbEvent = map[name];
       if (fbEvent && window.fbq) {
         const payload = e.detail ?? {};
-        
+
         if (name === "view_item" || name === "add_to_cart") {
           const items = payload.items as any[];
           const item = items?.[0];
@@ -76,7 +96,7 @@ export function AnalyticsScripts() {
               content_type: "product",
               content_name: item.item_name,
               value: payload.value || item.price,
-              currency: "INR"
+              currency: "INR",
             });
           }
         } else if (name === "begin_checkout" || name === "purchase") {
@@ -86,7 +106,7 @@ export function AnalyticsScripts() {
             content_type: "product",
             num_items: items.reduce((acc: number, i: any) => acc + (i.quantity || 1), 0),
             value: payload.value,
-            currency: "INR"
+            currency: "INR",
           });
         } else {
           window.fbq("track", fbEvent, payload);

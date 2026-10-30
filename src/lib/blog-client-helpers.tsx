@@ -17,7 +17,12 @@ export function resolvePostImage(url?: string | null, categoryOrSlug?: string | 
     localFallback = beeFarm;
   } else if (key.includes("ayurveda") || key.includes("remed") || key.includes("raw")) {
     localFallback = drizzle;
-  } else if (key.includes("sustain") || key.includes("planet") || key.includes("bloom") || key.includes("flora")) {
+  } else if (
+    key.includes("sustain") ||
+    key.includes("planet") ||
+    key.includes("bloom") ||
+    key.includes("flora")
+  ) {
     localFallback = beeFlower;
   } else if (key.includes("comb") || key.includes("hive")) {
     localFallback = comb;
@@ -97,13 +102,13 @@ function parseInlineFormatting(text: string): React.ReactNode[] {
       parts.push(
         <strong key={match.index} className="font-bold text-espresso">
           {token.slice(2, -2)}
-        </strong>
+        </strong>,
       );
     } else if (token.startsWith("*") && token.endsWith("*")) {
       parts.push(
         <em key={match.index} className="italic text-espresso/95">
           {token.slice(1, -1)}
-        </em>
+        </em>,
       );
     } else if (token.startsWith("[")) {
       const linkMatch = /^\[([^\]]+)\]\(([^)]+)\)$/.exec(token);
@@ -117,7 +122,7 @@ function parseInlineFormatting(text: string): React.ReactNode[] {
             className="text-burnt-orange font-bold underline hover:text-terracotta transition-colors"
           >
             {linkMatch[1]}
-          </a>
+          </a>,
         );
       } else {
         parts.push(token);
@@ -159,9 +164,7 @@ export function renderMarkdown(markdown?: string | null): React.ReactNode[] {
               className="w-full rounded-2xl shadow-soft border border-border/80 object-cover aspect-[16/9]"
             />
             {imgMatch[1] && (
-              <p className="mt-2 text-center text-xs text-muted-foreground italic">
-                {imgMatch[1]}
-              </p>
+              <p className="mt-2 text-center text-xs text-muted-foreground italic">{imgMatch[1]}</p>
             )}
           </div>
         );
@@ -230,10 +233,7 @@ export function renderMarkdown(markdown?: string | null): React.ReactNode[] {
 
     // Default Paragraph
     return (
-      <p
-        key={idx}
-        className="text-[15px] md:text-base text-foreground/90 leading-relaxed my-4"
-      >
+      <p key={idx} className="text-[15px] md:text-base text-foreground/90 leading-relaxed my-4">
         {parseInlineFormatting(trim)}
       </p>
     );

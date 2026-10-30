@@ -2,7 +2,19 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader, Card, BtnPrimary, BtnGhost, Field, inp } from "@/components/admin/ui";
-import { ArrowLeft, ArrowUp, ArrowDown, Plus, Trash2, Edit, Save, X, Image as ImageIcon, Video, FileText } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  Plus,
+  Trash2,
+  Edit,
+  Save,
+  X,
+  Image as ImageIcon,
+  Video,
+  FileText,
+} from "lucide-react";
 import {
   fetchAllHomepageCustomerStories,
   createHomepageCustomerStory,
@@ -24,7 +36,7 @@ function AdminCustomerStories() {
   const [showAdd, setShowAdd] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const router = useRouter();
-  const [products, setProducts] = useState<{name: string, slug: string}[]>([]);
+  const [products, setProducts] = useState<{ name: string; slug: string }[]>([]);
   const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState<Partial<HomepageCustomerStory>>({
@@ -58,7 +70,10 @@ function AdminCustomerStories() {
     try {
       // Inline fetch for simplicity, or we could import supabase
       const { supabase } = await import("@/integrations/supabase/client");
-      const { data } = await supabase.from("products").select("name, slug").eq("status", "published");
+      const { data } = await supabase
+        .from("products")
+        .select("name, slug")
+        .eq("status", "published");
       if (data) setProducts(data);
     } catch (e) {
       console.error("Failed to load products", e);
@@ -70,24 +85,29 @@ function AdminCustomerStories() {
     loadProducts();
   }, []);
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: "video" | "poster") => {
+  const handleFileUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    type: "video" | "poster",
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (type === "video" && !file.type.startsWith("video/")) return toast.error("Please select a valid video file.");
-    if (type === "poster" && !file.type.startsWith("image/")) return toast.error("Please select a valid image file.");
+    if (type === "video" && !file.type.startsWith("video/"))
+      return toast.error("Please select a valid video file.");
+    if (type === "poster" && !file.type.startsWith("image/"))
+      return toast.error("Please select a valid image file.");
 
     setUploading(true);
     toast.loading(`Uploading ${type}...`);
     try {
       const finalUrl = await uploadToImageKit(file, "homepage_stories");
-      
+
       if (type === "video") {
-        setFormData(prev => ({ ...prev, media_url: finalUrl }));
+        setFormData((prev) => ({ ...prev, media_url: finalUrl }));
       } else {
-        setFormData(prev => ({ ...prev, poster_image: finalUrl }));
+        setFormData((prev) => ({ ...prev, poster_image: finalUrl }));
       }
-      
+
       toast.dismiss();
       toast.success(`${type} uploaded successfully`);
     } catch (err: any) {
@@ -163,7 +183,8 @@ function AdminCustomerStories() {
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
-    if ((direction === "up" && index === 0) || (direction === "down" && index === items.length - 1)) return;
+    if ((direction === "up" && index === 0) || (direction === "down" && index === items.length - 1))
+      return;
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     const newItems = [...items];
     const [moved] = newItems.splice(index, 1);
@@ -189,13 +210,15 @@ function AdminCustomerStories() {
     }
   };
 
-  if (status === "loading") return <div className="py-24 text-center text-muted-foreground">Loading...</div>;
-  if (status === "error") return (
-    <div className="py-24 text-center">
-      <div className="text-red-500 mb-4 font-semibold">Unable to load video testimonials.</div>
-      <BtnPrimary onClick={loadData}>Retry</BtnPrimary>
-    </div>
-  );
+  if (status === "loading")
+    return <div className="py-24 text-center text-muted-foreground">Loading...</div>;
+  if (status === "error")
+    return (
+      <div className="py-24 text-center">
+        <div className="text-red-500 mb-4 font-semibold">Unable to load video testimonials.</div>
+        <BtnPrimary onClick={loadData}>Retry</BtnPrimary>
+      </div>
+    );
 
   return (
     <div>
@@ -203,7 +226,10 @@ function AdminCustomerStories() {
         title="Customer Testimonials"
         subtitle="Manage the 'Real People. Real Honey.' photo carousel on the homepage."
         actions={
-          <Link to="/admin/homepage" className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep">
+          <Link
+            to="/admin/homepage"
+            className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep"
+          >
             <ArrowLeft className="size-4" /> Back to Homepage CMS
           </Link>
         }
@@ -212,7 +238,9 @@ function AdminCustomerStories() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-serif text-xl font-bold text-forest-dark">Customer Testimonials</h2>
         {!showAdd && !editingId && (
-          <BtnPrimary onClick={() => setShowAdd(true)}><Plus className="size-4" /> Add Story</BtnPrimary>
+          <BtnPrimary onClick={() => setShowAdd(true)}>
+            <Plus className="size-4" /> Add Story
+          </BtnPrimary>
         )}
       </div>
 
@@ -221,59 +249,113 @@ function AdminCustomerStories() {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Rating">
-                <input type="number" min="1" max="5" required value={formData.rating || 5} onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })} className={inp} />
+                <input
+                  type="number"
+                  min="1"
+                  max="5"
+                  required
+                  value={formData.rating || 5}
+                  onChange={(e) => setFormData({ ...formData, rating: parseInt(e.target.value) })}
+                  className={inp}
+                />
               </Field>
               <Field label="Customer Name *">
-                <input required value={formData.customer_name || ""} onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })} className={inp} placeholder="e.g. Karan Mehta" />
+                <input
+                  required
+                  value={formData.customer_name || ""}
+                  onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
+                  className={inp}
+                  placeholder="e.g. Karan Mehta"
+                />
               </Field>
               <Field label="Customer Location (City/State)">
                 <div className="flex gap-2">
-                  <input value={formData.customer_city || ""} onChange={(e) => setFormData({ ...formData, customer_city: e.target.value })} className={inp} placeholder="City" />
-                  <input value={formData.customer_state || ""} onChange={(e) => setFormData({ ...formData, customer_state: e.target.value })} className={inp} placeholder="State" />
+                  <input
+                    value={formData.customer_city || ""}
+                    onChange={(e) => setFormData({ ...formData, customer_city: e.target.value })}
+                    className={inp}
+                    placeholder="City"
+                  />
+                  <input
+                    value={formData.customer_state || ""}
+                    onChange={(e) => setFormData({ ...formData, customer_state: e.target.value })}
+                    className={inp}
+                    placeholder="State"
+                  />
                 </div>
               </Field>
-              
+
               <Field label="Customer Photo (Optional)">
                 <div className="flex flex-col gap-2">
-                  <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => handleFileUpload(e, "poster")} className="text-sm" disabled={uploading} />
-                  {formData.poster_image && <div className="text-xs text-green-600 truncate">Uploaded: {formData.poster_image}</div>}
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={(e) => handleFileUpload(e, "poster")}
+                    className="text-sm"
+                    disabled={uploading}
+                  />
+                  {formData.poster_image && (
+                    <div className="text-xs text-green-600 truncate">
+                      Uploaded: {formData.poster_image}
+                    </div>
+                  )}
                 </div>
               </Field>
 
               <Field label="Associated Product">
-                <select 
-                  className={inp} 
-                  value={formData.product_slug || ""} 
+                <select
+                  className={inp}
+                  value={formData.product_slug || ""}
                   onChange={(e) => {
-                    const selected = products.find(p => p.slug === e.target.value);
-                    setFormData({ 
-                      ...formData, 
+                    const selected = products.find((p) => p.slug === e.target.value);
+                    setFormData({
+                      ...formData,
                       product_slug: e.target.value,
-                      product_name: selected?.name || ""
+                      product_name: selected?.name || "",
                     });
                   }}
                 >
                   <option value="">Select a product...</option>
-                  {products.map(p => (
-                    <option key={p.slug} value={p.slug}>{p.name}</option>
+                  {products.map((p) => (
+                    <option key={p.slug} value={p.slug}>
+                      {p.name}
+                    </option>
                   ))}
                 </select>
               </Field>
 
               <div className="md:col-span-2">
                 <Field label="Review Quote / Caption">
-                  <textarea rows={3} value={formData.review_text || ""} onChange={(e) => setFormData({ ...formData, review_text: e.target.value })} className={inp} placeholder="Review content..." />
+                  <textarea
+                    rows={3}
+                    value={formData.review_text || ""}
+                    onChange={(e) => setFormData({ ...formData, review_text: e.target.value })}
+                    className={inp}
+                    placeholder="Review content..."
+                  />
                 </Field>
               </div>
 
               <div className="md:col-span-2 flex items-center gap-2">
-                <input type="checkbox" id="published" checked={formData.published} onChange={(e) => setFormData({ ...formData, published: e.target.checked })} className="w-4 h-4 rounded border-border" />
-                <label htmlFor="published" className="text-sm font-medium">Published (Visible on site)</label>
+                <input
+                  type="checkbox"
+                  id="published"
+                  checked={formData.published}
+                  onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                  className="w-4 h-4 rounded border-border"
+                />
+                <label htmlFor="published" className="text-sm font-medium">
+                  Published (Visible on site)
+                </label>
               </div>
             </div>
             <div className="flex gap-2 pt-2">
-              <BtnPrimary type="submit"><Save className="size-4" /> Save Story</BtnPrimary>
-              <BtnGhost type="button" onClick={resetForm}><X className="size-4" /> Cancel</BtnGhost>
+              <BtnPrimary type="submit">
+                <Save className="size-4" /> Save Story
+              </BtnPrimary>
+              <BtnGhost type="button" onClick={resetForm}>
+                <X className="size-4" /> Cancel
+              </BtnGhost>
             </div>
           </form>
         </Card>
@@ -281,11 +363,16 @@ function AdminCustomerStories() {
 
       <div className="space-y-3">
         {status === "empty" ? (
-          <div className="p-8 text-center text-muted-foreground bg-white border border-border rounded-2xl">No customer testimonials configured.</div>
+          <div className="p-8 text-center text-muted-foreground bg-white border border-border rounded-2xl">
+            No customer testimonials configured.
+          </div>
         ) : (
           items.map((item, index) => {
             return (
-              <Card key={item.id} className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 ${editingId === item.id ? "border-gold-deep" : ""} ${!item.published ? "opacity-60 grayscale-[30%]" : ""}`}>
+              <Card
+                key={item.id}
+                className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 ${editingId === item.id ? "border-gold-deep" : ""} ${!item.published ? "opacity-60 grayscale-[30%]" : ""}`}
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 shrink-0 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange overflow-hidden">
                     {item.poster_image ? (
@@ -296,28 +383,66 @@ function AdminCustomerStories() {
                   </div>
                   <div>
                     <h3 className="font-bold text-forest-dark flex items-center gap-2">
-                      {item.customer_name} 
-                      {!item.published && <span className="text-[10px] uppercase tracking-widest bg-red-100 text-red-700 px-2 py-0.5 rounded-full">Draft</span>}
+                      {item.customer_name}
+                      {!item.published && (
+                        <span className="text-[10px] uppercase tracking-widest bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                          Draft
+                        </span>
+                      )}
                     </h3>
                     <p className="text-xs text-muted-foreground line-clamp-1 max-w-md">
                       {item.review_text || "Customer Photo"}
                     </p>
                     <div className="text-[11px] text-muted-foreground mt-1 flex gap-2">
-                      {item.customer_city && <span>📍 {item.customer_city}, {item.customer_state}</span>}
+                      {item.customer_city && (
+                        <span>
+                          📍 {item.customer_city}, {item.customer_state}
+                        </span>
+                      )}
                       {item.product_name && <span>🍯 {item.product_name}</span>}
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <div className="flex items-center border border-border rounded-lg overflow-hidden bg-white mr-2">
-                    <button disabled={index === 0} onClick={() => handleMove(index, "up")} className="p-2 hover:bg-cream/60 disabled:opacity-30 border-r border-border"><ArrowUp className="size-4" /></button>
-                    <button disabled={index === items.length - 1} onClick={() => handleMove(index, "down")} className="p-2 hover:bg-cream/60 disabled:opacity-30"><ArrowDown className="size-4" /></button>
+                    <button
+                      disabled={index === 0}
+                      onClick={() => handleMove(index, "up")}
+                      className="p-2 hover:bg-cream/60 disabled:opacity-30 border-r border-border"
+                    >
+                      <ArrowUp className="size-4" />
+                    </button>
+                    <button
+                      disabled={index === items.length - 1}
+                      onClick={() => handleMove(index, "down")}
+                      className="p-2 hover:bg-cream/60 disabled:opacity-30"
+                    >
+                      <ArrowDown className="size-4" />
+                    </button>
                   </div>
-                  <button onClick={() => handleTogglePublish(item.id, item.published)} className="p-2 text-forest-dark hover:bg-cream rounded" title="Toggle Publish">
+                  <button
+                    onClick={() => handleTogglePublish(item.id, item.published)}
+                    className="p-2 text-forest-dark hover:bg-cream rounded"
+                    title="Toggle Publish"
+                  >
                     {item.published ? <X className="size-4" /> : <Save className="size-4" />}
                   </button>
-                  <button onClick={() => { setEditingId(item.id); setFormData(item); setShowAdd(false); }} className="p-2 text-forest-dark hover:bg-cream rounded"><Edit className="size-4" /></button>
-                  <button onClick={() => handleRemove(item.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded"><Trash2 className="size-4" /></button>
+                  <button
+                    onClick={() => {
+                      setEditingId(item.id);
+                      setFormData(item);
+                      setShowAdd(false);
+                    }}
+                    className="p-2 text-forest-dark hover:bg-cream rounded"
+                  >
+                    <Edit className="size-4" />
+                  </button>
+                  <button
+                    onClick={() => handleRemove(item.id)}
+                    className="p-2 text-destructive hover:bg-destructive/10 rounded"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
                 </div>
               </Card>
             );

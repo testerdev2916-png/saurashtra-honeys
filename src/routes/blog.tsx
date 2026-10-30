@@ -1,14 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import React, { useState, useMemo } from "react";
-import {
-  ArrowRight,
-  Calendar,
-  Clock,
-  Search,
-  Check,
-  AlertCircle,
-  Sparkles,
-} from "lucide-react";
+import { ArrowRight, Calendar, Clock, Search, Check, AlertCircle, Sparkles } from "lucide-react";
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
@@ -18,28 +10,25 @@ import {
   getFeaturedPost,
   type PublicBlogPost,
 } from "@/lib/blog-server.functions";
-import {
-  resolvePostImage,
-  formatPostDate,
-} from "@/lib/blog-client-helpers";
+import { resolvePostImage, formatPostDate } from "@/lib/blog-client-helpers";
 import { subscribeNewsletter } from "@/lib/newsletter.functions";
 import { useServerFn } from "@tanstack/react-start";
 
 // Custom hook for native drag-to-scroll
 function useDragScroll() {
   const ref = React.useRef<HTMLDivElement>(null);
-  
+
   React.useEffect(() => {
     const ele = ref.current;
     if (!ele) return;
-    
+
     let pos = { top: 0, left: 0, x: 0, y: 0 };
     let isDown = false;
 
     const mouseDownHandler = function (e: MouseEvent) {
       isDown = true;
-      ele.style.cursor = 'grabbing';
-      ele.style.userSelect = 'none';
+      ele.style.cursor = "grabbing";
+      ele.style.userSelect = "none";
       pos = {
         left: ele.scrollLeft,
         top: ele.scrollTop,
@@ -59,18 +48,18 @@ function useDragScroll() {
 
     const mouseUpHandler = function () {
       isDown = false;
-      ele.style.cursor = 'grab';
-      ele.style.removeProperty('user-select');
+      ele.style.cursor = "grab";
+      ele.style.removeProperty("user-select");
     };
 
-    ele.addEventListener('mousedown', mouseDownHandler);
-    window.addEventListener('mousemove', mouseMoveHandler);
-    window.addEventListener('mouseup', mouseUpHandler);
+    ele.addEventListener("mousedown", mouseDownHandler);
+    window.addEventListener("mousemove", mouseMoveHandler);
+    window.addEventListener("mouseup", mouseUpHandler);
 
     return () => {
-      ele.removeEventListener('mousedown', mouseDownHandler);
-      window.removeEventListener('mousemove', mouseMoveHandler);
-      window.removeEventListener('mouseup', mouseUpHandler);
+      ele.removeEventListener("mousedown", mouseDownHandler);
+      window.removeEventListener("mousemove", mouseMoveHandler);
+      window.removeEventListener("mouseup", mouseUpHandler);
     };
   }, []);
 
@@ -164,7 +153,7 @@ function BlogPage() {
   const [newsletterMsg, setNewsletterMsg] = useState("");
 
   const subscribe = useServerFn(subscribeNewsletter);
-  
+
   // Attach the drag-to-scroll hook
   const scrollContainerRef = useDragScroll();
 
@@ -208,16 +197,12 @@ function BlogPage() {
         setNewsletterMsg("You are already subscribed to our Journal newsletter!");
       } else {
         setNewsletterStatus("success");
-        setNewsletterMsg(
-          "Successfully subscribed! Check your inbox for welcome stories."
-        );
+        setNewsletterMsg("Successfully subscribed! Check your inbox for welcome stories.");
         setEmail("");
       }
     } catch (err) {
       setNewsletterStatus("error");
-      setNewsletterMsg(
-        (err as Error).message || "Something went wrong. Please try again."
-      );
+      setNewsletterMsg((err as Error).message || "Something went wrong. Please try again.");
     }
   }
 
@@ -260,17 +245,16 @@ function BlogPage() {
               Honey. Knowledge. Inspiration.
             </h2>
             <p className="text-sm sm:text-base text-espresso/80 leading-relaxed mt-3 max-w-xl mx-auto">
-              Read our latest articles on bees, health, sustainability and
-              natural living.
+              Read our latest articles on bees, health, sustainability and natural living.
             </p>
           </div>
 
           {/* Category Filter Tabs - Premium Horizontal Navigation */}
           <div className="w-full relative -mx-4 sm:mx-0 overflow-hidden">
-            <div 
+            <div
               ref={scrollContainerRef}
               className="flex items-center gap-4 sm:gap-5 overflow-x-auto snap-x snap-mandatory pb-6 pt-2 px-5 sm:px-0 scroll-smooth no-scrollbar cursor-grab"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {CATEGORY_TABS.map((cat, index) => {
                 const isSelected = activeCategory === cat;
@@ -293,10 +277,7 @@ function BlogPage() {
           </div>
 
           {/* Search bar row */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="mt-6 max-w-md mx-auto relative"
-          >
+          <form onSubmit={handleSearchSubmit} className="mt-6 max-w-md mx-auto relative">
             <Search className="size-4 text-espresso/50 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
               type="text"
@@ -327,13 +308,10 @@ function BlogPage() {
               <div className="size-14 rounded-2xl bg-cream-deep flex items-center justify-center mx-auto text-brand-orange mb-4">
                 <Search className="size-6" />
               </div>
-              <h3 className="font-serif text-2xl font-bold text-espresso">
-                No articles found
-              </h3>
+              <h3 className="font-serif text-2xl font-bold text-espresso">No articles found</h3>
               <p className="mt-2 text-sm text-espresso/75 leading-relaxed">
-                We couldn&apos;t find any published articles matching your
-                criteria. Try selecting &quot;All Posts&quot; or resetting your
-                search.
+                We couldn&apos;t find any published articles matching your criteria. Try selecting
+                &quot;All Posts&quot; or resetting your search.
               </p>
               <button
                 type="button"
@@ -396,12 +374,10 @@ function BlogPage() {
                         <div className="pt-4 border-t border-border/60 flex items-center justify-between text-[12px] font-medium text-espresso/70">
                           <div className="flex items-center gap-4">
                             <span className="flex items-center gap-1.5">
-                              <Calendar className="size-3.5 text-brand-orange" />{" "}
-                              {post.date}
+                              <Calendar className="size-3.5 text-brand-orange" /> {post.date}
                             </span>
                             <span className="flex items-center gap-1.5">
-                              <Clock className="size-3.5 text-brand-orange" />{" "}
-                              {post.readTime}
+                              <Clock className="size-3.5 text-brand-orange" /> {post.readTime}
                             </span>
                           </div>
 
@@ -465,12 +441,10 @@ function BlogPage() {
                       <div className="pt-4 border-t border-border/60 flex items-center justify-between text-[11px] sm:text-xs font-medium text-espresso/70">
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1.5">
-                            <Calendar className="size-3.5 text-brand-orange" />{" "}
-                            {post.date}
+                            <Calendar className="size-3.5 text-brand-orange" /> {post.date}
                           </span>
                           <span className="flex items-center gap-1.5">
-                            <Clock className="size-3.5 text-brand-orange" />{" "}
-                            {post.readTime}
+                            <Clock className="size-3.5 text-brand-orange" /> {post.readTime}
                           </span>
                         </div>
 
@@ -523,8 +497,7 @@ function BlogPage() {
                   Join Our Honey Journey
                 </h2>
                 <p className="text-sm sm:text-base text-espresso/75 leading-relaxed pt-1">
-                  Get the latest stories, tips and farm updates right in your
-                  inbox.
+                  Get the latest stories, tips and farm updates right in your inbox.
                 </p>
               </div>
 
@@ -547,9 +520,7 @@ function BlogPage() {
                     disabled={newsletterStatus === "submitting"}
                     className="bg-brand-orange hover:bg-brand-orange-hover text-white font-bold text-xs sm:text-sm tracking-widest px-8 py-4 rounded-full uppercase shadow-md hover:scale-[1.02] transition-all disabled:opacity-50 shrink-0"
                   >
-                    {newsletterStatus === "submitting"
-                      ? "SUBSCRIBING..."
-                      : "SUBSCRIBE"}
+                    {newsletterStatus === "submitting" ? "SUBSCRIBING..." : "SUBSCRIBE"}
                   </button>
                 </form>
 

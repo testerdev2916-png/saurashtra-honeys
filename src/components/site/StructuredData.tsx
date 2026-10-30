@@ -4,14 +4,14 @@
 export function StructuredData({ data }: { data: unknown }) {
   if (!data) return null;
   return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
-    />
+    <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }} />
   );
 }
 
-export function breadcrumbLd(items: { name: string; url: string }[], origin = "https://saurastrahoney.com") {
+export function breadcrumbLd(
+  items: { name: string; url: string }[],
+  origin = "https://saurastrahoney.com",
+) {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -29,10 +29,18 @@ export function breadcrumbLd(items: { name: string; url: string }[], origin = "h
   };
 }
 
-export function productLd(p: {
-  name: string; description: string; image: string; slug: string; price: number;
-  rating?: number; reviews?: number;
-}, origin = "https://saurastrahoney.com") {
+export function productLd(
+  p: {
+    name: string;
+    description: string;
+    image: string;
+    slug: string;
+    price: number;
+    rating?: number;
+    reviews?: number;
+  },
+  origin = "https://saurastrahoney.com",
+) {
   const fullImage = p.image?.startsWith("http")
     ? p.image
     : `${origin}${p.image?.startsWith("/") ? "" : "/"}${p.image || "saurashtra-honey-logo-complete.png"}`;
@@ -54,26 +62,33 @@ export function productLd(p: {
       url: `${origin}/product/${p.slug}`,
       seller: {
         "@type": "Organization",
-        name: "Saurashtra Honey"
-      }
-    },
-    ...(p.rating && p.reviews ? {
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: p.rating,
-        reviewCount: p.reviews,
+        name: "Saurashtra Honey",
       },
-    } : {}),
+    },
+    ...(p.rating && p.reviews
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: p.rating,
+            reviewCount: p.reviews,
+          },
+        }
+      : {}),
   };
 }
 
-export function organizationLd(origin = "https://saurastrahoney.com", logoUrl = "https://saurastrahoney.com/saurashtra-honey-logo-complete.png") {
+export function organizationLd(
+  origin = "https://saurastrahoney.com",
+  logoUrl = "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+) {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Saurashtra Honey",
     url: origin,
-    logo: logoUrl.startsWith("http") ? logoUrl : `${origin}${logoUrl.startsWith("/") ? "" : "/"}${logoUrl}`,
+    logo: logoUrl.startsWith("http")
+      ? logoUrl
+      : `${origin}${logoUrl.startsWith("/") ? "" : "/"}${logoUrl}`,
     description: "Raw, unfiltered honey straight from the wildflower farms of Saurashtra.",
     contactPoint: {
       "@type": "ContactPoint",
@@ -81,12 +96,12 @@ export function organizationLd(origin = "https://saurastrahoney.com", logoUrl = 
       contactType: "customer service",
       email: "hello@saurastrahoney.com",
       areaServed: "IN",
-      availableLanguage: ["English", "Hindi", "Gujarati"]
+      availableLanguage: ["English", "Hindi", "Gujarati"],
     },
     sameAs: [
       "https://www.instagram.com/saurashtra_honey",
       "https://www.facebook.com/Saurashtrahoneybeefarm/",
-      "https://www.youtube.com/@saurashtrahoney2059"
+      "https://www.youtube.com/@saurashtrahoney2059",
     ],
   };
 }

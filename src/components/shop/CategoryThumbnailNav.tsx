@@ -17,8 +17,7 @@ export function CategoryThumbnailNav({
 
   // Normalize the active category for strict comparison
   const normalizedActive =
-    activeCategory.toLowerCase() === "all products" ||
-    activeCategory.toLowerCase() === "all"
+    activeCategory.toLowerCase() === "all products" || activeCategory.toLowerCase() === "all"
       ? "all products"
       : activeCategory.toLowerCase();
 
@@ -66,21 +65,27 @@ export function CategoryThumbnailNav({
                     }`}
                     draggable={false}
                     onError={(event) => {
-                      console.error("[CATEGORY IMAGE FAILED]", { slug: cat.slug, name: cat.name, src: event.currentTarget.src });
+                      console.error("[CATEGORY IMAGE FAILED]", {
+                        slug: cat.slug,
+                        name: cat.name,
+                        src: event.currentTarget.src,
+                      });
                     }}
                   />
                   {/* Subtle white overlay for unselected to make active pop more */}
-                  <div 
+                  <div
                     className={`absolute inset-0 bg-white/20 transition-opacity duration-300 ${
                       isSelected ? "opacity-0" : "opacity-100 group-hover:opacity-0"
-                    }`} 
+                    }`}
                   />
                 </div>
 
                 {/* Category Label */}
                 <span
                   className={`font-serif text-[13px] md:text-[15px] tracking-wide transition-colors duration-300 ${
-                    isSelected ? "text-brand-orange font-bold" : "text-espresso group-hover:text-brand-orange/80"
+                    isSelected
+                      ? "text-brand-orange font-bold"
+                      : "text-espresso group-hover:text-brand-orange/80"
                   }`}
                 >
                   {cat.name}

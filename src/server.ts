@@ -66,7 +66,10 @@ function applySecurityHeaders(response: Response): Response {
   // Prevent CDN (Netlify Edge) from caching dynamic SSR HTML or server function JSON
   const contentType = headers.get("content-type") || "";
   if (contentType.includes("text/html") || contentType.includes("application/json")) {
-    headers.set("Cache-Control", "public, max-age=0, s-maxage=0, must-revalidate, no-cache, no-store");
+    headers.set(
+      "Cache-Control",
+      "public, max-age=0, s-maxage=0, must-revalidate, no-cache, no-store",
+    );
   }
 
   return new Response(response.body, {
@@ -104,10 +107,12 @@ export default {
       return applySecurityHeaders(injected);
     } catch (error) {
       console.error(error);
-      return applySecurityHeaders(new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      }));
+      return applySecurityHeaders(
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        }),
+      );
     }
   },
 };

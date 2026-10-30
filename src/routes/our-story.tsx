@@ -244,16 +244,18 @@ export const Route = createFileRoute("/our-story")({
       { property: "og:title", content: "Our Story — Saurashtra Honey" },
       {
         property: "og:description",
-        content: "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
+        content:
+          "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://saurastrahoney.com/our-story" },
-      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        property: "og:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
     ],
-    links: [
-      { rel: "canonical", href: "https://saurastrahoney.com/our-story" },
-    ],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/our-story" }],
   }),
   loader: async () => {
     const sections = await fetchPageSections("our-story");
@@ -299,8 +301,9 @@ function OurStory() {
   ]);
 
   // Prepare slider images (unlimited array)
-  let sliderImages = gallery.images?.map((imgItem: any) => ({ img: imgItem.url, caption: imgItem.caption })) || [];
-  
+  let sliderImages =
+    gallery.images?.map((imgItem: any) => ({ img: imgItem.url, caption: imgItem.caption })) || [];
+
   if (sliderImages.length === 0) {
     // Fallback to legacy structure or placeholders
     const legacyImages = [
@@ -309,7 +312,7 @@ function OurStory() {
       gallery.gallery_img_2,
       gallery.gallery_img_3,
       gallery.gallery_img_5,
-      gallery.gallery_img_6
+      gallery.gallery_img_6,
     ].filter(Boolean);
 
     if (legacyImages.length > 0) {
@@ -319,7 +322,7 @@ function OurStory() {
         { img: beeFarmImg },
         { img: honeycombBeesImg },
         { img: honeyDrizzleImg },
-        { img: beeFlowerImg }
+        { img: beeFlowerImg },
       ];
     }
   }
@@ -651,29 +654,34 @@ function OurStory() {
             </div>
           </div>
 
-          <div className="w-full overflow-hidden py-8 reveal opacity-0 translate-y-8 transition-all duration-1000" ref={emblaRef}>
+          <div
+            className="w-full overflow-hidden py-8 reveal opacity-0 translate-y-8 transition-all duration-1000"
+            ref={emblaRef}
+          >
             <div className="flex gap-4 md:gap-6 items-center px-4 md:px-8">
               {displayImages.map((item, i) => (
-                  <div 
-                    key={i} 
-                    className="flex-[0_0_70%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_18%] min-w-0 flex flex-col items-center group"
-                  >
-                    <div className="w-full aspect-square overflow-hidden flex items-center justify-center relative">
-                      <img
-                        src={item.img}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
-                        alt={`Gallery ${i + 1}`}
-                      />
-                    </div>
-                    {item.caption && (
-                      <div className="mt-4 text-center px-2">
-                        <span className="font-serif italic text-lg text-[#2B2118]">{item.caption}</span>
-                      </div>
-                    )}
+                <div
+                  key={i}
+                  className="flex-[0_0_70%] sm:flex-[0_0_45%] md:flex-[0_0_30%] lg:flex-[0_0_22%] xl:flex-[0_0_18%] min-w-0 flex flex-col items-center group"
+                >
+                  <div className="w-full aspect-square overflow-hidden flex items-center justify-center relative">
+                    <img
+                      src={item.img}
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-700"
+                      alt={`Gallery ${i + 1}`}
+                    />
                   </div>
-                ))}
-              </div>
+                  {item.caption && (
+                    <div className="mt-4 text-center px-2">
+                      <span className="font-serif italic text-lg text-[#2B2118]">
+                        {item.caption}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
+          </div>
         </section>
 
         {/* 10. OUR PROMISE */}
@@ -710,7 +718,11 @@ function OurStory() {
                   style={{ transitionDelay: `${i * 150}ms` }}
                 >
                   <div className="mb-8 w-36 h-36 md:w-44 md:h-44 rounded-full overflow-hidden shadow-sm hover:scale-105 transition-transform duration-500">
-                    <img src={p.img} alt={p.title} className="w-full h-full object-cover mix-blend-multiply" />
+                    <img
+                      src={p.img}
+                      alt={p.title}
+                      className="w-full h-full object-cover mix-blend-multiply"
+                    />
                   </div>
                   <h3 className="font-bold tracking-widest text-[#2B2118] mb-3 uppercase">
                     {p.title}
@@ -723,12 +735,14 @@ function OurStory() {
         </section>
 
         {/* 11 & 12. ACHIEVEMENTS & STORY VIDEO */}
-        <AchievementsGallery 
-          items={achievements} 
+        <AchievementsGallery
+          items={achievements}
           videoNode={
-            sections.find(s => s.section_key === "story_video_gallery")?.enabled !== false ? (
+            sections.find((s) => s.section_key === "story_video_gallery")?.enabled !== false ? (
               <div className="w-full max-w-5xl mx-auto mb-16">
-                {(storyVideoGallery.eyebrow || storyVideoGallery.heading || storyVideoGallery.description) && (
+                {(storyVideoGallery.eyebrow ||
+                  storyVideoGallery.heading ||
+                  storyVideoGallery.description) && (
                   <div className="text-center mb-12 reveal opacity-0 translate-y-8 transition-all duration-1000">
                     {storyVideoGallery.eyebrow && (
                       <span className="text-[11px] uppercase tracking-[0.25em] text-[#3B5241] font-bold block mb-4">

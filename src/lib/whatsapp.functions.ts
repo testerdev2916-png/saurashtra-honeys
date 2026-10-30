@@ -39,20 +39,20 @@ export async function sendWhatsAppOrderAlert({
               { type: "text", text: orderNumber || "N/A" },
               { type: "text", text: phone || "N/A" },
               { type: "text", text: paymentMethod.toUpperCase() },
-              { type: "text", text: (total / 100).toFixed(2) }
-            ]
-          }
-        ]
-      }
+              { type: "text", text: (total / 100).toFixed(2) },
+            ],
+          },
+        ],
+      },
     };
 
     const res = await fetch(`https://graph.facebook.com/v19.0/${phoneNumberId}/messages`, {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json"
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {

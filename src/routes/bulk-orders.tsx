@@ -3,7 +3,16 @@ import React, { useState } from "react";
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
-import { Package, ShieldCheck, Truck, ArrowRight, CheckCircle2, Factory, Store, Hotel } from "lucide-react";
+import {
+  Package,
+  ShieldCheck,
+  Truck,
+  ArrowRight,
+  CheckCircle2,
+  Factory,
+  Store,
+  Hotel,
+} from "lucide-react";
 import { toast } from "sonner";
 import { submitForm } from "@/lib/submit";
 import { z } from "zod";
@@ -26,19 +35,24 @@ export const Route = createFileRoute("/bulk-orders")({
       },
       {
         name: "description",
-        content: "Premium wholesale honey supply for restaurants, retailers, hotels, and distributors. Custom packaging, reliable delivery, and competitive B2B pricing.",
+        content:
+          "Premium wholesale honey supply for restaurants, retailers, hotels, and distributors. Custom packaging, reliable delivery, and competitive B2B pricing.",
       },
       { property: "og:title", content: "Wholesale Honey Supply — Saurashtra Honey" },
       { property: "og:description", content: "Premium bulk honey for businesses." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://saurastrahoney.com/bulk-orders" },
-      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        property: "og:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        name: "twitter:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
     ],
-    links: [
-      { rel: "canonical", href: "https://saurastrahoney.com/bulk-orders" },
-    ],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/bulk-orders" }],
   }),
   loader: async () => {
     const sections = await fetchPageSections("bulk-orders");
@@ -51,13 +65,15 @@ export const Route = createFileRoute("/bulk-orders")({
         // @ts-expect-error - The is_wholesale column might not exist in the generated types yet
         .eq("is_wholesale", true)
         .order("sort_order", { ascending: true });
-        
+
       if (!error && data) {
         // Map data to Product type if needed, usually it matches closely enough or can be cast
         wholesaleProducts = data as unknown as Product[];
       }
     } catch (e) {
-      console.warn("Could not fetch wholesale products. The is_wholesale column might not exist yet.");
+      console.warn(
+        "Could not fetch wholesale products. The is_wholesale column might not exist yet.",
+      );
     }
     return { sections, wholesaleProducts };
   },
@@ -91,8 +107,7 @@ function BulkOrdersPage() {
     message: "",
   });
 
-  const set = <K extends keyof typeof form>(k: K, v: string) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -118,14 +133,18 @@ function BulkOrdersPage() {
       });
       setForm({ name: "", email: "", phone: "", company: "", city: "", quantity: "", message: "" });
     } catch {
-      toast.error(`Couldn't submit right now. Please call ${settings?.contact?.phone || "+91 96873 28404"}.`);
+      toast.error(
+        `Couldn't submit right now. Please call ${settings?.contact?.phone || "+91 96873 28404"}.`,
+      );
     } finally {
       setLoading(false);
     }
   }
 
   function scrollToForm() {
-    document.getElementById("request-quote")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById("request-quote")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   return (
@@ -141,7 +160,10 @@ function BulkOrdersPage() {
       {/* 1. Premium Hero */}
       <PageHeroSlider page="bulk-gifting" />
       <div className="bg-[#2B2118] py-6 flex justify-center gap-4">
-        <button onClick={scrollToForm} className="bg-[#D97706] text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-[#B57420] transition-colors">
+        <button
+          onClick={scrollToForm}
+          className="bg-[#D97706] text-white px-8 py-3 rounded-full font-bold text-sm tracking-widest uppercase hover:bg-[#B57420] transition-colors"
+        >
           Request Wholesale Pricing
         </button>
       </div>
@@ -157,10 +179,16 @@ function BulkOrdersPage() {
               {introSettings.heading || "Uncompromising Quality at Scale"}
             </h1>
             <p className="text-[#6B6257] leading-relaxed text-[16px] whitespace-pre-wrap">
-              {introSettings.description || "When you partner with Saurashtra Honey, you are guaranteed pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
+              {introSettings.description ||
+                "When you partner with Saurashtra Honey, you are guaranteed pure, natural honey sourced directly from our ethical farms. We maintain strict quality control across every batch, ensuring your business receives exactly what was promised—every single time."}
             </p>
             <ul className="space-y-4 pt-4">
-              {['Low Minimum Order Quantities (MOQ)', 'Customizable Packaging Sizes', 'NABL Lab Certified Purity', 'Dedicated Account Manager'].map((item, i) => (
+              {[
+                "Low Minimum Order Quantities (MOQ)",
+                "Customizable Packaging Sizes",
+                "NABL Lab Certified Purity",
+                "Dedicated Account Manager",
+              ].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-[#2B2118] font-[500]">
                   <CheckCircle2 className="size-5 text-[#D97706]" /> {item}
                 </li>
@@ -168,7 +196,11 @@ function BulkOrdersPage() {
             </ul>
           </div>
           <div className="flex-1 w-full relative aspect-square rounded-[24px] overflow-hidden">
-            <img src={introSettings.image || beeFarmImg} alt="Honey farm" className="w-full h-full object-cover" />
+            <img
+              src={introSettings.image || beeFarmImg}
+              alt="Honey farm"
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </section>
@@ -201,23 +233,37 @@ function BulkOrdersPage() {
       <section className="py-20 bg-[#FDFBF7]">
         <div className="container-page">
           <div className="text-center mb-16">
-            <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118]">Wholesale Benefits</h2>
+            <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118]">
+              Wholesale Benefits
+            </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="p-8 bg-[#FDFBF7] rounded-[24px] border border-[#D97706]/15">
               <Package className="size-10 text-[#D97706] mb-6" strokeWidth={1.5} />
-              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">Flexible Packaging</h3>
-              <p className="text-[#6B6257] leading-relaxed">Available in bulk food-grade buckets, drums, or retail-ready glass jars.</p>
+              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">
+                Flexible Packaging
+              </h3>
+              <p className="text-[#6B6257] leading-relaxed">
+                Available in bulk food-grade buckets, drums, or retail-ready glass jars.
+              </p>
             </div>
             <div className="p-8 bg-[#FDFBF7] rounded-[24px] border border-[#D97706]/15">
               <Truck className="size-10 text-[#D97706] mb-6" strokeWidth={1.5} />
-              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">Fast Delivery</h3>
-              <p className="text-[#6B6257] leading-relaxed">Reliable pan-India dispatch and logistics support to keep your inventory full.</p>
+              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">
+                Fast Delivery
+              </h3>
+              <p className="text-[#6B6257] leading-relaxed">
+                Reliable pan-India dispatch and logistics support to keep your inventory full.
+              </p>
             </div>
             <div className="p-8 bg-[#FDFBF7] rounded-[24px] border border-[#D97706]/15">
               <ShieldCheck className="size-10 text-[#D97706] mb-6" strokeWidth={1.5} />
-              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">Consistent Pricing</h3>
-              <p className="text-[#6B6257] leading-relaxed">Transparent B2B pricing structures designed to support your margins.</p>
+              <h3 className="font-serif text-[22px] font-bold text-[#2B2118] mb-3">
+                Consistent Pricing
+              </h3>
+              <p className="text-[#6B6257] leading-relaxed">
+                Transparent B2B pricing structures designed to support your margins.
+              </p>
             </div>
           </div>
         </div>
@@ -230,7 +276,12 @@ function BulkOrdersPage() {
             <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118]">How It Works</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {['Submit Enquiry', 'Consultation & Samples', 'Confirm Order', 'Dispatch & Delivery'].map((step, i) => (
+            {[
+              "Submit Enquiry",
+              "Consultation & Samples",
+              "Confirm Order",
+              "Dispatch & Delivery",
+            ].map((step, i) => (
               <div key={i} className="flex flex-col items-center text-center">
                 <div className="size-16 rounded-full bg-white border border-[#D97706]/20 flex items-center justify-center text-[#D97706] font-serif text-[24px] font-bold shadow-sm mb-6">
                   {i + 1}
@@ -245,10 +296,22 @@ function BulkOrdersPage() {
       {/* 5. Industries We Serve */}
       <section className="py-20 bg-white">
         <div className="container-page text-center">
-          <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] mb-12">Industries We Serve</h2>
+          <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] mb-12">
+            Industries We Serve
+          </h2>
           <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto">
-            {['Restaurants & Cafes', 'Luxury Hotels', 'Retail Chains', 'Distributors', 'Health Food Brands', 'Bakeries'].map((ind) => (
-              <div key={ind} className="px-8 py-4 bg-[#FDFBF7] rounded-full border border-[#D97706]/10 text-[#2B2118] font-bold tracking-wide">
+            {[
+              "Restaurants & Cafes",
+              "Luxury Hotels",
+              "Retail Chains",
+              "Distributors",
+              "Health Food Brands",
+              "Bakeries",
+            ].map((ind) => (
+              <div
+                key={ind}
+                className="px-8 py-4 bg-[#FDFBF7] rounded-full border border-[#D97706]/10 text-[#2B2118] font-bold tracking-wide"
+              >
                 {ind}
               </div>
             ))}
@@ -263,10 +326,14 @@ function BulkOrdersPage() {
             {[
               gallerySettings.gallery_img_1 || heroProductsImg,
               gallerySettings.gallery_img_2 || beeFarmImg,
-              gallerySettings.gallery_img_3 || familyHoneyImg
+              gallerySettings.gallery_img_3 || familyHoneyImg,
             ].map((img, idx) => (
               <div key={idx} className="aspect-square overflow-hidden rounded-[16px]">
-                <img src={img} alt="Gallery" className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+                <img
+                  src={img}
+                  alt="Gallery"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                />
               </div>
             ))}
           </div>
@@ -276,14 +343,28 @@ function BulkOrdersPage() {
       {/* 7. FAQs */}
       <section className="py-20 bg-[#FDFBF7]">
         <div className="container-page max-w-3xl mx-auto">
-          <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] text-center mb-12">Frequently Asked Questions</h2>
+          <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] text-center mb-12">
+            Frequently Asked Questions
+          </h2>
           <div className="space-y-6">
             {[
-              { q: "What is the Minimum Order Quantity (MOQ)?", a: "Our wholesale MOQ starts at just 10kg, making it accessible for both small cafes and large retail chains." },
-              { q: "Do you provide lab test reports?", a: "Yes, every bulk dispatch is accompanied by an independent NABL lab report guaranteeing purity." },
-              { q: "Can I get samples before ordering?", a: "Absolutely. We provide commercial sample kits for businesses to evaluate quality and taste profiles." }
+              {
+                q: "What is the Minimum Order Quantity (MOQ)?",
+                a: "Our wholesale MOQ starts at just 10kg, making it accessible for both small cafes and large retail chains.",
+              },
+              {
+                q: "Do you provide lab test reports?",
+                a: "Yes, every bulk dispatch is accompanied by an independent NABL lab report guaranteeing purity.",
+              },
+              {
+                q: "Can I get samples before ordering?",
+                a: "Absolutely. We provide commercial sample kits for businesses to evaluate quality and taste profiles.",
+              },
             ].map((faq, i) => (
-              <div key={i} className="bg-white p-6 rounded-[16px] shadow-sm border border-[#D97706]/10">
+              <div
+                key={i}
+                className="bg-white p-6 rounded-[16px] shadow-sm border border-[#D97706]/10"
+              >
                 <h3 className="font-bold text-[#2B2118] text-[18px] mb-2">{faq.q}</h3>
                 <p className="text-[#6B6257]">{faq.a}</p>
               </div>
@@ -299,7 +380,9 @@ function BulkOrdersPage() {
             Partner Testimonials
           </div>
           <p className="font-serif text-[24px] sm:text-[32px] text-[#2B2118] leading-relaxed italic">
-            "Saurashtra Honey has been our exclusive supplier for over two years. Their consistency in quality and flawless delivery schedule has made them an invaluable partner for our restaurant chain."
+            "Saurashtra Honey has been our exclusive supplier for over two years. Their consistency
+            in quality and flawless delivery schedule has made them an invaluable partner for our
+            restaurant chain."
           </p>
           <div className="mt-8 font-bold text-[#6B6257] uppercase tracking-widest text-[14px]">
             — Executive Chef, Premium Hospitality Group
@@ -312,41 +395,106 @@ function BulkOrdersPage() {
         <div className="container-page max-w-2xl mx-auto">
           <div className="bg-white p-8 sm:p-12 rounded-[24px] shadow-xl shadow-black/5">
             <div className="text-center mb-8">
-              <h2 className="font-serif text-[32px] font-bold text-[#2B2118] mb-3">Request Wholesale Pricing</h2>
-              <p className="text-[#6B6257]">Fill out the details below and our B2B team will reach out shortly.</p>
+              <h2 className="font-serif text-[32px] font-bold text-[#2B2118] mb-3">
+                Request Wholesale Pricing
+              </h2>
+              <p className="text-[#6B6257]">
+                Fill out the details below and our B2B team will reach out shortly.
+              </p>
             </div>
-            
+
             <form onSubmit={onSubmit} className="space-y-5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <input type="text" placeholder="Full Name" value={form.name} onChange={(e) => set("name", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]" required />
-                <input type="text" placeholder="Company / Business Name" value={form.company} onChange={(e) => set("company", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]" required />
+                <input
+                  type="text"
+                  placeholder="Full Name"
+                  value={form.name}
+                  onChange={(e) => set("name", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]"
+                  required
+                />
+                <input
+                  type="text"
+                  placeholder="Company / Business Name"
+                  value={form.company}
+                  onChange={(e) => set("company", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]"
+                  required
+                />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <input type="email" placeholder="Email Address" value={form.email} onChange={(e) => set("email", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]" required />
-                <input type="tel" placeholder="Phone Number" value={form.phone} onChange={(e) => set("phone", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]" required />
+                <input
+                  type="email"
+                  placeholder="Email Address"
+                  value={form.email}
+                  onChange={(e) => set("email", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]"
+                  required
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]"
+                  required
+                />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <input type="text" placeholder="City" value={form.city} onChange={(e) => set("city", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]" required />
-                <select value={form.quantity} onChange={(e) => set("quantity", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706] appearance-none" required>
-                  <option value="" disabled>Estimated Monthly Quantity</option>
+                <input
+                  type="text"
+                  placeholder="City"
+                  value={form.city}
+                  onChange={(e) => set("city", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706]"
+                  required
+                />
+                <select
+                  value={form.quantity}
+                  onChange={(e) => set("quantity", e.target.value)}
+                  className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706] appearance-none"
+                  required
+                >
+                  <option value="" disabled>
+                    Estimated Monthly Quantity
+                  </option>
                   <option value="10-50kg">10 - 50 kg</option>
                   <option value="50-200kg">50 - 200 kg</option>
                   <option value="200kg+">200+ kg</option>
                 </select>
               </div>
-              <textarea placeholder="Tell us about your requirements..." value={form.message} onChange={(e) => set("message", e.target.value)} className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706] min-h-[120px] resize-y"></textarea>
-              
-              <button type="submit" disabled={loading} className="w-full py-4 bg-[#D97706] hover:bg-[#B57420] text-white font-bold tracking-widest uppercase rounded-xl transition-colors disabled:opacity-70 mt-2">
+              <textarea
+                placeholder="Tell us about your requirements..."
+                value={form.message}
+                onChange={(e) => set("message", e.target.value)}
+                className="w-full px-5 py-3.5 bg-[#FDFBF7] border border-[#D97706]/20 rounded-xl focus:outline-none focus:border-[#D97706] min-h-[120px] resize-y"
+              ></textarea>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-4 bg-[#D97706] hover:bg-[#B57420] text-white font-bold tracking-widest uppercase rounded-xl transition-colors disabled:opacity-70 mt-2"
+              >
                 {loading ? "Sending..." : "Submit Request"}
               </button>
             </form>
-            
+
             <div className="mt-8 text-center text-[#6B6257] text-[14px]">
               <p>Or contact us directly:</p>
               <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 text-[15px] sm:text-[16px] md:text-[18px] font-medium text-[#2B2118] mt-2">
-                <a href={`tel:${settings?.contact?.phone ? settings.contact.phone.replace(/\s+/g, '') : "+919687328404"}`} className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5">📞 {settings?.contact?.phone || "+91 96873 28404"}</a>
+                <a
+                  href={`tel:${settings?.contact?.phone ? settings.contact.phone.replace(/\s+/g, "") : "+919687328404"}`}
+                  className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5"
+                >
+                  📞 {settings?.contact?.phone || "+91 96873 28404"}
+                </a>
                 <span className="text-[#2B2118]/30">|</span>
-                <a href={`mailto:${settings?.contact?.email || "wholesale@saurashtrahoney.com"}`} className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5">✉️ {settings?.contact?.email || "wholesale@saurashtrahoney.com"}</a>
+                <a
+                  href={`mailto:${settings?.contact?.email || "wholesale@saurashtrahoney.com"}`}
+                  className="hover:text-[#D97706] whitespace-nowrap flex items-center gap-1.5"
+                >
+                  ✉️ {settings?.contact?.email || "wholesale@saurashtrahoney.com"}
+                </a>
               </div>
             </div>
           </div>

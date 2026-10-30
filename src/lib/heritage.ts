@@ -15,7 +15,9 @@ export interface HeritageVideo {
  * Fetches the active heritage video for the public frontend.
  * Returns null if no active video is found, which is a normal state.
  */
-export async function fetchActiveHeritageVideo(signal?: AbortSignal): Promise<HeritageVideo | null> {
+export async function fetchActiveHeritageVideo(
+  signal?: AbortSignal,
+): Promise<HeritageVideo | null> {
   const { data, error } = await (supabase as any)
     .from("homepage_heritage_video")
     .select("*")
@@ -48,12 +50,12 @@ export async function fetchAdminHeritageVideo(): Promise<HeritageVideo | null> {
 }
 
 /**
- * Upserts the heritage video configuration. 
+ * Upserts the heritage video configuration.
  * Since there's only meant to be one, this updates the existing record or inserts a new one.
  */
 export async function upsertHeritageVideo(
   videoId: string | null,
-  data: Partial<HeritageVideo>
+  data: Partial<HeritageVideo>,
 ): Promise<HeritageVideo> {
   if (videoId) {
     const { data: updated, error } = await (supabase as any)

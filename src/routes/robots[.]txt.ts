@@ -18,25 +18,32 @@ export const Route = createFileRoute("/robots.txt")({
               global: {
                 fetch: (input, init) => {
                   const h = new Headers(init?.headers);
-                  if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+                  if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+                    h.delete("Authorization");
                   h.set("apikey", key);
                   return fetch(input, { ...init, headers: h });
                 },
               },
             });
-            const { data } = await supa.from("app_settings").select("data").eq("id", 1).maybeSingle();
-            const robots = (data?.data as { robots?: { disallow_paths?: string[]; extra?: string } } | undefined)?.robots;
+            const { data } = await supa
+              .from("app_settings")
+              .select("data")
+              .eq("id", 1)
+              .maybeSingle();
+            const robots = (
+              data?.data as { robots?: { disallow_paths?: string[]; extra?: string } } | undefined
+            )?.robots;
             if (robots?.disallow_paths?.length) disallow = robots.disallow_paths;
             if (robots?.extra) extra = robots.extra;
           }
-        } catch { /* defaults */ }
+        } catch {
+          /* defaults */
+        }
 
-        const body = [
-          "User-agent: *",
-          "Allow: /",
-          ...disallow.map((p) => `Disallow: ${p}`),
-          extra.trim(),
-        ].filter(Boolean).join("\n") + "\n";
+        const body =
+          ["User-agent: *", "Allow: /", ...disallow.map((p) => `Disallow: ${p}`), extra.trim()]
+            .filter(Boolean)
+            .join("\n") + "\n";
         return new Response(body, {
           headers: { "Content-Type": "text/plain", "Cache-Control": "public, max-age=3600" },
         });

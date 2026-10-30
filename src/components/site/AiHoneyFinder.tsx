@@ -165,7 +165,7 @@ export function AiHoneyFinder({
       (k) =>
         k.q.toLowerCase().includes(q) ||
         k.a.toLowerCase().includes(q) ||
-        k.category.toLowerCase().includes(q)
+        k.category.toLowerCase().includes(q),
     );
   }, [searchQuery]);
 
@@ -204,7 +204,8 @@ export function AiHoneyFinder({
                 Not sure which floral harvest fits your routine?
               </h3>
               <p className="text-sm text-[#FDFBF7]/80 max-w-xl">
-                Take our 45-second interactive quiz or ask our AI knowledge guide about natural enzymes, digestion benefits, and lab purity.
+                Take our 45-second interactive quiz or ask our AI knowledge guide about natural
+                enzymes, digestion benefits, and lab purity.
               </p>
             </div>
             <button
@@ -505,7 +506,8 @@ export function AiHoneyFinder({
                       <div className="bg-white rounded-2xl border border-[#D97706]/40 p-5 shadow-sm space-y-4">
                         <div className="flex items-center justify-between">
                           <span className="inline-flex items-center gap-1.5 bg-[#D97706]/15 text-[#D97706] px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">
-                            <Sparkles className="size-3.5" /> {recommendation.matchScore}% AI COMPATIBILITY
+                            <Sparkles className="size-3.5" /> {recommendation.matchScore}% AI
+                            COMPATIBILITY
                           </span>
                           <button
                             onClick={resetQuiz}

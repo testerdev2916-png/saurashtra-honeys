@@ -1,11 +1,20 @@
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link } from "@tanstack/react-router";
 import React, { useState, useEffect } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
-import { ArrowRight, Package, Gift, Sparkles, Tag, ShieldCheck, HeartHandshake, Award } from "lucide-react";
+import {
+  ArrowRight,
+  Package,
+  Gift,
+  Sparkles,
+  Tag,
+  ShieldCheck,
+  HeartHandshake,
+  Award,
+} from "lucide-react";
 import { fetchPageSections } from "@/lib/page-cms.functions";
 
 // Photographic assets
@@ -23,19 +32,24 @@ export const Route = createFileRoute("/bulk-gifting")({
       },
       {
         name: "description",
-        content: "Discover our premium B2B services: Wholesale Bulk Orders, Corporate Gifting, Luxury Hampers, and White Label Manufacturing of pure natural honey.",
+        content:
+          "Discover our premium B2B services: Wholesale Bulk Orders, Corporate Gifting, Luxury Hampers, and White Label Manufacturing of pure natural honey.",
       },
       { property: "og:title", content: "B2B Ecosystem — Saurashtra Honey" },
       { property: "og:description", content: "Partner with a trusted premium honey manufacturer." },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://saurastrahoney.com/bulk-gifting" },
-      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        property: "og:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        name: "twitter:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
     ],
-    links: [
-      { rel: "canonical", href: "https://saurastrahoney.com/bulk-gifting" },
-    ],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/bulk-gifting" }],
   }),
   loader: () => fetchPageSections("bulk-gifting"),
   component: BulkGiftingHubPage,
@@ -55,15 +69,15 @@ function BulkGiftingHubPage() {
         stopOnMouseEnter: true,
         playOnInit: false,
       }),
-    ]
+    ],
   );
-  
+
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   useEffect(() => {
     if (!emblaApi) return;
     const autoplay = emblaApi.plugins().autoplay;
-    
+
     // Initial wait before first movement
     const initTimeout = setTimeout(() => {
       if (autoplay) autoplay.play();
@@ -102,7 +116,7 @@ function BulkGiftingHubPage() {
       img: heroProductsImg,
       Icon: Package,
       href: "/bulk-orders",
-      cta: "Explore Bulk Solutions"
+      cta: "Explore Bulk Solutions",
     },
     {
       title: "Corporate Gifting",
@@ -110,7 +124,7 @@ function BulkGiftingHubPage() {
       img: giftPackImg,
       Icon: Gift,
       href: "/corporate-gifting",
-      cta: "View Gifting Solutions"
+      cta: "View Gifting Solutions",
     },
     {
       title: "Gift Hampers",
@@ -118,7 +132,7 @@ function BulkGiftingHubPage() {
       img: heroHoneyImg,
       Icon: Sparkles,
       href: "/gift-hampers",
-      cta: "Explore Hampers"
+      cta: "Explore Hampers",
     },
     {
       title: "Private Labeling",
@@ -126,7 +140,7 @@ function BulkGiftingHubPage() {
       img: ajwainImg,
       Icon: Tag,
       href: "/private-label",
-      cta: "Build Your Brand"
+      cta: "Build Your Brand",
     },
   ];
 
@@ -171,8 +185,9 @@ function BulkGiftingHubPage() {
             A Trusted Manufacturer of Pure Natural Honey
           </h1>
           <p className="text-[#6B6257] text-[16px] sm:text-[18px] max-w-2xl mx-auto leading-relaxed">
-            We provide end-to-end premium honey solutions for businesses worldwide. 
-            Select a service below to explore dedicated offerings, minimum order quantities, and custom solutions tailored for your business.
+            We provide end-to-end premium honey solutions for businesses worldwide. Select a service
+            below to explore dedicated offerings, minimum order quantities, and custom solutions
+            tailored for your business.
           </p>
         </div>
       </section>
@@ -184,7 +199,7 @@ function BulkGiftingHubPage() {
             <div className="flex -ml-4 py-4">
               {serviceCards.map((card) => (
                 <div key={card.title} className="flex-[0_0_82vw] pl-4 min-w-0">
-                  <Link 
+                  <Link
                     to={card.href}
                     className="group flex flex-col rounded-[26px] overflow-hidden bg-white border border-[#2B2118]/5 shadow-[0_4px_24px_rgba(43,33,24,0.04)] active:shadow-[0_12px_40px_rgba(43,33,24,0.08)] transition-all duration-[300ms] ease-out active:scale-[1.02] h-auto"
                   >
@@ -196,7 +211,10 @@ function BulkGiftingHubPage() {
                       />
                     </div>
                     <div className="p-[22px] flex flex-col flex-1">
-                      <card.Icon className="size-[22px] text-[#D97706] mb-[14px] shrink-0" strokeWidth={1.5} />
+                      <card.Icon
+                        className="size-[22px] text-[#D97706] mb-[14px] shrink-0"
+                        strokeWidth={1.5}
+                      />
                       <h3 className="font-serif text-[34px] font-medium leading-[1.1] text-[#2B2118] mb-[12px]">
                         {card.title}
                       </h3>
@@ -204,8 +222,11 @@ function BulkGiftingHubPage() {
                         {card.desc}
                       </p>
                       <div className="mt-[18px] flex items-center text-[18px] font-semibold text-[#D97706] transition-colors">
-                        {card.cta} 
-                        <ArrowRight className="ml-1.5 size-4 transition-transform duration-[300ms] ease-out group-active:translate-x-1.5" strokeWidth={2.5} />
+                        {card.cta}
+                        <ArrowRight
+                          className="ml-1.5 size-4 transition-transform duration-[300ms] ease-out group-active:translate-x-1.5"
+                          strokeWidth={2.5}
+                        />
                       </div>
                     </div>
                   </Link>
@@ -216,10 +237,10 @@ function BulkGiftingHubPage() {
           {/* Pagination Dots */}
           <div className="flex justify-center gap-2 mt-4">
             {serviceCards.map((_, i) => (
-              <button 
-                key={i} 
-                className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedIndex ? "bg-[#D97706] w-4" : "bg-[#D97706]/20 w-1.5"}`} 
-                onClick={() => emblaApi?.scrollTo(i)} 
+              <button
+                key={i}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === selectedIndex ? "bg-[#D97706] w-4" : "bg-[#D97706]/20 w-1.5"}`}
+                onClick={() => emblaApi?.scrollTo(i)}
                 aria-label={`Go to slide ${i + 1}`}
               />
             ))}
@@ -230,8 +251,8 @@ function BulkGiftingHubPage() {
         <div className="container-page hidden md:block">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7 md:gap-8 max-w-[1400px] mx-auto">
             {serviceCards.map((card) => (
-              <Link 
-                key={card.title} 
+              <Link
+                key={card.title}
                 to={card.href}
                 className="group flex flex-col rounded-[26px] overflow-hidden bg-white border border-[#2B2118]/5 shadow-[0_4px_24px_rgba(43,33,24,0.04)] hover:shadow-[0_12px_40px_rgba(43,33,24,0.08)] transition-all duration-[300ms] ease-out hover:-translate-y-2 lg:h-[480px]"
               >
@@ -251,8 +272,11 @@ function BulkGiftingHubPage() {
                     {card.desc}
                   </p>
                   <div className="mt-6 flex items-center text-[15px] xl:text-[16px] font-semibold text-[#D97706] group-hover:text-[#B57420] transition-colors">
-                    {card.cta} 
-                    <ArrowRight className="ml-1.5 size-4 transition-transform duration-[300ms] ease-out group-hover:translate-x-1.5" strokeWidth={2.5} />
+                    {card.cta}
+                    <ArrowRight
+                      className="ml-1.5 size-4 transition-transform duration-[300ms] ease-out group-hover:translate-x-1.5"
+                      strokeWidth={2.5}
+                    />
                   </div>
                 </div>
               </Link>
@@ -269,17 +293,23 @@ function BulkGiftingHubPage() {
             <div className="flex flex-col items-center">
               <ShieldCheck className="size-10 text-[#D97706] mb-4" strokeWidth={1} />
               <div className="font-bold text-[18px] mb-2">Lab Tested</div>
-              <p className="text-[#FDFBF7]/70 text-[14px]">Every batch is independently certified for purity.</p>
+              <p className="text-[#FDFBF7]/70 text-[14px]">
+                Every batch is independently certified for purity.
+              </p>
             </div>
             <div className="flex flex-col items-center">
               <Award className="size-10 text-[#D97706] mb-4" strokeWidth={1} />
               <div className="font-bold text-[18px] mb-2">Premium Quality</div>
-              <p className="text-[#FDFBF7]/70 text-[14px]">Raw, unfiltered, and packed with natural enzymes.</p>
+              <p className="text-[#FDFBF7]/70 text-[14px]">
+                Raw, unfiltered, and packed with natural enzymes.
+              </p>
             </div>
             <div className="flex flex-col items-center">
               <HeartHandshake className="size-10 text-[#D97706] mb-4" strokeWidth={1} />
               <div className="font-bold text-[18px] mb-2">End-to-End Support</div>
-              <p className="text-[#FDFBF7]/70 text-[14px]">From harvesting to bespoke packaging, we handle it all.</p>
+              <p className="text-[#FDFBF7]/70 text-[14px]">
+                From harvesting to bespoke packaging, we handle it all.
+              </p>
             </div>
           </div>
         </div>

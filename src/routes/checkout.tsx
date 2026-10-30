@@ -6,8 +6,9 @@ import { useCart } from "@/lib/cart";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { createOrder, verifyRazorpay } from "@/lib/orders.functions";
+import { requestCodPhoneOtp, verifyCodPhoneOtp } from "@/lib/auth-otp.functions";
 import { toast } from "sonner";
-import { CreditCard, Truck, ShieldCheck, Package, UserCheck, Lock } from "lucide-react";
+import { CreditCard, Truck, ShieldCheck, Package, UserCheck, Lock, Phone, CheckCircle2, ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -63,6 +64,8 @@ function Checkout() {
   const navigate = useNavigate();
   const createOrderFn = useServerFn(createOrder);
   const verifyFn = useServerFn(verifyRazorpay);
+  const requestCodOtpFn = useServerFn(requestCodPhoneOtp);
+  const verifyCodOtpFn = useServerFn(verifyCodPhoneOtp);
   const [addresses, setAddresses] = useState<SavedAddress[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [form, setForm] = useState({
@@ -79,6 +82,20 @@ function Checkout() {
   const [notes, setNotes] = useState("");
   const [busy, setBusy] = useState(false);
   const [beganCheckout, setBeganCheckout] = useState(false);
+
+  // Phone OTP Verification States for COD
+  const [verifiedPhone, setVerifiedPhone] = useState<string | null>(null);
+  const [showOtpModal, setShowOtpModal] = useState(false);
+  const [otpCode, setOtpCode] = useState("");
+  const [otpCooldown, setOtpCooldown] = useState(0);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+
+  useEffect(() => {
+    if (otpCooldown <= 0) return;
+    const t = setInterval(() => setOtpCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [otpCooldown]);
 
   // Enforce mandatory sign-in for checkout: redirect unauthenticated visitors
   useEffect(() => {
@@ -116,15 +133,30 @@ function Checkout() {
           .select("*")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false }),
-        supabase.from("profiles").select("full_name, phone").eq("id", user.id).maybeSingle(),
+        supabase
+          .from("profiles")
+          .select("full_name, phone, phone_verified")
+          .eq("id", user.id)
+          .maybeSingle(),
       ]);
       setAddresses((addrs as SavedAddress[]) ?? []);
       if (addrs && addrs.length > 0) setSelected(addrs[0].id);
+
+      const pData = profile as unknown as {
+        full_name?: string;
+        phone?: string;
+        phone_verified?: boolean;
+      } | null;
+
+      if (pData?.phone && pData?.phone_verified) {
+        setVerifiedPhone(pData.phone);
+      }
+
       setForm((f) => ({
         ...f,
         email: user.email ?? "",
-        full_name: f.full_name || profile?.full_name || (user.user_metadata?.full_name ?? ""),
-        phone: f.phone || profile?.phone || "",
+        full_name: f.full_name || pData?.full_name || (user.user_metadata?.full_name ?? ""),
+        phone: f.phone || pData?.phone || "",
       }));
     })();
   }, [user]);
@@ -147,6 +179,45 @@ function Checkout() {
   const discountedSubtotal = Math.max(0, subtotal - discount);
   const shipping = shippingWaived || discountedSubtotal >= 799 ? 0 : 49;
   const total = discountedSubtotal + shipping;
+
+  async function handleSendCodOtp() {
+    if (!form.phone.trim()) {
+      toast.error("Please enter your mobile phone number first.");
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const res = await requestCodOtpFn({ data: { phone: form.phone.trim() } });
+      toast.success(`Verification code sent to ${res.phone}`);
+      setOtpCooldown(res.cooldownSeconds || 60);
+    } catch (e) {
+      toast.error((e as Error).message || "Could not send verification code.");
+    } finally {
+      setSendingOtp(false);
+    }
+  }
+
+  async function handleVerifyAndCompleteCod() {
+    if (!otpCode || otpCode.trim().length < 4) {
+      toast.error("Please enter the 6-digit OTP code.");
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await verifyCodOtpFn({
+        data: { phone: form.phone.trim(), otp: otpCode.trim() },
+      });
+      toast.success(res.message || "Mobile number verified!");
+      setVerifiedPhone(form.phone.trim());
+      setShowOtpModal(false);
+      setOtpCode("");
+      void executeOrderPlacement(form.phone.trim());
+    } catch (e) {
+      toast.error((e as Error).message || "Invalid or expired OTP code.");
+    } finally {
+      setVerifyingOtp(false);
+    }
+  }
 
   async function place() {
     if (busy) return;
@@ -171,6 +242,24 @@ function Checkout() {
       toast.error("Please fill your name, contact phone, and full shipping address");
       return;
     }
+
+    // Cash on Delivery OTP Verification Enforcement
+    if (method === "cod") {
+      const cleanInput = form.phone.trim().replace(/\D/g, "").slice(-10);
+      const cleanVerified = verifiedPhone ? verifiedPhone.trim().replace(/\D/g, "").slice(-10) : "";
+      const isVerified = cleanVerified && cleanInput === cleanVerified;
+
+      if (!isVerified) {
+        setShowOtpModal(true);
+        void handleSendCodOtp();
+        return;
+      }
+    }
+
+    await executeOrderPlacement(form.phone);
+  }
+
+  async function executeOrderPlacement(confirmedPhone: string) {
     setBusy(true);
     const watchdog = setTimeout(() => {
       setBusy(false);
@@ -182,7 +271,7 @@ function Checkout() {
         data: {
           full_name: form.full_name,
           email: form.email,
-          phone: form.phone,
+          phone: confirmedPhone,
           shipping: {
             line1: form.line1,
             line2: form.line2,
@@ -508,12 +597,26 @@ function Checkout() {
                   onChange={() => setMethod("cod")}
                   className="mt-1"
                 />
-                <div>
-                  <div className="font-semibold text-espresso flex items-center gap-2">
-                    <Truck className="size-4" /> Cash on Delivery
+                <div className="flex-1">
+                  <div className="font-semibold text-espresso flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2">
+                      <Truck className="size-4" /> Cash on Delivery
+                    </span>
+                    {verifiedPhone &&
+                    form.phone &&
+                    form.phone.trim().replace(/\D/g, "").slice(-10) ===
+                      verifiedPhone.trim().replace(/\D/g, "").slice(-10) ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
+                        <CheckCircle2 className="size-3" /> Phone Verified
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-burnt-orange bg-burnt-orange/10 px-2 py-0.5 rounded">
+                        <Phone className="size-3" /> OTP Required
+                      </span>
+                    )}
                   </div>
-                  <div className="text-xs text-muted-foreground">
-                    Pay when you receive. India-wide.
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    Pay when you receive. Verified mobile number required to prevent fake bookings.
                   </div>
                 </div>
               </label>
@@ -640,6 +743,79 @@ function Checkout() {
           {busy ? "PLACING…" : method === "cod" ? "PLACE ORDER" : `PAY ₹${total}`}
         </button>
       </div>
+
+      {/* COD Mandatory Mobile Verification Modal */}
+      {showOtpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-cream border border-burnt-orange/40 rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl relative text-espresso">
+            <button
+              onClick={() => setShowOtpModal(false)}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-espresso p-1 text-sm font-bold"
+            >
+              ✕
+            </button>
+            <div className="size-12 rounded-2xl bg-burnt-orange/15 flex items-center justify-center text-burnt-orange mx-auto mb-3">
+              <Phone className="size-6" />
+            </div>
+            <h3 className="font-serif text-2xl font-bold text-center text-espresso">
+              Verify Mobile Number
+            </h3>
+            <p className="mt-2 text-xs text-center text-muted-foreground leading-relaxed">
+              To prevent fake orders and confirm your Cash on Delivery booking, we sent a 6-digit code
+              to <b className="text-espresso">{form.phone}</b>.
+            </p>
+
+            <div className="mt-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold tracking-wider text-espresso mb-1 text-center">
+                  ENTER 6-DIGIT OTP CODE
+                </label>
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  autoFocus
+                  placeholder="• • • • • •"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                  className="w-full text-center tracking-[0.5em] text-2xl font-mono py-3.5 bg-white border border-border rounded-xl focus:outline-none focus:border-burnt-orange shadow-inner"
+                />
+              </div>
+
+              <button
+                disabled={verifyingOtp || otpCode.length < 4}
+                onClick={handleVerifyAndCompleteCod}
+                className="w-full bg-espresso text-cream font-bold text-xs tracking-widest py-3.5 rounded-xl hover:bg-burnt-orange transition-colors disabled:opacity-60 shadow-sm"
+              >
+                {verifyingOtp ? "VERIFYING OTP…" : "VERIFY & PLACE COD ORDER"}
+              </button>
+
+              <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
+                <button
+                  type="button"
+                  disabled={otpCooldown > 0 || sendingOtp}
+                  onClick={handleSendCodOtp}
+                  className="font-semibold text-burnt-orange hover:underline disabled:opacity-50"
+                >
+                  {sendingOtp
+                    ? "Sending…"
+                    : otpCooldown > 0
+                      ? `Resend OTP in ${otpCooldown}s`
+                      : "Resend Code"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowOtpModal(false)}
+                  className="hover:underline text-muted-foreground"
+                >
+                  Change number
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </SiteLayout>
   );
 }

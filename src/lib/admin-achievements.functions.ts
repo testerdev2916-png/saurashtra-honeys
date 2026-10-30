@@ -17,7 +17,7 @@ async function audit(
   action: string,
   entity_type?: string,
   entity_id?: string,
-  metadata?: any
+  metadata?: any,
 ) {
   await supabase.from("audit_logs").insert({
     actor_id: actor,
@@ -37,10 +37,16 @@ export const listAchievements = createServerFn()
       .select("*")
       .order("display_order", { ascending: true })
       .order("created_at", { ascending: false });
-    
+
     if (error) {
-      if (error.message.includes("Could not find the table") || error.message.includes("relation") || error.message.includes("schema cache")) {
-        console.warn("achievements_gallery table not found, returning empty array. Push migration to Supabase to fix.");
+      if (
+        error.message.includes("Could not find the table") ||
+        error.message.includes("relation") ||
+        error.message.includes("schema cache")
+      ) {
+        console.warn(
+          "achievements_gallery table not found, returning empty array. Push migration to Supabase to fix.",
+        );
         return { rows: [] };
       }
       throw new Error(error.message);
@@ -59,13 +65,13 @@ export const upsertAchievement = createServerFn()
       description: z.string().optional(),
       display_order: z.number().default(0),
       is_active: z.boolean().default(true),
-    })
+    }),
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data: payload, context }) => {
     const { supabase, userId } = context;
     await assertPerm(supabase, userId, "settings.manage");
-    
+
     if (payload.id) {
       const { data, error } = await (supabase as any)
         .from("achievements_gallery")
@@ -73,16 +79,23 @@ export const upsertAchievement = createServerFn()
         .eq("id", payload.id)
         .select()
         .single();
-      
+
       if (error) {
-        if (error.message.includes("Could not find the table") || error.message.includes("relation")) {
-          throw new Error("achievements_gallery table not found. Please push the database migration to Supabase first.");
+        if (
+          error.message.includes("Could not find the table") ||
+          error.message.includes("relation")
+        ) {
+          throw new Error(
+            "achievements_gallery table not found. Please push the database migration to Supabase first.",
+          );
         }
         throw new Error(error.message);
       }
-      
+
       if (data) {
-        await audit(supabase, userId, "update_achievement", "achievements_gallery", payload.id, { title: payload.title });
+        await audit(supabase, userId, "update_achievement", "achievements_gallery", payload.id, {
+          title: payload.title,
+        });
         return { success: true, item: data };
       }
       throw new Error("Update failed: no data returned");
@@ -92,16 +105,28 @@ export const upsertAchievement = createServerFn()
         .insert(payload)
         .select()
         .single();
-        
+
       if (error) {
-        if (error.message.includes("Could not find the table") || error.message.includes("relation")) {
-          throw new Error("achievements_gallery table not found. Please push the database migration to Supabase first.");
+        if (
+          error.message.includes("Could not find the table") ||
+          error.message.includes("relation")
+        ) {
+          throw new Error(
+            "achievements_gallery table not found. Please push the database migration to Supabase first.",
+          );
         }
         throw new Error(error.message);
       }
-      
+
       if (data) {
-        await audit(supabase, userId, "create_achievement", "achievements_gallery", (data as any).id, { title: payload.title });
+        await audit(
+          supabase,
+          userId,
+          "create_achievement",
+          "achievements_gallery",
+          (data as any).id,
+          { title: payload.title },
+        );
         return { success: true, item: data };
       }
       throw new Error("Insert failed: no data returned");
@@ -117,7 +142,7 @@ export const deleteAchievement = createServerFn()
 
     const { error } = await (supabase as any).from("achievements_gallery").delete().eq("id", id);
     if (error) throw new Error(error.message);
-    
+
     await audit(supabase, userId, "delete_achievement", "achievements_gallery", id);
     return { success: true };
   });
@@ -126,7 +151,7 @@ export const reorderAchievements = createServerFn()
   .validator(
     z.object({
       items: z.array(z.object({ id: z.string(), display_order: z.number() })),
-    })
+    }),
   )
   .middleware([requireSupabaseAuth])
   .handler(async ({ data: { items }, context }) => {
@@ -140,6 +165,8 @@ export const reorderAchievements = createServerFn()
       if (error) throw new Error(error.message);
     }
 
-    await audit(supabase, userId, "reorder_achievements", "achievements_gallery", undefined, { count: items.length });
+    await audit(supabase, userId, "reorder_achievements", "achievements_gallery", undefined, {
+      count: items.length,
+    });
     return { success: true };
   });

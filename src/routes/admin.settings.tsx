@@ -11,14 +11,60 @@ export const Route = createFileRoute("/admin/settings")({ component: SettingsPag
 
 type Row = { key: string; value: Record<string, unknown>; is_public: boolean; updated_at: string };
 
-const LABELS: Record<string, { title: string; fields: { key: string; label: string; type?: string; textarea?: boolean }[] }> = {
-  company:  { title: "Company", fields: [{ key: "name", label: "Company name" }, { key: "tagline", label: "Tagline" }, { key: "logo_url", label: "Logo URL" }, { key: "favicon_url", label: "Favicon URL" }] },
-  contact:  { title: "Contact", fields: [{ key: "email", label: "Email" }, { key: "phone", label: "Phone" }, { key: "whatsapp", label: "WhatsApp" }, { key: "address", label: "Address", textarea: true }] },
-  social:   { title: "Social links", fields: [{ key: "instagram", label: "Instagram" }, { key: "facebook", label: "Facebook" }, { key: "youtube", label: "YouTube" }, { key: "twitter", label: "Twitter/X" }] },
-  business: { title: "Business", fields: [{ key: "gst", label: "GST number" }, { key: "hours", label: "Business hours" }] },
-  footer:   { title: "Footer", fields: [{ key: "copyright", label: "Copyright line" }] },
-  seo:      { title: "Default SEO", fields: [{ key: "default_title", label: "Default title" }, { key: "default_description", label: "Default description", textarea: true }, { key: "og_image", label: "Default OG image URL" }] },
-  shipping: { title: "Shipping & Delivery", fields: [{ key: "free_shipping_min_gujarat", label: "Free Shipping Min Order (Gujarat)" }, { key: "free_shipping_min_india", label: "Free Shipping Min Order (Rest of India)" }] },
+const LABELS: Record<
+  string,
+  { title: string; fields: { key: string; label: string; type?: string; textarea?: boolean }[] }
+> = {
+  company: {
+    title: "Company",
+    fields: [
+      { key: "name", label: "Company name" },
+      { key: "tagline", label: "Tagline" },
+      { key: "logo_url", label: "Logo URL" },
+      { key: "favicon_url", label: "Favicon URL" },
+    ],
+  },
+  contact: {
+    title: "Contact",
+    fields: [
+      { key: "email", label: "Email" },
+      { key: "phone", label: "Phone" },
+      { key: "whatsapp", label: "WhatsApp" },
+      { key: "address", label: "Address", textarea: true },
+    ],
+  },
+  social: {
+    title: "Social links",
+    fields: [
+      { key: "instagram", label: "Instagram" },
+      { key: "facebook", label: "Facebook" },
+      { key: "youtube", label: "YouTube" },
+      { key: "twitter", label: "Twitter/X" },
+    ],
+  },
+  business: {
+    title: "Business",
+    fields: [
+      { key: "gst", label: "GST number" },
+      { key: "hours", label: "Business hours" },
+    ],
+  },
+  footer: { title: "Footer", fields: [{ key: "copyright", label: "Copyright line" }] },
+  seo: {
+    title: "Default SEO",
+    fields: [
+      { key: "default_title", label: "Default title" },
+      { key: "default_description", label: "Default description", textarea: true },
+      { key: "og_image", label: "Default OG image URL" },
+    ],
+  },
+  shipping: {
+    title: "Shipping & Delivery",
+    fields: [
+      { key: "free_shipping_min_gujarat", label: "Free Shipping Min Order (Gujarat)" },
+      { key: "free_shipping_min_india", label: "Free Shipping Min Order (Rest of India)" },
+    ],
+  },
 };
 
 function SettingsPage() {
@@ -41,9 +87,13 @@ function SettingsPage() {
         for (const [k, val] of Object.entries(row.value ?? {})) v[row.key][k] = String(val ?? "");
       }
       setValues(v);
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   }
-  useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
+  useEffect(() => {
+    void load(); /* eslint-disable-next-line */
+  }, []);
 
   async function onUploadBranding(rowKey: string, fieldKey: string, file: File) {
     try {
@@ -69,7 +119,11 @@ function SettingsPage() {
       if (key === "company") void queryClient.invalidateQueries({ queryKey: ["company-settings"] });
       await router.invalidate();
       await load();
-    } catch (e) { toast.error((e as Error).message); } finally { setBusy(null); }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
   }
 
   return (
@@ -82,8 +136,20 @@ function SettingsPage() {
             return (
               <Card key={row.key} className="p-6">
                 <h2 className="font-serif text-xl text-forest-dark mb-3">{row.key}</h2>
-                <textarea rows={6} className={`${inp} font-mono text-xs`} defaultValue={JSON.stringify(row.value, null, 2)}
-                  onBlur={(e) => { try { const v = JSON.parse(e.target.value); void save({ data: { key: row.key, value: v, is_public: row.is_public } }).then(() => toast.success("Saved")); } catch { toast.error("Invalid JSON"); } }}
+                <textarea
+                  rows={6}
+                  className={`${inp} font-mono text-xs`}
+                  defaultValue={JSON.stringify(row.value, null, 2)}
+                  onBlur={(e) => {
+                    try {
+                      const v = JSON.parse(e.target.value);
+                      void save({
+                        data: { key: row.key, value: v, is_public: row.is_public },
+                      }).then(() => toast.success("Saved"));
+                    } catch {
+                      toast.error("Invalid JSON");
+                    }
+                  }}
                 />
               </Card>
             );
@@ -96,10 +162,30 @@ function SettingsPage() {
                   <div key={fld.key} className={fld.textarea ? "md:col-span-2" : ""}>
                     <Field label={fld.label}>
                       {fld.textarea ? (
-                        <textarea rows={3} className={inp} value={values[row.key]?.[fld.key] ?? ""} onChange={(e) => setValues((v) => ({ ...v, [row.key]: { ...v[row.key], [fld.key]: e.target.value } }))} />
+                        <textarea
+                          rows={3}
+                          className={inp}
+                          value={values[row.key]?.[fld.key] ?? ""}
+                          onChange={(e) =>
+                            setValues((v) => ({
+                              ...v,
+                              [row.key]: { ...v[row.key], [fld.key]: e.target.value },
+                            }))
+                          }
+                        />
                       ) : (
                         <div className="flex items-center gap-2">
-                          <input type={fld.type ?? "text"} className={`${inp} flex-1`} value={values[row.key]?.[fld.key] ?? ""} onChange={(e) => setValues((v) => ({ ...v, [row.key]: { ...v[row.key], [fld.key]: e.target.value } }))} />
+                          <input
+                            type={fld.type ?? "text"}
+                            className={`${inp} flex-1`}
+                            value={values[row.key]?.[fld.key] ?? ""}
+                            onChange={(e) =>
+                              setValues((v) => ({
+                                ...v,
+                                [row.key]: { ...v[row.key], [fld.key]: e.target.value },
+                              }))
+                            }
+                          />
                           {(fld.key === "logo_url" || fld.key === "favicon_url") && (
                             <label className="inline-flex items-center gap-1.5 bg-brand-orange hover:bg-brand-orange-hover text-white px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider cursor-pointer transition-colors shrink-0">
                               <Upload className="size-3.5" />
@@ -117,28 +203,35 @@ function SettingsPage() {
                           )}
                         </div>
                       )}
-                      {(fld.key === "logo_url" || fld.key === "favicon_url") && values[row.key]?.[fld.key] && (
-                        <div className="mt-2 p-2 rounded-lg border border-border bg-espresso/90 flex items-center gap-3">
-                          <img
-                            src={values[row.key][fld.key]}
-                            alt={fld.label}
-                            className="max-h-8 w-auto object-contain"
-                            style={{
-                              filter: "none",
-                              opacity: 1,
-                              mixBlendMode: "normal",
-                            }}
-                          />
-                          <span className="text-[10px] text-cream/70 truncate font-mono">
-                            Previewing original file without tinting
-                          </span>
-                        </div>
-                      )}
+                      {(fld.key === "logo_url" || fld.key === "favicon_url") &&
+                        values[row.key]?.[fld.key] && (
+                          <div className="mt-2 p-2 rounded-lg border border-border bg-espresso/90 flex items-center gap-3">
+                            <img
+                              src={values[row.key][fld.key]}
+                              alt={fld.label}
+                              className="max-h-8 w-auto object-contain"
+                              style={{
+                                filter: "none",
+                                opacity: 1,
+                                mixBlendMode: "normal",
+                              }}
+                            />
+                            <span className="text-[10px] text-cream/70 truncate font-mono">
+                              Previewing original file without tinting
+                            </span>
+                          </div>
+                        )}
                     </Field>
                   </div>
                 ))}
               </div>
-              <BtnPrimary onClick={() => onSave(row.key)} disabled={busy === row.key} className="mt-4">{busy === row.key ? "SAVING…" : "SAVE"}</BtnPrimary>
+              <BtnPrimary
+                onClick={() => onSave(row.key)}
+                disabled={busy === row.key}
+                className="mt-4"
+              >
+                {busy === row.key ? "SAVING…" : "SAVE"}
+              </BtnPrimary>
             </Card>
           );
         })}

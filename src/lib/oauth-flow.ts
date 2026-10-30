@@ -55,7 +55,10 @@ export function getURL(): string {
 export function isLocalOAuthOrigin(origin: string): boolean {
   try {
     const { hostname, protocol } = new URL(origin);
-    return protocol === "http:" && (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]");
+    return (
+      protocol === "http:" &&
+      (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]")
+    );
   } catch {
     return false;
   }
@@ -81,24 +84,30 @@ export function buildOAuthCallbackUrl(origin: string, intentId: string): string 
   return url.toString();
 }
 
-export function consumeOAuthIntent(intentId?: string | null):
+export function consumeOAuthIntent(
+  intentId?: string | null,
+):
   | { ok: true; target: string }
   | { ok: false; reason: "missing" | "not_found" | "mismatch" | "expired" | "invalid" } {
   const s = storage();
   if (!s) return { ok: false, reason: "not_found" };
   const latest = s.getItem(LATEST_INTENT_KEY);
-  
+
   // If no intentId is passed, use the latest one implicitly (useful for clean redirect URLs)
   const targetIntentId = intentId || latest;
-  
+
   if (!targetIntentId) return { ok: false, reason: "missing" };
   if (intentId && latest !== intentId) return { ok: false, reason: "mismatch" };
-  
+
   const raw = s.getItem(`${INTENT_PREFIX}${targetIntentId}`);
   if (!raw) return { ok: false, reason: "not_found" };
   try {
     const intent = JSON.parse(raw) as Partial<OAuthIntent>;
-    if (intent.id !== intentId || typeof intent.target !== "string" || typeof intent.createdAt !== "number") {
+    if (
+      intent.id !== intentId ||
+      typeof intent.target !== "string" ||
+      typeof intent.createdAt !== "number"
+    ) {
       return { ok: false, reason: "invalid" };
     }
     if (Date.now() - intent.createdAt > INTENT_TTL_MS) return { ok: false, reason: "expired" };
@@ -122,14 +131,21 @@ function currentSafeUrlParts() {
     origin: url.origin,
     pathname: url.pathname,
     searchKeys: Array.from(url.searchParams.keys()).sort().join(",") || "none",
-    hashKeys: url.hash ? Array.from(new URLSearchParams(url.hash.slice(1)).keys()).sort().join(",") || "present" : "none",
+    hashKeys: url.hash
+      ? Array.from(new URLSearchParams(url.hash.slice(1)).keys())
+          .sort()
+          .join(",") || "present"
+      : "none",
   };
 }
 
 export function oauthDebug(event: string, details: Record<string, OAuthDebugValue> = {}) {
   if (typeof window === "undefined") return;
   const safeDetails = Object.fromEntries(
-    Object.entries(details).map(([key, value]) => [key, typeof value === "string" && value.length > 160 ? `${value.slice(0, 160)}…` : value]),
+    Object.entries(details).map(([key, value]) => [
+      key,
+      typeof value === "string" && value.length > 160 ? `${value.slice(0, 160)}…` : value,
+    ]),
   );
   console.info("[oauth-flow]", event, { ...currentSafeUrlParts(), ...safeDetails });
 }

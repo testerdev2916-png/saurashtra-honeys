@@ -9,6 +9,7 @@
 ## 1. Summary of Changes
 
 ### New Files Created
+
 1. `supabase/migrations/20260728100000_admin_video_cms_and_dynamic_categories.sql`
    - Complete Supabase PostgreSQL migration for the `homepage_videos` table and dynamic categories normalization.
    - Adds `homepage_videos` table with columns: `id`, `title`, `subtitle`, `badge`, `video_url`, `thumbnail_url`, `product_slug`, `link_url`, `status`, `is_active`, `display_order`, `created_at`, `updated_at`.
@@ -30,6 +31,7 @@
    - Comprehensive documentation and setup guide.
 
 ### Modified Files
+
 1. `src/lib/admin-cms.functions.ts`
    - Added server RPC functions:
      - `listHomepageVideos`: returns all story cards ordered by `display_order ASC, created_at ASC`.
@@ -66,18 +68,21 @@
 To activate the Video CMS and Dynamic Categories in your Supabase project, execute the SQL migration file in your Supabase SQL Editor:
 
 ### Step 1: Open Supabase SQL Editor
+
 1. Log in to your [Supabase Dashboard](https://supabase.com/dashboard).
 2. Select your project.
 3. In the left sidebar, click on **SQL Editor** (`/project/<id>/sql`).
 4. Click **+ New Query**.
 
 ### Step 2: Execute the Migration Script
+
 1. Open the file `supabase/migrations/20260728100000_admin_video_cms_and_dynamic_categories.sql` from your project folder.
 2. Copy the entire SQL contents.
 3. Paste into the Supabase SQL Editor and click **Run**.
 4. Verify that the output shows `Success. No rows returned.`
 
 ### What the Migration Does Automatically:
+
 - Creates `public.homepage_videos` table with RLS policies and trigger for `updated_at`.
 - Updates `storage.buckets` (`media` and `product-images`) with `file_size_limit = 209715200` (200 MB) and allowed video/image MIME types.
 - Seeds default `public.categories` rows (`Single Flora Honey`, `Multiflora Honey`, `Raw Unfiltered Honey`, `Honey Comb`, `Gift Packs & Combos`).
@@ -92,7 +97,7 @@ To activate the Video CMS and Dynamic Categories in your Supabase project, execu
    - Navigate to `/admin/stories` in your browser.
    - Click **NEW STORY CARD**.
    - Upload a poster image and a 9:16 vertical video clip (up to 200 MB). Notice the interactive upload progress bar and vertical preview card.
-   - Select a linked product (e.g., *Ajwain Honey*) and click **SAVE STORY CARD**.
+   - Select a linked product (e.g., _Ajwain Honey_) and click **SAVE STORY CARD**.
    - Use the **Up/Down arrow buttons** in the list to reorder story cards.
 2. **Verify Homepage Story Section (`/`):**
    - Open the homepage (`/`) and scroll to **Why Choose Us — A Promise in Every Jar**.
@@ -109,12 +114,16 @@ To activate the Video CMS and Dynamic Categories in your Supabase project, execu
 ## 4. Creating the ZIP Archives (Patch ZIP & Complete Website ZIP)
 
 We have provided a zero-dependency Node.js script [scripts/create_zips.mjs](file:///Users/rahicreativemedia/Downloads/Natural_Ecom_Elevate_4_category-images_FIXED/scripts/create_zips.mjs) that automatically packages the project into two clean ZIP archives:
+
 1. **`Saurashtra_Honey_Admin_Video_CMS_Patch.zip`** — Contains ONLY the newly created and modified files along with this CHANGELOG.
 2. **`Saurashtra_Honey_Complete_Website_Updated.zip`** — Contains the complete updated e-commerce website (excluding `node_modules`, `.git`, and temporary build artifacts).
 
 ### How to generate the ZIP archives:
+
 Open your terminal in the project root directory and run:
+
 ```bash
 node scripts/create_zips.mjs
 ```
+
 Both ZIP files will be generated in the root directory immediately.

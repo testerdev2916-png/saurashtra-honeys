@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useSiteSettings } from "@/lib/site-settings";
 import { useCompanySettings, DEFAULT_COMPANY_SETTINGS } from "@/lib/company-settings";
 
-const DEFAULT_IMAGEKIT_LOGO = DEFAULT_COMPANY_SETTINGS.logo_url || "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
+const DEFAULT_IMAGEKIT_LOGO =
+  DEFAULT_COMPANY_SETTINGS.logo_url ||
+  "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
 const LOCAL_FALLBACK_LOGO = "/saurashtra-honey-logo-complete.png";
 
 function resolveLogoSources(customUrl?: string): string[] {
@@ -22,14 +24,29 @@ function FallbackBeeIcon({ className = "size-10" }: { className?: string }) {
   return (
     <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
       <circle cx="24" cy="24" r="22" fill="#FDF8F0" stroke="#C88A2B" strokeWidth="2" />
-      <path d="M24 10C24 10 16 16 16 24C16 32 24 38 24 38C24 38 32 32 32 24C32 16 24 10 24 10Z" fill="#C88A2B" fillOpacity="0.15" stroke="#C88A2B" strokeWidth="2" />
+      <path
+        d="M24 10C24 10 16 16 16 24C16 32 24 38 24 38C24 38 32 32 32 24C32 16 24 10 24 10Z"
+        fill="#C88A2B"
+        fillOpacity="0.15"
+        stroke="#C88A2B"
+        strokeWidth="2"
+      />
       <circle cx="24" cy="18" r="4" fill="#C88A2B" />
-      <path d="M18 24H30M19 28H29M21 32H27" stroke="#49301F" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M18 24H30M19 28H29M21 32H27"
+        stroke="#49301F"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
     </svg>
   );
 }
 
-export function BeeLogo({ className = "max-h-[52px] w-auto object-contain shrink-0" }: { className?: string }) {
+export function BeeLogo({
+  className = "max-h-[52px] w-auto object-contain shrink-0",
+}: {
+  className?: string;
+}) {
   const company = useCompanySettings();
   const settings = useSiteSettings();
   const logoUrl = company?.logo_url || settings.company?.logo_url;

@@ -140,32 +140,40 @@ export async function seedWhoWeSupplyIfEmpty(supabase: any) {
       const rowsToInsert = [
         {
           title: "Premium Bakeries & Patisseries",
-          description: "Artisanal bakeries across India trust our pure honey and beeswax to create signature pastries, glazes, and naturally sweetened baked goods.",
-          image_url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=60",
+          description:
+            "Artisanal bakeries across India trust our pure honey and beeswax to create signature pastries, glazes, and naturally sweetened baked goods.",
+          image_url:
+            "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800&auto=format&fit=crop&q=60",
           sort_order: 1,
-          active: true
+          active: true,
         },
         {
           title: "Luxury Hotels & Resorts",
-          description: "Five-star hospitality brands feature Saurashtra Honey at breakfast buffets, in premium rooms, and as part of exclusive wellness retreats.",
-          image_url: "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop&q=60",
+          description:
+            "Five-star hospitality brands feature Saurashtra Honey at breakfast buffets, in premium rooms, and as part of exclusive wellness retreats.",
+          image_url:
+            "https://images.unsplash.com/photo-1582719508461-905c673771fd?w=800&auto=format&fit=crop&q=60",
           sort_order: 2,
-          active: true
+          active: true,
         },
         {
           title: "Ayurvedic & Wellness Brands",
-          description: "Leading natural health companies source our raw honey and bee pollen as foundational ingredients for traditional remedies and modern supplements.",
-          image_url: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&auto=format&fit=crop&q=60",
+          description:
+            "Leading natural health companies source our raw honey and bee pollen as foundational ingredients for traditional remedies and modern supplements.",
+          image_url:
+            "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=800&auto=format&fit=crop&q=60",
           sort_order: 3,
-          active: true
+          active: true,
         },
         {
           title: "Boutique Cafés",
-          description: "Specialty coffee shops and organic cafés serve our unique monofloral honeys to complement artisanal beverages and healthy breakfast bowls.",
-          image_url: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60",
+          description:
+            "Specialty coffee shops and organic cafés serve our unique monofloral honeys to complement artisanal beverages and healthy breakfast bowls.",
+          image_url:
+            "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&auto=format&fit=crop&q=60",
           sort_order: 4,
-          active: true
-        }
+          active: true,
+        },
       ];
       await supabase.from("who_we_supply_services").insert(rowsToInsert as never);
     }
@@ -197,7 +205,7 @@ export const listAdminSupplyServices = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ rows: SupplyServiceRow[] }> => {
     await assertStaff(context.supabase, context.userId);
-        await seedWhoWeSupplyIfEmpty(context.supabase);
+    await seedWhoWeSupplyIfEmpty(context.supabase);
     const { data, error } = await context.supabase
       .from("who_we_supply_services")
       .select("*")
@@ -233,7 +241,7 @@ export const upsertSupplyService = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof supplyServiceSchema>) => supplyServiceSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { id, ...rest } = data;
+    const { id, ...rest } = data;
     if (id) {
       const { error } = await context.supabase
         .from("who_we_supply_services")
@@ -252,7 +260,10 @@ export const deleteSupplyService = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-        const { error } = await context.supabase.from("who_we_supply_services").delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("who_we_supply_services")
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

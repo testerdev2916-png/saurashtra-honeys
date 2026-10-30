@@ -8,7 +8,6 @@ import {
   getProductAdditionalImages,
   formatSizeDisplay,
   cleanProductName,
-  isInfographicImage,
 } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { fetchProduct, fetchProducts } from "@/lib/product-catalog";
@@ -255,7 +254,7 @@ function ProductPage() {
       return url.split("?")[0].trim();
     };
 
-    // 1. Gather all images belonging strictly to the currently selected variant
+    // 1. Gather all packaging images belonging strictly to the currently selected variant
     const variantImages: string[] = [];
     if (activeVariant) {
       if (activeVariant.image) variantImages.push(activeVariant.image);
@@ -269,50 +268,63 @@ function ProductPage() {
       }
     }
 
-    // Deduplicate variant images by normalized URL while preserving the original URL
-    const seenVariant = new Set<string>();
-    const finalVariantImages: string[] = [];
+    // Set of URLs belonging exclusively to other variants so their packaging doesn't leak into this variant's gallery
+    const otherVariantsImages = new Set<string>();
+    if (p.variants && p.variants.length > 0) {
+      for (const v of p.variants) {
+        const isCurrent =
+          activeVariant &&
+          (v.id === activeVariant.id ||
+            normalizeSizeKey(v.label) === normalizeSizeKey(activeVariant.label));
+        if (!isCurrent) {
+          if (v.image) otherVariantsImages.add(normalize(v.image));
+          if (v.image_url) otherVariantsImages.add(normalize(v.image_url));
+          if (Array.isArray(v.images)) {
+            for (const img of v.images) {
+              if (img) otherVariantsImages.add(normalize(img));
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Gather candidate common / additional images from all product sources
+    const candidateCommonImages: string[] = [];
+    if (p.image) candidateCommonImages.push(p.image);
+    if (Array.isArray(p.images)) candidateCommonImages.push(...p.images);
+    if (Array.isArray(p.additionalImages)) candidateCommonImages.push(...p.additionalImages);
+    if (p.sharedContent?.infographics) {
+      const infoList = Object.values(p.sharedContent.infographics).filter(
+        (u): u is string => typeof u === "string" && u.trim().length > 0,
+      );
+      candidateCommonImages.push(...infoList);
+    }
+
+    const seen = new Set<string>();
+    const finalGallery: string[] = [];
+
+    const pushImg = (url: string) => {
+      if (!url || !url.trim() || url.includes("supabase.co")) return;
+      const norm = normalize(url);
+      if (!norm || seen.has(norm)) return;
+      seen.add(norm);
+      finalGallery.push(url);
+    };
+
+    // First: Active variant packaging images come first
     for (const url of variantImages) {
-      if (!url || !url.trim() || url.includes("supabase.co")) continue;
+      pushImg(url);
+    }
+
+    // Second: Common product images (excluding images belonging exclusively to other variants)
+    for (const url of candidateCommonImages) {
       const norm = normalize(url);
-      if (!seenVariant.has(norm)) {
-        seenVariant.add(norm);
-        finalVariantImages.push(url);
+      if (!otherVariantsImages.has(norm)) {
+        pushImg(url);
       }
     }
 
-    // If the active variant has its own images, use ONLY the active variant's images!
-    // Both the main hero image and the entire thumbnail gallery strictly match the selected variant.
-    // Images from previously selected variants or the default base size will never leak in.
-    if (finalVariantImages.length > 0) {
-      return finalVariantImages;
-    }
-
-    // 2. Fallback for single-variant / base products with no variant-specific images
-    // Strictly filter out any infographic images so packaging gallery remains pure packaging
-    const fallbackImages: string[] = [];
-    if (p.image && !isInfographicImage(p.image, p)) fallbackImages.push(p.image);
-    if (p.images && p.images.length > 0) {
-      fallbackImages.push(...p.images.slice(0, 2).filter((u) => !isInfographicImage(u, p)));
-    }
-    if (p.additionalImages && p.additionalImages.length > 0) {
-      fallbackImages.push(...p.additionalImages.filter((u) => !isInfographicImage(u, p)));
-    }
-
-    const seenFallback = new Set<string>();
-    const finalFallbackImages: string[] = [];
-    for (const url of fallbackImages) {
-      if (!url || !url.trim() || url.includes("supabase.co")) continue;
-      const norm = normalize(url);
-      if (!seenFallback.has(norm)) {
-        seenFallback.add(norm);
-        finalFallbackImages.push(url);
-      }
-    }
-
-    return finalFallbackImages.length > 0
-      ? finalFallbackImages
-      : [p.image].filter((img): img is string => Boolean(img) && !isInfographicImage(img, p));
+    return finalGallery.length > 0 ? finalGallery : [p.image].filter((x): x is string => Boolean(x));
   }, [p, activeVariant]);
 
   useEffect(() => {
@@ -902,70 +914,7 @@ function ProductPage() {
         </div>
       </section>
 
-      {/* ============================================================== */}
-      {/* 250 GM SHARED CONTENT: THE 6 CORE COMMON CONTENT SECTIONS      */}
-      {/* Fetched from 250 GM variant & displayed ONCE across all sizes  */}
-      {/* ============================================================== */}
-
-      {/* 1. HOW TO USE */}
-      {p.sharedContent?.infographics?.howToUse && (
-        <section className="container-product pb-12">
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
-            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
-                Everyday Rituals
-              </span>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
-                How to Use & Daily Rituals
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                {p.sharedContent?.usage_instructions ||
-                  ((p as Record<string, unknown>).usage_instructions as string) ||
-                  "Enjoy Saurashtra Honey directly by the spoonful, stirred into warm infusions, or as a wholesome natural sweetener for everyday wellness."}
-              </p>
-            </div>
-            <div className="p-4 md:p-8 flex justify-center bg-white">
-              <img
-                src={p.sharedContent.infographics.howToUse}
-                alt={`${cleanProductName(p.name)} - How to Use`}
-                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 2. INGREDIENTS */}
-      {p.sharedContent?.infographics?.ingredients && (
-        <section className="container-product pb-12">
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
-            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
-                Floral Terroir
-              </span>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
-                Ingredients & Botanical Purity
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                {p.sharedContent?.floral_source_notes ||
-                  p.floral_source_notes ||
-                  "100% Raw, Unheated, and Unfiltered Honey ethically harvested from the wild blossoms of Saurashtra. Pure nectar with natural enzymes, antioxidants, and trace pollens preserved."}
-              </p>
-            </div>
-            <div className="p-4 md:p-8 flex justify-center bg-white">
-              <img
-                src={p.sharedContent.infographics.ingredients}
-                alt={`${cleanProductName(p.name)} - Ingredients & Nutritional Info`}
-                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 3. OUR PROCESS */}
+      {/* Honey Process Infographic */}
       <section
         className="pb-14 relative"
         style={{
@@ -986,99 +935,13 @@ function ProductPage() {
           </h2>
         </div>
         <img
-          src={p.sharedContent?.infographics?.ourProcess || honeyProcessImg}
+          src={honeyProcessImg}
           alt={`${cleanProductName(p.name)} - Honey extraction and processing infographic`}
           style={{ width: "100%", display: "block", height: "auto" }}
           className="w-full h-auto block object-contain"
           loading="lazy"
         />
       </section>
-
-      {/* 4. OUR FARM */}
-      {p.sharedContent?.infographics?.ourFarm && (
-        <section className="container-product pb-12">
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
-            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
-                Apiary Terroir
-              </span>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
-                Our Farm & Wild Apiaries
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                Harvested across the biodiverse flora of Saurashtra, Gujarat. Our beekeeping
-                practices nurture thriving bee colonies and honor the seasonal flowering cycles of the
-                region.
-              </p>
-            </div>
-            <div className="p-4 md:p-8 flex justify-center bg-white">
-              <img
-                src={p.sharedContent.infographics.ourFarm}
-                alt={`${cleanProductName(p.name)} - Our Farm and Apiaries`}
-                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 5. CERTIFICATES */}
-      {p.sharedContent?.infographics?.certificates && (
-        <section className="container-product pb-12">
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
-            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
-                Verified Quality
-              </span>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
-                Quality Certificates & Lab Purity
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                {p.sharedContent?.purity_lab_test ||
-                  p.purity_lab_test ||
-                  "Every batch is certified by NABL-accredited laboratories for zero sugar adulteration, optimal moisture parameters, and true botanical pollen identity."}
-              </p>
-            </div>
-            <div className="p-4 md:p-8 flex justify-center bg-white">
-              <img
-                src={p.sharedContent.infographics.certificates}
-                alt={`${cleanProductName(p.name)} - Purity Lab Test and Certificates`}
-                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* 6. LIFESTYLE */}
-      {p.sharedContent?.infographics?.lifestyle && (
-        <section className="container-product pb-14">
-          <div className="bg-white border border-border/80 rounded-2xl overflow-hidden shadow-soft">
-            <div className="p-6 md:p-8 bg-cream/30 border-b border-border/60">
-              <span className="text-[11px] font-bold uppercase tracking-widest text-burnt-orange">
-                Everyday Living
-              </span>
-              <h2 className="font-serif text-2xl md:text-3xl font-bold text-espresso mt-1">
-                Lifestyle & Holistic Nutrition
-              </h2>
-              <p className="text-sm text-muted-foreground mt-2 max-w-2xl leading-relaxed">
-                Make pure raw honey an essential companion to your balanced lifestyle—for morning
-                vitality, pre-workout natural carbohydrates, and wholesome family nourishment.
-              </p>
-            </div>
-            <div className="p-4 md:p-8 flex justify-center bg-white">
-              <img
-                src={p.sharedContent.infographics.lifestyle}
-                alt={`${cleanProductName(p.name)} - Lifestyle and Wellness`}
-                className="max-h-[720px] w-auto object-contain rounded-xl shadow-xs"
-                loading="lazy"
-              />
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* FAQ Accordion */}
       <section className="container-product pb-14">

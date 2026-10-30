@@ -20,7 +20,11 @@ const PAGE_GROUPS = {
     pages: [
       { slug: "our-story", title: "Our Story", desc: "The journey, the founder, and the farm." },
       { slug: "contact", title: "Contact Us", desc: "Addresses, phone numbers, and maps." },
-      { slug: "bee-farming", title: "Bee Farming", desc: "Imagery and stats about beekeeping practices." },
+      {
+        slug: "bee-farming",
+        title: "Bee Farming",
+        desc: "Imagery and stats about beekeeping practices.",
+      },
     ],
   },
   b2b: {
@@ -28,12 +32,32 @@ const PAGE_GROUPS = {
     subtitle: "Manage bulk orders, corporate gifting, and private label content.",
     icon: Store,
     pages: [
-      { slug: "bulk-gifting", title: "B2B Hub (Outside Page)", desc: "The main landing page showing the 4 B2B cards." },
-      { slug: "bulk-orders", title: "Bulk Orders", desc: "Wholesale supplies and bulk purchasing." },
-      { slug: "corporate-gifting", title: "Corporate Gifting", desc: "Corporate gifting solutions and features." },
-      { slug: "private-label", title: "Private Label", desc: "OEM and private label manufacturing." },
+      {
+        slug: "bulk-gifting",
+        title: "B2B Hub (Outside Page)",
+        desc: "The main landing page showing the 4 B2B cards.",
+      },
+      {
+        slug: "bulk-orders",
+        title: "Bulk Orders",
+        desc: "Wholesale supplies and bulk purchasing.",
+      },
+      {
+        slug: "corporate-gifting",
+        title: "Corporate Gifting",
+        desc: "Corporate gifting solutions and features.",
+      },
+      {
+        slug: "private-label",
+        title: "Private Label",
+        desc: "OEM and private label manufacturing.",
+      },
       { slug: "gift-hampers", title: "Gift Hampers", desc: "Curated premium honey gift hampers." },
-      { slug: "become-a-partner", title: "Become a Partner", desc: "Partnership programs and benefits." },
+      {
+        slug: "become-a-partner",
+        title: "Become a Partner",
+        desc: "Partnership programs and benefits.",
+      },
     ],
   },
 };
@@ -45,10 +69,7 @@ function AdminPagesGroup() {
 
   return (
     <div>
-      <PageHeader 
-        title={config.title} 
-        subtitle={config.subtitle} 
-      />
+      <PageHeader title={config.title} subtitle={config.subtitle} />
 
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {config.pages.map((p) => (
@@ -61,9 +82,7 @@ function AdminPagesGroup() {
                 <h3 className="font-serif text-xl font-bold text-forest-dark mb-2 group-hover:text-brand-orange transition-colors">
                   {p.title}
                 </h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {p.desc}
-                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
               </div>
               <div className="mt-6 flex items-center text-sm font-semibold text-brand-orange group-hover:gap-2 transition-all">
                 Manage Page <ChevronRight className="size-4 ml-1" />

@@ -28,10 +28,7 @@ function AdminHomepageCategories() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [cats, sel] = await Promise.all([
-        fetchShopCategories(),
-        fetchAllHomepageCategories(),
-      ]);
+      const [cats, sel] = await Promise.all([fetchShopCategories(), fetchAllHomepageCategories()]);
       setAllCategories(cats);
       setSelections(sel);
     } catch (e) {
@@ -156,8 +153,13 @@ function AdminHomepageCategories() {
             >
               <option value="">Select a category to add...</option>
               {allCategories.map((c) => (
-                <option key={c.slug} value={c.slug} disabled={selections.some(s => s.category_slug === c.slug)}>
-                  {c.name} {selections.some(s => s.category_slug === c.slug) ? "(Already added)" : ""}
+                <option
+                  key={c.slug}
+                  value={c.slug}
+                  disabled={selections.some((s) => s.category_slug === c.slug)}
+                >
+                  {c.name}{" "}
+                  {selections.some((s) => s.category_slug === c.slug) ? "(Already added)" : ""}
                 </option>
               ))}
             </select>
@@ -181,7 +183,11 @@ function AdminHomepageCategories() {
               <Card key={sel.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {cat?.image_url ? (
-                    <img src={cat.image_url} alt={cat.name} className="w-12 h-12 object-cover rounded bg-cream" />
+                    <img
+                      src={cat.image_url}
+                      alt={cat.name}
+                      className="w-12 h-12 object-cover rounded bg-cream"
+                    />
                   ) : (
                     <div className="w-12 h-12 rounded bg-cream border border-border" />
                   )}

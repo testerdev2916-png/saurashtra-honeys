@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
 dotenv.config();
 const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_ANON_KEY);
 
@@ -16,22 +16,22 @@ const CANONICAL_SECTIONS = [
 ];
 
 async function seed() {
-  const { data: existing } = await supabase.from('homepage_sections').select('section_key');
-  const existingKeys = new Set((existing || []).map(r => r.section_key));
-  
+  const { data: existing } = await supabase.from("homepage_sections").select("section_key");
+  const existingKeys = new Set((existing || []).map((r) => r.section_key));
+
   let order = existingKeys.size;
   for (const key of CANONICAL_SECTIONS) {
     if (!existingKeys.has(key)) {
       order++;
-      await supabase.from('homepage_sections').insert({
+      await supabase.from("homepage_sections").insert({
         section_key: key,
         enabled: true,
         sort_order: order,
-        settings: {}
+        settings: {},
       });
-      console.log('Inserted', key);
+      console.log("Inserted", key);
     }
   }
-  console.log('Done');
+  console.log("Done");
 }
 seed();

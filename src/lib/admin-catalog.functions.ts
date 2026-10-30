@@ -67,7 +67,7 @@ const productSchema = z.object({
   hsn_code: z.string().max(40).nullable().optional(),
   weight_g: z.number().int().nonnegative().nullable().optional(),
   low_stock_limit: z.number().int().nonnegative().default(5),
-  status: z.enum(["draft","published","archived"]).default("published"),
+  status: z.enum(["draft", "published", "archived"]).default("published"),
   is_featured: z.boolean().default(false),
   is_bestseller: z.boolean().default(false),
   is_new_arrival: z.boolean().default(false),
@@ -93,7 +93,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { id, ...rest } = data;
     if (rest.images && Array.isArray(rest.images) && rest.images.length > 0) {
-      const validPrimary = rest.images.find(img => typeof img === 'string' && img.trim() !== "");
+      const validPrimary = rest.images.find((img) => typeof img === "string" && img.trim() !== "");
       if (validPrimary) {
         rest.image_url = validPrimary;
       }
@@ -104,18 +104,30 @@ export const upsertProduct = createServerFn({ method: "POST" })
     }
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;
-    
-    console.log("Saving product payload:", JSON.stringify({ images: rest.images, attrs: rest.attributes }));
+
+    console.log(
+      "Saving product payload:",
+      JSON.stringify({ images: rest.images, attrs: rest.attributes }),
+    );
 
     if (id) {
-      const { data: updated, error } = await context.supabase.from("products").update(rest as never).eq("id", id).select("id").single();
+      const { data: updated, error } = await context.supabase
+        .from("products")
+        .update(rest as never)
+        .eq("id", id)
+        .select("id")
+        .single();
       if (error) {
         console.error("Supabase update error:", error);
         throw new Error(error.message);
       }
       return { ok: true, id: updated?.id || id };
     }
-    const { data: inserted, error } = await context.supabase.from("products").insert(rest as never).select("id").single();
+    const { data: inserted, error } = await context.supabase
+      .from("products")
+      .insert(rest as never)
+      .select("id")
+      .single();
     if (error) throw new Error(error.message);
     return { ok: true, id: inserted?.id };
   });
@@ -125,35 +137,37 @@ export const deleteProduct = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    
+
     // Fetch product to clean up relations and storage
     const { data: product, error: fetchErr } = await context.supabase
       .from("products")
       .select("*")
       .eq("id", data.id)
       .single();
-      
+
     if (fetchErr && fetchErr.code !== "PGRST116") {
       throw new Error(fetchErr.message);
     }
-    
+
     if (product) {
       const p: any = product;
       // 1. Clean up images from storage
       const allImages = new Set<string>();
       if (p.image_url) allImages.add(p.image_url);
       if (Array.isArray(p.images)) {
-        p.images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
+        p.images.forEach((img: any) => typeof img === "string" && allImages.add(img));
       }
       if (p.attributes && Array.isArray((p.attributes as any).additional_images)) {
-        (p.attributes as any).additional_images.forEach((img: any) => typeof img === 'string' && allImages.add(img));
+        (p.attributes as any).additional_images.forEach(
+          (img: any) => typeof img === "string" && allImages.add(img),
+        );
       }
-      
+
       const pathsToRemove = Array.from(allImages)
-        .filter(url => url.includes("/storage/v1/object/public/media/"))
-        .map(url => url.split("/storage/v1/object/public/media/")[1])
+        .filter((url) => url.includes("/storage/v1/object/public/media/"))
+        .map((url) => url.split("/storage/v1/object/public/media/")[1])
         .filter(Boolean);
-        
+
       if (pathsToRemove.length > 0) {
         await context.supabase.storage.from("media").remove(pathsToRemove);
       }
@@ -170,15 +184,15 @@ export const deleteProduct = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .select("id")
       .maybeSingle();
-      
+
     if (error) {
       throw new Error("Unable to permanently delete product: " + error.message);
     }
-    
+
     if (!deletedRow) {
       throw new Error("Product was not deleted (it may not exist or you lack permission).");
     }
-    
+
     return { ok: true };
   });
 
@@ -207,7 +221,9 @@ export type VariantItem = z.infer<typeof variantInputSchema>;
 
 export const listProductVariants = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { product_id: string }) => z.object({ product_id: z.string().uuid() }).parse(d))
+  .inputValidator((d: { product_id: string }) =>
+    z.object({ product_id: z.string().uuid() }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { data: rows, error } = await context.supabase
@@ -225,10 +241,12 @@ export const listProductVariants = createServerFn({ method: "POST" })
 export const saveProductVariants = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { product_id: string; variants: VariantItem[] }) =>
-    z.object({
-      product_id: z.string().uuid(),
-      variants: z.array(variantInputSchema),
-    }).parse(d)
+    z
+      .object({
+        product_id: z.string().uuid(),
+        variants: z.array(variantInputSchema),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
@@ -295,7 +313,9 @@ export const saveProductVariants = createServerFn({ method: "POST" })
     const defaultVar = results.find((x) => x.is_default) || results[0];
     if (defaultVar) {
       const activeLabels = results.filter((x) => x.is_active).map((x) => x.label);
-      const totalStock = results.filter((x) => x.is_active).reduce((sum, x) => sum + (x.stock_quantity || 0), 0);
+      const totalStock = results
+        .filter((x) => x.is_active)
+        .reduce((sum, x) => sum + (x.stock_quantity || 0), 0);
       await context.supabase
         .from("products")
         .update({
@@ -318,10 +338,7 @@ export const deleteProductVariant = createServerFn({ method: "POST" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
-    const { error } = await context.supabase
-      .from("product_variants")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("product_variants").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -362,34 +379,42 @@ export const upsertSlide = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
 
-    const { data: { session } } = await context.supabase.auth.getSession();
-    const { data: { user }, error: userError } = await context.supabase.auth.getUser();
+    const {
+      data: { session },
+    } = await context.supabase.auth.getSession();
+    const {
+      data: { user },
+      error: userError,
+    } = await context.supabase.auth.getUser();
 
-    console.log('[HERO_SAVE_AUTH]', {
+    console.log("[HERO_SAVE_AUTH]", {
       hasSession: !!session,
       userId: user?.id,
       email: user?.email,
       accessTokenExists: !!session?.access_token,
-      userError
+      userError,
     });
 
     const { id, ...rest } = data;
-    
-    console.log('[HERO_SAVE_START]', {
-      operation: id ? 'UPDATE' : 'INSERT',
-      table: 'hero_slides',
-      userId: user?.id
+
+    console.log("[HERO_SAVE_START]", {
+      operation: id ? "UPDATE" : "INSERT",
+      table: "hero_slides",
+      userId: user?.id,
     });
 
     if (id) {
-      const result = await context.supabase.from("hero_slides").update(rest as never).eq("id", id);
-      console.log('[HERO_SAVE_RESULT]', { data: result.data, error: result.error });
+      const result = await context.supabase
+        .from("hero_slides")
+        .update(rest as never)
+        .eq("id", id);
+      console.log("[HERO_SAVE_RESULT]", { data: result.data, error: result.error });
       if (result.error) throw new Error(result.error.message);
       return { ok: true };
     }
-    
+
     const result = await context.supabase.from("hero_slides").insert(rest as never);
-    console.log('[HERO_SAVE_RESULT]', { data: result.data, error: result.error });
+    console.log("[HERO_SAVE_RESULT]", { data: result.data, error: result.error });
     if (result.error) throw new Error(result.error.message);
     return { ok: true };
   });
@@ -453,9 +478,7 @@ export const upsertCategoryHeroSlide = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       return { ok: true };
     }
-    const { error } = await supabaseAdmin
-      .from("category_hero_slides")
-      .insert([rest as never]);
+    const { error } = await supabaseAdmin.from("category_hero_slides").insert([rest as never]);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -466,10 +489,7 @@ export const deleteCategoryHeroSlide = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("category_hero_slides")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await supabaseAdmin.from("category_hero_slides").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -496,7 +516,10 @@ export const listAdminReviews = createServerFn({ method: "POST" })
 export const moderateReview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: { id: string; status: "approved" | "pending" | "rejected" }) =>
-    z.object({ id: z.string().uuid(), status: z.enum(["approved", "pending", "rejected"]) }).parse(d))
+    z
+      .object({ id: z.string().uuid(), status: z.enum(["approved", "pending", "rejected"]) })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertAdmin(context.supabase, context.userId);
     const { error } = await context.supabase

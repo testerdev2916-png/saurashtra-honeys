@@ -28,8 +28,7 @@ export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
       {
-        title:
-          "Contact Us — We'd Love to Hear From You | Saurashtra Honey",
+        title: "Contact Us — We'd Love to Hear From You | Saurashtra Honey",
       },
       {
         name: "description",
@@ -47,13 +46,17 @@ export const Route = createFileRoute("/contact")({
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://saurastrahoney.com/contact" },
-      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        property: "og:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        name: "twitter:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
     ],
-    links: [
-      { rel: "canonical", href: "https://saurastrahoney.com/contact" },
-    ],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/contact" }],
   }),
   component: ContactPage,
 });
@@ -78,8 +81,7 @@ function ContactPage() {
   });
   const [openFaq, setOpenFaq] = useState<number | null>(0);
 
-  const set = <K extends keyof typeof form>(k: K, v: string) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const set = <K extends keyof typeof form>(k: K, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -102,9 +104,7 @@ function ContactPage() {
         message: "",
       });
     } catch {
-      toast.error(
-        "Couldn't send right now. Please try again or call +91 96873 28404."
-      );
+      toast.error("Couldn't send right now. Please try again or call +91 96873 28404.");
     } finally {
       setLoading(false);
     }
@@ -127,7 +127,9 @@ function ContactPage() {
     },
     {
       title: "Visit Us",
-      value: settings.contact?.address || "At. Farm, Nicha Kotda, Ta. Mahuva, Dist. Bhavnagar, Gujarat – 364130",
+      value:
+        settings.contact?.address ||
+        "At. Farm, Nicha Kotda, Ta. Mahuva, Dist. Bhavnagar, Gujarat – 364130",
       subtext: "Our apiary & dispatch center",
       Icon: MapPin,
       href: "https://www.google.com/maps/search/?api=1&query=Saurashtra+Honey+Bee+Farm+Nicha+Kotda+Mahuva+Gujarat",
@@ -178,10 +180,7 @@ function ContactPage() {
       {/* =========================================================================
           4, 5, 6, 7 & 8. MAIN CONTACT SECTION (#contact-section)
          ========================================================================= */}
-      <section
-        id="contact-section"
-        className="py-16 sm:py-24 bg-cream border-b border-border/80"
-      >
+      <section id="contact-section" className="py-16 sm:py-24 bg-cream border-b border-border/80">
         <div className="container-page">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
             {/* LEFT COLUMN: Contact Details (5 cols) */}
@@ -194,39 +193,33 @@ function ContactPage() {
                   We&apos;d Love to Hear From You!
                 </h1>
                 <p className="text-sm sm:text-base text-espresso/80 leading-relaxed mt-3 mb-8">
-                  Reach out to us for any queries, support or bulk orders. Our
-                  team will get back to you as soon as possible.
+                  Reach out to us for any queries, support or bulk orders. Our team will get back to
+                  you as soon as possible.
                 </p>
               </div>
 
               {/* Contact Channels List */}
               <div className="space-y-4">
-                {contactChannels.map(
-                  ({ title, value, subtext, Icon, href }) => (
-                    <a
-                      key={title}
-                      href={href}
-                      target={href.startsWith("http") ? "_blank" : undefined}
-                      rel="noreferrer"
-                      className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-border/80 hover:border-brand-orange hover:shadow-xs transition-all duration-200 group"
-                    >
-                      <div className="size-12 sm:size-14 rounded-full bg-cream border border-border/70 flex items-center justify-center text-brand-orange shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-                        <Icon className="size-5 sm:size-6" />
+                {contactChannels.map(({ title, value, subtext, Icon, href }) => (
+                  <a
+                    key={title}
+                    href={href}
+                    target={href.startsWith("http") ? "_blank" : undefined}
+                    rel="noreferrer"
+                    className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-border/80 hover:border-brand-orange hover:shadow-xs transition-all duration-200 group"
+                  >
+                    <div className="size-12 sm:size-14 rounded-full bg-cream border border-border/70 flex items-center justify-center text-brand-orange shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+                      <Icon className="size-5 sm:size-6" />
+                    </div>
+                    <div className="pt-0.5">
+                      <div className="font-serif text-base sm:text-lg font-bold text-espresso group-hover:text-brand-orange transition-colors">
+                        {title}
                       </div>
-                      <div className="pt-0.5">
-                        <div className="font-serif text-base sm:text-lg font-bold text-espresso group-hover:text-brand-orange transition-colors">
-                          {title}
-                        </div>
-                        <div className="font-semibold text-sm text-espresso mt-0.5">
-                          {value}
-                        </div>
-                        <div className="text-xs text-espresso/70 mt-0.5">
-                          {subtext}
-                        </div>
-                      </div>
-                    </a>
-                  )
-                )}
+                      <div className="font-semibold text-sm text-espresso mt-0.5">{value}</div>
+                      <div className="text-xs text-espresso/70 mt-0.5">{subtext}</div>
+                    </div>
+                  </a>
+                ))}
               </div>
             </div>
 
@@ -272,12 +265,8 @@ function ContactPage() {
                     >
                       <option value="">Subject *</option>
                       <option value="General Enquiry">General Enquiry</option>
-                      <option value="Order Status & Shipping">
-                        Order Status &amp; Shipping
-                      </option>
-                      <option value="Bulk & Wholesale Request">
-                        Bulk &amp; Wholesale Request
-                      </option>
+                      <option value="Order Status & Shipping">Order Status &amp; Shipping</option>
+                      <option value="Bulk & Wholesale Request">Bulk &amp; Wholesale Request</option>
                       <option value="Corporate Gifting & Hampers">
                         Corporate Gifting &amp; Hampers
                       </option>
@@ -322,10 +311,7 @@ function ContactPage() {
       {/* =========================================================================
           9. LOCATION / MAP SECTION (#map-section)
          ========================================================================= */}
-      <section
-        id="map-section"
-        className="py-12 sm:py-16 bg-cream border-b border-border/80"
-      >
+      <section id="map-section" className="py-12 sm:py-16 bg-cream border-b border-border/80">
         <div className="container-page">
           <div className="relative w-full rounded-3xl sm:rounded-[2.5rem] overflow-hidden border border-border/80 shadow-soft bg-cream-deep min-h-[400px] sm:min-h-0 aspect-auto sm:aspect-[21/8]">
             {/* Interactive OpenStreetMap iframe centered on exact Mahuva farm location */}
@@ -343,13 +329,12 @@ function ContactPage() {
                   <MapPin className="size-5" />
                 </div>
                 <div>
-                  <h4 className="font-serif text-lg font-bold text-espresso">
-                    Our Location
-                  </h4>
+                  <h4 className="font-serif text-lg font-bold text-espresso">Our Location</h4>
                   <p className="text-xs sm:text-sm text-espresso/75 mt-0.5 leading-relaxed whitespace-pre-line">
                     <span className="font-semibold text-espresso">Saurashtra Honey Bee Farm</span>
                     {"\n"}
-                    {settings.contact?.address || "At. Farm, Nicha Kotda,\nTa. Mahuva, Dist. Bhavnagar,\nGujarat – 364130"}
+                    {settings.contact?.address ||
+                      "At. Farm, Nicha Kotda,\nTa. Mahuva, Dist. Bhavnagar,\nGujarat – 364130"}
                   </p>
                 </div>
               </div>
@@ -399,11 +384,7 @@ function ContactPage() {
                         {q}
                       </h3>
                       <div className="size-8 rounded-full bg-cream flex items-center justify-center text-brand-orange shrink-0">
-                        {isOpen ? (
-                          <Minus className="size-4" />
-                        ) : (
-                          <Plus className="size-4" />
-                        )}
+                        {isOpen ? <Minus className="size-4" /> : <Plus className="size-4" />}
                       </div>
                     </div>
                     {isOpen && (
@@ -434,8 +415,8 @@ function ContactPage() {
                     We&apos;re happy to help!
                   </h3>
                   <p className="mt-2 text-xs sm:text-sm text-espresso/75 leading-relaxed">
-                    Chat with our friendly team directly on WhatsApp for quick
-                    answers and order assistance.
+                    Chat with our friendly team directly on WhatsApp for quick answers and order
+                    assistance.
                   </p>
 
                   <div className="mt-6">

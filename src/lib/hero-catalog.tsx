@@ -30,7 +30,7 @@ export const fetchPublicHeroRows = createServerFn({ method: "POST" })
       }
 
       // 2. If RLS blocks it (42501), fallback to secure Server Admin client
-      if (error && error.code === '42501') {
+      if (error && error.code === "42501") {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         const { data: adminData, error: adminError } = await supabaseAdmin
           .from("hero_slides")
@@ -38,7 +38,7 @@ export const fetchPublicHeroRows = createServerFn({ method: "POST" })
           .eq("page", page)
           .eq("active", true)
           .order("sort_order", { ascending: true });
-          
+
         if (adminData && adminData.length > 0) {
           return { rows: adminData as unknown as HeroRow[] };
         }
@@ -73,8 +73,8 @@ export function heroRowToSlide(r: HeroRow): HeroSlide {
     title: r.title || "Promotional Banner",
     description: r.subtitle || undefined,
     image: resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE, r.updated_at),
-    mobileImage: r.mobile_image_url 
-      ? `${r.mobile_image_url}${r.mobile_image_url.includes('?') ? '&' : '?'}v=${new Date(r.updated_at).getTime()}` 
+    mobileImage: r.mobile_image_url
+      ? `${r.mobile_image_url}${r.mobile_image_url.includes("?") ? "&" : "?"}v=${new Date(r.updated_at).getTime()}`
       : undefined,
     ctaText: r.cta_label || undefined,
     ctaTo: r.cta_href || "/shop",
@@ -133,5 +133,3 @@ export async function fetchHeroSlides(page: string): Promise<HeroSlide[]> {
     return getDefaultHeroSlides(page);
   }
 }
-
-

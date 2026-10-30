@@ -60,8 +60,8 @@ function ShoppableVideoCard({
         }
       }
     };
-    window.addEventListener('shoppable-video-mute-others', handleGlobalMute);
-    return () => window.removeEventListener('shoppable-video-mute-others', handleGlobalMute);
+    window.addEventListener("shoppable-video-mute-others", handleGlobalMute);
+    return () => window.removeEventListener("shoppable-video-mute-others", handleGlobalMute);
   }, [uniqueId]);
 
   // Attempt to play when visible & lazy load when near viewport
@@ -73,12 +73,12 @@ function ShoppableVideoCard({
     const obsPlay = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && videoRef.current) {
-          videoRef.current.play().catch(e => console.error("Autoplay prevented:", e));
+          videoRef.current.play().catch((e) => console.error("Autoplay prevented:", e));
         } else if (!entry.isIntersecting && videoRef.current) {
           videoRef.current.pause();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     // Observer for Lazy Loading / Unloading video src
@@ -86,7 +86,7 @@ function ShoppableVideoCard({
       ([entry]) => {
         setIsNearViewport(entry.isIntersecting);
       },
-      { rootMargin: "600px" }
+      { rootMargin: "600px" },
     );
 
     obsPlay.observe(el);
@@ -106,10 +106,12 @@ function ShoppableVideoCard({
   const handleVideoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (isMuted) {
       setIsMuted(false);
-      window.dispatchEvent(new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }));
+      window.dispatchEvent(
+        new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }),
+      );
       if (videoRef.current) {
         videoRef.current.muted = false;
         videoRef.current.play().catch(console.error);
@@ -160,9 +162,18 @@ function ShoppableVideoCard({
         <div className="absolute top-3 right-3 z-40 bg-black/50 backdrop-blur-md px-2 py-1 rounded-md text-white text-[11px] font-semibold tracking-wide pointer-events-none shadow-sm flex items-center gap-1.5">
           {!isMuted && (
             <div className="flex gap-[2px] h-[10px] items-end">
-              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.0s', height: '100%' }}></div>
-              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.2s', height: '60%' }}></div>
-              <div className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]" style={{ animationDelay: '0.4s', height: '80%' }}></div>
+              <div
+                className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]"
+                style={{ animationDelay: "0.0s", height: "100%" }}
+              ></div>
+              <div
+                className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]"
+                style={{ animationDelay: "0.2s", height: "60%" }}
+              ></div>
+              <div
+                className="w-[2px] bg-white/90 animate-[soundWave_1s_ease-in-out_infinite]"
+                style={{ animationDelay: "0.4s", height: "80%" }}
+              ></div>
             </div>
           )}
           {formatDuration(duration)}
@@ -170,7 +181,7 @@ function ShoppableVideoCard({
       )}
 
       {/* Hover scale effect wrapper for video */}
-      <div 
+      <div
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
@@ -190,7 +201,8 @@ function ShoppableVideoCard({
             style={{ transition: `transform ${customDuration} ${customBezier}` }}
           />
         ) : (
-          <img loading="lazy"
+          <img
+            loading="lazy"
             src={item.thumbnail_url || item.fallbackImage}
             alt=""
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
@@ -200,38 +212,47 @@ function ShoppableVideoCard({
       </div>
 
       {/* FLOATING PRODUCT CARD */}
-      {product && (() => {
-        const defaultVar = getDefaultVariant(product);
-        const displayImage = resolveActiveImage(product, defaultVar);
-        return (
-        <Link 
-          to="."
-          search={((prev: any) => ({ ...prev, reel: item.id })) as any}
-          className="absolute z-20 w-[68%] sm:w-[60%] left-1/2 -translate-x-1/2 bottom-[4%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2 sm:p-2.5 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)]"
-        >
-          <div className="w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] bg-white border border-white/80 flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm shrink-0 rounded-[12px] overflow-hidden">
-             <img loading="lazy" src={displayImage} alt={product.name} className="w-full h-full object-contain p-1" />
-          </div>
-          <h3 className="font-semibold text-black text-center text-[11px] sm:text-[12px] leading-tight mb-0.5 px-1 line-clamp-2">
-            {displayTitle}
-          </h3>
-          <div className="text-black font-bold text-[11px] sm:text-[13px]">
-            {product.priceMax ? (
-              <>₹{product.price.toLocaleString("en-IN")} - ₹{product.priceMax.toLocaleString("en-IN")}</>
-            ) : (
-              <>
-                ₹{product.price.toLocaleString("en-IN")}
-                {product.mrp && product.mrp > product.price && (
-                  <span className="text-black/60 line-through font-medium ml-1 text-[10px] sm:text-[11px]">
-                    ₹{product.mrp.toLocaleString("en-IN")}
-                  </span>
+      {product &&
+        (() => {
+          const defaultVar = getDefaultVariant(product);
+          const displayImage = resolveActiveImage(product, defaultVar);
+          return (
+            <Link
+              to="."
+              search={((prev: any) => ({ ...prev, reel: item.id })) as any}
+              className="absolute z-20 w-[68%] sm:w-[60%] left-1/2 -translate-x-1/2 bottom-[4%] rounded-[16px] sm:rounded-[18px] bg-white/60 backdrop-blur-[16px] border border-white/40 shadow-[0_8px_32px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.8)] p-2 sm:p-2.5 flex flex-col items-center justify-center cursor-pointer hover:bg-white/70 transition-all hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(0,0,0,0.15)]"
+            >
+              <div className="w-[60px] h-[60px] sm:w-[72px] sm:h-[72px] bg-white border border-white/80 flex items-center justify-center mb-1.5 sm:mb-2 shadow-sm shrink-0 rounded-[12px] overflow-hidden">
+                <img
+                  loading="lazy"
+                  src={displayImage}
+                  alt={product.name}
+                  className="w-full h-full object-contain p-1"
+                />
+              </div>
+              <h3 className="font-semibold text-black text-center text-[11px] sm:text-[12px] leading-tight mb-0.5 px-1 line-clamp-2">
+                {displayTitle}
+              </h3>
+              <div className="text-black font-bold text-[11px] sm:text-[13px]">
+                {product.priceMax ? (
+                  <>
+                    ₹{product.price.toLocaleString("en-IN")} - ₹
+                    {product.priceMax.toLocaleString("en-IN")}
+                  </>
+                ) : (
+                  <>
+                    ₹{product.price.toLocaleString("en-IN")}
+                    {product.mrp && product.mrp > product.price && (
+                      <span className="text-black/60 line-through font-medium ml-1 text-[10px] sm:text-[11px]">
+                        ₹{product.mrp.toLocaleString("en-IN")}
+                      </span>
+                    )}
+                  </>
                 )}
-              </>
-            )}
-          </div>
-        </Link>
-        );
-      })()}
+              </div>
+            </Link>
+          );
+        })()}
     </div>
   );
 }
@@ -263,20 +284,24 @@ export function ShoppableVideoCarousel({
   const activeReelId = search?.reel;
 
   const handleCloseViewer = useCallback(() => {
-    navigate({ search: ((prev: any) => { const { reel, ...rest } = prev; return rest; }) as any, replace: true });
+    navigate({
+      search: ((prev: any) => {
+        const { reel, ...rest } = prev;
+        return rest;
+      }) as any,
+      replace: true,
+    });
   }, [navigate]);
 
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     let mounted = true;
-    void Promise.all([fetchHomepageVideos(), fetchProducts()]).then(
-      ([videoList, productList]) => {
-        if (!mounted) return;
-        if (productList.length > 0) setAllProducts(productList);
-        setVideos(videoList);
-      }
-    );
+    void Promise.all([fetchHomepageVideos(), fetchProducts()]).then(([videoList, productList]) => {
+      if (!mounted) return;
+      if (productList.length > 0) setAllProducts(productList);
+      setVideos(videoList);
+    });
     return () => {
       mounted = false;
     };
@@ -339,7 +364,7 @@ export function ShoppableVideoCarousel({
           obs.disconnect(); // Only need to trigger entry animation once
         }
       },
-      { rootMargin: "600px" } // trigger visibility slightly before it enters viewport
+      { rootMargin: "600px" }, // trigger visibility slightly before it enters viewport
     );
 
     obs.observe(el);
@@ -349,7 +374,10 @@ export function ShoppableVideoCarousel({
   if (sortedVideos.length === 0) return null;
 
   return (
-    <section ref={sectionRef} className={`py-12 md:py-20 bg-[#F8F5EF] overflow-hidden ${className ?? ""}`}>
+    <section
+      ref={sectionRef}
+      className={`py-12 md:py-20 bg-[#F8F5EF] overflow-hidden ${className ?? ""}`}
+    >
       <div className="container-page">
         <div className="flex flex-col items-center text-center mb-[70px]">
           <div className="text-[12px] uppercase tracking-[6px] text-[#D97706] font-[600] mb-2 sm:mb-4">
@@ -363,9 +391,7 @@ export function ShoppableVideoCarousel({
               {subtitle}
             </p>
           )}
-
         </div>
-
       </div>
 
       {/* MOBILE VIEW (Exactly 2 cards, arrows, swipeable) */}
@@ -377,21 +403,33 @@ export function ShoppableVideoCarousel({
             onClick={scrollPrev}
             className="absolute left-[8px] sm:left-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
           </button>
-          
+
           <button
             type="button"
             onClick={scrollNext}
             className="absolute right-[8px] sm:right-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
 
           <div className="overflow-hidden w-full relative" ref={emblaRef}>
             <div className="flex touch-pan-y cursor-grab active:cursor-grabbing px-[16px]">
               {sortedVideos.map((item, idx) => (
-                <div key={`mob-${item.id}-${idx}`} className="flex-[0_0_calc(70%)] sm:flex-[0_0_calc(50%_-_8px)] min-w-0 mr-[16px] pb-6">
+                <div
+                  key={`mob-${item.id}-${idx}`}
+                  className="flex-[0_0_calc(70%)] sm:flex-[0_0_calc(50%_-_8px)] min-w-0 mr-[16px] pb-6"
+                >
                   <ShoppableVideoCard
                     item={item}
                     product={allProducts.find((p) => p.slug === item.product_slug)}
@@ -405,14 +443,13 @@ export function ShoppableVideoCarousel({
             </div>
           </div>
         </div>
-
       </div>
 
       {/* DESKTOP VIEW (Full-width Carousel Track Marquee) */}
       <div className="hidden md:flex w-full overflow-hidden ticker-wrap pb-10 pt-4">
-        <div 
+        <div
           className="flex w-max animate-ticker hover:[animation-play-state:paused]"
-          style={{ animationDuration: '600s' }}
+          style={{ animationDuration: "600s" }}
         >
           {/* First set of duplicated videos */}
           <div className="flex">
@@ -444,7 +481,7 @@ export function ShoppableVideoCarousel({
       </div>
 
       {activeReelId && sortedVideos.length > 0 && (
-        <ShoppableReelViewer 
+        <ShoppableReelViewer
           videos={sortedVideos}
           allProducts={allProducts}
           initialReelId={activeReelId}

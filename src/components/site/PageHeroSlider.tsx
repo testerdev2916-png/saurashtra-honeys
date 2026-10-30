@@ -9,9 +9,7 @@ export function PageHeroSlider({
   page: "home" | "shop" | "our-story" | "journal" | "bulk-gifting" | "contact" | string;
   interval?: number;
 }) {
-  const [slides, setSlides] = useState<HeroSlide[]>(() =>
-    getDefaultHeroSlides(page)
-  );
+  const [slides, setSlides] = useState<HeroSlide[]>(() => getDefaultHeroSlides(page));
 
   useEffect(() => {
     void fetchHeroSlides(page).then(setSlides);

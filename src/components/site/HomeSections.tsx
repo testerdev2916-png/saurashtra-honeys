@@ -83,8 +83,8 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
 
   React.useEffect(() => {
     fetchAllHomepageTrustItems()
-      .then(data => setDbItems(data))
-      .catch(err => console.warn("Failed to fetch trust items, using fallback", err))
+      .then((data) => setDbItems(data))
+      .catch((err) => console.warn("Failed to fetch trust items, using fallback", err))
       .finally(() => setLoading(false));
   }, []);
 
@@ -97,15 +97,18 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
     { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.png" },
   ];
 
-  const items = dbItems.length > 0
-    ? dbItems.map(item => {
-        const matched = fallbackItems.find(f => f.label.toLowerCase() === item.title.toLowerCase());
-        return {
-          label: item.title,
-          img: item.icon || (matched ? matched.img : "/images/trust/pure_no_additives.png") // use uploaded image or fallback
-        };
-      })
-    : fallbackItems;
+  const items =
+    dbItems.length > 0
+      ? dbItems.map((item) => {
+          const matched = fallbackItems.find(
+            (f) => f.label.toLowerCase() === item.title.toLowerCase(),
+          );
+          return {
+            label: item.title,
+            img: item.icon || (matched ? matched.img : "/images/trust/pure_no_additives.png"), // use uploaded image or fallback
+          };
+        })
+      : fallbackItems;
 
   if (loading) return null;
 
@@ -114,12 +117,14 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
       <div className="container-page">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
           {items.map(({ label, img }, idx) => (
-            <div
-              key={idx}
-              className="flex flex-col items-center text-center p-2 group"
-            >
+            <div key={idx} className="flex flex-col items-center text-center p-2 group">
               <div className="size-28 sm:size-36 lg:size-40 mb-5 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1">
-                <img src={img} alt={label} className="w-full h-full object-contain" loading="lazy" />
+                <img
+                  src={img}
+                  alt={label}
+                  className="w-full h-full object-contain"
+                  loading="lazy"
+                />
               </div>
               <span className="text-xs sm:text-[13px] font-bold text-espresso leading-snug group-hover:text-brand-orange transition-colors">
                 {label}
@@ -136,8 +141,13 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
    2.5 INFINITE MARQUEE STRIP
    ========================================================================= */
 export function HomeMarqueeStrip({ settings }: { settings?: Record<string, any> }) {
-  const marqueeText = settings?.marquee_text || "FROM THE HIVE • PURE BY NATURE • RAW & UNPROCESSED • FARM TO JAR • NATURAL FLORAL SOURCES • ETHICAL BEEKEEPING";
-  const items = marqueeText.split("•").map((s: string) => s.trim()).filter(Boolean);
+  const marqueeText =
+    settings?.marquee_text ||
+    "FROM THE HIVE • PURE BY NATURE • RAW & UNPROCESSED • FARM TO JAR • NATURAL FLORAL SOURCES • ETHICAL BEEKEEPING";
+  const items = marqueeText
+    .split("•")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
 
   const block = (
     <div className="flex items-center space-x-8 sm:space-x-12 px-4 sm:px-6 text-[11px] sm:text-xs font-semibold tracking-[0.15em] text-white uppercase">
@@ -151,13 +161,23 @@ export function HomeMarqueeStrip({ settings }: { settings?: Record<string, any> 
   );
   return (
     <div className="w-full bg-announcement py-4 sm:py-5 overflow-hidden ticker-wrap">
-      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '280s' }}>
+      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: "280s" }}>
         {/* Render enough blocks to cover large ultra-wide screens */}
         <div className="flex items-center">
-          {block}{block}{block}{block}{block}{block}
+          {block}
+          {block}
+          {block}
+          {block}
+          {block}
+          {block}
         </div>
         <div className="flex items-center">
-          {block}{block}{block}{block}{block}{block}
+          {block}
+          {block}
+          {block}
+          {block}
+          {block}
+          {block}
         </div>
       </div>
     </div>
@@ -167,20 +187,19 @@ export function HomeMarqueeStrip({ settings }: { settings?: Record<string, any> 
 /* =========================================================================
    3. SHOP BY CATEGORY (6 circular cards with images)
    ========================================================================= */
-export function HomeShopByCategory({ 
-  settings, 
-  initialCategories 
-}: { 
+export function HomeShopByCategory({
+  settings,
+  initialCategories,
+}: {
   settings?: Record<string, any>;
   initialCategories?: any[];
 }) {
   const [displayCats, setDisplayCats] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, dragFree: true, align: "start" },
-    [Autoplay({ delay: 2500, stopOnInteraction: false, stopOnMouseEnter: true })]
-  );
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: true, align: "start" }, [
+    Autoplay({ delay: 2500, stopOnInteraction: false, stopOnMouseEnter: true }),
+  ]);
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
@@ -201,12 +220,12 @@ export function HomeShopByCategory({
         "beauty-products": prodLycheeImg,
         "all-products": heroProductsImg,
       };
-      const baseCats = allCats.map(cat => ({
+      const baseCats = allCats.map((cat) => ({
         name: cat.name,
         img: getCategoryImageUrl(cat) || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
         filter: cat.name,
         slug: cat.slug,
-        updatedAt: cat.updatedAt
+        updatedAt: cat.updatedAt,
       }));
       setDisplayCats([...baseCats, ...baseCats, ...baseCats]);
       setLoading(false);
@@ -228,7 +247,9 @@ export function HomeShopByCategory({
 
   const s_eyebrow = settings?.eyebrow ?? "DISCOVER";
   const s_heading = settings?.heading ?? "Explore Our World";
-  const s_desc = settings?.description ?? "Discover every expression of pure honey—from everyday favourites to rare treasures, thoughtfully crafted by nature.";
+  const s_desc =
+    settings?.description ??
+    "Discover every expression of pure honey—from everyday favourites to rare treasures, thoughtfully crafted by nature.";
   const s_cta_text = settings?.cta_text ?? "VIEW ALL CATEGORIES";
   const s_cta_url = settings?.cta_url ?? "/shop";
 
@@ -236,10 +257,30 @@ export function HomeShopByCategory({
     <section className="pt-16 sm:pt-24 pb-16 sm:pb-20 bg-[#F8F5EF] overflow-hidden relative">
       {/* PREMIUM VINTAGE ANIMATED BACKGROUND LAYER */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.18] z-0">
-        <img loading="lazy" src="/images/bg_illustrations/floral_alpha.webp" alt="" className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1" />
-        <img loading="lazy" src="/images/bg_illustrations/honeycomb_alpha.webp" alt="" className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2" />
-        <img loading="lazy" src="/images/bg_illustrations/bees_alpha.webp" alt="" className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3" />
-        <img loading="lazy" src="/images/bg_illustrations/dipper_alpha.webp" alt="" className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4" />
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/floral_alpha.webp"
+          alt=""
+          className="absolute -top-[10%] -left-[10%] sm:-left-[5%] w-[400px] sm:w-[500px] max-w-[70vw] object-contain animate-float-1"
+        />
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/honeycomb_alpha.webp"
+          alt=""
+          className="absolute top-[15%] -right-[15%] sm:right-[5%] w-[350px] sm:w-[400px] max-w-[60vw] object-contain animate-float-2"
+        />
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/bees_alpha.webp"
+          alt=""
+          className="absolute bottom-[25%] left-[5%] sm:left-[15%] w-[200px] sm:w-[300px] max-w-[40vw] object-contain animate-float-3"
+        />
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/dipper_alpha.webp"
+          alt=""
+          className="absolute -bottom-[5%] -right-[10%] sm:-right-[5%] w-[350px] sm:w-[450px] max-w-[60vw] object-contain animate-float-4"
+        />
       </div>
 
       <div className="container-page mb-8 relative z-10">
@@ -271,7 +312,14 @@ export function HomeShopByCategory({
             onClick={scrollPrev}
             className="absolute left-[8px] sm:left-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
           </button>
 
           <button
@@ -279,42 +327,49 @@ export function HomeShopByCategory({
             onClick={scrollNext}
             className="absolute right-[8px] sm:right-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </button>
 
           {/* Carousel Container */}
           <div className="overflow-hidden md:overflow-visible relative w-full" ref={emblaRef}>
             <div className="flex gap-[12px] md:gap-[24px] py-6 touch-pan-y cursor-grab active:cursor-grabbing">
-            {displayCats.map((cat, idx) => (
-              <div 
-                key={idx} 
-                className="flex-[0_0_calc(50%_-_6px)] md:flex-[0_0_calc(100%/2.5_-_16px)] lg:flex-[0_0_calc(100%/3.5_-_18px)] xl:flex-[0_0_calc(100%/4.5_-_19.2px)] min-w-0"
-              >
-                <Link
-                  to={(
-                    cat.filter && cat.filter.toLowerCase() !== "all products" && cat.filter.toLowerCase() !== "all"
-                      ? `/shop/${cat.filter.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`
-                      : "/shop"
-                  ) as any}
-                  className="group/card relative flex flex-col shrink-0 overflow-hidden bg-white rounded-[16px] sm:rounded-[22px] shadow-[0_8px_20px_rgba(0,0,0,0.05)] sm:shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_35px_rgba(217,119,6,0.15)] transition-all duration-300 w-full aspect-square"
+              {displayCats.map((cat, idx) => (
+                <div
+                  key={idx}
+                  className="flex-[0_0_calc(50%_-_6px)] md:flex-[0_0_calc(100%/2.5_-_16px)] lg:flex-[0_0_calc(100%/3.5_-_18px)] xl:flex-[0_0_calc(100%/4.5_-_19.2px)] min-w-0"
                 >
-                  <div className="absolute inset-0 w-full h-full bg-[#F8F5EF]/50 overflow-hidden">
-                    <img 
-                      key={cat.updatedAt || cat.img}
-                      src={cat.img} 
-                      alt={cat.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = prodLiquidImg;
-                      }}
-                      className="w-full h-full object-cover pointer-events-none transform transition-transform duration-300 ease-out group-hover/card:scale-105"
-                    />
-                  </div>
-                </Link>
-              </div>
-            ))}
+                  <Link
+                    to={
+                      (cat.filter &&
+                      cat.filter.toLowerCase() !== "all products" &&
+                      cat.filter.toLowerCase() !== "all"
+                        ? `/shop/${cat.filter
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]+/g, "-")
+                            .replace(/(^-|-$)/g, "")}`
+                        : "/shop") as any
+                    }
+                    className="group/card relative flex flex-col shrink-0 overflow-hidden bg-white rounded-[16px] sm:rounded-[22px] shadow-[0_8px_20px_rgba(0,0,0,0.05)] sm:shadow-[0_10px_25px_rgba(0,0,0,0.05)] hover:shadow-[0_15px_35px_rgba(217,119,6,0.15)] transition-all duration-300 w-full aspect-square"
+                  >
+                    <div className="absolute inset-0 w-full h-full bg-[#F8F5EF]/50 overflow-hidden">
+                      <img
+                        key={cat.updatedAt || cat.img}
+                        src={cat.img}
+                        alt={cat.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = prodLiquidImg;
+                        }}
+                        className="w-full h-full object-cover pointer-events-none transform transition-transform duration-300 ease-out group-hover/card:scale-105"
+                      />
+                    </div>
+                  </Link>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </section>
@@ -345,7 +400,7 @@ export function HomeBestSellers({
   React.useEffect(() => {
     // ONLY display products where show_on_homepage = true
     const homepageProducts = products
-      .filter(p => p.showOnHomepage === true)
+      .filter((p) => p.showOnHomepage === true)
       .sort((a, b) => (a.homeSortOrder || 0) - (b.homeSortOrder || 0));
     setDisplayList(homepageProducts);
     setLoading(false);
@@ -355,7 +410,9 @@ export function HomeBestSellers({
 
   const bs_eyebrow = settings?.eyebrow ?? "CURATED FOR YOU";
   const bs_heading = settings?.heading ?? "Our Finest Picks";
-  const bs_desc = settings?.description ?? "A handpicked selection of our most loved honey and bee-crafted essentials, chosen for their exceptional purity and quality.";
+  const bs_desc =
+    settings?.description ??
+    "A handpicked selection of our most loved honey and bee-crafted essentials, chosen for their exceptional purity and quality.";
   const bs_cta_text = settings?.cta_text ?? "VIEW ALL PRODUCTS";
   const bs_cta_url = settings?.cta_url ?? "/shop";
 
@@ -397,11 +454,7 @@ export function HomeBestSellers({
         {/* Desktop/Tablet View */}
         <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
           {displayList.map((product) => (
-            <ProductCard
-              key={product.slug}
-              p={product}
-              onQuickView={onQuickView}
-            />
+            <ProductCard key={product.slug} p={product} onQuickView={onQuickView} />
           ))}
         </div>
       </div>
@@ -409,11 +462,9 @@ export function HomeBestSellers({
   );
 }
 
-
 /* =========================================================================
    6. WHY CHOOSE SAURASHTRA HONEY (Asymmetrical editorial 3-column layout)
    ========================================================================= */
-
 
 /* =========================================================================
    7. FARM / BEEKEEPING BANNER (Wide dark-overlay banner)
@@ -422,29 +473,39 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
   const storyPoints = [
     {
       title: settings?.point1_title ?? "From Hive to Home",
-      desc: settings?.point1_desc ?? "Carefully harvested honey, brought directly from nature to your home.",
-      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.png"
+      desc:
+        settings?.point1_desc ??
+        "Carefully harvested honey, brought directly from nature to your home.",
+      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.png",
     },
     {
       title: settings?.point2_title ?? "Wildflower Richness",
-      desc: settings?.point2_desc ?? "Naturally influenced by the diverse flowers surrounding our hives.",
-      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.png"
+      desc:
+        settings?.point2_desc ??
+        "Naturally influenced by the diverse flowers surrounding our hives.",
+      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.png",
     },
     {
       title: settings?.point3_title ?? "HIVE TO HOME",
-      desc: settings?.point3_desc ?? "We harvest raw honey from pristine Saurashtra flora, ensuring it never touches a factory.",
-      img: settings?.point3_icon ?? "/images/heritage/illus_hive_to_home.webp"
+      desc:
+        settings?.point3_desc ??
+        "We harvest raw honey from pristine Saurashtra flora, ensuring it never touches a factory.",
+      img: settings?.point3_icon ?? "/images/heritage/illus_hive_to_home.webp",
     },
     {
       title: settings?.point4_title ?? "WILDFLOWER RICH",
-      desc: settings?.point4_desc ?? "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
-      img: settings?.point4_icon ?? "/images/heritage/illus_wildflower.webp"
-    }
+      desc:
+        settings?.point4_desc ??
+        "Sourced from diverse nectar profiles creating deep, complex flavors unique to our region.",
+      img: settings?.point4_icon ?? "/images/heritage/illus_wildflower.webp",
+    },
   ];
 
   const fb_eyebrow = settings?.eyebrow ?? "OUR JOURNEY";
   const fb_heading = settings?.heading ?? "The Journey Behind Every Drop";
-  const fb_desc = settings?.description ?? "From the wildflowers of Saurashtra to the hands of our beekeepers, every drop follows a journey rooted in nature, care, and patience. We preserve what nature creates — pure, authentic honey, just as it was meant to be.";
+  const fb_desc =
+    settings?.description ??
+    "From the wildflowers of Saurashtra to the hands of our beekeepers, every drop follows a journey rooted in nature, care, and patience. We preserve what nature creates — pure, authentic honey, just as it was meant to be.";
   const cinematicImg = settings?.cinematic_image ?? "/images/heritage/journey-beekeeper.jpg";
 
   const fb_cta_text = settings?.cta_text ?? "EXPLORE OUR HIVE";
@@ -454,17 +515,17 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
     <section className="relative overflow-hidden bg-[#F8F5EF] py-16 sm:py-32">
       {/* 3. Large Heritage Illustrations (Parallax Background) */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.15] sm:opacity-[0.20] z-0">
-        <img 
-          loading="lazy" 
-          src="/images/bg_illustrations/floral_alpha.webp" 
-          alt="" 
-          className="absolute -top-[15%] -left-[10%] w-[50vw] sm:w-[35vw] max-w-[300px] object-contain opacity-[0.08] pointer-events-none rotate-12" 
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/floral_alpha.webp"
+          alt=""
+          className="absolute -top-[15%] -left-[10%] w-[50vw] sm:w-[35vw] max-w-[300px] object-contain opacity-[0.08] pointer-events-none rotate-12"
         />
-        <img 
-          loading="lazy" 
-          src="/images/bg_illustrations/honeycomb_alpha.webp" 
-          alt="" 
-          className="absolute top-[40%] -right-[15%] sm:-right-[5%] w-[400px] sm:w-[500px] max-w-[60vw] object-contain animate-float-2" 
+        <img
+          loading="lazy"
+          src="/images/bg_illustrations/honeycomb_alpha.webp"
+          alt=""
+          className="absolute top-[40%] -right-[15%] sm:-right-[5%] w-[400px] sm:w-[500px] max-w-[60vw] object-contain animate-float-2"
         />
       </div>
 
@@ -483,8 +544,8 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
         </div>
         <div className="w-full max-w-5xl mx-auto mb-20 sm:mb-28 rounded-[20px] sm:rounded-[32px] overflow-hidden shadow-2xl shadow-espresso/5 bg-[#F8F5EF] p-2 sm:p-4 border border-border/40">
           <div className="rounded-xl sm:rounded-[24px] overflow-hidden relative group">
-            <img 
-              src={cinematicImg} 
+            <img
+              src={cinematicImg}
               alt={fb_heading}
               className="w-full h-auto aspect-[4/3] sm:aspect-[21/9] object-cover transform transition-transform duration-[20s] ease-out group-hover:scale-105"
               loading="lazy"
@@ -497,9 +558,16 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
           {storyPoints.map((point, idx) => (
             <div key={idx} className="flex flex-col items-center text-center">
               <div className="h-[90px] sm:h-[150px] aspect-square mb-4 sm:mb-6 transition-transform duration-700 hover:-translate-y-2 flex items-center justify-center">
-                <img loading="lazy" src={point.img} alt={point.title} className="w-full h-full object-contain" />
+                <img
+                  loading="lazy"
+                  src={point.img}
+                  alt={point.title}
+                  className="w-full h-full object-contain"
+                />
               </div>
-              <h3 className="font-serif text-[16px] sm:text-[22px] text-espresso mb-2 sm:mb-3 font-[500] leading-tight">{point.title}</h3>
+              <h3 className="font-serif text-[16px] sm:text-[22px] text-espresso mb-2 sm:mb-3 font-[500] leading-tight">
+                {point.title}
+              </h3>
               <p className="text-[12px] sm:text-[15px] text-espresso/70 leading-relaxed max-w-[280px]">
                 {point.desc}
               </p>
@@ -517,7 +585,6 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
             <ArrowRight className="size-4 sm:size-5 transition-transform duration-300 group-hover:translate-x-[6px]" />
           </Link>
         </div>
-
       </div>
     </section>
   );
@@ -560,7 +627,8 @@ export function HomeCustomerStories({
 
   const cs_eyebrow = settings?.eyebrow ?? "FROM OUR HIVE TO YOUR HOME";
   const cs_heading = settings?.heading ?? "REAL PEOPLE. REAL HONEY.";
-  const cs_desc = settings?.description ?? "Real experiences shared by people who choose Saurashtra Honey.";
+  const cs_desc =
+    settings?.description ?? "Real experiences shared by people who choose Saurashtra Honey.";
 
   return (
     <section className="py-16 sm:py-28 bg-[#FDFBF7] border-y border-border/40 overflow-hidden relative">
@@ -576,19 +644,19 @@ export function HomeCustomerStories({
             {cs_desc}
           </p>
         </div>
-        
+
         {/* Navigation Buttons */}
         {photoStories.length > 0 && (
           <div className="hidden md:flex gap-3 pb-2">
-            <button 
-              onClick={scrollPrev} 
+            <button
+              onClick={scrollPrev}
               aria-label="Previous testimonial"
               className="w-12 h-12 rounded-full border border-border/60 flex items-center justify-center hover:bg-cream hover:border-brand-orange/30 transition-all text-espresso"
             >
               <ChevronLeft className="w-6 h-6" />
             </button>
-            <button 
-              onClick={scrollNext} 
+            <button
+              onClick={scrollNext}
               aria-label="Next testimonial"
               className="w-12 h-12 rounded-full border border-border/60 flex items-center justify-center hover:bg-cream hover:border-brand-orange/30 transition-all text-espresso"
             >
@@ -607,8 +675,12 @@ export function HomeCustomerStories({
                 <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center text-brand-orange/40 mb-4">
                   <Star className="w-8 h-8" />
                 </div>
-                <h3 className="font-serif text-xl font-medium text-espresso mb-2">No testimonials yet</h3>
-                <p className="text-muted-foreground">Admin: Add customer testimonials in the dashboard to populate this section.</p>
+                <h3 className="font-serif text-xl font-medium text-espresso mb-2">
+                  No testimonials yet
+                </h3>
+                <p className="text-muted-foreground">
+                  Admin: Add customer testimonials in the dashboard to populate this section.
+                </p>
               </div>
             ) : (
               photoStories.map((story) => (
@@ -623,7 +695,10 @@ export function HomeCustomerStories({
                         <div className="flex items-center gap-2">
                           <div className="flex gap-0.5 text-brand-orange">
                             {[...Array(story.rating || 5)].map((_, i) => (
-                              <Star key={i} className="w-[14px] sm:w-[16px] h-[14px] sm:h-[16px] fill-current" />
+                              <Star
+                                key={i}
+                                className="w-[14px] sm:w-[16px] h-[14px] sm:h-[16px] fill-current"
+                              />
                             ))}
                           </div>
                           <span className="text-[12px] sm:text-[13px] font-bold text-espresso tracking-wide">
@@ -666,19 +741,19 @@ export function HomeCustomerStories({
             )}
           </div>
         </div>
-        
+
         {/* Mobile Navigation (optional, visual cue) */}
         {photoStories.length > 0 && (
           <div className="flex md:hidden justify-center gap-3 mt-8">
-            <button 
-              onClick={scrollPrev} 
+            <button
+              onClick={scrollPrev}
               aria-label="Previous testimonial"
               className="w-10 h-10 rounded-full border border-border/60 flex items-center justify-center hover:bg-cream text-espresso"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
-            <button 
-              onClick={scrollNext} 
+            <button
+              onClick={scrollNext}
               aria-label="Next testimonial"
               className="w-10 h-10 rounded-full border border-border/60 flex items-center justify-center hover:bg-cream text-espresso"
             >
@@ -694,12 +769,20 @@ export function HomeCustomerStories({
 /* =========================================================================
    10. JOURNAL PREVIEW (3 article cards from blogPosts)
    ========================================================================= */
-export function HomeJournalPreview({ posts, settings }: { posts: BlogPost[], settings?: Record<string, any> }) {
+export function HomeJournalPreview({
+  posts,
+  settings,
+}: {
+  posts: BlogPost[];
+  settings?: Record<string, any>;
+}) {
   const displayPosts = posts.slice(0, 3);
 
   const jp_eyebrow = settings?.eyebrow ?? "JOIN OUR JOURNEY";
   const jp_heading = settings?.heading ?? "Follow Our Hive";
-  const jp_desc = settings?.description ?? "Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.";
+  const jp_desc =
+    settings?.description ??
+    "Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.";
   const jp_cta_text = settings?.cta_text ?? "READ OUR STORIES";
   const jp_cta_url = settings?.cta_url ?? "/blog";
 
@@ -825,17 +908,24 @@ export function HomeJournalPreview({ posts, settings }: { posts: BlogPost[], set
   );
 }
 
-
 import { Instagram } from "lucide-react";
 
-export function HomeInstagramPreview({ feed, settings }: { feed: any, settings?: Record<string, any> }) {
+export function HomeInstagramPreview({
+  feed,
+  settings,
+}: {
+  feed: any;
+  settings?: Record<string, any>;
+}) {
   const isEnabled = feed?.settings?.is_enabled;
   const posts = feed?.posts || [];
 
   const eyebrow = settings?.eyebrow ?? "JOIN OUR JOURNEY";
   const heading = settings?.heading ?? "Follow Our Hive";
-  const desc = settings?.description ?? "Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.";
-  
+  const desc =
+    settings?.description ??
+    "Stay connected for new harvests, behind-the-scenes moments, and everyday inspiration from our farms.";
+
   if (!isEnabled || posts.length === 0) {
     // Fallback state
     return (
@@ -899,7 +989,11 @@ export function HomeInstagramPreview({ feed, settings }: { feed: any, settings?:
               className="group block relative rounded-2xl overflow-hidden aspect-square bg-white border border-border/80 shadow-xs hover:shadow-lift transition-all duration-300"
             >
               <img
-                src={post.media_type === "VIDEO" && post.thumbnail_url ? post.thumbnail_url : post.media_url}
+                src={
+                  post.media_type === "VIDEO" && post.thumbnail_url
+                    ? post.thumbnail_url
+                    : post.media_url
+                }
                 alt={post.caption || "Instagram post"}
                 loading="lazy"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
@@ -938,19 +1032,22 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
       (entries) => {
         const [entry] = entries;
         if (entry.isIntersecting) {
-          video.play().then(() => {
-            setIsPlaying(true);
-            setShowFallbackPlay(false);
-          }).catch(err => {
-            console.warn("Autoplay prevented:", err);
-            setShowFallbackPlay(true);
-          });
+          video
+            .play()
+            .then(() => {
+              setIsPlaying(true);
+              setShowFallbackPlay(false);
+            })
+            .catch((err) => {
+              console.warn("Autoplay prevented:", err);
+              setShowFallbackPlay(true);
+            });
         } else {
           video.pause();
           setIsPlaying(false);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.5 },
     );
 
     if (containerRef.current) observer.observe(containerRef.current);
@@ -1012,7 +1109,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
   };
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full h-full group bg-black cursor-pointer overflow-hidden rounded-[20px] sm:rounded-[24px]"
       onMouseEnter={() => setIsHovering(true)}
@@ -1029,7 +1126,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
         loop
         className="w-full h-full object-cover"
       />
-      
+
       {showFallbackPlay && !isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-10 transition-opacity">
           <button className="size-20 md:size-24 bg-[#D97706] text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform">
@@ -1038,29 +1135,49 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
         </div>
       )}
 
-      <div 
+      <div
         className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 z-20 flex flex-col justify-end gap-3 md:gap-4
-          ${isHovering || !isPlaying ? 'opacity-100' : 'opacity-0'}`}
+          ${isHovering || !isPlaying ? "opacity-100" : "opacity-0"}`}
       >
-        <div 
+        <div
           className="w-full h-1.5 md:h-2 bg-white/30 rounded-full cursor-pointer overflow-hidden group/progress"
           onClick={handleProgressBarClick}
         >
-          <div 
-            className="h-full bg-[#D97706] transition-all duration-100" 
-            style={{ width: `${progress}%` }} 
+          <div
+            className="h-full bg-[#D97706] transition-all duration-100"
+            style={{ width: `${progress}%` }}
           />
         </div>
 
         <div className="flex items-center justify-between">
-          <button onClick={(e) => { e.stopPropagation(); togglePlay(); }} className="text-white hover:text-[#D97706] transition-colors">
-            {isPlaying ? <Icons.Pause className="size-5 md:size-6" fill="currentColor" /> : <Icons.Play className="size-5 md:size-6" fill="currentColor" />}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              togglePlay();
+            }}
+            className="text-white hover:text-[#D97706] transition-colors"
+          >
+            {isPlaying ? (
+              <Icons.Pause className="size-5 md:size-6" fill="currentColor" />
+            ) : (
+              <Icons.Play className="size-5 md:size-6" fill="currentColor" />
+            )}
           </button>
           <div className="flex items-center gap-4">
-            <button onClick={toggleMute} className="text-white hover:text-[#D97706] transition-colors">
-              {isMuted ? <Icons.VolumeX className="size-5 md:size-6" /> : <Icons.Volume2 className="size-5 md:size-6" />}
+            <button
+              onClick={toggleMute}
+              className="text-white hover:text-[#D97706] transition-colors"
+            >
+              {isMuted ? (
+                <Icons.VolumeX className="size-5 md:size-6" />
+              ) : (
+                <Icons.Volume2 className="size-5 md:size-6" />
+              )}
             </button>
-            <button onClick={toggleFullscreen} className="text-white hover:text-[#D97706] transition-colors">
+            <button
+              onClick={toggleFullscreen}
+              className="text-white hover:text-[#D97706] transition-colors"
+            >
               <Icons.Maximize className="size-5 md:size-6" />
             </button>
           </div>
@@ -1078,16 +1195,27 @@ export function HomeHeritageVideo({ settings }: { settings?: Record<string, any>
     let ignore = false;
     import("@/lib/heritage").then(({ fetchActiveHeritageVideo }) => {
       fetchActiveHeritageVideo()
-        .then(res => { if (!ignore) setData(res); })
-        .catch(err => { if (!ignore) console.warn("Failed to fetch heritage section", err); })
-        .finally(() => { if (!ignore) setLoading(false); });
+        .then((res) => {
+          if (!ignore) setData(res);
+        })
+        .catch((err) => {
+          if (!ignore) console.warn("Failed to fetch heritage section", err);
+        })
+        .finally(() => {
+          if (!ignore) setLoading(false);
+        });
     });
-    return () => { ignore = true; };
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   const wc_eyebrow = data?.eyebrow ?? settings?.eyebrow ?? "OUR HERITAGE";
-  const wc_heading = data?.title === "Where Purity Begins" ? "The Journey Behind Every Creation" : (data?.title ?? settings?.heading ?? "The Journey Behind Every Creation");
-  
+  const wc_heading =
+    data?.title === "Where Purity Begins"
+      ? "The Journey Behind Every Creation"
+      : (data?.title ?? settings?.heading ?? "The Journey Behind Every Creation");
+
   if (!loading && (!data || !data.is_active || !data.video_url)) return null;
 
   return (
@@ -1101,7 +1229,8 @@ export function HomeHeritageVideo({ settings }: { settings?: Record<string, any>
             {wc_heading}
           </h2>
           <p className="text-[15px] md:text-[18px] text-[#6B6257] max-w-[650px] sm:max-w-[700px] leading-[1.6] mt-7 sm:mt-8">
-            A slow journey from hive to finished product — capturing the raw materials, traditional processes and human hands behind everything we create, just as nature intended.
+            A slow journey from hive to finished product — capturing the raw materials, traditional
+            processes and human hands behind everything we create, just as nature intended.
           </p>
         </div>
       </div>

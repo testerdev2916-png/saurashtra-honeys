@@ -140,10 +140,7 @@ export function getCategoryShopSlug(nameOrSlug: string): string {
   ) {
     return "beauty-products";
   }
-  if (
-    clean === "beeswax products" ||
-    clean === "beeswax-products"
-  ) {
+  if (clean === "beeswax products" || clean === "beeswax-products") {
     return "beeswax-products";
   }
   if (
@@ -158,7 +155,6 @@ export function getCategoryShopSlug(nameOrSlug: string): string {
   }
   return clean.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
-
 
 const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
   "raw-honey": {
@@ -250,15 +246,13 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
       {
         stepNumber: "02",
         title: "Steam Purification",
-        description:
-          "Gently melted and strained using fine cloth filtration without bleaching.",
+        description: "Gently melted and strained using fine cloth filtration without bleaching.",
         image: prodHoneycombImg,
       },
       {
         stepNumber: "03",
         title: "Golden Blocks & Pellets",
-        description:
-          "Poured into pristine molds ready for cosmetic or household crafting.",
+        description: "Poured into pristine molds ready for cosmetic or household crafting.",
         image: honeycombBeesImg,
       },
     ],
@@ -308,8 +302,7 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
       {
         stepNumber: "03",
         title: "Low-Temp Preservation",
-        description:
-          "Slowly dehydrated in dehumidified air to keep vitamins active and crunchy.",
+        description: "Slowly dehydrated in dehumidified air to keep vitamins active and crunchy.",
         image: beeFlowerImg,
       },
     ],
@@ -345,22 +338,19 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
       {
         stepNumber: "01",
         title: "Pure Beeswax Selection",
-        description:
-          "Using only filtered golden wax from our seasonal honey harvests.",
+        description: "Using only filtered golden wax from our seasonal honey harvests.",
         image: honeycombBeesImg,
       },
       {
         stepNumber: "02",
         title: "Hand-Pouring & Dipping",
-        description:
-          "Crafted in small batches with precision cotton wicks for balanced burning.",
+        description: "Crafted in small batches with precision cotton wicks for balanced burning.",
         image: honeyDrizzleImg,
       },
       {
         stepNumber: "03",
         title: "Slow Curing",
-        description:
-          "Aged to ensure a steady, smokeless, and therapeutic burn time.",
+        description: "Aged to ensure a steady, smokeless, and therapeutic burn time.",
         image: honeyDrizzleImg,
       },
     ],
@@ -389,29 +379,27 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
       },
       {
         title: "Enriched with Propolis & Beeswax",
-        description: "Creates a breathable moisture barrier that protects against environmental elements.",
+        description:
+          "Creates a breathable moisture barrier that protects against environmental elements.",
       },
     ],
     processSteps: [
       {
         stepNumber: "01",
         title: "Active Hive Ingredients",
-        description:
-          "Formulating with raw honey, beeswax, and antioxidant-rich botanicals.",
+        description: "Formulating with raw honey, beeswax, and antioxidant-rich botanicals.",
         image: familyHoneyImg,
       },
       {
         stepNumber: "02",
         title: "Gentle Artisanal Blending",
-        description:
-          "Cold-crafted at body temperature to preserve delicate skin enzymes.",
+        description: "Cold-crafted at body temperature to preserve delicate skin enzymes.",
         image: honeyDrizzleImg,
       },
       {
         stepNumber: "03",
         title: "Pure Daily Rituals",
-        description:
-          "Tested for gentleness on all skin types, from dry hands to delicate lips.",
+        description: "Tested for gentleness on all skin types, from dry hands to delicate lips.",
         image: familyHoneyImg,
       },
     ],
@@ -440,29 +428,27 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
       },
       {
         title: "Customizable for Corporate Gifting",
-        description: "Tailored selections and personalized notes for weddings and business partners.",
+        description:
+          "Tailored selections and personalized notes for weddings and business partners.",
       },
     ],
     processSteps: [
       {
         stepNumber: "01",
         title: "Tasting Curation",
-        description:
-          "Handpicked selections of contrasting honey origins and floral profiles.",
+        description: "Handpicked selections of contrasting honey origins and floral profiles.",
         image: prodGiftpackImg,
       },
       {
         stepNumber: "02",
         title: "Handmade Accessories",
-        description:
-          "Paired with seasoned wooden dippers and beeswax candles.",
+        description: "Paired with seasoned wooden dippers and beeswax candles.",
         image: prodHoneycombImg,
       },
       {
         stepNumber: "03",
         title: "Luxury Boxing",
-        description:
-          "Finished with gold-foil accents and sustainable presentation ribbons.",
+        description: "Finished with gold-foil accents and sustainable presentation ribbons.",
         image: prodGiftpackImg,
       },
     ],
@@ -471,13 +457,13 @@ const CATEGORY_METADATA_MAP: Record<string, CategoryCollectionMetadata> = {
 
 export function getCategoryMetadata(
   slug: string,
-  dbCategories?: ShopCategory[]
+  dbCategories?: ShopCategory[],
 ): CategoryCollectionMetadata {
   const normalized = getCategorySlug(slug);
   const found = CATEGORY_METADATA_MAP[normalized];
   if (found) {
     const dbCat = dbCategories?.find(
-      (c) => getCategorySlug(c.slug) === normalized || getCategorySlug(c.name) === normalized
+      (c) => getCategorySlug(c.slug) === normalized || getCategorySlug(c.name) === normalized,
     );
     if (dbCat && dbCat.image_url) {
       return {
@@ -492,7 +478,7 @@ export function getCategoryMetadata(
   const dbCat = dbCategories?.find(
     (c) =>
       c.slug.toLowerCase() === slug.toLowerCase() ||
-      c.name.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase()
+      c.name.toLowerCase().replace(/\s+/g, "-") === slug.toLowerCase(),
   );
 
   const displayName = dbCat ? dbCat.name.toUpperCase() : slug.replace(/-/g, " ").toUpperCase();
@@ -599,11 +585,7 @@ export function getCategoryProducts(slug: string, allProducts: Product[]): Produ
     }
 
     if (normSlug === "beeswax-candles") {
-      if (
-        pCat === "beeswax candle" ||
-        pCat === "beeswax candles" ||
-        pCat.includes("candle")
-      ) {
+      if (pCat === "beeswax candle" || pCat === "beeswax candles" || pCat.includes("candle")) {
         return true;
       }
       if (pName.includes("candle")) return true;

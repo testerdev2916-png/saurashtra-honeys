@@ -22,7 +22,7 @@ vite: {
       allowedHosts: ["stale-worlds-cough.loca.lt"],
     },
   },*/
-  export default defineConfig({
+export default defineConfig({
   vite: {
     server: {
       allowedHosts: true,
@@ -36,6 +36,4 @@ vite: {
   nitro: {
     preset: "node-server",
   },
-
-
 });

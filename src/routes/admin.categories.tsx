@@ -4,92 +4,241 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { listCategories, upsertCategory, deleteCategory } from "@/lib/admin-cms.functions";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
-import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
-import { ArrowLeft, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Image as ImageIcon } from "lucide-react";
+import {
+  BtnGhost,
+  BtnPrimary,
+  Card,
+  Field,
+  inp,
+  PageHeader,
+  StatusPill,
+  TableWrap,
+  Td,
+  Th,
+} from "@/components/admin/ui";
+import {
+  ArrowLeft,
+  ImageOff,
+  Pencil,
+  Plus,
+  RefreshCcw,
+  Trash2,
+  Upload,
+  Image as ImageIcon,
+} from "lucide-react";
 
 export const Route = createFileRoute("/admin/categories")({ component: CategoriesPage });
 
-type Cat = { id: string; slug: string; name: string; description: string | null; image_url: string | null; parent_id: string | null; sort_order: number; active: boolean; show_in_shop_nav: boolean; shop_nav_label: string | null; shop_nav_sort_order: number; seo_title: string | null; seo_description: string | null };
-const EMPTY: Partial<Cat> = { slug: "", name: "", description: "", image_url: "", parent_id: null, sort_order: 0, active: true, show_in_shop_nav: false, shop_nav_label: "", shop_nav_sort_order: 0, seo_title: "", seo_description: "" };
+type Cat = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  parent_id: string | null;
+  sort_order: number;
+  active: boolean;
+  show_in_shop_nav: boolean;
+  shop_nav_label: string | null;
+  shop_nav_sort_order: number;
+  seo_title: string | null;
+  seo_description: string | null;
+};
+const EMPTY: Partial<Cat> = {
+  slug: "",
+  name: "",
+  description: "",
+  image_url: "",
+  parent_id: null,
+  sort_order: 0,
+  active: true,
+  show_in_shop_nav: false,
+  shop_nav_label: "",
+  shop_nav_sort_order: 0,
+  seo_title: "",
+  seo_description: "",
+};
 
 function CategoriesPage() {
-  const list = useServerFn(listCategories); const save = useServerFn(upsertCategory); const del = useServerFn(deleteCategory);
-  const [rows, setRows] = useState<Cat[]>([]); const [loading, setLoading] = useState(false);
+  const list = useServerFn(listCategories);
+  const save = useServerFn(upsertCategory);
+  const del = useServerFn(deleteCategory);
+  const [rows, setRows] = useState<Cat[]>([]);
+  const [loading, setLoading] = useState(false);
   const [edit, setEdit] = useState<Partial<Cat> | null>(null);
-  async function load() { setLoading(true); try { const r = await list({}); setRows(r.rows as unknown as Cat[]); } catch (e) { toast.error((e as Error).message); } finally { setLoading(false); } }
-  useEffect(() => { void load(); /* eslint-disable-next-line */ }, []);
+  async function load() {
+    setLoading(true);
+    try {
+      const r = await list({});
+      setRows(r.rows as unknown as Cat[]);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
+  }
+  useEffect(() => {
+    void load(); /* eslint-disable-next-line */
+  }, []);
 
   const router = useRouter();
-  if (edit) return <Editor initial={edit} parents={rows} onCancel={() => setEdit(null)} onSaved={async () => { setEdit(null); await router.invalidate(); await load(); }} />;
+  if (edit)
+    return (
+      <Editor
+        initial={edit}
+        parents={rows}
+        onCancel={() => setEdit(null)}
+        onSaved={async () => {
+          setEdit(null);
+          await router.invalidate();
+          await load();
+        }}
+      />
+    );
 
   const virtualRows = rows.filter((r) => r.slug === "all-products");
   const productRows = rows.filter((r) => r.slug !== "all-products");
 
   const renderTable = (data: Cat[], emptyText: string) => (
     <TableWrap>
-      <thead><tr>{["Sort","Image","Slug","Name","Parent","In Shop Nav","Nav Sort","Status",""].map((h) => <Th key={h}>{h}</Th>)}</tr></thead>
+      <thead>
+        <tr>
+          {["Sort", "Image", "Slug", "Name", "Parent", "In Shop Nav", "Nav Sort", "Status", ""].map(
+            (h) => (
+              <Th key={h}>{h}</Th>
+            ),
+          )}
+        </tr>
+      </thead>
       <tbody className="divide-y divide-border">
-        {loading && <tr><Td className="text-center py-12 text-muted-foreground">Loading…</Td></tr>}
-        {!loading && data.length === 0 && <tr><Td className="text-center py-12 text-muted-foreground">{emptyText}</Td></tr>}
-        {!loading && data.map((r) => (
-          <tr key={r.id} className="hover:bg-cream/40">
-            <Td className="text-xs text-muted-foreground">{r.sort_order}</Td>
-            <Td>
-              <div className="size-11 rounded-lg overflow-hidden bg-cream border border-border grid place-items-center shrink-0">
-                {r.image_url ? <img src={r.image_url} alt={r.name} className="w-full h-full object-cover" loading="lazy" /> : <ImageOff className="size-4 text-muted-foreground/50" />}
-              </div>
-            </Td>
-            <Td className="text-xs font-mono">{r.slug}</Td>
-            <Td className="font-medium text-forest-dark">{r.name}</Td>
-            <Td className="text-xs">{rows.find((x) => x.id === r.parent_id)?.name ?? "—"}</Td>
-            <Td><StatusPill s={r.show_in_shop_nav ? "active" : "disabled"} /></Td>
-            <Td className="text-xs">{r.shop_nav_sort_order}</Td>
-            <Td><StatusPill s={r.active ? "active" : "disabled"} /></Td>
-            <Td className="text-right whitespace-nowrap">
-              <Link to="/admin/category-hero" search={{ category: r.slug }} className="text-brand-orange hover:underline text-xs font-bold mr-3 inline-flex items-center gap-1">
-                <ImageIcon className="size-3.5 inline" /> BANNER (1920×600)
-              </Link>
-              <button onClick={() => setEdit(r)} className="text-gold-deep hover:underline text-xs font-bold mr-3"><Pencil className="size-3.5 inline" /> EDIT</button>
-              {r.slug !== "all-products" && (
-                <button onClick={async () => { if (!confirm("Delete?")) return; try { await del({ data: { id: r.id } }); toast.success("Deleted"); void load(); } catch (e) { toast.error((e as Error).message); } }} className="text-destructive hover:underline text-xs font-bold"><Trash2 className="size-3.5 inline" /></button>
-              )}
-            </Td>
+        {loading && (
+          <tr>
+            <Td className="text-center py-12 text-muted-foreground">Loading…</Td>
           </tr>
-        ))}
+        )}
+        {!loading && data.length === 0 && (
+          <tr>
+            <Td className="text-center py-12 text-muted-foreground">{emptyText}</Td>
+          </tr>
+        )}
+        {!loading &&
+          data.map((r) => (
+            <tr key={r.id} className="hover:bg-cream/40">
+              <Td className="text-xs text-muted-foreground">{r.sort_order}</Td>
+              <Td>
+                <div className="size-11 rounded-lg overflow-hidden bg-cream border border-border grid place-items-center shrink-0">
+                  {r.image_url ? (
+                    <img
+                      src={r.image_url}
+                      alt={r.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <ImageOff className="size-4 text-muted-foreground/50" />
+                  )}
+                </div>
+              </Td>
+              <Td className="text-xs font-mono">{r.slug}</Td>
+              <Td className="font-medium text-forest-dark">{r.name}</Td>
+              <Td className="text-xs">{rows.find((x) => x.id === r.parent_id)?.name ?? "—"}</Td>
+              <Td>
+                <StatusPill s={r.show_in_shop_nav ? "active" : "disabled"} />
+              </Td>
+              <Td className="text-xs">{r.shop_nav_sort_order}</Td>
+              <Td>
+                <StatusPill s={r.active ? "active" : "disabled"} />
+              </Td>
+              <Td className="text-right whitespace-nowrap">
+                <Link
+                  to="/admin/category-hero"
+                  search={{ category: r.slug }}
+                  className="text-brand-orange hover:underline text-xs font-bold mr-3 inline-flex items-center gap-1"
+                >
+                  <ImageIcon className="size-3.5 inline" /> BANNER (1920×600)
+                </Link>
+                <button
+                  onClick={() => setEdit(r)}
+                  className="text-gold-deep hover:underline text-xs font-bold mr-3"
+                >
+                  <Pencil className="size-3.5 inline" /> EDIT
+                </button>
+                {r.slug !== "all-products" && (
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Delete?")) return;
+                      try {
+                        await del({ data: { id: r.id } });
+                        toast.success("Deleted");
+                        void load();
+                      } catch (e) {
+                        toast.error((e as Error).message);
+                      }
+                    }}
+                    className="text-destructive hover:underline text-xs font-bold"
+                  >
+                    <Trash2 className="size-3.5 inline" />
+                  </button>
+                )}
+              </Td>
+            </tr>
+          ))}
       </tbody>
     </TableWrap>
   );
 
   return (
     <div>
-      <PageHeader title="Categories" subtitle={`${rows.length} categories`} actions={
-        <>
-          <BtnGhost onClick={load}><RefreshCcw className="size-3.5" /> REFRESH</BtnGhost>
-          <Link to="/admin/category-hero">
-            <BtnGhost className="text-brand-orange border-brand-orange/40 hover:bg-brand-orange/10 gap-1.5">
-              <ImageIcon className="size-3.5" /> CATEGORY BANNERS (1920×600)
+      <PageHeader
+        title="Categories"
+        subtitle={`${rows.length} categories`}
+        actions={
+          <>
+            <BtnGhost onClick={load}>
+              <RefreshCcw className="size-3.5" /> REFRESH
             </BtnGhost>
-          </Link>
-          <BtnPrimary onClick={() => setEdit(EMPTY)}><Plus className="size-3.5" /> NEW CATEGORY</BtnPrimary>
-        </>
-      } />
-      
+            <Link to="/admin/category-hero">
+              <BtnGhost className="text-brand-orange border-brand-orange/40 hover:bg-brand-orange/10 gap-1.5">
+                <ImageIcon className="size-3.5" /> CATEGORY BANNERS (1920×600)
+              </BtnGhost>
+            </Link>
+            <BtnPrimary onClick={() => setEdit(EMPTY)}>
+              <Plus className="size-3.5" /> NEW CATEGORY
+            </BtnPrimary>
+          </>
+        }
+      />
+
       <div className="mb-12">
         <h3 className="font-serif text-xl text-forest-dark mb-4">Virtual Collections</h3>
-        <p className="text-sm text-muted-foreground mb-4">Special collections that span across multiple product types.</p>
+        <p className="text-sm text-muted-foreground mb-4">
+          Special collections that span across multiple product types.
+        </p>
         {renderTable(virtualRows, "No virtual collections.")}
       </div>
 
       <div>
         <h3 className="font-serif text-xl text-forest-dark mb-4">Product Categories</h3>
-        <p className="text-sm text-muted-foreground mb-4">Database categories used to tag and filter actual products.</p>
+        <p className="text-sm text-muted-foreground mb-4">
+          Database categories used to tag and filter actual products.
+        </p>
         {renderTable(productRows, "No product categories yet.")}
       </div>
     </div>
   );
 }
 
-function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>; parents: Cat[]; onCancel: () => void; onSaved: () => Promise<void> | void }) {
+function Editor({
+  initial,
+  parents,
+  onCancel,
+  onSaved,
+}: {
+  initial: Partial<Cat>;
+  parents: Cat[];
+  onCancel: () => void;
+  onSaved: () => Promise<void> | void;
+}) {
   const [f, setF] = useState<Partial<Cat>>({ ...initial });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -102,59 +251,174 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
     setUploading(true);
     try {
       const url = await uploadToImageKit(file, "categories");
-      if (url) { setF((prev) => ({ ...prev, image_url: url })); toast.success("Image uploaded"); }
-    } catch (e) { toast.error((e as Error).message); } finally { setUploading(false); }
+      if (url) {
+        setF((prev) => ({ ...prev, image_url: url }));
+        toast.success("Image uploaded");
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUploading(false);
+    }
   }
 
   return (
     <div>
-      <button onClick={onCancel} className="inline-flex items-center gap-1 text-xs font-bold text-forest-dark mb-4"><ArrowLeft className="size-4" /> BACK</button>
+      <button
+        onClick={onCancel}
+        className="inline-flex items-center gap-1 text-xs font-bold text-forest-dark mb-4"
+      >
+        <ArrowLeft className="size-4" /> BACK
+      </button>
       <Card className="p-6 max-w-3xl">
-        <h2 className="font-serif text-2xl text-forest-dark mb-4">{f.id ? "Edit category" : "New category"}</h2>
+        <h2 className="font-serif text-2xl text-forest-dark mb-4">
+          {f.id ? "Edit category" : "New category"}
+        </h2>
         <div className="grid md:grid-cols-2 gap-3 text-sm">
-          <Field label="Slug *"><input value={f.slug ?? ""} onChange={(e) => setF({ ...f, slug: e.target.value })} className={inp} /></Field>
-          <Field label="Name *"><input value={f.name ?? ""} onChange={(e) => setF({ ...f, name: e.target.value })} className={inp} /></Field>
+          <Field label="Slug *">
+            <input
+              value={f.slug ?? ""}
+              onChange={(e) => setF({ ...f, slug: e.target.value })}
+              className={inp}
+            />
+          </Field>
+          <Field label="Name *">
+            <input
+              value={f.name ?? ""}
+              onChange={(e) => setF({ ...f, name: e.target.value })}
+              className={inp}
+            />
+          </Field>
           <Field label="Parent">
-            <select value={f.parent_id ?? ""} onChange={(e) => setF({ ...f, parent_id: e.target.value || null })} className={inp}>
+            <select
+              value={f.parent_id ?? ""}
+              onChange={(e) => setF({ ...f, parent_id: e.target.value || null })}
+              className={inp}
+            >
               <option value="">— top-level —</option>
-              {parents.filter((p) => p.id !== f.id).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+              {parents
+                .filter((p) => p.id !== f.id)
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
             </select>
           </Field>
-          <Field label="Sort order"><input type="number" value={f.sort_order ?? 0} onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })} className={inp} /></Field>
+          <Field label="Sort order">
+            <input
+              type="number"
+              value={f.sort_order ?? 0}
+              onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })}
+              className={inp}
+            />
+          </Field>
           <div className="md:col-span-2">
             <Field label="Category image">
               <div className="flex items-start gap-4">
                 <div className="size-24 rounded-xl overflow-hidden bg-cream border border-border grid place-items-center shrink-0">
-                  {f.image_url ? <img src={f.image_url} alt={f.name || "Category preview"} className="w-full h-full object-cover" /> : <ImageOff className="size-6 text-muted-foreground/50" />}
+                  {f.image_url ? (
+                    <img
+                      src={f.image_url}
+                      alt={f.name || "Category preview"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <ImageOff className="size-6 text-muted-foreground/50" />
+                  )}
                 </div>
                 <div className="flex-1 space-y-2">
-                  <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { const file = e.target.files?.[0]; if (file) void onFile(file); e.target.value = ""; }} />
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void onFile(file);
+                      e.target.value = "";
+                    }}
+                  />
                   <div className="flex gap-2">
-                    <BtnGhost type="button" disabled={uploading} onClick={() => fileRef.current?.click()}><Upload className="size-3.5" /> {uploading ? "UPLOADING…" : f.image_url ? "REPLACE IMAGE" : "UPLOAD IMAGE"}</BtnGhost>
-                    {f.image_url && <BtnGhost type="button" onClick={() => setF({ ...f, image_url: "" })}><Trash2 className="size-3.5" /> REMOVE</BtnGhost>}
+                    <BtnGhost
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => fileRef.current?.click()}
+                    >
+                      <Upload className="size-3.5" />{" "}
+                      {uploading ? "UPLOADING…" : f.image_url ? "REPLACE IMAGE" : "UPLOAD IMAGE"}
+                    </BtnGhost>
+                    {f.image_url && (
+                      <BtnGhost type="button" onClick={() => setF({ ...f, image_url: "" })}>
+                        <Trash2 className="size-3.5" /> REMOVE
+                      </BtnGhost>
+                    )}
                   </div>
-                  <input value={f.image_url ?? ""} onChange={(e) => setF({ ...f, image_url: e.target.value })} className={inp} placeholder="Or paste an image URL…" />
-                  <p className="text-[11px] text-muted-foreground">This image appears on the storefront's "Shop by Category" section. JPG/PNG/WebP, ideally a square or 4:5 crop, under 10MB.</p>
+                  <input
+                    value={f.image_url ?? ""}
+                    onChange={(e) => setF({ ...f, image_url: e.target.value })}
+                    className={inp}
+                    placeholder="Or paste an image URL…"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    This image appears on the storefront's "Shop by Category" section. JPG/PNG/WebP,
+                    ideally a square or 4:5 crop, under 10MB.
+                  </p>
                 </div>
               </div>
             </Field>
           </div>
-          <div className="md:col-span-2"><Field label="Description"><textarea rows={3} value={f.description ?? ""} onChange={(e) => setF({ ...f, description: e.target.value })} className={inp} /></Field></div>
-          <Field label="SEO title"><input value={f.seo_title ?? ""} onChange={(e) => setF({ ...f, seo_title: e.target.value })} className={inp} /></Field>
-          <Field label="SEO description"><input value={f.seo_description ?? ""} onChange={(e) => setF({ ...f, seo_description: e.target.value })} className={inp} /></Field>
-          
+          <div className="md:col-span-2">
+            <Field label="Description">
+              <textarea
+                rows={3}
+                value={f.description ?? ""}
+                onChange={(e) => setF({ ...f, description: e.target.value })}
+                className={inp}
+              />
+            </Field>
+          </div>
+          <Field label="SEO title">
+            <input
+              value={f.seo_title ?? ""}
+              onChange={(e) => setF({ ...f, seo_title: e.target.value })}
+              className={inp}
+            />
+          </Field>
+          <Field label="SEO description">
+            <input
+              value={f.seo_description ?? ""}
+              onChange={(e) => setF({ ...f, seo_description: e.target.value })}
+              className={inp}
+            />
+          </Field>
+
           <div className="md:col-span-2 mt-4 pt-4 border-t border-border">
             <h3 className="font-serif text-lg text-forest-dark mb-3">Shop Navigation Settings</h3>
             <div className="grid md:grid-cols-2 gap-3">
               <label className="flex items-center gap-2 text-sm md:col-span-2">
-                <input type="checkbox" checked={!!f.show_in_shop_nav} onChange={(e) => setF({ ...f, show_in_shop_nav: e.target.checked })} /> 
+                <input
+                  type="checkbox"
+                  checked={!!f.show_in_shop_nav}
+                  onChange={(e) => setF({ ...f, show_in_shop_nav: e.target.checked })}
+                />
                 Show in Shop Navigation Dropdown
               </label>
               <Field label="Navigation Label (Optional)">
-                <input value={f.shop_nav_label ?? ""} onChange={(e) => setF({ ...f, shop_nav_label: e.target.value })} className={inp} placeholder="Overrides category name if set" />
+                <input
+                  value={f.shop_nav_label ?? ""}
+                  onChange={(e) => setF({ ...f, shop_nav_label: e.target.value })}
+                  className={inp}
+                  placeholder="Overrides category name if set"
+                />
               </Field>
               <Field label="Navigation Sort Order">
-                <input type="number" value={f.shop_nav_sort_order ?? 0} onChange={(e) => setF({ ...f, shop_nav_sort_order: Number(e.target.value) })} className={inp} />
+                <input
+                  type="number"
+                  value={f.shop_nav_sort_order ?? 0}
+                  onChange={(e) => setF({ ...f, shop_nav_sort_order: Number(e.target.value) })}
+                  className={inp}
+                />
               </Field>
             </div>
           </div>
@@ -166,7 +430,8 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
                 Category Hero Banner (1920 × 600 px)
               </div>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Manage the full-width 1920×600 header banner shown on <code>/shop/{f.slug || "category"}</code>.
+                Manage the full-width 1920×600 header banner shown on{" "}
+                <code>/shop/{f.slug || "category"}</code>.
               </p>
             </div>
             <Link to="/admin/category-hero" search={{ category: f.slug || "honey" }}>
@@ -176,21 +441,49 @@ function Editor({ initial, parents, onCancel, onSaved }: { initial: Partial<Cat>
             </Link>
           </div>
 
-          <label className="flex items-center gap-2 text-xs md:col-span-2 mt-2"><input type="checkbox" checked={!!f.active} onChange={(e) => setF({ ...f, active: e.target.checked })} /> Active</label>
+          <label className="flex items-center gap-2 text-xs md:col-span-2 mt-2">
+            <input
+              type="checkbox"
+              checked={!!f.active}
+              onChange={(e) => setF({ ...f, active: e.target.checked })}
+            />{" "}
+            Active
+          </label>
         </div>
         <div className="mt-6 flex gap-3">
-          <BtnPrimary disabled={busy} onClick={async () => {
-            setBusy(true);
-            try {
-              await save({ data: {
-                id: f.id, slug: f.slug!, name: f.name!, description: f.description ?? null, image_url: f.image_url || null,
-                parent_id: f.parent_id ?? null, sort_order: Number(f.sort_order ?? 0), active: !!f.active,
-                show_in_shop_nav: !!f.show_in_shop_nav, shop_nav_label: f.shop_nav_label || null, shop_nav_sort_order: Number(f.shop_nav_sort_order ?? 0),
-                seo_title: f.seo_title || null, seo_description: f.seo_description || null,
-              }});
-              toast.success("Saved"); await onSaved();
-            } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
-          }}>{busy ? "SAVING…" : "SAVE"}</BtnPrimary>
+          <BtnPrimary
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              try {
+                await save({
+                  data: {
+                    id: f.id,
+                    slug: f.slug!,
+                    name: f.name!,
+                    description: f.description ?? null,
+                    image_url: f.image_url || null,
+                    parent_id: f.parent_id ?? null,
+                    sort_order: Number(f.sort_order ?? 0),
+                    active: !!f.active,
+                    show_in_shop_nav: !!f.show_in_shop_nav,
+                    shop_nav_label: f.shop_nav_label || null,
+                    shop_nav_sort_order: Number(f.shop_nav_sort_order ?? 0),
+                    seo_title: f.seo_title || null,
+                    seo_description: f.seo_description || null,
+                  },
+                });
+                toast.success("Saved");
+                await onSaved();
+              } catch (e) {
+                toast.error((e as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            {busy ? "SAVING…" : "SAVE"}
+          </BtnPrimary>
           <BtnGhost onClick={onCancel}>CANCEL</BtnGhost>
         </div>
       </Card>

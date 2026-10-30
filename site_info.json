@@ -78,9 +78,7 @@
   "functions_timeout": null,
   "plugins": [],
   "account_subdomain": null,
-  "cdp_enabled_contexts": [
-    "deploy-preview"
-  ],
+  "cdp_enabled_contexts": ["deploy-preview"],
   "deploy_retention_in_days": 90,
   "build_timelimit": null,
   "password_context": "all",

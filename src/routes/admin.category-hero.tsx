@@ -71,10 +71,7 @@ function CategoryHeroPage() {
   async function load() {
     setLoading(true);
     try {
-      const [cats, slidesRes] = await Promise.all([
-        fetchShopCategories(),
-        listFn(),
-      ]);
+      const [cats, slidesRes] = await Promise.all([fetchShopCategories(), listFn()]);
       setCategories(cats);
       setRows((slidesRes?.rows as CategoryHeroSlide[]) || []);
 
@@ -104,10 +101,12 @@ function CategoryHeroPage() {
   }, [rows, filterCategory]);
 
   const activeCategory = useMemo(() => {
-    return categories.find((c) => c.slug.toLowerCase() === filterCategory.toLowerCase()) || {
-      slug: filterCategory,
-      name: filterCategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-    };
+    return (
+      categories.find((c) => c.slug.toLowerCase() === filterCategory.toLowerCase()) || {
+        slug: filterCategory,
+        name: filterCategory.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+      }
+    );
   }, [categories, filterCategory]);
 
   if (edit) {
@@ -145,7 +144,10 @@ function CategoryHeroPage() {
               <RefreshCcw className={`size-4 ${loading ? "animate-spin" : ""}`} />
               Refresh
             </BtnGhost>
-            <BtnPrimary onClick={() => setEdit({ ...EMPTY, category_slug: filterCategory })} className="gap-2">
+            <BtnPrimary
+              onClick={() => setEdit({ ...EMPTY, category_slug: filterCategory })}
+              className="gap-2"
+            >
               <Plus className="size-4" />
               Add Banner Slide
             </BtnPrimary>
@@ -156,7 +158,9 @@ function CategoryHeroPage() {
       {/* Category selector tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 border-b border-border/50">
         {categories.map((c) => {
-          const count = rows.filter((r) => r.category_slug.toLowerCase() === c.slug.toLowerCase()).length;
+          const count = rows.filter(
+            (r) => r.category_slug.toLowerCase() === c.slug.toLowerCase(),
+          ).length;
           const isSelected = filterCategory.toLowerCase() === c.slug.toLowerCase();
           return (
             <button
@@ -189,10 +193,14 @@ function CategoryHeroPage() {
       <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-lg bg-cream/40 border border-border/60 text-xs">
         <div className="flex items-center gap-2 text-espresso">
           <ImageIcon className="size-4 text-brand-orange" />
-          <span>Category: <strong className="font-semibold">{activeCategory.name}</strong> (<code>/shop/{filterCategory}</code>)</span>
+          <span>
+            Category: <strong className="font-semibold">{activeCategory.name}</strong> (
+            <code>/shop/{filterCategory}</code>)
+          </span>
         </div>
         <div className="text-muted-foreground">
-          Recommended Size: <strong className="text-forest-dark font-medium">1920 × 600 px</strong> (Aspect ratio 16:5)
+          Recommended Size: <strong className="text-forest-dark font-medium">1920 × 600 px</strong>{" "}
+          (Aspect ratio 16:5)
         </div>
       </div>
 
@@ -214,11 +222,17 @@ function CategoryHeroPage() {
                 <tr>
                   <td colSpan={6} className="text-center py-16 text-muted-foreground align-top">
                     <ImageIcon className="size-12 mx-auto text-muted-foreground/30 mb-3" />
-                    <div className="text-base font-medium text-espresso mb-1">No banner found for {activeCategory.name}</div>
+                    <div className="text-base font-medium text-espresso mb-1">
+                      No banner found for {activeCategory.name}
+                    </div>
                     <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-                      Upload a 1920×600 image to display a full-width hero banner on /shop/{filterCategory}.
+                      Upload a 1920×600 image to display a full-width hero banner on /shop/
+                      {filterCategory}.
                     </p>
-                    <BtnPrimary onClick={() => setEdit({ ...EMPTY, category_slug: filterCategory })} className="gap-2 inline-flex">
+                    <BtnPrimary
+                      onClick={() => setEdit({ ...EMPTY, category_slug: filterCategory })}
+                      className="gap-2 inline-flex"
+                    >
                       <Plus className="size-3.5" /> Upload 1920×600 Banner
                     </BtnPrimary>
                   </td>
@@ -244,7 +258,11 @@ function CategoryHeroPage() {
                     </Td>
                     <Td>
                       <div className="font-medium text-espresso truncate max-w-[200px] lg:max-w-[300px]">
-                        {r.title || <span className="text-muted-foreground italic">Graphic Only (No Overlay Text)</span>}
+                        {r.title || (
+                          <span className="text-muted-foreground italic">
+                            Graphic Only (No Overlay Text)
+                          </span>
+                        )}
                       </div>
                       <div className="text-xs text-muted-foreground truncate max-w-[200px] lg:max-w-[300px] mt-0.5">
                         {r.subtitle || (r.cta_href ? `Links to: ${r.cta_href}` : "No link")}
@@ -291,19 +309,20 @@ function CategoryHeroPage() {
           </table>
         </TableWrap>
       </Card>
-      
+
       {filteredRows.length > 0 && (
         <div className="mt-4 p-4 rounded-xl border border-brand-orange/30 bg-brand-orange/5 text-xs text-espresso flex items-start gap-2.5">
           <Eye className="size-4 text-brand-orange shrink-0 mt-0.5" />
           <div>
-            <strong>Active Banners:</strong> {filteredRows.length} slide{filteredRows.length > 1 ? "s" : ""}. 
-            {filteredRows.length === 1 
-              ? " Displays as a clean static 1920×600 banner." 
+            <strong>Active Banners:</strong> {filteredRows.length} slide
+            {filteredRows.length > 1 ? "s" : ""}.
+            {filteredRows.length === 1
+              ? " Displays as a clean static 1920×600 banner."
               : " Displays as an auto-playing carousel slider."}
-            <a 
-              href={`/shop/${filterCategory}`} 
-              target="_blank" 
-              rel="noreferrer" 
+            <a
+              href={`/shop/${filterCategory}`}
+              target="_blank"
+              rel="noreferrer"
               className="ml-2 font-bold text-brand-orange underline inline-flex items-center gap-1"
             >
               View on /shop/{filterCategory} <ExternalLink className="size-3" />
@@ -402,7 +421,9 @@ function Editor({
           <h1 className="font-serif text-2xl font-medium text-espresso">
             {doc.id ? "Edit Category Banner" : "Add Category Banner"}
           </h1>
-          <p className="text-sm text-muted-foreground">Category: <code>{f.category_slug}</code></p>
+          <p className="text-sm text-muted-foreground">
+            Category: <code>{f.category_slug}</code>
+          </p>
         </div>
         <div className="flex-1" />
         <BtnPrimary onClick={save} disabled={saving} className="min-w-[120px]">
@@ -423,15 +444,26 @@ function Editor({
               </span>
             </div>
             <p className="text-xs text-muted-foreground">
-              Optimal resolution: <strong>1920 × 600 px</strong> (exact 16:5 ratio). Formats: JPG, PNG, WebP.
+              Optimal resolution: <strong>1920 × 600 px</strong> (exact 16:5 ratio). Formats: JPG,
+              PNG, WebP.
             </p>
             {f.image_url ? (
               <div className="relative group rounded-lg overflow-hidden border border-border bg-muted">
-                <img src={f.image_url} alt="Banner Preview" className="w-full aspect-[16/5] object-cover" />
+                <img
+                  src={f.image_url}
+                  alt="Banner Preview"
+                  className="w-full aspect-[16/5] object-cover"
+                />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                   <label className="cursor-pointer bg-white text-espresso px-4 py-2 rounded shadow text-sm font-medium hover:bg-cream">
                     {uploadingDesktop ? "Uploading…" : "Replace Image"}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleDesktopUpload} disabled={uploadingDesktop} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleDesktopUpload}
+                      disabled={uploadingDesktop}
+                    />
                   </label>
                   <button
                     type="button"
@@ -447,8 +479,16 @@ function Editor({
               <label className="flex flex-col items-center justify-center w-full aspect-[16/5] border-2 border-dashed border-border/80 rounded-lg bg-cream/30 hover:bg-cream/60 cursor-pointer transition-colors p-4 text-center">
                 <Upload className="size-8 text-brand-orange mb-2" />
                 <span className="text-sm font-semibold text-espresso">Upload 1920×600 Banner</span>
-                <span className="text-xs text-muted-foreground mt-1">PNG, JPG, WebP up to 10MB</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleDesktopUpload} disabled={uploadingDesktop} />
+                <span className="text-xs text-muted-foreground mt-1">
+                  PNG, JPG, WebP up to 10MB
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleDesktopUpload}
+                  disabled={uploadingDesktop}
+                />
               </label>
             )}
             <Field label="Or paste Image URL directly">
@@ -466,16 +506,29 @@ function Editor({
               <h3 className="font-medium text-espresso">Mobile Crop Image (Optional)</h3>
               <span className="text-[11px] text-muted-foreground">e.g. 800 × 800 or 4:5</span>
             </div>
-            <p className="text-xs text-muted-foreground">If omitted, the desktop 1920×600 image will be automatically centered and scaled for mobile screens.</p>
+            <p className="text-xs text-muted-foreground">
+              If omitted, the desktop 1920×600 image will be automatically centered and scaled for
+              mobile screens.
+            </p>
             {f.mobile_image_url ? (
               <div className="relative group rounded-lg overflow-hidden border border-border w-1/2 mx-auto">
-                <img src={f.mobile_image_url} alt="Mobile Preview" className="w-full aspect-[4/5] object-cover" />
+                <img
+                  src={f.mobile_image_url}
+                  alt="Mobile Preview"
+                  className="w-full aspect-[4/5] object-cover"
+                />
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                   <label className="cursor-pointer bg-white text-espresso px-3 py-1.5 rounded shadow text-xs font-medium hover:bg-cream">
                     {uploadingMobile ? "Uploading…" : "Replace"}
-                    <input type="file" accept="image/*" className="hidden" onChange={handleMobileUpload} disabled={uploadingMobile} />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleMobileUpload}
+                      disabled={uploadingMobile}
+                    />
                   </label>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => setF({ ...f, mobile_image_url: null })}
                     className="bg-red-600 text-white px-2.5 py-1.5 rounded shadow text-xs hover:bg-red-700"
@@ -488,8 +541,16 @@ function Editor({
             ) : (
               <label className="flex flex-col items-center justify-center w-full aspect-[21/9] border-2 border-dashed border-border/80 rounded-lg bg-cream/30 hover:bg-cream/60 cursor-pointer transition-colors p-3 text-center">
                 <Upload className="size-6 text-muted-foreground/60 mb-1" />
-                <span className="text-xs font-medium text-espresso">Upload Mobile Banner (Optional)</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handleMobileUpload} disabled={uploadingMobile} />
+                <span className="text-xs font-medium text-espresso">
+                  Upload Mobile Banner (Optional)
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleMobileUpload}
+                  disabled={uploadingMobile}
+                />
               </label>
             )}
           </Card>
@@ -499,7 +560,7 @@ function Editor({
         <div className="space-y-6">
           <Card className="p-6 space-y-4 flex flex-col">
             <h3 className="font-medium text-espresso border-b pb-2 mb-2">Category & Visibility</h3>
-            
+
             <Field label="Target Category">
               <select
                 className={inp}
@@ -541,7 +602,7 @@ function Editor({
               <h3 className="font-medium text-espresso">Text & Overlay (Optional)</h3>
               <span className="text-[11px] text-muted-foreground">Optional</span>
             </div>
-            
+
             <p className="text-xs text-muted-foreground">
               If your 1920×600 banner already has text designed into it, leave these fields empty.
             </p>
@@ -583,7 +644,8 @@ function Editor({
               </Field>
             </div>
             <p className="text-[11px] text-muted-foreground">
-              Tip: If you provide a Link without Button Text, the entire 1920×600 banner becomes clickable!
+              Tip: If you provide a Link without Button Text, the entire 1920×600 banner becomes
+              clickable!
             </p>
           </Card>
         </div>

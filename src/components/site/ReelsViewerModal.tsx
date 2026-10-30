@@ -105,7 +105,7 @@ export function ReelsViewerModal({
       const videoEl = document.getElementById(`reel-video-${story.id}`) as HTMLVideoElement;
       if (videoEl) {
         if (index === activeIndex) {
-          // Only enforce play/pause here. Mute state should ideally persist 
+          // Only enforce play/pause here. Mute state should ideally persist
           // or be explicitly applied during swipe if needed.
           if (isPlaying) {
             videoEl.muted = isMuted; // Try to retain user preference on swipe
@@ -171,7 +171,18 @@ export function ReelsViewerModal({
           onClick={() => emblaApi?.scrollPrev()}
           className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 transition-all shadow-xl"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m15 18-6-6 6-6" />
+          </svg>
         </button>
       </div>
 
@@ -181,7 +192,18 @@ export function ReelsViewerModal({
           onClick={() => emblaApi?.scrollNext()}
           className="w-14 h-14 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 transition-all shadow-xl"
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="m9 18 6-6-6-6" />
+          </svg>
         </button>
       </div>
 
@@ -192,12 +214,9 @@ export function ReelsViewerModal({
       >
         <div className="flex flex-col h-full">
           {stories.map((story, index) => (
-            <div
-              key={story.id}
-              className="flex-[0_0_100%] h-full w-full relative"
-            >
+            <div key={story.id} className="flex-[0_0_100%] h-full w-full relative">
               {/* Video Element */}
-              <div 
+              <div
                 className="w-full h-full bg-black relative"
                 onClick={() => setIsPlaying(!isPlaying)}
               >
@@ -216,8 +235,10 @@ export function ReelsViewerModal({
                   onClick={(e) => {
                     e.stopPropagation();
                     const newMuted = !isMuted;
-                    
-                    const videoEl = document.getElementById(`reel-video-${story.id}`) as HTMLVideoElement;
+
+                    const videoEl = document.getElementById(
+                      `reel-video-${story.id}`,
+                    ) as HTMLVideoElement;
                     if (videoEl) {
                       videoEl.muted = newMuted;
                       if (!newMuted) {
@@ -233,23 +254,28 @@ export function ReelsViewerModal({
                       console.log("readyState:", videoEl.readyState);
                       console.log("networkState:", videoEl.networkState);
                       console.log("error:", videoEl.error);
-                      
+
                       const audioTracks = (videoEl as any).audioTracks;
-                      console.log("audio track present:", audioTracks ? audioTracks.length > 0 : 'unknown API');
+                      console.log(
+                        "audio track present:",
+                        audioTracks ? audioTracks.length > 0 : "unknown API",
+                      );
                       console.log("navigator.userAgent:", navigator.userAgent);
 
                       // Ensure it's playing
                       if (videoEl.paused) {
                         const playPromise = videoEl.play();
                         if (playPromise !== undefined) {
-                          playPromise.then(() => {
-                            console.log("play promise result: resolved successfully");
-                          }).catch(err => {
-                            console.error("play promise result: rejected", err);
-                          });
+                          playPromise
+                            .then(() => {
+                              console.log("play promise result: resolved successfully");
+                            })
+                            .catch((err) => {
+                              console.error("play promise result: rejected", err);
+                            });
                         }
                       }
-                      
+
                       setIsMuted(videoEl.muted); // Update UI to match actual DOM state
                     }
                   }}
@@ -258,45 +284,53 @@ export function ReelsViewerModal({
                 >
                   {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
                 </button>
-                
+
                 {/* Play/Pause indicator overlay (optional, subtle) */}
                 {!isPlaying && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none">
                     <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/40">
-                      <div className="w-5 h-5 bg-white ml-1" style={{ clipPath: "polygon(0 0, 0 100%, 100% 50%)" }} />
+                      <div
+                        className="w-5 h-5 bg-white ml-1"
+                        style={{ clipPath: "polygon(0 0, 0 100%, 100% 50%)" }}
+                      />
                     </div>
                   </div>
                 )}
-                
+
                 {/* Gradient for text readability */}
                 <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
               </div>
 
               {/* Right Side Action Rail */}
               <div className="absolute right-0 bottom-24 sm:bottom-32 p-4 flex flex-col items-center gap-6 z-30 pointer-events-auto drop-shadow-lg">
-                
                 {/* LIKE ACTION */}
-                <div className="flex flex-col items-center gap-1.5 group cursor-pointer" onClick={(e) => {
-                  e.stopPropagation();
-                  handleLike(story);
-                }}>
+                <div
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(story);
+                  }}
+                >
                   <div className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/20 transition-transform group-hover:scale-110">
-                    <Heart 
+                    <Heart
                       className={`w-6 h-6 transition-colors ${
-                        story.product_slug && wishlist.has(story.product_slug) 
-                          ? "fill-red-500 text-red-500" 
+                        story.product_slug && wishlist.has(story.product_slug)
+                          ? "fill-red-500 text-red-500"
                           : "text-white"
-                      }`} 
+                      }`}
                     />
                   </div>
                   <span className="text-white text-[12px] font-medium drop-shadow-md">Like</span>
                 </div>
 
                 {/* SHARE ACTION */}
-                <div className="flex flex-col items-center gap-1.5 group cursor-pointer" onClick={(e) => {
-                  e.stopPropagation();
-                  handleShare(story);
-                }}>
+                <div
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleShare(story);
+                  }}
+                >
                   <div className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/20 transition-transform group-hover:scale-110">
                     <Share className="w-6 h-6 text-white" />
                   </div>
@@ -304,10 +338,13 @@ export function ReelsViewerModal({
                 </div>
 
                 {/* REVIEWS ACTION */}
-                <div className="flex flex-col items-center gap-1.5 group cursor-pointer" onClick={(e) => {
-                  e.stopPropagation();
-                  setShowReviewsPanel(true);
-                }}>
+                <div
+                  className="flex flex-col items-center gap-1.5 group cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowReviewsPanel(true);
+                  }}
+                >
                   <div className="w-12 h-12 rounded-full bg-black/20 backdrop-blur-md flex items-center justify-center border border-white/20 transition-transform group-hover:scale-110">
                     <MessageSquare className="w-6 h-6 text-white" />
                   </div>
@@ -317,16 +354,18 @@ export function ReelsViewerModal({
 
               {/* Bottom Info Overlay */}
               <div className="absolute bottom-0 left-0 right-16 p-5 sm:p-6 pb-8 sm:pb-8 flex flex-col justify-end pointer-events-none z-20">
-                
                 {/* Product Thumbnail Only */}
                 <div className="flex items-center gap-3 mb-2">
-                  {story.product_slug && products && (
+                  {story.product_slug &&
+                    products &&
                     (() => {
-                      const matchedProduct = products.find((p: any) => p.slug === story.product_slug);
+                      const matchedProduct = products.find(
+                        (p: any) => p.slug === story.product_slug,
+                      );
                       const productImg = matchedProduct?.image_url || matchedProduct?.images?.[0];
                       if (matchedProduct && productImg) {
                         return (
-                          <Link 
+                          <Link
                             to={`/product/${matchedProduct.slug}` as any}
                             className="block w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-[12px] sm:rounded-2xl overflow-hidden border border-white/40 shadow-lg bg-white pointer-events-auto hover:scale-105 transition-transform"
                             onClick={(e) => {
@@ -335,17 +374,16 @@ export function ReelsViewerModal({
                               onClose();
                             }}
                           >
-                            <img 
-                              src={resolveImage(null, productImg)} 
-                              alt={matchedProduct.name} 
-                              className="w-full h-full object-cover" 
+                            <img
+                              src={resolveImage(null, productImg)}
+                              alt={matchedProduct.name}
+                              className="w-full h-full object-cover"
                             />
                           </Link>
                         );
                       }
                       return null;
-                    })()
-                  )}
+                    })()}
                 </div>
               </div>
             </div>
@@ -355,25 +393,25 @@ export function ReelsViewerModal({
 
       {/* Reviews Panel */}
       {showReviewsPanel && (
-        <div 
+        <div
           className="absolute inset-0 z-[10000] sm:bg-black/40 transition-opacity"
           onClick={() => setShowReviewsPanel(false)}
         >
           {/* Mobile Bottom Sheet / Desktop Right Panel */}
-          <div 
+          <div
             className="absolute bottom-0 inset-x-0 h-[60vh] sm:h-full sm:top-0 sm:right-0 sm:left-auto sm:w-[400px] bg-[#111] sm:bg-[#111]/95 sm:backdrop-blur-xl border-t sm:border-t-0 sm:border-l border-white/10 rounded-t-[32px] sm:rounded-none flex flex-col pointer-events-auto shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b border-white/10 shrink-0">
               <h3 className="text-white font-serif text-xl font-medium">Customer Review</h3>
-              <button 
+              <button
                 onClick={() => setShowReviewsPanel(false)}
                 className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white hover:bg-white/20 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto">
               {stories[activeIndex] && (
                 <div className="flex flex-col">
@@ -383,14 +421,16 @@ export function ReelsViewerModal({
                       <Star key={i} className="w-5 h-5 fill-current drop-shadow-sm" />
                     ))}
                   </div>
-                  
+
                   {/* Review Text */}
                   {stories[activeIndex].review_text ? (
                     <blockquote className="text-white/90 text-[17px] sm:text-lg leading-[1.6] font-medium mb-8">
                       "{stories[activeIndex].review_text}"
                     </blockquote>
                   ) : (
-                    <div className="text-white/50 text-base italic mb-8">No review text provided.</div>
+                    <div className="text-white/50 text-base italic mb-8">
+                      No review text provided.
+                    </div>
                   )}
 
                   {/* Customer Info */}
@@ -406,9 +446,12 @@ export function ReelsViewerModal({
                         </span>
                       )}
                     </div>
-                    {(stories[activeIndex].customer_city || stories[activeIndex].customer_state) && (
+                    {(stories[activeIndex].customer_city ||
+                      stories[activeIndex].customer_state) && (
                       <div className="text-sm text-white/60 capitalize mt-1">
-                        {[stories[activeIndex].customer_city, stories[activeIndex].customer_state].filter(Boolean).join(", ")}
+                        {[stories[activeIndex].customer_city, stories[activeIndex].customer_state]
+                          .filter(Boolean)
+                          .join(", ")}
                       </div>
                     )}
                   </div>

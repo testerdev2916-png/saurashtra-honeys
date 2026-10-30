@@ -90,7 +90,8 @@ function AdminTrustItems() {
   };
 
   const handleMove = async (index: number, direction: "up" | "down") => {
-    if ((direction === "up" && index === 0) || (direction === "down" && index === items.length - 1)) return;
+    if ((direction === "up" && index === 0) || (direction === "down" && index === items.length - 1))
+      return;
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     const newItems = [...items];
     const [moved] = newItems.splice(index, 1);
@@ -114,7 +115,10 @@ function AdminTrustItems() {
         title="Trust Strip"
         subtitle="Manage the trust badges (e.g. Pure Honey, Lab Tested) displayed on the homepage."
         actions={
-          <Link to="/admin/homepage" className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep">
+          <Link
+            to="/admin/homepage"
+            className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep"
+          >
             <ArrowLeft className="size-4" /> Back to Homepage CMS
           </Link>
         }
@@ -123,7 +127,9 @@ function AdminTrustItems() {
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-serif text-xl font-bold text-forest-dark">Active Badges</h2>
         {!showAdd && !editingId && (
-          <BtnPrimary onClick={() => setShowAdd(true)}><Plus className="size-4" /> Add Badge</BtnPrimary>
+          <BtnPrimary onClick={() => setShowAdd(true)}>
+            <Plus className="size-4" /> Add Badge
+          </BtnPrimary>
         )}
       </div>
 
@@ -132,7 +138,13 @@ function AdminTrustItems() {
           <form onSubmit={handleSave} className="space-y-4">
             <div className="grid md:grid-cols-2 gap-4">
               <Field label="Title *">
-                <input required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className={inp} placeholder="e.g. Pure Honey" />
+                <input
+                  required
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  className={inp}
+                  placeholder="e.g. Pure Honey"
+                />
               </Field>
               <Field label="Illustration Image">
                 <ImageUpload
@@ -143,13 +155,22 @@ function AdminTrustItems() {
               </Field>
               <div className="md:col-span-2">
                 <Field label="Description">
-                  <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className={inp} placeholder="e.g. Sustainably sourced" />
+                  <input
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    className={inp}
+                    placeholder="e.g. Sustainably sourced"
+                  />
                 </Field>
               </div>
             </div>
             <div className="flex gap-2 pt-2">
-              <BtnPrimary type="submit"><Save className="size-4" /> Save</BtnPrimary>
-              <BtnGhost type="button" onClick={resetForm}><X className="size-4" /> Cancel</BtnGhost>
+              <BtnPrimary type="submit">
+                <Save className="size-4" /> Save
+              </BtnPrimary>
+              <BtnGhost type="button" onClick={resetForm}>
+                <X className="size-4" /> Cancel
+              </BtnGhost>
             </div>
           </form>
         </Card>
@@ -157,31 +178,75 @@ function AdminTrustItems() {
 
       <div className="space-y-3">
         {items.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground bg-white border border-border rounded-2xl">No badges configured.</div>
+          <div className="p-8 text-center text-muted-foreground bg-white border border-border rounded-2xl">
+            No badges configured.
+          </div>
         ) : (
           items.map((item, index) => {
             return (
-              <Card key={item.id} className={`p-4 flex items-center justify-between ${editingId === item.id ? "border-gold-deep" : ""}`}>
+              <Card
+                key={item.id}
+                className={`p-4 flex items-center justify-between ${editingId === item.id ? "border-gold-deep" : ""}`}
+              >
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange overflow-hidden p-2">
-                    {item.icon && (item.icon.startsWith("http") || item.icon.startsWith("/") || item.icon.startsWith("data:")) ? (
-                      <img src={item.icon} alt={item.title} className="w-full h-full object-contain" />
+                    {item.icon &&
+                    (item.icon.startsWith("http") ||
+                      item.icon.startsWith("/") ||
+                      item.icon.startsWith("data:")) ? (
+                      <img
+                        src={item.icon}
+                        alt={item.title}
+                        className="w-full h-full object-contain"
+                      />
                     ) : (
                       <Icons.Check className="size-5" />
                     )}
                   </div>
                   <div>
                     <h3 className="font-bold text-forest-dark">{item.title}</h3>
-                    {item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
+                    {item.description && (
+                      <p className="text-xs text-muted-foreground">{item.description}</p>
+                    )}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center border border-border rounded-lg overflow-hidden bg-white mr-2">
-                    <button disabled={index === 0} onClick={() => handleMove(index, "up")} className="p-2 hover:bg-cream/60 disabled:opacity-30 border-r border-border"><ArrowUp className="size-4" /></button>
-                    <button disabled={index === items.length - 1} onClick={() => handleMove(index, "down")} className="p-2 hover:bg-cream/60 disabled:opacity-30"><ArrowDown className="size-4" /></button>
+                    <button
+                      disabled={index === 0}
+                      onClick={() => handleMove(index, "up")}
+                      className="p-2 hover:bg-cream/60 disabled:opacity-30 border-r border-border"
+                    >
+                      <ArrowUp className="size-4" />
+                    </button>
+                    <button
+                      disabled={index === items.length - 1}
+                      onClick={() => handleMove(index, "down")}
+                      className="p-2 hover:bg-cream/60 disabled:opacity-30"
+                    >
+                      <ArrowDown className="size-4" />
+                    </button>
                   </div>
-                  <button onClick={() => { setEditingId(item.id); setFormData({ title: item.title, description: item.description || "", icon: item.icon || "" }); setShowAdd(false); }} className="p-2 text-forest-dark hover:bg-cream rounded"><Edit className="size-4" /></button>
-                  <button onClick={() => handleRemove(item.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded"><Trash2 className="size-4" /></button>
+                  <button
+                    onClick={() => {
+                      setEditingId(item.id);
+                      setFormData({
+                        title: item.title,
+                        description: item.description || "",
+                        icon: item.icon || "",
+                      });
+                      setShowAdd(false);
+                    }}
+                    className="p-2 text-forest-dark hover:bg-cream rounded"
+                  >
+                    <Edit className="size-4" />
+                  </button>
+                  <button
+                    onClick={() => handleRemove(item.id)}
+                    className="p-2 text-destructive hover:bg-destructive/10 rounded"
+                  >
+                    <Trash2 className="size-4" />
+                  </button>
                 </div>
               </Card>
             );

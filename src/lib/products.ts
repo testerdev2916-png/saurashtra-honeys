@@ -167,15 +167,14 @@ export function getProductGallery(product: Product): string[] {
     ? Array.from(
         new Set(
           product.images
-            .slice(0, 2)
-            .filter((u): u is string => typeof u === "string" && u.trim().length > 0 && !isInfographicImage(u, product)),
+            .filter((u): u is string => typeof u === "string" && u.trim().length > 0),
         ),
       )
     : [];
   if (list.length > 0) {
     return list;
   }
-  return product.image && !isInfographicImage(product.image, product) ? [product.image] : [];
+  return product.image ? [product.image] : [];
 }
 
 export function getProductAdditionalImages(product: Product): string[] {

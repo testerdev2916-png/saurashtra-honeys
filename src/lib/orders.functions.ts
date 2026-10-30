@@ -11,6 +11,16 @@ import {
   notifyOrderCancelled,
 } from "./email/email-service";
 import type { EmailOrderData, EmailOrderItem, EmailShippingAddress } from "./email/templates";
+import {
+  validateEmailForCheckout,
+  checkRateLimit,
+  logSecurityEvent,
+} from "./security/fake-order-detector";
+import { normalizePhoneNumber } from "./security/sms-otp.service";
+import {
+  getActiveFallbackVerification,
+  saveFallbackVerification,
+} from "./auth-otp.functions";
 
 const itemSchema = z.object({
   slug: z.string().max(120),
@@ -115,19 +125,208 @@ async function razorpayCreateOrder(amountPaise: number, receipt: string) {
   return (await res.json()) as { id: string; amount: number; currency: string };
 }
 
-async function insertOrderRow(
+export async function insertOrderRow(
   supabaseClient: SupabaseClient<Database>,
   data: z.infer<typeof createSchema>,
   userId: string | null,
 ) {
-  // SERVER-SIDE ENFORCEMENT: Guest orders are prohibited
+  // 1. SERVER-SIDE ENFORCEMENT: Guest orders are strictly prohibited
   if (!userId) {
     throw new Error(
       "Authentication required. Please sign in or create an account to complete your order.",
     );
   }
 
-  const subtotalPaise = data.items.reduce((s, i) => s + i.price * i.qty, 0) * 100;
+  // 2. FAKE / SUSPICIOUS EMAIL ADDRESS DETECTION
+  // Blocks example.com, test domains, disposable mailboxes, and admin-blocked addresses
+  const emailCheck = await validateEmailForCheckout(supabaseClient, data.email);
+  if (!emailCheck.valid) {
+    await logSecurityEvent(supabaseClient, {
+      eventType: "order.blocked_fake_email",
+      severity: "warning",
+      actorId: userId,
+      email: data.email,
+      metadata: { reason: emailCheck.reason },
+    });
+    throw new Error(emailCheck.reason || "Invalid email address for order confirmation.");
+  }
+
+  // 3. RATE LIMITING: Prevent order spam / automated fake orders (Max 5 orders per 10 mins per user)
+  const orderRate = checkRateLimit(`order_create:${userId}`, 5, 10 * 60 * 1000);
+  if (!orderRate.allowed) {
+    await logSecurityEvent(supabaseClient, {
+      eventType: "order.rate_limit_exceeded",
+      severity: "warning",
+      actorId: userId,
+      email: data.email,
+    });
+    throw new Error(
+      "You have submitted multiple orders recently. Please wait a few moments before placing another order.",
+    );
+  }
+
+  // 4. MANDATORY MOBILE OTP VERIFICATION FOR CASH ON DELIVERY (COD) ORDERS
+  let isPhoneVerified = false;
+  let verificationMethod = "none";
+
+  if (data.payment_method === "cod") {
+    const normPhone = normalizePhoneNumber(data.phone);
+    if (!normPhone.valid) {
+      throw new Error(normPhone.error || "Please enter a valid mobile number for Cash on Delivery.");
+    }
+    const phone = normPhone.phone;
+
+    // A. Check user profile for permanently verified phone matching order phone
+    try {
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("phone, phone_verified")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (profile) {
+        const p = profile as unknown as { phone?: string; phone_verified?: boolean };
+        if (p.phone_verified && p.phone) {
+          const normProf = normalizePhoneNumber(p.phone);
+          if (normProf.valid && normProf.phone === phone) {
+            isPhoneVerified = true;
+            verificationMethod = "profile_verified";
+          }
+        }
+      }
+    } catch {
+      // Fall through to active verification check
+    }
+
+    // B. Check active, unconsumed phone verification in database
+    let matchedVerifId: string | null = null;
+    if (!isPhoneVerified) {
+      try {
+        const fifteenMinAgo = new Date(Date.now() - 15 * 60 * 1000).toISOString();
+        const { data: verifs } = await supabaseClient
+          .from("phone_verifications" as unknown as "orders")
+          .select("id, verified_at, consumed_at")
+          .eq("phone", phone)
+          .eq("purpose", "cod_order")
+          .gte("verified_at", fifteenMinAgo)
+          .is("consumed_at", null)
+          .order("created_at", { ascending: false })
+          .limit(1);
+
+        if (verifs && verifs[0]) {
+          isPhoneVerified = true;
+          verificationMethod = "sms_otp";
+          matchedVerifId = (verifs[0] as unknown as { id: string }).id;
+        }
+      } catch {
+        // Fall through to memory store check
+      }
+    }
+
+    // C. Check active verification in memory fallback store
+    if (!isPhoneVerified) {
+      const mem = getActiveFallbackVerification(phone, "cod_order");
+      if (
+        mem &&
+        mem.verifiedAt &&
+        Date.now() - mem.verifiedAt < 15 * 60 * 1000 &&
+        !mem.consumedAt
+      ) {
+        isPhoneVerified = true;
+        verificationMethod = "sms_otp";
+        mem.consumedAt = Date.now();
+        saveFallbackVerification(mem);
+      }
+    }
+
+    if (!isPhoneVerified) {
+      await logSecurityEvent(supabaseClient, {
+        eventType: "order.blocked_unverified_cod",
+        severity: "warning",
+        actorId: userId,
+        phone,
+      });
+      throw new Error(
+        "Mobile number verification is mandatory for Cash on Delivery (COD) orders. Please verify your phone number via OTP to complete your order.",
+      );
+    }
+
+    // Consume verification record to prevent replay attacks
+    if (matchedVerifId) {
+      try {
+        await supabaseClient
+          .from("phone_verifications" as unknown as "orders")
+          .update({ consumed_at: new Date().toISOString() } as never)
+          .eq("id", matchedVerifId);
+      } catch {
+        // Ignore if schema not migrated
+      }
+    }
+  } else if (data.payment_method === "razorpay") {
+    verificationMethod = "prepaid_razorpay";
+  }
+
+  // 5. SERVER-SIDE PRICE RECALCULATION & TAMPER PROTECTION
+  // Recalculates authoritative line-item prices directly from products / product_variants catalog
+  const validatedItems = await Promise.all(
+    data.items.map(async (item) => {
+      let authoritativePrice = item.price;
+      try {
+        if (item.variantId) {
+          const { data: v } = await supabaseClient
+            .from("product_variants")
+            .select("price")
+            .eq("id", item.variantId)
+            .maybeSingle();
+          if (v && v.price != null && v.price > 0) {
+            authoritativePrice = v.price;
+          }
+        } else if (item.slug) {
+          const { data: p } = await supabaseClient
+            .from("products")
+            .select("id, price")
+            .or(`slug.eq.${item.slug},canonical_url.eq.${item.slug}`)
+            .maybeSingle();
+          if (p) {
+            if (item.size) {
+              const { data: v } = await supabaseClient
+                .from("product_variants")
+                .select("price")
+                .eq("product_id", p.id)
+                .ilike("label", item.size)
+                .maybeSingle();
+              if (v && v.price != null && v.price > 0) authoritativePrice = v.price;
+              else if (p.price != null && p.price > 0) authoritativePrice = p.price;
+            } else if (p.price != null && p.price > 0) {
+              authoritativePrice = p.price;
+            }
+          }
+        }
+      } catch {
+        // Fall back to client price if catalog query fails
+      }
+
+      if (authoritativePrice !== item.price) {
+        await logSecurityEvent(supabaseClient, {
+          eventType: "order.price_tamper_prevented",
+          severity: "info",
+          actorId: userId,
+          metadata: {
+            slug: item.slug,
+            clientPrice: item.price,
+            authoritativePrice,
+          },
+        });
+      }
+
+      return {
+        ...item,
+        price: authoritativePrice,
+      };
+    }),
+  );
+
+  const subtotalPaise = validatedItems.reduce((s, i) => s + i.price * i.qty, 0) * 100;
   const coupon = await resolveCoupon(supabaseClient, data.coupon_code, subtotalPaise);
   const discountedSubtotal = subtotalPaise - coupon.discount;
   const shippingPaise = coupon.freeShipping || discountedSubtotal >= 79900 ? 0 : 4900;
@@ -142,7 +341,7 @@ async function insertOrderRow(
     phone: data.phone,
     full_name: data.full_name,
     shipping: data.shipping,
-    items: data.items,
+    items: validatedItems,
     subtotal_paise: subtotalPaise,
     shipping_paise: shippingPaise,
     total_paise: totalPaise,
@@ -154,12 +353,29 @@ async function insertOrderRow(
     status: (data.payment_method === "cod" ? "processing" : "pending") as "processing" | "pending",
     timeline: [{ at: new Date().toISOString(), status: "created", note: "Order placed" }],
     notes: data.notes ?? null,
+    phone_verified: isPhoneVerified,
+    verification_method: verificationMethod,
   };
-  const { data: row, error } = await supabaseClient
+  let { data: row, error } = await supabaseClient
     .from("orders")
     .insert(insert as never)
     .select("id, order_number")
     .single();
+
+  // Backward-compatible fallback if DB migration hasn't been run on Supabase SQL editor yet
+  if (error && (error.message.includes("phone_verified") || error.message.includes("verification_method"))) {
+    const fallbackInsert = { ...insert };
+    delete (fallbackInsert as Record<string, unknown>).phone_verified;
+    delete (fallbackInsert as Record<string, unknown>).verification_method;
+    const retry = await supabaseClient
+      .from("orders")
+      .insert(fallbackInsert as never)
+      .select("id, order_number")
+      .single();
+    row = retry.data;
+    error = retry.error;
+  }
+
   if (error) throw new Error(error.message);
 
   if (coupon.id) {

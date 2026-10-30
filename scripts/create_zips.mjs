@@ -130,10 +130,14 @@ for (const relPath of patchFiles) {
   console.log(`  + Added ${relPath}`);
 }
 patchZip.finish();
-console.log(`✅ Patch ZIP created: ${patchZipPath} (${(fs.statSync(patchZipPath).size / 1024).toFixed(2)} KB)\n`);
+console.log(
+  `✅ Patch ZIP created: ${patchZipPath} (${(fs.statSync(patchZipPath).size / 1024).toFixed(2)} KB)\n`,
+);
 
 // 2. Create Complete Website ZIP
-console.log("=== Creating Complete Website ZIP (Saurashtra_Honey_Complete_Website_Updated.zip) ===");
+console.log(
+  "=== Creating Complete Website ZIP (Saurashtra_Honey_Complete_Website_Updated.zip) ===",
+);
 const fullZipPath = path.join(ROOT, "Saurashtra_Honey_Complete_Website_Updated.zip");
 const fullZip = new ZipWriter(fullZipPath);
 
@@ -172,4 +176,6 @@ function walkDir(currentDir, baseDir) {
 
 walkDir(ROOT, ROOT);
 fullZip.finish();
-console.log(`✅ Complete Website ZIP created: ${fullZipPath} (${(fs.statSync(fullZipPath).size / (1024 * 1024)).toFixed(2)} MB)\n`);
+console.log(
+  `✅ Complete Website ZIP created: ${fullZipPath} (${(fs.statSync(fullZipPath).size / (1024 * 1024)).toFixed(2)} MB)\n`,
+);

@@ -1,4 +1,5 @@
 Plan:
+
 1. Replace IntersectionObserver (for active video) with a requestAnimationFrame loop in ShoppableVideoCarousel to flawlessly track the center card.
 2. In ShoppableVideoCard, listen for 'shoppable-video-active' to set isActive.
 3. Update nearObs to a safe positive rootMargin (600px) so Safari doesn't bug out.

@@ -26,8 +26,8 @@ export function ImageUpload({
       if (!e.target.files || e.target.files.length === 0) return;
       const file = e.target.files[0];
       setUploading(true);
-      
-      const fileExt = file.name.split('.').pop();
+
+      const fileExt = file.name.split(".").pop();
       // Upload to Cloudinary
       const finalUrl = await uploadToImageKit(file, folder);
 
@@ -38,7 +38,7 @@ export function ImageUpload({
     } finally {
       setUploading(false);
       // Reset input
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -47,17 +47,17 @@ export function ImageUpload({
       {value ? (
         <div className="relative group rounded-md overflow-hidden border border-border/50 bg-muted/20 flex items-center justify-center">
           {mediaType === "video" ? (
-            <video 
-              src={value} 
-              autoPlay 
-              muted 
-              loop 
+            <video
+              src={value}
+              autoPlay
+              muted
+              loop
               className="w-full h-auto max-h-[200px] object-contain"
             />
           ) : (
-            <img 
-              src={value} 
-              alt="Uploaded media" 
+            <img
+              src={value}
+              alt="Uploaded media"
               className="w-full h-auto max-h-[200px] object-contain"
             />
           )}
@@ -87,10 +87,12 @@ export function ImageUpload({
               {mediaType === "video" ? "MP4, WebM (Max 20MB)" : "PNG, JPG, WEBP (Max 5MB)"}
             </p>
           </div>
-          <input 
-            type="file" 
-            className="hidden" 
-            accept={mediaType === "video" ? "video/mp4, video/webm" : "image/png, image/jpeg, image/webp"} 
+          <input
+            type="file"
+            className="hidden"
+            accept={
+              mediaType === "video" ? "video/mp4, video/webm" : "image/png, image/jpeg, image/webp"
+            }
             onChange={handleUpload}
             disabled={uploading}
           />

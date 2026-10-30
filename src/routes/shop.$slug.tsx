@@ -22,24 +22,30 @@ export const Route = createFileRoute("/shop/$slug")({
     }
   },
   loader: async () => {
-    const [categories, products] = await Promise.all([
-      fetchShopCategories(),
-      fetchProducts(),
-    ]);
+    const [categories, products] = await Promise.all([fetchShopCategories(), fetchProducts()]);
     return { categories, products };
   },
   head: ({ params }) => {
-    const title = `${params.slug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())} | Saurashtra Honey`;
+    const title = `${params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} | Saurashtra Honey`;
     return {
       meta: [
         { title },
-        { name: "description", content: `Explore our premium selection of ${title}. Pure, natural, and ethically sourced.` },
+        {
+          name: "description",
+          content: `Explore our premium selection of ${title}. Pure, natural, and ethically sourced.`,
+        },
       ],
     };
   },
   component: () => {
     const { slug } = Route.useParams();
     const data = Route.useLoaderData();
-    return <ShopPage overrideCategorySlug={slug} initialCategories={data.categories} initialProducts={data.products} />;
+    return (
+      <ShopPage
+        overrideCategorySlug={slug}
+        initialCategories={data.categories}
+        initialProducts={data.products}
+      />
+    );
   },
 });

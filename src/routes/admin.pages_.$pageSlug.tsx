@@ -1,9 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Card, PageHeader, StatusPill, BtnPrimary, BtnGhost, Field, inp, ImageUpload } from "@/components/admin/ui";
+import {
+  Card,
+  PageHeader,
+  StatusPill,
+  BtnPrimary,
+  BtnGhost,
+  Field,
+  inp,
+  ImageUpload,
+} from "@/components/admin/ui";
 import { ArrowLeft, Save, Sparkles, Image as ImageIcon } from "lucide-react";
-import { fetchPageSections, updatePageSectionSettings, togglePageSectionVisibility, type PageSection } from "@/lib/page-cms.functions";
+import {
+  fetchPageSections,
+  updatePageSectionSettings,
+  togglePageSectionVisibility,
+  type PageSection,
+} from "@/lib/page-cms.functions";
 
 export const Route = createFileRoute("/admin/pages_/$pageSlug")({
   component: PageEditor,
@@ -14,7 +28,7 @@ type FieldDef =
   | { type: "textarea"; key: string; label: string; placeholder?: string }
   | { type: "image"; key: string; label: string; bucket?: string; folder?: string }
   | { type: "video"; key: string; label: string; bucket?: string; folder?: string }
-  | { type: "boolean"; key: string; label: string; }
+  | { type: "boolean"; key: string; label: string }
   | { type: "list"; key: string; label: string; itemFields: FieldDef[] };
 
 type SectionConfig = {
@@ -28,7 +42,7 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
   "our-story": {
     title: "Our Story",
     sections: {
-      "hero": {
+      hero: {
         title: "Hero Section",
         description: "The large cinematic hero at the top.",
         fields: [
@@ -36,21 +50,30 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Supporting Text" },
           { type: "text", key: "cta_text", label: "CTA Text" },
-          { type: "image", key: "desktop_image", label: "Desktop Image", folder: "pages/our-story" },
+          {
+            type: "image",
+            key: "desktop_image",
+            label: "Desktop Image",
+            folder: "pages/our-story",
+          },
           { type: "image", key: "mobile_image", label: "Mobile Image", folder: "pages/our-story" },
-        ]
+        ],
       },
-      "where_it_began": {
+      where_it_began: {
         title: "Where It Began",
         description: "The origin story section.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
-          { type: "textarea", key: "description", label: "Story Paragraphs (use multiple lines for breaks)" },
+          {
+            type: "textarea",
+            key: "description",
+            label: "Story Paragraphs (use multiple lines for breaks)",
+          },
           { type: "image", key: "image", label: "Side Image", folder: "pages/our-story" },
-        ]
+        ],
       },
-      "saurashtra_land": {
+      saurashtra_land: {
         title: "Nomadic Beekeeping",
         description: "Full-width landscape section.",
         fields: [
@@ -58,18 +81,18 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Supporting Text" },
           { type: "image", key: "bg_image", label: "Background Image", folder: "pages/our-story" },
-        ]
+        ],
       },
-      "honey_varieties": {
+      honey_varieties: {
         title: "Our Honey Varieties",
         description: "List of the natural honey varieties produced.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
-        ]
+        ],
       },
-      "heart_of_everything": {
+      heart_of_everything: {
         title: "The Heart of Everything",
         description: "Bees section with 4 feature points.",
         fields: [
@@ -84,9 +107,9 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "feature3_desc", label: "Feature 3 Description" },
           { type: "text", key: "feature4_title", label: "Feature 4 Title" },
           { type: "textarea", key: "feature4_desc", label: "Feature 4 Description" },
-        ]
+        ],
       },
-      "hive_to_jar": {
+      hive_to_jar: {
         title: "From Hive to Jar",
         description: "9-step premium storytelling timeline.",
         fields: [
@@ -97,23 +120,33 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "closing_heading", label: "Closing Heading" },
           { type: "textarea", key: "closing_description", label: "Closing Description" },
           { type: "text", key: "closing_cta_text", label: "Closing CTA Text" },
-          { 
-            type: "list", 
-            key: "steps", 
+          {
+            type: "list",
+            key: "steps",
             label: "Process Steps",
             itemFields: [
               { type: "text", key: "number", label: "Step Number (e.g. 01)" },
               { type: "text", key: "category", label: "Category (e.g. THE BEGINNING)" },
               { type: "text", key: "title", label: "Title" },
               { type: "textarea", key: "description", label: "Description" },
-              { type: "video", key: "video", label: "Video (MP4/WebM)", folder: "pages/our-story/process" },
-              { type: "image", key: "poster", label: "Poster Image", folder: "pages/our-story/process" },
+              {
+                type: "video",
+                key: "video",
+                label: "Video (MP4/WebM)",
+                folder: "pages/our-story/process",
+              },
+              {
+                type: "image",
+                key: "poster",
+                label: "Poster Image",
+                folder: "pages/our-story/process",
+              },
               { type: "boolean", key: "active", label: "Active?" },
-            ]
-          }
-        ]
+            ],
+          },
+        ],
       },
-      "our_promise": {
+      our_promise: {
         title: "Our Promise",
         description: "Raw, Honest, Responsible statements.",
         fields: [
@@ -125,9 +158,9 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "promise2_desc", label: "Promise 2 Description" },
           { type: "text", key: "promise3_title", label: "Promise 3 Title" },
           { type: "textarea", key: "promise3_desc", label: "Promise 3 Description" },
-        ]
+        ],
       },
-      "responsible_beekeeping": {
+      responsible_beekeeping: {
         title: "Farmers & Nature",
         description: "Editorial split section with 4 cards.",
         fields: [
@@ -143,9 +176,9 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "feature3_desc", label: "Feature 3 Description" },
           { type: "text", key: "feature4_title", label: "Feature 4 Title" },
           { type: "textarea", key: "feature4_desc", label: "Feature 4 Description" },
-        ]
+        ],
       },
-      "the_people": {
+      the_people: {
         title: "Our Growth & Our Team",
         description: "Founder/family story.",
         fields: [
@@ -154,26 +187,26 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/our-story" },
           { type: "text", key: "signature_text", label: "Signature Text" },
-        ]
+        ],
       },
-      "life_around_hives": {
+      life_around_hives: {
         title: "Life Around the Hives",
         description: "Infinite image slider gallery.",
         fields: [
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
-          { 
-            type: "list", 
-            key: "images", 
+          {
+            type: "list",
+            key: "images",
             label: "Gallery Images",
             itemFields: [
               { type: "image", key: "url", label: "Image", folder: "pages/our-story" },
-              { type: "text", key: "caption", label: "Caption (Optional)" }
-            ]
-          }
-        ]
+              { type: "text", key: "caption", label: "Caption (Optional)" },
+            ],
+          },
+        ],
       },
-      "final_cta": {
+      final_cta: {
         title: "Final CTA",
         description: "Bottom call to action.",
         fields: [
@@ -181,9 +214,9 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "text", key: "cta_text", label: "CTA Button Text" },
           { type: "text", key: "cta_link", label: "CTA Button Link (e.g. /shop)" },
-        ]
+        ],
       },
-      "story_video_gallery": {
+      story_video_gallery: {
         title: "Story Video",
         description: "A section with a video that appears above the achievements gallery.",
         fields: [
@@ -191,43 +224,48 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "video", key: "video_url", label: "Video File", folder: "pages/our-story/video" },
-          { type: "image", key: "video_poster", label: "Video Poster Image", folder: "pages/our-story/video" }
-        ]
-      }
-    }
+          {
+            type: "image",
+            key: "video_poster",
+            label: "Video Poster Image",
+            folder: "pages/our-story/video",
+          },
+        ],
+      },
+    },
   },
-  "contact": {
+  contact: {
     title: "Contact Us",
     sections: {
-      "info": {
+      info: {
         title: "Contact Information",
         description: "Phone numbers, emails, and physical address.",
         fields: [
           { type: "text", key: "email", label: "Support Email" },
           { type: "text", key: "phone", label: "Phone Number" },
           { type: "textarea", key: "address", label: "Physical Address" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "bee-farming": {
     title: "Bee Farming",
     sections: {
-      "intro": {
+      intro: {
         title: "Introduction",
         description: "Introductory text and image.",
         fields: [
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/bee-farming" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "bulk-orders": {
     title: "Bulk Orders",
     sections: {
-      "intro": {
+      intro: {
         title: "Introduction Section",
         description: "The main introductory text and image.",
         fields: [
@@ -235,23 +273,23 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
-        ]
+        ],
       },
-      "gallery": {
+      gallery: {
         title: "Gallery",
         description: "Images to display in the gallery section.",
         fields: [
           { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "corporate-gifting": {
     title: "Corporate Gifting",
     sections: {
-      "intro": {
+      intro: {
         title: "Introduction Section",
         description: "The main introductory text and image.",
         fields: [
@@ -259,23 +297,23 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
-        ]
+        ],
       },
-      "gallery": {
+      gallery: {
         title: "Gallery",
         description: "Images to display in the gallery section.",
         fields: [
           { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "private-label": {
     title: "Private Label",
     sections: {
-      "intro": {
+      intro: {
         title: "Introduction Section",
         description: "The main introductory text and image.",
         fields: [
@@ -283,23 +321,23 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
-        ]
+        ],
       },
-      "gallery": {
+      gallery: {
         title: "Gallery",
         description: "Images to display in the gallery section.",
         fields: [
           { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "gift-hampers": {
     title: "Gift Hampers",
     sections: {
-      "intro": {
+      intro: {
         title: "Introduction Section",
         description: "The main introductory text and image.",
         fields: [
@@ -307,23 +345,23 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "image", label: "Main Image", folder: "pages/b2b" },
-        ]
+        ],
       },
-      "gallery": {
+      gallery: {
         title: "Gallery",
         description: "Images to display in the gallery section.",
         fields: [
           { type: "image", key: "gallery_img_1", label: "Gallery Image 1", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_2", label: "Gallery Image 2", folder: "pages/b2b" },
           { type: "image", key: "gallery_img_3", label: "Gallery Image 3", folder: "pages/b2b" },
-        ]
-      }
-    }
+        ],
+      },
+    },
   },
   "bulk-gifting": {
     title: "B2B Ecosystem (Outside Hub)",
     sections: {
-      "hub_cards": {
+      hub_cards: {
         title: "Service Cards",
         description: "The 4 cards shown on the B2B landing page.",
         fields: [
@@ -337,17 +375,17 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
               { type: "image", key: "img", label: "Image", folder: "pages/b2b" },
               { type: "text", key: "cta", label: "CTA Text" },
               { type: "text", key: "href", label: "Link URL" },
-              { type: "text", key: "iconName", label: "Icon Name (Package, Gift, Sparkles, Tag)" }
-            ]
-          }
-        ]
-      }
-    }
+              { type: "text", key: "iconName", label: "Icon Name (Package, Gift, Sparkles, Tag)" },
+            ],
+          },
+        ],
+      },
+    },
   },
   "become-a-partner": {
     title: "Become a Partner",
     sections: {
-      "hero": {
+      hero: {
         title: "Hero Banner",
         description: "Top section of the partnership page.",
         fields: [
@@ -355,10 +393,10 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "textarea", key: "description", label: "Description" },
           { type: "image", key: "desktop_image", label: "Desktop Image", folder: "pages/b2b" },
           { type: "image", key: "mobile_image", label: "Mobile Image", folder: "pages/b2b" },
-        ]
-      }
-    }
-  }
+        ],
+      },
+    },
+  },
 };
 
 function renderField(field: FieldDef, value: any, onChange: (val: any) => void) {
@@ -386,7 +424,7 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
   if (field.type === "image") {
     return (
       <div className="p-4 rounded-xl border border-border/60 bg-white">
-        <ImageUpload 
+        <ImageUpload
           bucket={field.bucket || "media"}
           folder={field.folder || "pages/generic"}
           value={value}
@@ -398,7 +436,7 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
   if (field.type === "video") {
     return (
       <div className="p-4 rounded-xl border border-border/60 bg-white">
-        <ImageUpload 
+        <ImageUpload
           bucket={field.bucket || "media"}
           folder={field.folder || "pages/generic"}
           value={value}
@@ -411,8 +449,8 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
   if (field.type === "boolean") {
     return (
       <label className="flex items-center gap-2 mt-2 cursor-pointer">
-        <input 
-          type="checkbox" 
+        <input
+          type="checkbox"
           className="w-4 h-4 rounded border-border text-forest focus:ring-forest-dark"
           checked={!!value}
           onChange={(e) => onChange(e.target.checked)}
@@ -428,31 +466,51 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
         {list.map((item, idx) => (
           <div key={idx} className="p-4 rounded-xl border border-border bg-muted/10 relative group">
             <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <button type="button" onClick={() => {
-                if (idx > 0) {
-                  const n = [...list];
-                  [n[idx-1], n[idx]] = [n[idx], n[idx-1]];
-                  onChange(n);
-                }
-              }} className="p-1 bg-white border border-border rounded hover:bg-muted text-xs">↑</button>
-              <button type="button" onClick={() => {
-                if (idx < list.length - 1) {
-                  const n = [...list];
-                  [n[idx+1], n[idx]] = [n[idx], n[idx+1]];
-                  onChange(n);
-                }
-              }} className="p-1 bg-white border border-border rounded hover:bg-muted text-xs">↓</button>
-              <button type="button" onClick={() => {
-                if (confirm("Remove item?")) {
-                  const n = [...list];
-                  n.splice(idx, 1);
-                  onChange(n);
-                }
-              }} className="p-1 bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 text-xs">✕</button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (idx > 0) {
+                    const n = [...list];
+                    [n[idx - 1], n[idx]] = [n[idx], n[idx - 1]];
+                    onChange(n);
+                  }
+                }}
+                className="p-1 bg-white border border-border rounded hover:bg-muted text-xs"
+              >
+                ↑
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (idx < list.length - 1) {
+                    const n = [...list];
+                    [n[idx + 1], n[idx]] = [n[idx], n[idx + 1]];
+                    onChange(n);
+                  }
+                }}
+                className="p-1 bg-white border border-border rounded hover:bg-muted text-xs"
+              >
+                ↓
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm("Remove item?")) {
+                    const n = [...list];
+                    n.splice(idx, 1);
+                    onChange(n);
+                  }
+                }}
+                className="p-1 bg-red-50 border border-red-200 text-red-600 rounded hover:bg-red-100 text-xs"
+              >
+                ✕
+              </button>
             </div>
-            
+
             <div className="space-y-4 pt-2">
-              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Item {idx + 1}</div>
+              <div className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                Item {idx + 1}
+              </div>
               {field.itemFields.map((iF) => (
                 <Field key={iF.key} label={iF.label}>
                   {renderField(iF, item[iF.key], (v) => {
@@ -465,9 +523,12 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
             </div>
           </div>
         ))}
-        <BtnGhost type="button" onClick={() => {
-          onChange([...list, {}]);
-        }}>
+        <BtnGhost
+          type="button"
+          onClick={() => {
+            onChange([...list, {}]);
+          }}
+        >
           + Add Item
         </BtnGhost>
       </div>
@@ -479,7 +540,7 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
 function PageEditor() {
   const { pageSlug } = Route.useParams();
   const config = PAGE_CONFIGS[pageSlug];
-  
+
   const [sections, setSections] = useState<PageSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingKey, setEditingKey] = useState<string | null>(null);
@@ -507,7 +568,9 @@ function PageEditor() {
   }, [pageSlug, config]);
 
   if (!config) {
-    return <div className="p-12 text-center text-muted-foreground">Page configuration not found.</div>;
+    return (
+      <div className="p-12 text-center text-muted-foreground">Page configuration not found.</div>
+    );
   }
 
   if (loading) return <div className="p-12 text-center">Loading...</div>;
@@ -539,7 +602,7 @@ function PageEditor() {
       await togglePageSectionVisibility(pageSlug, sectionKey, !currentEnabled);
       toast.success(currentEnabled ? "Section hidden" : "Section visible");
       setSections((prev) =>
-        prev.map((s) => (s.section_key === sectionKey ? { ...s, enabled: !currentEnabled } : s))
+        prev.map((s) => (s.section_key === sectionKey ? { ...s, enabled: !currentEnabled } : s)),
       );
     } catch (e) {
       toast.error("Failed to toggle visibility");
@@ -548,11 +611,14 @@ function PageEditor() {
 
   return (
     <div>
-      <PageHeader 
+      <PageHeader
         title={`Editing: ${config.title}`}
         subtitle="Manage the content for this specific page."
         actions={
-          <Link to="/admin/pages" className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep">
+          <Link
+            to="/admin/pages"
+            className="inline-flex items-center gap-2 border border-border rounded-lg px-3 py-2 text-xs font-semibold hover:border-gold-deep"
+          >
             <ArrowLeft className="size-4" /> Back to Pages
           </Link>
         }
@@ -577,9 +643,7 @@ function PageEditor() {
                   <BtnGhost onClick={() => handleToggle(sKey, isEnabled)}>
                     {isEnabled ? "Hide" : "Show"}
                   </BtnGhost>
-                  <BtnPrimary onClick={() => handleEdit(sKey)}>
-                    Edit Settings
-                  </BtnPrimary>
+                  <BtnPrimary onClick={() => handleEdit(sKey)}>Edit Settings</BtnPrimary>
                 </div>
               </div>
 
@@ -589,14 +653,22 @@ function PageEditor() {
                     {sConf.fields.map((field) => (
                       <div key={field.key}>
                         <Field label={field.label}>
-                          {renderField(field, formData[field.key], (val) => setFormData({ ...formData, [field.key]: val }))}
+                          {renderField(field, formData[field.key], (val) =>
+                            setFormData({ ...formData, [field.key]: val }),
+                          )}
                         </Field>
                       </div>
                     ))}
 
                     <div className="flex gap-3 pt-4 border-t border-border">
                       <BtnPrimary type="submit" disabled={saving}>
-                        {saving ? "Saving..." : <><Save className="size-4" /> Save Changes</>}
+                        {saving ? (
+                          "Saving..."
+                        ) : (
+                          <>
+                            <Save className="size-4" /> Save Changes
+                          </>
+                        )}
                       </BtnPrimary>
                       <BtnGhost type="button" onClick={() => setEditingKey(null)} disabled={saving}>
                         Cancel

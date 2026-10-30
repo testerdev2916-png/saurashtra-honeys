@@ -56,6 +56,7 @@ import { Route as AdminPagesRouteImport } from './routes/admin.pages'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminRedirectsRouteImport } from './routes/admin.redirects'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
+import { Route as AdminSecurityRouteImport } from './routes/admin.security'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminStoriesRouteImport } from './routes/admin.stories'
 import { Route as AdminSubmissionsRouteImport } from './routes/admin.submissions'
@@ -315,6 +316,11 @@ const AdminReviewsRoute = AdminReviewsRouteImport.update({
   path: '/reviews',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminSecurityRoute = AdminSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -480,6 +486,7 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -550,6 +557,7 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -623,6 +631,7 @@ export interface FileRoutesById {
   '/admin/products': typeof AdminProductsRoute
   '/admin/redirects': typeof AdminRedirectsRoute
   '/admin/reviews': typeof AdminReviewsRoute
+  '/admin/security': typeof AdminSecurityRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/stories': typeof AdminStoriesRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
@@ -697,6 +706,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/stories'
     | '/admin/submissions'
@@ -767,6 +777,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/stories'
     | '/admin/submissions'
@@ -839,6 +850,7 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/redirects'
     | '/admin/reviews'
+    | '/admin/security'
     | '/admin/settings'
     | '/admin/stories'
     | '/admin/submissions'
@@ -1232,6 +1244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminReviewsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/security': {
+      id: '/admin/security'
+      path: '/security'
+      fullPath: '/admin/security'
+      preLoaderRoute: typeof AdminSecurityRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/settings': {
       id: '/admin/settings'
       path: '/settings'
@@ -1419,6 +1438,7 @@ interface AdminRouteChildren {
   AdminProductsRoute: typeof AdminProductsRoute
   AdminRedirectsRoute: typeof AdminRedirectsRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
+  AdminSecurityRoute: typeof AdminSecurityRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStoriesRoute: typeof AdminStoriesRoute
   AdminSubmissionsRoute: typeof AdminSubmissionsRoute
@@ -1456,6 +1476,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductsRoute: AdminProductsRoute,
   AdminRedirectsRoute: AdminRedirectsRoute,
   AdminReviewsRoute: AdminReviewsRoute,
+  AdminSecurityRoute: AdminSecurityRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStoriesRoute: AdminStoriesRoute,
   AdminSubmissionsRoute: AdminSubmissionsRoute,

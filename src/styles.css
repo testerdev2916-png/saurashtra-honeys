@@ -6,7 +6,9 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
   --font-serif: "Cormorant Garamond", "Playfair Display", ui-serif, Georgia, serif;
 
   --radius-sm: calc(var(--radius) - 4px);
@@ -38,34 +40,34 @@
   --color-ring: var(--ring);
 
   /* New D2C Semantic Palette */
-  --color-ivory: #FFF9ED;
-  --color-beige: #F3E8CF;
-  --color-cocoa: #49301F;
-  --color-botanical: #253C27;
-  --color-honey-gold: #C88A2B;
-  --color-dark-text: #2B211B;
-  --color-muted-text: #6F665F;
+  --color-ivory: #fff9ed;
+  --color-beige: #f3e8cf;
+  --color-cocoa: #49301f;
+  --color-botanical: #253c27;
+  --color-honey-gold: #c88a2b;
+  --color-dark-text: #2b211b;
+  --color-muted-text: #6f665f;
 
   /* Backward Compatibility Mappings -> New Organic Palette */
-  --color-espresso: #23120B;
-  --color-cream: #FFF9ED;
-  --color-cream-deep: #F3E8CF;
-  --color-sand: #F3E8CF;
-  --color-burnt-orange: #D9651E;
-  --color-terracotta: #A66E1E;
-  --color-soft-black: #2B211B;
-  --color-pure-white: #FFFFFF;
-  --color-brand-orange: #D9651E;
-  --color-brand-orange-hover: #C15717;
-  --color-brand-dark: #23120B;
+  --color-espresso: #23120b;
+  --color-cream: #fff9ed;
+  --color-cream-deep: #f3e8cf;
+  --color-sand: #f3e8cf;
+  --color-burnt-orange: #d9651e;
+  --color-terracotta: #a66e1e;
+  --color-soft-black: #2b211b;
+  --color-pure-white: #ffffff;
+  --color-brand-orange: #d9651e;
+  --color-brand-orange-hover: #c15717;
+  --color-brand-dark: #23120b;
 
-  --color-gold: #C88A2B;
-  --color-gold-deep: #A66E1E;
-  --color-forest: #253C27;
-  --color-forest-dark: #1A2D1B;
-  --color-honey: #D9651E;
-  
-  --color-announcement: #B57420;
+  --color-gold: #c88a2b;
+  --color-gold-deep: #a66e1e;
+  --color-forest: #253c27;
+  --color-forest-dark: #1a2d1b;
+  --color-honey: #d9651e;
+
+  --color-announcement: #b57420;
 
   --shadow-soft: 0 4px 24px rgba(73, 48, 31, 0.05);
   --shadow-lift: 0 16px 40px -10px rgba(73, 48, 31, 0.12);
@@ -85,60 +87,64 @@
 :root {
   --radius: 0.75rem;
   /* Saurashtra Honey D2C Organic Palette — Warm Ivory, Natural Beige, Cocoa Brown, Botanical Green, Honey Gold */
-  --background: #FFF9ED;
-  --foreground: #23120B;
+  --background: #fff9ed;
+  --foreground: #23120b;
 
-  --cream: #FFF9ED;
-  --cream-deep: #F3E8CF;
-  --sand: #F3E8CF;
-  --espresso: #23120B;
-  --burnt-orange: #D9651E;
-  --terracotta: #A66E1E;
-  --soft-black: #2B211B;
-  --pure-white: #FFFFFF;
-  --brand-orange: #D9651E;
-  --brand-orange-hover: #C15717;
-  --brand-dark: #23120B;
+  --cream: #fff9ed;
+  --cream-deep: #f3e8cf;
+  --sand: #f3e8cf;
+  --espresso: #23120b;
+  --burnt-orange: #d9651e;
+  --terracotta: #a66e1e;
+  --soft-black: #2b211b;
+  --pure-white: #ffffff;
+  --brand-orange: #d9651e;
+  --brand-orange-hover: #c15717;
+  --brand-dark: #23120b;
 
-  --gold: #C88A2B;
-  --gold-deep: #A66E1E;
-  --honey: #D9651E;
-  --forest: #253C27;
-  --forest-dark: #1A2D1B;
+  --gold: #c88a2b;
+  --gold-deep: #a66e1e;
+  --honey: #d9651e;
+  --forest: #253c27;
+  --forest-dark: #1a2d1b;
 
-  --card: #FFFFFF;
-  --card-foreground: #2B211B;
-  --popover: #FFFFFF;
-  --popover-foreground: #2B211B;
-  --primary: #49301F;
-  --primary-foreground: #FFF9ED;
-  --secondary: #F3E8CF;
-  --secondary-foreground: #49301F;
-  --muted: #F3E8CF;
-  --muted-foreground: #6F665F;
-  --accent: #C88A2B;
-  --accent-foreground: #FFFFFF;
-  --destructive: #A66E1E;
-  --destructive-foreground: #FFFFFF;
-  --border: #E8DECC;
-  --input: #E8DECC;
-  --ring: #C88A2B;
+  --card: #ffffff;
+  --card-foreground: #2b211b;
+  --popover: #ffffff;
+  --popover-foreground: #2b211b;
+  --primary: #49301f;
+  --primary-foreground: #fff9ed;
+  --secondary: #f3e8cf;
+  --secondary-foreground: #49301f;
+  --muted: #f3e8cf;
+  --muted-foreground: #6f665f;
+  --accent: #c88a2b;
+  --accent-foreground: #ffffff;
+  --destructive: #a66e1e;
+  --destructive-foreground: #ffffff;
+  --border: #e8decc;
+  --input: #e8decc;
+  --ring: #c88a2b;
 
   --shadow-soft: 0 4px 24px rgba(73, 48, 31, 0.05);
   --shadow-lift: 0 16px 40px -10px rgba(73, 48, 31, 0.12);
-  --gradient-forest: linear-gradient(135deg, #253C27, #1A2D1B);
-  --gradient-honey: linear-gradient(135deg, #C88A2B, #A66E1E);
-  --gradient-cream: linear-gradient(180deg, #FFF9ED, #F3E8CF);
+  --gradient-forest: linear-gradient(135deg, #253c27, #1a2d1b);
+  --gradient-honey: linear-gradient(135deg, #c88a2b, #a66e1e);
+  --gradient-cream: linear-gradient(180deg, #fff9ed, #f3e8cf);
 }
 
 .dark {
-  --background: #2B211B;
-  --foreground: #FFF9ED;
+  --background: #2b211b;
+  --foreground: #fff9ed;
 }
 
 @layer base {
-  * { border-color: var(--color-border); }
-  html, body, #root {
+  * {
+    border-color: var(--color-border);
+  }
+  html,
+  body,
+  #root {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
@@ -153,13 +159,24 @@
     -webkit-font-smoothing: antialiased;
     font-weight: 500; /* Bolder default body text */
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-serif);
     letter-spacing: -0.01em;
     font-weight: 700; /* Bolder default headings */
   }
   /* Bolder defaults for interactive elements */
-  button, nav, label, a, input, select, textarea {
+  button,
+  nav,
+  label,
+  a,
+  input,
+  select,
+  textarea {
     font-weight: 600;
   }
 }
@@ -186,13 +203,21 @@
 }
 
 @keyframes kenburns {
-  0%   { transform: scale(1) translate3d(0,0,0); }
-  100% { transform: scale(1.08) translate3d(-1.5%, -1%, 0); }
+  0% {
+    transform: scale(1) translate3d(0, 0, 0);
+  }
+  100% {
+    transform: scale(1.08) translate3d(-1.5%, -1%, 0);
+  }
 }
 
 @keyframes ticker-marquee {
-  0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-50%, 0, 0); }
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
 }
 
 .animate-ticker {
@@ -212,26 +237,54 @@
 
 /* Saurashtra Honey Standard D2C Button System (Section 38) */
 @keyframes float-vintage-1 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-10px, -15px); }
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-10px, -15px);
+  }
 }
 @keyframes float-vintage-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(12px, -8px) scale(1.02); }
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(12px, -8px) scale(1.02);
+  }
 }
 @keyframes float-vintage-3 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg); }
-  50% { transform: translate(-8px, 12px) rotate(2deg); }
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate(-8px, 12px) rotate(2deg);
+  }
 }
 @keyframes float-vintage-4 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(15px, 15px); }
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(15px, 15px);
+  }
 }
 
-.animate-float-1 { animation: float-vintage-1 14s ease-in-out infinite; }
-.animate-float-2 { animation: float-vintage-2 18s ease-in-out infinite; }
-.animate-float-3 { animation: float-vintage-3 20s ease-in-out infinite; }
-.animate-float-4 { animation: float-vintage-4 16s ease-in-out infinite; }
+.animate-float-1 {
+  animation: float-vintage-1 14s ease-in-out infinite;
+}
+.animate-float-2 {
+  animation: float-vintage-2 18s ease-in-out infinite;
+}
+.animate-float-3 {
+  animation: float-vintage-3 20s ease-in-out infinite;
+}
+.animate-float-4 {
+  animation: float-vintage-4 16s ease-in-out infinite;
+}
 
 @utility btn-primary {
   background-color: var(--color-botanical);
@@ -254,7 +307,7 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 .btn-primary:hover {
-  background-color: #1A2D1B;
+  background-color: #1a2d1b;
   transform: translateY(-1px);
 }
 
@@ -279,7 +332,7 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 .btn-secondary:hover {
-  background-color: #2C1D13;
+  background-color: #2c1d13;
   transform: translateY(-1px);
 }
 
@@ -303,7 +356,7 @@
 
 @utility btn-accent {
   background-color: var(--color-honey-gold);
-  color: #FFFFFF;
+  color: #ffffff;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -322,13 +375,18 @@
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 .btn-accent:hover {
-  background-color: #A66E1E;
+  background-color: #a66e1e;
   transform: translateY(-1px);
 }
 
-
 @keyframes soundWave {
-  0% { transform: scaleY(0.6); }
-  50% { transform: scaleY(1); }
-  100% { transform: scaleY(0.6); }
+  0% {
+    transform: scaleY(0.6);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(0.6);
+  }
 }

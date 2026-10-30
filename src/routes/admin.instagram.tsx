@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getInstagramSettings, saveInstagramSettings, syncInstagramPosts } from "@/lib/instagram.functions";
+import {
+  getInstagramSettings,
+  saveInstagramSettings,
+  syncInstagramPosts,
+} from "@/lib/instagram.functions";
 import { PageHeader } from "@/components/admin/ui";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { RefreshCw, Instagram, AlertCircle, CheckCircle2 } from "lucide-react";
@@ -62,9 +72,11 @@ function AdminInstagramSettings() {
 
   return (
     <div className="p-4 sm:p-6 md:p-8 space-y-6 max-w-[1200px] mx-auto w-full">
-      <PageHeader title="Instagram Integration" subtitle="Connect and manage your Follow Our Hive section." />
+      <PageHeader
+        title="Instagram Integration"
+        subtitle="Connect and manage your Follow Our Hive section."
+      />
       <div className="max-w-4xl space-y-6">
-        
         {/* Connection Status Card */}
         <Card>
           <CardHeader>
@@ -85,9 +97,11 @@ function AdminInstagramSettings() {
                   <AlertCircle className="size-6 text-yellow-500" />
                 )}
                 <div>
-                  <p className="font-semibold">{isConnected ? "Connected to Instagram" : "Not Connected"}</p>
+                  <p className="font-semibold">
+                    {isConnected ? "Connected to Instagram" : "Not Connected"}
+                  </p>
                   <p className="text-sm text-muted-foreground">
-                    {initialData.last_synced 
+                    {initialData.last_synced
                       ? `Last synced: ${new Date(initialData.last_synced).toLocaleString()}`
                       : "No sync history available."}
                   </p>
@@ -115,7 +129,7 @@ function AdminInstagramSettings() {
                   onChange={(e) => setFormData({ ...formData, instagram_token: e.target.value })}
                 />
                 {isConnected && (
-                  <Button 
+                  <Button
                     variant="destructive"
                     onClick={() => {
                       setFormData({ ...formData, instagram_token: "" });
@@ -127,7 +141,8 @@ function AdminInstagramSettings() {
                 )}
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Generate this token in your Meta Developer Dashboard. Never share this token publicly.
+                Generate this token in your Meta Developer Dashboard. Never share this token
+                publicly.
               </p>
             </div>
           </CardContent>

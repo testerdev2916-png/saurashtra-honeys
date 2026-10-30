@@ -28,10 +28,7 @@ function AdminHomepageProducts() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [prods, sel] = await Promise.all([
-        fetchProducts(),
-        fetchAllHomepageFeaturedProducts(),
-      ]);
+      const [prods, sel] = await Promise.all([fetchProducts(), fetchAllHomepageFeaturedProducts()]);
       setAllProducts(prods);
       setSelections(sel);
     } catch (e) {
@@ -156,8 +153,13 @@ function AdminHomepageProducts() {
             >
               <option value="">Select a product to add...</option>
               {allProducts.map((p) => (
-                <option key={p.slug} value={p.slug} disabled={selections.some(s => s.product_slug === p.slug)}>
-                  {p.name} {selections.some(s => s.product_slug === p.slug) ? "(Already added)" : ""}
+                <option
+                  key={p.slug}
+                  value={p.slug}
+                  disabled={selections.some((s) => s.product_slug === p.slug)}
+                >
+                  {p.name}{" "}
+                  {selections.some((s) => s.product_slug === p.slug) ? "(Already added)" : ""}
                 </option>
               ))}
             </select>
@@ -181,13 +183,19 @@ function AdminHomepageProducts() {
               <Card key={sel.id} className="p-4 flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   {prod?.image ? (
-                    <img src={prod.image} alt={prod.name} className="w-12 h-12 object-cover rounded bg-cream" />
+                    <img
+                      src={prod.image}
+                      alt={prod.name}
+                      className="w-12 h-12 object-cover rounded bg-cream"
+                    />
                   ) : (
                     <div className="w-12 h-12 rounded bg-cream border border-border" />
                   )}
                   <div>
                     <h3 className="font-bold text-forest-dark">{prod?.name || sel.product_slug}</h3>
-                    <p className="text-xs text-muted-foreground">/{sel.product_slug} • ₹{prod?.price || "---"}</p>
+                    <p className="text-xs text-muted-foreground">
+                      /{sel.product_slug} • ₹{prod?.price || "---"}
+                    </p>
                   </div>
                 </div>
 

@@ -7,15 +7,7 @@ import {
   renderMarkdown,
   extractTableOfContents,
 } from "@/lib/blog-client-helpers";
-import {
-  Calendar,
-  Clock,
-  ChevronRight,
-  ArrowRight,
-  Copy,
-  Check,
-  BookOpen,
-} from "lucide-react";
+import { Calendar, Clock, ChevronRight, ArrowRight, Copy, Check, BookOpen } from "lucide-react";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -27,13 +19,18 @@ export const Route = createFileRoute("/blog/$slug")({
   },
   head: ({ loaderData }) => {
     const post = loaderData?.post;
-    const imageSrc = post ? resolvePostImage(post.cover_image_url, post.category_name || post.slug) : "";
+    const imageSrc = post
+      ? resolvePostImage(post.cover_image_url, post.category_name || post.slug)
+      : "";
     const canonicalUrl = post ? `https://saurastrahoney.com/blog/${post.slug}` : "";
     return {
       meta: post
         ? [
             { title: `${post.seo_title || post.title} | Saurashtra Honey Journal` },
-            { name: "description", content: (post.seo_description || post.excerpt || "").slice(0, 155) },
+            {
+              name: "description",
+              content: (post.seo_description || post.excerpt || "").slice(0, 155),
+            },
             { property: "og:title", content: post.title },
             { property: "og:description", content: post.excerpt || "" },
             { property: "og:type", content: "article" },
@@ -46,9 +43,7 @@ export const Route = createFileRoute("/blog/$slug")({
             { name: "twitter:description", content: post.excerpt || "" },
             ...(imageSrc ? [{ name: "twitter:image", content: imageSrc }] : []),
           ]
-        : [
-            { title: "Article Not Found | Saurashtra Honey Journal" },
-          ],
+        : [{ title: "Article Not Found | Saurashtra Honey Journal" }],
       links: post && canonicalUrl ? [{ rel: "canonical", href: canonicalUrl }] : [],
     };
   },
@@ -56,8 +51,13 @@ export const Route = createFileRoute("/blog/$slug")({
     <SiteLayout>
       <div className="container-page py-24 text-center">
         <h1 className="font-serif text-4xl font-bold text-espresso">Article not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">The story you are looking for may have been moved or unpublished.</p>
-        <Link to="/blog" className="mt-6 inline-block bg-espresso text-cream rounded-full px-7 py-3.5 text-xs font-bold tracking-widest hover:bg-burnt-orange transition-all">
+        <p className="mt-2 text-sm text-muted-foreground">
+          The story you are looking for may have been moved or unpublished.
+        </p>
+        <Link
+          to="/blog"
+          className="mt-6 inline-block bg-espresso text-cream rounded-full px-7 py-3.5 text-xs font-bold tracking-widest hover:bg-burnt-orange transition-all"
+        >
           BACK TO JOURNAL
         </Link>
       </div>
@@ -67,7 +67,10 @@ export const Route = createFileRoute("/blog/$slug")({
     <SiteLayout>
       <div className="container-page py-24 text-center">
         <h1 className="font-serif text-4xl font-bold text-espresso">Something went wrong</h1>
-        <button onClick={reset} className="mt-4 text-burnt-orange border-b border-burnt-orange font-bold">
+        <button
+          onClick={reset}
+          className="mt-4 text-burnt-orange border-b border-burnt-orange font-bold"
+        >
           Try again
         </button>
       </div>
@@ -87,8 +90,13 @@ function BlogPost() {
       <SiteLayout>
         <div className="container-page py-24 text-center">
           <h1 className="font-serif text-4xl font-bold text-espresso">Article not found</h1>
-          <p className="mt-2 text-sm text-muted-foreground">The story you are looking for may have been moved or unpublished.</p>
-          <Link to="/blog" className="mt-6 inline-block bg-espresso text-cream rounded-full px-7 py-3.5 text-xs font-bold tracking-widest hover:bg-burnt-orange transition-all">
+          <p className="mt-2 text-sm text-muted-foreground">
+            The story you are looking for may have been moved or unpublished.
+          </p>
+          <Link
+            to="/blog"
+            className="mt-6 inline-block bg-espresso text-cream rounded-full px-7 py-3.5 text-xs font-bold tracking-widest hover:bg-burnt-orange transition-all"
+          >
             BACK TO JOURNAL
           </Link>
         </div>
@@ -131,12 +139,12 @@ function BlogPost() {
     } else if (type === "whatsapp") {
       window.open(
         `https://api.whatsapp.com/send?text=${encodeURIComponent(post.title + " - " + url)}`,
-        "_blank"
+        "_blank",
       );
     } else if (type === "twitter") {
       window.open(
         `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(url)}`,
-        "_blank"
+        "_blank",
       );
     }
   };
@@ -230,10 +238,7 @@ function BlogPost() {
                     key={item.id}
                     className={item.level === 3 ? "pl-4 text-muted-foreground" : ""}
                   >
-                    <a
-                      href={`#${item.id}`}
-                      className="hover:text-burnt-orange transition-colors"
-                    >
+                    <a href={`#${item.id}`} className="hover:text-burnt-orange transition-colors">
                       {item.text}
                     </a>
                   </li>
@@ -259,11 +264,10 @@ function BlogPost() {
             </div>
             <div>
               <SectionEyebrow>Author & Research</SectionEyebrow>
-              <h3 className="font-serif text-xl font-bold text-espresso mt-0.5">
-                {authorName}
-              </h3>
+              <h3 className="font-serif text-xl font-bold text-espresso mt-0.5">{authorName}</h3>
               <p className="mt-2 text-xs md:text-sm text-muted-foreground leading-relaxed">
-                Curated by our veteran beekeepers, NABL-certified food scientists, and Ayurvedic health practitioners in Saurashtra, Gujarat.
+                Curated by our veteran beekeepers, NABL-certified food scientists, and Ayurvedic
+                health practitioners in Saurashtra, Gujarat.
               </p>
             </div>
           </div>
@@ -272,9 +276,7 @@ function BlogPost() {
         {/* SIDEBAR - RELATED & EXPLORE */}
         <aside className="space-y-6">
           <div className="bg-white border border-border/80 rounded-2xl p-6 shadow-soft">
-            <h3 className="font-serif text-lg font-bold text-espresso mb-4">
-              Related Articles
-            </h3>
+            <h3 className="font-serif text-lg font-bold text-espresso mb-4">Related Articles</h3>
             {related.length === 0 ? (
               <p className="text-xs text-muted-foreground py-4 text-center">
                 No related articles found.
@@ -322,7 +324,8 @@ function BlogPost() {
             <SectionEyebrow>Pure Honey Collections</SectionEyebrow>
             <h3 className="mt-1 font-serif text-xl font-bold">Taste the Story</h3>
             <p className="mt-2 text-xs text-cream/75 leading-relaxed">
-              Explore our unheated, single-flora honeys harvested ethically from the floral belts of Saurashtra.
+              Explore our unheated, single-flora honeys harvested ethically from the floral belts of
+              Saurashtra.
             </p>
             <Link
               to="/shop"
@@ -342,7 +345,8 @@ function BlogPost() {
               Want to Learn More About Ethical Beekeeping?
             </h3>
             <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-              Join our bee farming community and explore the art of natural beekeeping with Saurashtra Honey.
+              Join our bee farming community and explore the art of natural beekeeping with
+              Saurashtra Honey.
             </p>
           </div>
           <Link

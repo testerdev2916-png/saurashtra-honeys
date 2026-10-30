@@ -21,25 +21,27 @@ export async function fetchPageSections(page_slug: string): Promise<PageSection[
   return (data as any) || [];
 }
 
-export async function updatePageSectionSettings(page_slug: string, section_key: string, settings: Record<string, any>) {
+export async function updatePageSectionSettings(
+  page_slug: string,
+  section_key: string,
+  settings: Record<string, any>,
+) {
   // Upsert the record
   const { error } = await supabase
     .from("page_content" as any)
-    .upsert(
-      { page_slug, section_key, settings } as any,
-      { onConflict: 'page_slug,section_key' }
-    );
+    .upsert({ page_slug, section_key, settings } as any, { onConflict: "page_slug,section_key" });
 
   if (error) throw error;
 }
 
-export async function togglePageSectionVisibility(page_slug: string, section_key: string, enabled: boolean) {
+export async function togglePageSectionVisibility(
+  page_slug: string,
+  section_key: string,
+  enabled: boolean,
+) {
   const { error } = await supabase
     .from("page_content" as any)
-    .upsert(
-      { page_slug, section_key, enabled } as any,
-      { onConflict: 'page_slug,section_key' }
-    );
+    .upsert({ page_slug, section_key, enabled } as any, { onConflict: "page_slug,section_key" });
 
   if (error) throw error;
 }

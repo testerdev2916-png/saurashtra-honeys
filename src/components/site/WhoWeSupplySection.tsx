@@ -113,7 +113,8 @@ export function WhoWeSupplySection() {
             <div className="flex flex-col max-h-[85vh] sm:max-h-[80vh]">
               {/* Header Image Area */}
               <div className="relative aspect-[16/7] w-full overflow-hidden bg-cream shrink-0">
-                <img loading="lazy"
+                <img
+                  loading="lazy"
                   src={resolveImage(selected.image_key, selected.image_url)}
                   alt={selected.detail_title}
                   className="w-full h-full object-cover object-center"

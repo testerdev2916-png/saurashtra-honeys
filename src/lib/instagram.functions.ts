@@ -33,7 +33,7 @@ const defaultSettings: InstagramSettings = {
 async function fetchFromInstagramAPI(token: string, limit: number): Promise<InstagramPost[]> {
   const url = `https://graph.instagram.com/me/media?fields=id,media_type,media_url,thumbnail_url,permalink,caption,timestamp&access_token=${token}&limit=${limit}`;
   const response = await fetch(url);
-  
+
   if (!response.ok) {
     const errorText = await response.text();
     throw new Error(`Instagram API Error: ${response.status} ${errorText}`);
@@ -58,7 +58,7 @@ async function performSync(supabaseClient: any) {
     .select("data")
     .eq("id", 1)
     .maybeSingle();
-    
+
   const data = (settingsRow?.data as any) || {};
   const settings: InstagramSettings = { ...defaultSettings, ...(data.instagram_settings || {}) };
 
@@ -68,7 +68,7 @@ async function performSync(supabaseClient: any) {
 
   // Fetch from API
   const posts = await fetchFromInstagramAPI(settings.instagram_token, 20); // Fetch a few extra to have a buffer
-  
+
   // Cache the posts
   const cache: InstagramCache = { posts };
   settings.last_synced = new Date().toISOString();
@@ -78,9 +78,9 @@ async function performSync(supabaseClient: any) {
   const { error } = await supabaseClient
     .from("app_settings")
     .upsert({ id: 1, data: newData, updated_at: new Date().toISOString() });
-    
+
   if (error) throw error;
-  
+
   return { ok: true, count: posts.length };
 }
 
@@ -112,7 +112,9 @@ export const getInstagramSettings = createServerFn({ method: "GET" })
 
 export const saveInstagramSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: { is_enabled: boolean; post_count: number; instagram_token: string | null }) => input)
+  .validator(
+    (input: { is_enabled: boolean; post_count: number; instagram_token: string | null }) => input,
+  )
   .handler(async ({ data: input, context }) => {
     const { data: role } = await context.supabase.rpc("is_staff", { _user_id: context.userId });
     if (!role) throw new Error("Forbidden");
@@ -125,7 +127,7 @@ export const saveInstagramSettings = createServerFn({ method: "POST" })
 
     const existingData = (settingsRow?.data as any) || {};
     const currentSettings = existingData.instagram_settings || {};
-    
+
     const newSettings = {
       ...currentSettings,
       is_enabled: input.is_enabled,
@@ -134,59 +136,69 @@ export const saveInstagramSettings = createServerFn({ method: "POST" })
     };
 
     const newData = { ...existingData, instagram_settings: newSettings };
-    
+
     // If token was wiped, also clear the cache
     if (!input.instagram_token) {
       newData.instagram_cache = { posts: [] };
       newSettings.last_synced = null;
     }
 
-    const { error } = await context.supabase
-      .from("app_settings")
-      .upsert({ id: 1, data: newData, updated_by: context.userId, updated_at: new Date().toISOString() });
-      
+    const { error } = await context.supabase.from("app_settings").upsert({
+      id: 1,
+      data: newData,
+      updated_by: context.userId,
+      updated_at: new Date().toISOString(),
+    });
+
     if (error) throw error;
-    
+
     // Log audit
-    await context.supabase.rpc("log_audit", { _action: "instagram.settings_updated", _entity_type: "app_settings", _entity_id: "1", _metadata: {} });
-    
+    await context.supabase.rpc("log_audit", {
+      _action: "instagram.settings_updated",
+      _entity_type: "app_settings",
+      _entity_id: "1",
+      _metadata: {},
+    });
+
     return { ok: true };
   });
 
-export const getPublicInstagramFeed = createServerFn({ method: "GET" })
-  .handler(async () => {
-    // Uses the public anonymous client because this is hit by website visitors
-    const { supabase } = await import("@/integrations/supabase/client");
-    
-    const { data: settingsRow } = await supabase
-      .from("app_settings")
-      .select("data")
-      .eq("id", 1)
-      .maybeSingle();
-      
-    if (!settingsRow || !settingsRow.data) {
-      return { settings: defaultSettings, posts: [] };
+export const getPublicInstagramFeed = createServerFn({ method: "GET" }).handler(async () => {
+  // Uses the public anonymous client because this is hit by website visitors
+  const { supabase } = await import("@/integrations/supabase/client");
+
+  const { data: settingsRow } = await supabase
+    .from("app_settings")
+    .select("data")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (!settingsRow || !settingsRow.data) {
+    return { settings: defaultSettings, posts: [] };
+  }
+
+  const settings: InstagramSettings = {
+    ...defaultSettings,
+    ...((settingsRow.data as any).instagram_settings || {}),
+  };
+  const cache: InstagramCache = (settingsRow.data as any).instagram_cache || { posts: [] };
+
+  // Lazy sync logic
+  if (settings.is_enabled && settings.instagram_token) {
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const lastSyncedTime = settings.last_synced ? new Date(settings.last_synced).getTime() : 0;
+    const isStale = Date.now() - lastSyncedTime > ONE_DAY;
+
+    if (isStale) {
+      // Fire and forget - don't block the frontend response
+      performSync(supabase).catch((err) => {
+        console.error("Background Instagram Sync Failed:", err);
+      });
     }
+  }
 
-    const settings: InstagramSettings = { ...defaultSettings, ...((settingsRow.data as any).instagram_settings || {}) };
-    const cache: InstagramCache = (settingsRow.data as any).instagram_cache || { posts: [] };
+  // Limit returned posts based on settings
+  const activePosts = cache.posts.slice(0, settings.post_count || 6);
 
-    // Lazy sync logic
-    if (settings.is_enabled && settings.instagram_token) {
-      const ONE_DAY = 24 * 60 * 60 * 1000;
-      const lastSyncedTime = settings.last_synced ? new Date(settings.last_synced).getTime() : 0;
-      const isStale = Date.now() - lastSyncedTime > ONE_DAY;
-
-      if (isStale) {
-        // Fire and forget - don't block the frontend response
-        performSync(supabase).catch(err => {
-          console.error("Background Instagram Sync Failed:", err);
-        });
-      }
-    }
-
-    // Limit returned posts based on settings
-    const activePosts = cache.posts.slice(0, settings.post_count || 6);
-
-    return { settings, posts: activePosts };
-  });
+  return { settings, posts: activePosts };
+});

@@ -18,6 +18,7 @@ import {
   Image as ImageIcon,
   Settings,
   ShieldCheck,
+  ShieldAlert,
   ClipboardList,
   LogOut,
   Menu,
@@ -48,44 +49,130 @@ type NavItem = {
 
 const NAV: NavItem[] = [
   { label: "Dashboard", to: "/admin", icon: LayoutDashboard },
-  
+
   // ── Catalog ──
-  { label: "Products", to: "/admin/products", icon: Package, perm: "products.manage", dividerBefore: "CATALOG" },
+  {
+    label: "Products",
+    to: "/admin/products",
+    icon: Package,
+    perm: "products.manage",
+    dividerBefore: "CATALOG",
+  },
   { label: "Categories", to: "/admin/categories", icon: Tags, perm: "categories.manage" },
-  { label: "Category Banners", to: "/admin/category-hero", icon: ImageIcon, perm: "categories.manage" },
+  {
+    label: "Category Banners",
+    to: "/admin/category-hero",
+    icon: ImageIcon,
+    perm: "categories.manage",
+  },
   { label: "Inventory", to: "/admin/inventory", icon: Boxes, perm: "products.manage" },
-  
+
   // ── Sales & Customers ──
-  { label: "Orders", to: "/admin/orders", icon: ShoppingBag, perm: "orders.manage", dividerBefore: "SALES" },
+  {
+    label: "Orders",
+    to: "/admin/orders",
+    icon: ShoppingBag,
+    perm: "orders.manage",
+    dividerBefore: "SALES",
+  },
   { label: "Customers", to: "/admin/customers", icon: Users },
   { label: "Reviews", to: "/admin/reviews", icon: Star, perm: "reviews.moderate" },
   { label: "Coupons", to: "/admin/coupons", icon: Ticket, perm: "coupons.manage" },
-  
+
   // ── CMS (Content Management) ──
-  { label: "Homepage", to: "/admin/homepage", icon: Home, perm: "settings.manage", dividerBefore: "CMS" },
-  { label: "↳ Main Hero Slider", to: "/admin/hero", icon: Layers, perm: "settings.manage", indent: true },
-  { label: "↳ Category Banners (1920×600)", to: "/admin/category-hero", icon: Layers, perm: "categories.manage", indent: true },
-  { label: "↳ Trust Strip", to: "/admin/homepage/trust", icon: ShieldCheck, perm: "settings.manage", indent: true },
-  { label: "↳ Videos & Stories", to: "/admin/stories", icon: Film, perm: "settings.manage", indent: true },
-  { label: "↳ Customer Stories", to: "/admin/homepage/stories", icon: Video, perm: "settings.manage", indent: true },
-  { label: "↳ Heritage Video", to: "/admin/heritage", icon: Video, perm: "settings.manage", indent: true },
-  
-  { label: "Information Pages", to: "/admin/pages?group=info", icon: FileText, perm: "settings.manage" },
-  { label: "B2B / Partnerships", to: "/admin/pages?group=b2b", icon: Store, perm: "settings.manage" },
-  
+  {
+    label: "Homepage",
+    to: "/admin/homepage",
+    icon: Home,
+    perm: "settings.manage",
+    dividerBefore: "CMS",
+  },
+  {
+    label: "↳ Main Hero Slider",
+    to: "/admin/hero",
+    icon: Layers,
+    perm: "settings.manage",
+    indent: true,
+  },
+  {
+    label: "↳ Category Banners (1920×600)",
+    to: "/admin/category-hero",
+    icon: Layers,
+    perm: "categories.manage",
+    indent: true,
+  },
+  {
+    label: "↳ Trust Strip",
+    to: "/admin/homepage/trust",
+    icon: ShieldCheck,
+    perm: "settings.manage",
+    indent: true,
+  },
+  {
+    label: "↳ Videos & Stories",
+    to: "/admin/stories",
+    icon: Film,
+    perm: "settings.manage",
+    indent: true,
+  },
+  {
+    label: "↳ Customer Stories",
+    to: "/admin/homepage/stories",
+    icon: Video,
+    perm: "settings.manage",
+    indent: true,
+  },
+  {
+    label: "↳ Heritage Video",
+    to: "/admin/heritage",
+    icon: Video,
+    perm: "settings.manage",
+    indent: true,
+  },
+
+  {
+    label: "Information Pages",
+    to: "/admin/pages?group=info",
+    icon: FileText,
+    perm: "settings.manage",
+  },
+  {
+    label: "B2B / Partnerships",
+    to: "/admin/pages?group=b2b",
+    icon: Store,
+    perm: "settings.manage",
+  },
+
   { label: "Blog", to: "/admin/blog", icon: FileText, perm: "blog.manage" },
-  { label: "Achievements & Awards", to: "/admin/achievements", icon: Trophy, perm: "settings.manage" },
+  {
+    label: "Achievements & Awards",
+    to: "/admin/achievements",
+    icon: Trophy,
+    perm: "settings.manage",
+  },
   { label: "Media Library", to: "/admin/media", icon: ImageIcon, perm: "media.manage" },
 
   // ── Site Settings & Marketing ──
-  { label: "Site Settings", to: "/admin/settings", icon: Settings, perm: "settings.manage", dividerBefore: "SITE SETTINGS" },
+  {
+    label: "Site Settings",
+    to: "/admin/settings",
+    icon: Settings,
+    perm: "settings.manage",
+    dividerBefore: "SITE SETTINGS",
+  },
   { label: "Submissions", to: "/admin/submissions", icon: MessageSquare },
   { label: "Newsletter", to: "/admin/newsletter", icon: Mail, perm: "settings.manage" },
   { label: "Loyalty & Rewards", to: "/admin/loyalty", icon: Award, perm: "settings.manage" },
   { label: "Marketing & SEO", to: "/admin/marketing", icon: Megaphone, perm: "settings.manage" },
-  { label: "Instagram Integration", to: "/admin/instagram", icon: Instagram, perm: "settings.manage" },
+  {
+    label: "Instagram Integration",
+    to: "/admin/instagram",
+    icon: Instagram,
+    perm: "settings.manage",
+  },
   { label: "Redirects", to: "/admin/redirects", icon: ArrowLeftRight, perm: "settings.manage" },
   { label: "Users & Roles", to: "/admin/users", icon: ShieldCheck, perm: "users.manage" },
+  { label: "Security & Anti-Fake", to: "/admin/security", icon: ShieldAlert, perm: "settings.manage" },
   { label: "Audit Logs", to: "/admin/audit", icon: ClipboardList, perm: "audit.read" },
 ];
 
@@ -205,8 +292,8 @@ export function AdminShell() {
                     active
                       ? "bg-white/10 text-gold border-l-2 border-gold"
                       : item.indent
-                      ? "text-cream/60 hover:bg-white/5 hover:text-cream/90"
-                      : "text-cream/80 hover:bg-white/5 hover:text-cream"
+                        ? "text-cream/60 hover:bg-white/5 hover:text-cream/90"
+                        : "text-cream/80 hover:bg-white/5 hover:text-cream"
                   }`}
                 >
                   <item.icon className={`shrink-0 ${item.indent ? "size-3.5" : "size-4"}`} />

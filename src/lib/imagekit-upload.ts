@@ -1,5 +1,5 @@
 import ImageKit from "imagekit-javascript";
-import imageCompression from 'browser-image-compression';
+import imageCompression from "browser-image-compression";
 import { supabase } from "@/integrations/supabase/client";
 
 import { getImageKitAuthParams } from "./imagekit.functions";
@@ -8,11 +8,13 @@ import { getImageKitAuthParams } from "./imagekit.functions";
 let ikInstance: ImageKit | null = null;
 
 const getIkConfig = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
   const sessionToken = session?.access_token;
-  
+
   if (!sessionToken) {
-      throw new Error("Not authenticated for ImageKit API");
+    throw new Error("Not authenticated for ImageKit API");
   }
 
   // Fetch the configuration (public key) and initial signature from our secure server function
@@ -20,7 +22,9 @@ const getIkConfig = async () => {
   const { signature, expire, token, publicKey, urlEndpoint } = data;
 
   if (!publicKey) {
-    console.error("[ImageKit Client] Missing publicKey in API response. The server environment is missing IMAGEKIT_PUBLIC_KEY.");
+    console.error(
+      "[ImageKit Client] Missing publicKey in API response. The server environment is missing IMAGEKIT_PUBLIC_KEY.",
+    );
     throw new Error("Missing public key for upload configuration");
   }
 
@@ -36,9 +40,9 @@ const getIkConfig = async () => {
 
 export async function uploadToImageKit(file: File, folder: string): Promise<string> {
   let fileToUpload = file;
-  
+
   // Compress images larger than 1.5MB
-  if (file.type.startsWith('image/') && file.size > 1.5 * 1024 * 1024) {
+  if (file.type.startsWith("image/") && file.size > 1.5 * 1024 * 1024) {
     try {
       const options = {
         maxSizeMB: 1.5,
@@ -49,32 +53,35 @@ export async function uploadToImageKit(file: File, folder: string): Promise<stri
       // Convert back to File to retain original name/type properties for FormData
       fileToUpload = new File([compressedBlob], file.name, { type: file.type });
     } catch (error) {
-      console.warn('Image compression failed, proceeding with original file', error);
+      console.warn("Image compression failed, proceeding with original file", error);
     }
   }
 
   const imagekitFolder = `/saurashtra-honey/${folder}`;
-  
+
   const { ikInstance, signature, expire, token } = await getIkConfig();
 
   return new Promise((resolve, reject) => {
-    ikInstance.upload({
-      file: fileToUpload,
-      fileName: fileToUpload.name,
-      folder: imagekitFolder,
-      useUniqueFileName: true,
-      signature,
-      expire,
-      token,
-    }, function(err: any, result: any) {
-      if (err) {
-        console.error("ImageKit Upload Error:", err);
-        reject(new Error(err.message || "Failed to upload to ImageKit"));
-      } else if (result) {
-        resolve(result.url);
-      } else {
-        reject(new Error("Unknown error during upload"));
-      }
-    });
+    ikInstance.upload(
+      {
+        file: fileToUpload,
+        fileName: fileToUpload.name,
+        folder: imagekitFolder,
+        useUniqueFileName: true,
+        signature,
+        expire,
+        token,
+      },
+      function (err: any, result: any) {
+        if (err) {
+          console.error("ImageKit Upload Error:", err);
+          reject(new Error(err.message || "Failed to upload to ImageKit"));
+        } else if (result) {
+          resolve(result.url);
+        } else {
+          reject(new Error("Unknown error during upload"));
+        }
+      },
+    );
   });
 }

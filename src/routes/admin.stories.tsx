@@ -2,9 +2,38 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { listHomepageVideos, upsertHomepageVideo, deleteHomepageVideo, reorderHomepageVideos } from "@/lib/admin-cms.functions";
-import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
-import { ArrowLeft, ArrowUp, ArrowDown, ImageOff, Pencil, Plus, RefreshCcw, Trash2, Upload, Video, Play, Pause } from "lucide-react";
+import {
+  listHomepageVideos,
+  upsertHomepageVideo,
+  deleteHomepageVideo,
+  reorderHomepageVideos,
+} from "@/lib/admin-cms.functions";
+import {
+  BtnGhost,
+  BtnPrimary,
+  Card,
+  Field,
+  inp,
+  PageHeader,
+  StatusPill,
+  TableWrap,
+  Td,
+  Th,
+} from "@/components/admin/ui";
+import {
+  ArrowLeft,
+  ArrowUp,
+  ArrowDown,
+  ImageOff,
+  Pencil,
+  Plus,
+  RefreshCcw,
+  Trash2,
+  Upload,
+  Video,
+  Play,
+  Pause,
+} from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
@@ -55,7 +84,7 @@ function StoriesPage() {
     setLoading(true);
     try {
       const r = await listFn({});
-      setRows((r.rows as unknown) as StoryRow[]);
+      setRows(r.rows as unknown as StoryRow[]);
       const p = await fetchProducts();
       if (p.length) setAllProducts(p);
     } catch (e) {
@@ -130,7 +159,16 @@ function StoriesPage() {
       <TableWrap>
         <thead>
           <tr>
-            {["Order", "Preview", "Title & Subtitle", "Badge", "Product", "Status", "Order Move", ""].map((h) => (
+            {[
+              "Order",
+              "Preview",
+              "Title & Subtitle",
+              "Badge",
+              "Product",
+              "Status",
+              "Order Move",
+              "",
+            ].map((h) => (
               <Th key={h}>{h}</Th>
             ))}
           </tr>
@@ -138,12 +176,16 @@ function StoriesPage() {
         <tbody className="divide-y divide-border">
           {loading && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">Loading homepage videos...</Td>
+              <Td className="text-center py-12 text-muted-foreground">
+                Loading homepage videos...
+              </Td>
             </tr>
           )}
           {!loading && rows.length === 0 && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">No homepage videos yet. Click "New Story Card" to create one.</Td>
+              <Td className="text-center py-12 text-muted-foreground">
+                No homepage videos yet. Click "New Story Card" to create one.
+              </Td>
             </tr>
           )}
           {!loading &&
@@ -153,7 +195,12 @@ function StoriesPage() {
                 <Td>
                   <div className="relative size-14 aspect-[9/16] rounded-lg overflow-hidden bg-cream-deep border border-border grid place-items-center shrink-0">
                     {r.thumbnail_url ? (
-                      <img src={r.thumbnail_url} alt={r.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img
+                        src={r.thumbnail_url}
+                        alt={r.title}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
                     ) : (
                       <ImageOff className="size-5 text-muted-foreground/50" />
                     )}
@@ -329,7 +376,8 @@ function Editor({
           {f.id ? "Edit Story / Video Card" : "New Story / Video Card"}
         </h2>
         <p className="text-xs text-muted-foreground mb-6">
-          Recommended format: 9:16 vertical (1080 × 1920), maximum 200 MB. Poster-first rendering ensures no video is downloaded until customer interacts.
+          Recommended format: 9:16 vertical (1080 × 1920), maximum 200 MB. Poster-first rendering
+          ensures no video is downloaded until customer interacts.
         </p>
 
         <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -464,7 +512,11 @@ function Editor({
                     onClick={() => thumbRef.current?.click()}
                   >
                     <Upload className="size-3.5" />
-                    {thumbUploading ? "UPLOADING THUMBNAIL..." : f.thumbnail_url ? "REPLACE THUMBNAIL" : "UPLOAD THUMBNAIL"}
+                    {thumbUploading
+                      ? "UPLOADING THUMBNAIL..."
+                      : f.thumbnail_url
+                        ? "REPLACE THUMBNAIL"
+                        : "UPLOAD THUMBNAIL"}
                   </BtnGhost>
                   {f.thumbnail_url && (
                     <BtnGhost type="button" onClick={() => setF({ ...f, thumbnail_url: "" })}>
@@ -479,7 +531,8 @@ function Editor({
                   placeholder="Or paste image URL (https://...)"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  JPG, PNG, or WebP. Appears immediately when page loads before customer plays video.
+                  JPG, PNG, or WebP. Appears immediately when page loads before customer plays
+                  video.
                 </p>
               </div>
             </Field>
@@ -534,7 +587,8 @@ function Editor({
                   placeholder="Or paste video URL (https://...)"
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Vertical 9:16 video (1080 × 1920 recommended). Replaces static image when customer clicks play.
+                  Vertical 9:16 video (1080 × 1920 recommended). Replaces static image when customer
+                  clicks play.
                 </p>
               </div>
             </Field>
@@ -559,11 +613,7 @@ function Editor({
                   className="w-full h-full object-cover"
                 />
               ) : f.thumbnail_url ? (
-                <img
-                  src={f.thumbnail_url}
-                  alt="Preview"
-                  className="w-full h-full object-cover"
-                />
+                <img src={f.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-cream/50 text-xs p-4 text-center">
                   <Video className="size-8 mb-2 opacity-40" />
@@ -588,7 +638,11 @@ function Editor({
                   className="absolute inset-0 flex items-center justify-center z-10"
                 >
                   <span className="grid place-items-center size-10 rounded-full bg-cream/90 text-forest-dark shadow">
-                    {previewPlaying ? <Pause className="size-4" /> : <Play className="size-4 ml-0.5" />}
+                    {previewPlaying ? (
+                      <Pause className="size-4" />
+                    ) : (
+                      <Play className="size-4 ml-0.5" />
+                    )}
                   </span>
                 </button>
               )}
@@ -599,12 +653,22 @@ function Editor({
                   if (p) {
                     return (
                       <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/15">
-                        <img src={p.image} alt={p.name} className="size-8 rounded-lg object-cover bg-cream shrink-0 border border-white/20" />
+                        <img
+                          src={p.image}
+                          alt={p.name}
+                          className="size-8 rounded-lg object-cover bg-cream shrink-0 border border-white/20"
+                        />
                         <div className="min-w-0 flex-1">
-                          <div className="font-serif text-xs font-bold text-white truncate">{p.name}</div>
+                          <div className="font-serif text-xs font-bold text-white truncate">
+                            {p.name}
+                          </div>
                           <div className="flex items-baseline gap-1 mt-0.5">
                             <span className="text-xs font-bold text-white">₹{p.price}</span>
-                            {p.mrp && p.mrp > p.price && <span className="text-[10px] text-white/60 line-through">₹{p.mrp}</span>}
+                            {p.mrp && p.mrp > p.price && (
+                              <span className="text-[10px] text-white/60 line-through">
+                                ₹{p.mrp}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -612,7 +676,9 @@ function Editor({
                   }
                   return (
                     <>
-                      <div className="font-serif text-sm leading-tight">{f.title || "Card Title"}</div>
+                      <div className="font-serif text-sm leading-tight">
+                        {f.title || "Card Title"}
+                      </div>
                       <div className="text-[10px] text-cream/80">{f.subtitle || "Subtitle"}</div>
                     </>
                   );

@@ -7,8 +7,10 @@ import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import type { HeroSlide } from "@/components/site/HeroSlider";
 
 export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] } = {}) {
-  const [slides, setSlides] = useState<HeroSlide[]>(() => initialSlides || getDefaultHeroSlides("shop"));
-  
+  const [slides, setSlides] = useState<HeroSlide[]>(
+    () => initialSlides || getDefaultHeroSlides("shop"),
+  );
+
   useEffect(() => {
     if (!initialSlides) {
       void fetchHeroSlides("shop").then((loaded) => {
@@ -19,11 +21,10 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
     }
   }, [initialSlides]);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start", duration: 50 },
-    [Autoplay({ delay: 5000, stopOnInteraction: false })]
-  );
-  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start", duration: 50 }, [
+    Autoplay({ delay: 5000, stopOnInteraction: false }),
+  ]);
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const paused = useRef(false);
 
@@ -35,9 +36,12 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
-  const scrollTo = useCallback((index: number) => {
-    if (emblaApi) emblaApi.scrollTo(index);
-  }, [emblaApi]);
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi],
+  );
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -54,7 +58,7 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
   if (!slides || slides.length === 0) return null;
 
   return (
-    <section 
+    <section
       className="relative w-full max-w-[100vw] overflow-hidden bg-[#FDFBF7] group/section"
       onMouseEnter={() => {
         paused.current = true;
@@ -71,17 +75,17 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
       <div className="overflow-hidden w-full" ref={emblaRef}>
         <div className="flex touch-pan-y">
           {slides.map((s, idx) => (
-            <div 
-              key={idx} 
+            <div
+              key={idx}
               className="relative flex-none w-full aspect-[4/5] md:aspect-[16/5] min-w-0"
-              role="group" 
+              role="group"
               aria-roledescription="slide"
             >
               <picture className="w-full h-full block">
                 {s.mobileImage && (
-                  <source 
-                    media="(max-width: 767px)" 
-                    srcSet={s.mobileImage} 
+                  <source
+                    media="(max-width: 767px)"
+                    srcSet={s.mobileImage}
                     // @ts-ignore
                     fetchpriority={idx === 0 ? "high" : "auto"}
                   />
@@ -117,7 +121,7 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
           >
             <ChevronRight className="size-5 md:size-6" />
           </button>
-          
+
           {/* Pagination Dots */}
           <div className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2.5 z-20">
             {slides.map((_, idx) => (
@@ -125,8 +129,8 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
                 key={idx}
                 onClick={() => scrollTo(idx)}
                 className={`transition-all duration-300 rounded-full ${
-                  idx === selectedIndex 
-                    ? "w-8 md:w-10 h-1.5 md:h-2 bg-white md:bg-[#3B5241]" 
+                  idx === selectedIndex
+                    ? "w-8 md:w-10 h-1.5 md:h-2 bg-white md:bg-[#3B5241]"
                     : "w-1.5 h-1.5 md:w-2 md:h-2 bg-white/50 md:bg-[#3B5241]/30 hover:bg-white/80 md:hover:bg-[#3B5241]/60"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}

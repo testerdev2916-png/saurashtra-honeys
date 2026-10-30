@@ -3,8 +3,36 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listPosts, upsertPost, deletePost } from "@/lib/admin-cms.functions";
-import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
-import { ArrowLeft, Pencil, Plus, RefreshCcw, Trash2, Star, Sparkles, Upload, Heading2, Heading3, Bold, Italic, List, Quote, Link as LinkIcon, Image as ImageIcon } from "lucide-react";
+import {
+  BtnGhost,
+  BtnPrimary,
+  Card,
+  Field,
+  inp,
+  PageHeader,
+  StatusPill,
+  TableWrap,
+  Td,
+  Th,
+} from "@/components/admin/ui";
+import {
+  ArrowLeft,
+  Pencil,
+  Plus,
+  RefreshCcw,
+  Trash2,
+  Star,
+  Sparkles,
+  Upload,
+  Heading2,
+  Heading3,
+  Bold,
+  Italic,
+  List,
+  Quote,
+  Link as LinkIcon,
+  Image as ImageIcon,
+} from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 
 export const Route = createFileRoute("/admin/blog")({ component: BlogPage });
@@ -111,9 +139,11 @@ function BlogPage() {
       <TableWrap>
         <thead>
           <tr>
-            {["Title", "Category", "Status", "Published", "Featured / Popular", "Updated", ""].map((h) => (
-              <Th key={h}>{h}</Th>
-            ))}
+            {["Title", "Category", "Status", "Published", "Featured / Popular", "Updated", ""].map(
+              (h) => (
+                <Th key={h}>{h}</Th>
+              ),
+            )}
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -124,7 +154,9 @@ function BlogPage() {
           )}
           {!loading && rows.length === 0 && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">No journal articles found. Click &quot;New Article&quot; to create one.</Td>
+              <Td className="text-center py-12 text-muted-foreground">
+                No journal articles found. Click &quot;New Article&quot; to create one.
+              </Td>
             </tr>
           )}
           {!loading &&
@@ -416,7 +448,9 @@ function Editor({
           </Field>
           <div className="md:col-span-2">
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-bold text-espresso">Full Article Content (Markdown / Rich Formatting)</label>
+              <label className="text-xs font-bold text-espresso">
+                Full Article Content (Markdown / Rich Formatting)
+              </label>
               <div className="flex items-center gap-1.5 bg-cream-deep p-1 rounded-lg border border-border">
                 <button
                   type="button"
@@ -476,7 +510,9 @@ function Editor({
                 </button>
                 <button
                   type="button"
-                  onClick={() => insertMarkdown("![Image description](https://example.com/image.jpg)")}
+                  onClick={() =>
+                    insertMarkdown("![Image description](https://example.com/image.jpg)")
+                  }
                   title="Image"
                   className="p-1 hover:bg-cream rounded text-espresso text-xs font-bold"
                 >
@@ -523,7 +559,7 @@ function Editor({
                     published_at:
                       f.status === "published" && !f.published_at
                         ? new Date().toISOString()
-                        : f.published_at ?? null,
+                        : (f.published_at ?? null),
                   },
                 });
                 toast.success("Journal article saved");

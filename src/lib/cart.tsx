@@ -1,5 +1,18 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { getVariantByLabel, resolveActiveImage, type Product, type ProductVariant } from "./products";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import {
+  getVariantByLabel,
+  resolveActiveImage,
+  type Product,
+  type ProductVariant,
+} from "./products";
 
 export type CartItem = {
   slug: string;
@@ -22,7 +35,7 @@ export type AppliedCoupon = {
 
 type CartCtx = {
   items: CartItem[];
-  saved: CartItem[];        // save-for-later
+  saved: CartItem[]; // save-for-later
   open: boolean;
   setOpen: (b: boolean) => void;
   add: (p: Product, size?: string, qty?: number, variant?: ProductVariant) => void;
@@ -35,9 +48,9 @@ type CartCtx = {
   coupon: AppliedCoupon | null;
   applyCoupon: (c: AppliedCoupon | null) => void;
   count: number;
-  subtotal: number;         // rupees
-  subtotalPaise: number;    // paise
-  discount: number;         // rupees
+  subtotal: number; // rupees
+  subtotalPaise: number; // paise
+  discount: number; // rupees
   shippingWaived: boolean;
 };
 
@@ -55,14 +68,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(KEY); if (raw) setItems(JSON.parse(raw));
-      const rawS = localStorage.getItem(SAVED_KEY); if (rawS) setSaved(JSON.parse(rawS));
-      const rawC = localStorage.getItem(COUPON_KEY); if (rawC) setCoupon(JSON.parse(rawC));
-    } catch {/* ignore */}
+      const raw = localStorage.getItem(KEY);
+      if (raw) setItems(JSON.parse(raw));
+      const rawS = localStorage.getItem(SAVED_KEY);
+      if (rawS) setSaved(JSON.parse(rawS));
+      const rawC = localStorage.getItem(COUPON_KEY);
+      if (rawC) setCoupon(JSON.parse(rawC));
+    } catch {
+      /* ignore */
+    }
     setHydrated(true);
   }, []);
-  useEffect(() => { if (hydrated) localStorage.setItem(KEY, JSON.stringify(items)); }, [items, hydrated]);
-  useEffect(() => { if (hydrated) localStorage.setItem(SAVED_KEY, JSON.stringify(saved)); }, [saved, hydrated]);
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(KEY, JSON.stringify(items));
+  }, [items, hydrated]);
+  useEffect(() => {
+    if (hydrated) localStorage.setItem(SAVED_KEY, JSON.stringify(saved));
+  }, [saved, hydrated]);
   useEffect(() => {
     if (!hydrated) return;
     if (coupon) localStorage.setItem(COUPON_KEY, JSON.stringify(coupon));
@@ -80,60 +102,146 @@ export function CartProvider({ children }: { children: ReactNode }) {
       discountPaise = Math.min(coupon.discount_paise, subtotalPaise);
     }
     return {
-      items, saved, open, setOpen,
+      items,
+      saved,
+      open,
+      setOpen,
       add: (p, size, qty = 1, variant?: ProductVariant) => {
         const s = size ?? p.sizes[0];
         const v = variant ?? getVariantByLabel(p, s);
         const itemPrice = v.price ?? p.price;
         const itemImage = resolveActiveImage(p, v);
         setItems((prev) => {
-          const idx = prev.findIndex((i) => (v.id && i.variantId) ? i.variantId === v.id : (i.slug === p.slug && i.size === s));
+          const idx = prev.findIndex((i) =>
+            v.id && i.variantId ? i.variantId === v.id : i.slug === p.slug && i.size === s,
+          );
           if (idx >= 0) {
             const next = [...prev];
             const newQty = next[idx].qty + qty;
             const cappedQty = v.stock !== undefined ? Math.min(newQty, v.stock) : newQty;
-            next[idx] = { ...next[idx], qty: cappedQty, price: itemPrice, variantId: v.id, sku: v.sku, stock: v.stock, image: itemImage };
+            next[idx] = {
+              ...next[idx],
+              qty: cappedQty,
+              price: itemPrice,
+              variantId: v.id,
+              sku: v.sku,
+              stock: v.stock,
+              image: itemImage,
+            };
             return next;
           }
           const initialQty = v.stock !== undefined ? Math.min(qty, v.stock) : qty;
-          return [...prev, { slug: p.slug, name: p.name, image: itemImage, size: s, price: itemPrice, qty: initialQty, variantId: v.id, sku: v.sku, stock: v.stock }];
+          return [
+            ...prev,
+            {
+              slug: p.slug,
+              name: p.name,
+              image: itemImage,
+              size: s,
+              price: itemPrice,
+              qty: initialQty,
+              variantId: v.id,
+              sku: v.sku,
+              stock: v.stock,
+            },
+          ];
         });
         setOpen(true);
       },
-      remove: (slug, size, variantId) => setItems((prev) => prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)))),
+      remove: (slug, size, variantId) =>
+        setItems((prev) =>
+          prev.filter(
+            (i) =>
+              !(variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size),
+          ),
+        ),
       updateQty: (slug, size, qty, variantId) =>
         setItems((prev) =>
           prev.map((i) => {
-            const match = (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size);
+            const match =
+              variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size;
             if (match) {
               const clamped = Math.max(1, qty);
               const maxQty = i.stock !== undefined ? Math.min(clamped, i.stock) : clamped;
               return { ...i, qty: maxQty };
             }
             return i;
-          })
+          }),
         ),
-      clear: () => { setItems([]); setCoupon(null); },
-      moveToSaved: (slug, size, variantId) => setItems((prev) => {
-        const it = prev.find((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
-        if (!it) return prev;
-        setSaved((s) => s.some((x) => (variantId && x.variantId) ? x.variantId === variantId : (x.slug === slug && x.size === size)) ? s : [...s, { ...it, qty: 1 }]);
-        return prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)));
-      }),
-      moveToCart: (slug, size, variantId) => setSaved((prev) => {
-        const it = prev.find((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
-        if (!it) return prev;
-        setItems((cur) => {
-          const idx = cur.findIndex((i) => (variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size));
-          if (idx >= 0) { const next = [...cur]; next[idx] = { ...next[idx], qty: next[idx].qty + 1 }; return next; }
-          return [...cur, { ...it, qty: 1 }];
-        });
-        return prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)));
-      }),
-      removeSaved: (slug, size, variantId) => setSaved((prev) => prev.filter((i) => !((variantId && i.variantId) ? i.variantId === variantId : (i.slug === slug && i.size === size)))),
-      coupon, applyCoupon,
+      clear: () => {
+        setItems([]);
+        setCoupon(null);
+      },
+      moveToSaved: (slug, size, variantId) =>
+        setItems((prev) => {
+          const it = prev.find((i) =>
+            variantId && i.variantId
+              ? i.variantId === variantId
+              : i.slug === slug && i.size === size,
+          );
+          if (!it) return prev;
+          setSaved((s) =>
+            s.some((x) =>
+              variantId && x.variantId
+                ? x.variantId === variantId
+                : x.slug === slug && x.size === size,
+            )
+              ? s
+              : [...s, { ...it, qty: 1 }],
+          );
+          return prev.filter(
+            (i) =>
+              !(variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size),
+          );
+        }),
+      moveToCart: (slug, size, variantId) =>
+        setSaved((prev) => {
+          const it = prev.find((i) =>
+            variantId && i.variantId
+              ? i.variantId === variantId
+              : i.slug === slug && i.size === size,
+          );
+          if (!it) return prev;
+          setItems((cur) => {
+            const idx = cur.findIndex((i) =>
+              variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size,
+            );
+            if (idx >= 0) {
+              const next = [...cur];
+              next[idx] = { ...next[idx], qty: next[idx].qty + 1 };
+              return next;
+            }
+            return [...cur, { ...it, qty: 1 }];
+          });
+          return prev.filter(
+            (i) =>
+              !(variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size),
+          );
+        }),
+      removeSaved: (slug, size, variantId) =>
+        setSaved((prev) =>
+          prev.filter(
+            (i) =>
+              !(variantId && i.variantId
+                ? i.variantId === variantId
+                : i.slug === slug && i.size === size),
+          ),
+        ),
+      coupon,
+      applyCoupon,
       count: items.reduce((n, i) => n + i.qty, 0),
-      subtotal, subtotalPaise,
+      subtotal,
+      subtotalPaise,
       discount: discountPaise / 100,
       shippingWaived: !!coupon?.free_shipping,
     };

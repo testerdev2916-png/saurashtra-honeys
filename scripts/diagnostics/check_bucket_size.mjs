@@ -1,12 +1,17 @@
-import { createClient } from '@supabase/supabase-js';
-import dotenv from 'dotenv';
-dotenv.config({ path: '.env.local' });
-dotenv.config({ path: '.env' });
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.local" });
+dotenv.config({ path: ".env" });
 
-const supabase = createClient(process.env.VITE_SUPABASE_URL, process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY);
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY,
+);
 
 async function run() {
-  const { data, error } = await supabase.storage.from('media').list('', { limit: 100, sortBy: { column: 'created_at', order: 'desc' }});
+  const { data, error } = await supabase.storage
+    .from("media")
+    .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
   if (error) {
     console.error(error);
     return;

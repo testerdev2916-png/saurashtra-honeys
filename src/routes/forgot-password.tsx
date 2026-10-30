@@ -8,7 +8,10 @@ export const Route = createFileRoute("/forgot-password")({
   head: () => ({
     meta: [
       { title: "Reset your password | Saurashtra Honey" },
-      { name: "description", content: "Request a secure link to reset your Saurashtra Honey account password." },
+      {
+        name: "description",
+        content: "Request a secure link to reset your Saurashtra Honey account password.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -42,21 +45,36 @@ function ForgotPassword() {
       <div className="container-page py-16 max-w-md">
         <SectionEyebrow>Password reset</SectionEyebrow>
         <h1 className="mt-2 font-serif text-4xl text-forest-dark">Forgot password?</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Enter your email and we'll send you a secure link to set a new one.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Enter your email and we'll send you a secure link to set a new one.
+        </p>
         {sent ? (
           <div className="mt-6 bg-cream border border-gold/40 rounded-xl p-4 text-sm text-forest-dark">
-            If an account exists for <b>{email}</b>, a reset link is on its way. It expires in 1 hour.
+            If an account exists for <b>{email}</b>, a reset link is on its way. It expires in 1
+            hour.
           </div>
         ) : (
           <form onSubmit={submit} className="mt-6 space-y-3">
-            <input required type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep" />
-            <button disabled={busy} className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60">
+            <input
+              required
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+            />
+            <button
+              disabled={busy}
+              className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60"
+            >
               {busy ? "SENDING…" : "SEND RESET LINK"}
             </button>
           </form>
         )}
         <div className="mt-6 text-xs">
-          <Link to="/auth" className="text-gold-deep hover:underline">← Back to sign in</Link>
+          <Link to="/auth" className="text-gold-deep hover:underline">
+            ← Back to sign in
+          </Link>
         </div>
       </div>
     </SiteLayout>

@@ -3,7 +3,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState, Fragment } from "react";
 import { Suspense, lazy } from "react";
 import { SiteLayout } from "@/components/site/Layout";
-const QuickViewLazy = lazy(() => import("@/components/site/QuickView").then(m => ({ default: m.QuickView })));
+const QuickViewLazy = lazy(() =>
+  import("@/components/site/QuickView").then((m) => ({ default: m.QuickView })),
+);
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
@@ -27,33 +29,47 @@ import {
 } from "@/components/site/HomeSections";
 
 import { fetchShopCategories } from "@/lib/category-catalog";
-import { fetchAllHomepageCustomerStories, type HomepageCustomerStory } from "@/lib/homepage-cms.functions";
+import {
+  fetchAllHomepageCustomerStories,
+  type HomepageCustomerStory,
+} from "@/lib/homepage-cms.functions";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [categories, products] = await Promise.all([
-      fetchShopCategories(),
-      fetchProducts(),
-    ]);
+    const [categories, products] = await Promise.all([fetchShopCategories(), fetchProducts()]);
     return { categories, products };
   },
   head: () => ({
     meta: [
       { title: "Saurashtra Honey — Pure, Raw & Unfiltered Honey from Saurashtra" },
-      { name: "description", content: "Raw, unfiltered honey straight from the floral farms of Saurashtra. Lab-tested for purity in every batch, ethically harvested for family wellness." },
+      {
+        name: "description",
+        content:
+          "Raw, unfiltered honey straight from the floral farms of Saurashtra. Lab-tested for purity in every batch, ethically harvested for family wellness.",
+      },
       { property: "og:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
-      { property: "og:description", content: "Raw. Natural. Unfiltered. From our farms to your home, with care." },
+      {
+        property: "og:description",
+        content: "Raw. Natural. Unfiltered. From our farms to your home, with care.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:url", content: "https://saurastrahoney.com/" },
-      { property: "og:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        property: "og:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
-      { name: "twitter:description", content: "Raw. Natural. Unfiltered. From our farms to your home, with care." },
-      { name: "twitter:image", content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png" },
+      {
+        name: "twitter:description",
+        content: "Raw. Natural. Unfiltered. From our farms to your home, with care.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+      },
     ],
-    links: [
-      { rel: "canonical", href: "https://saurastrahoney.com/" },
-    ],
+    links: [{ rel: "canonical", href: "https://saurastrahoney.com/" }],
   }),
   component: Home,
 });
@@ -89,7 +105,6 @@ function Home() {
   const fetchInstaFn = useServerFn(getPublicInstagramFeed);
 
   useEffect(() => {
-
     // Fetch CMS sections — failure is safe, just means no CMS overrides
     void fetchHomepageSections()
       .then((data) => {
@@ -119,7 +134,7 @@ function Home() {
               displayDate: formatPostDate(p.published_at || p.created_at),
               readTime: p.reading_time || "5 min read",
               image: resolvePostImage(p.cover_image_url, p.category_name || p.slug),
-            }))
+            })),
           );
         }
       });
@@ -133,7 +148,7 @@ function Home() {
         "https://placehold.co/400x700/FDFBF7/D97706?text=Video+Placeholder+5",
         "https://placehold.co/400x700/FDFBF7/D97706?text=Video+Placeholder+6",
       ];
-      
+
       const setDummyStories = () => {
         setStories([
           {
@@ -170,7 +185,8 @@ function Home() {
             customer_name: "Ritika Verma",
             customer_city: "Surat",
             customer_state: "Gujarat",
-            review_text: "The raw honeycomb was a hit with my kids! Truly unfiltered, natural sweetness without any artificial aftertaste.",
+            review_text:
+              "The raw honeycomb was a hit with my kids! Truly unfiltered, natural sweetness without any artificial aftertaste.",
             rating: 5,
             verified: false,
             published: true,
@@ -186,7 +202,8 @@ function Home() {
             customer_name: "Aman Patel",
             customer_city: "Vadodara",
             customer_state: "Gujarat",
-            review_text: "Best quality honey I've ever tasted. The packaging was beautiful and the delivery was quick.",
+            review_text:
+              "Best quality honey I've ever tasted. The packaging was beautiful and the delivery was quick.",
             rating: 4,
             verified: false,
             published: true,
@@ -202,7 +219,8 @@ function Home() {
             customer_name: "Pooja Desai",
             customer_city: "Mumbai",
             customer_state: "Maharashtra",
-            review_text: "I use this honey every morning in my tea. It's incredibly pure and has a very rich texture. Highly recommended!",
+            review_text:
+              "I use this honey every morning in my tea. It's incredibly pure and has a very rich texture. Highly recommended!",
             rating: 5,
             verified: false,
             published: true,
@@ -218,7 +236,8 @@ function Home() {
             customer_name: "Rahul Singh",
             customer_city: "Pune",
             customer_state: "Maharashtra",
-            review_text: "I was skeptical about buying honey online, but Saurashtra Honey proved me wrong. Authentic and fresh.",
+            review_text:
+              "I was skeptical about buying honey online, but Saurashtra Honey proved me wrong. Authentic and fresh.",
             rating: 5,
             verified: false,
             published: true,
@@ -227,21 +246,23 @@ function Home() {
             poster_image: dummyPosters[5],
             product_slug: "raw-honey",
             product_name: "Raw Honey",
-          }
+          },
         ] as HomepageCustomerStory[]);
       };
 
-      void fetchAllHomepageCustomerStories().then((res) => {
-        if (res && res.length > 0) {
-          setStories(res.filter(s => s.published));
-        } else {
+      void fetchAllHomepageCustomerStories()
+        .then((res) => {
+          if (res && res.length > 0) {
+            setStories(res.filter((s) => s.published));
+          } else {
+            setDummyStories();
+          }
+        })
+        .catch((e) => {
+          console.warn("Failed to fetch customer stories, using dummy data:", e);
           setDummyStories();
-        }
-      }).catch((e) => {
-        console.warn("Failed to fetch customer stories, using dummy data:", e);
-        setDummyStories();
-      });
-        
+        });
+
       // Fetch Instagram Feed
       void fetchInstaFn().then((res) => {
         setInstaFeed(res);
@@ -296,7 +317,13 @@ function Home() {
       case "trust_strip":
         return <HomeTrustStrip key="trust_strip" settings={settings} />;
       case "shop_by_category":
-        return <HomeShopByCategory key="shop_by_category" settings={settings} initialCategories={data.categories} />;
+        return (
+          <HomeShopByCategory
+            key="shop_by_category"
+            settings={settings}
+            initialCategories={data.categories}
+          />
+        );
       case "featured_products":
         return (
           <HomeBestSellers

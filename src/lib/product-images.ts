@@ -60,49 +60,53 @@ export function resolveImage(
   updatedAt?: string | null,
 ): string {
   let cleanUrl = url?.trim();
-  
+
   // If url is empty but key looks like a path (e.g. products/123.jpg), treat it as the url
-  if (!cleanUrl && key?.trim() && key.includes('/')) {
+  if (!cleanUrl && key?.trim() && key.includes("/")) {
     cleanUrl = key.trim();
   }
 
   let resultUrl = fallback;
   if (cleanUrl) {
-    if (cleanUrl.includes('res.cloudinary.com')) {
-      resultUrl = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, '')}`;
+    if (cleanUrl.includes("res.cloudinary.com")) {
+      resultUrl = cleanUrl.startsWith("http")
+        ? cleanUrl
+        : `https://${cleanUrl.replace(/^\/+/, "")}`;
     } else if (/^https?:\/\//i.test(cleanUrl)) {
       resultUrl = cleanUrl;
     } else {
-      let path = cleanUrl.replace(/^\/+/, '');
+      let path = cleanUrl.replace(/^\/+/, "");
       let bucket = "media";
-      
-      if (path.startsWith('media/')) {
+
+      if (path.startsWith("media/")) {
         path = path.substring(6);
-      } else if (path.startsWith('review-media/')) {
+      } else if (path.startsWith("review-media/")) {
         bucket = "review-media";
         path = path.substring(13);
       }
-      
-      // Remove query strings if they accidentally got stored
-      path = path.split('?')[0].split('#')[0];
 
-      const { data } = supabase.storage.from(bucket).getPublicUrl(path, { transform: { quality: 80, format: 'webp' as any } });
+      // Remove query strings if they accidentally got stored
+      path = path.split("?")[0].split("#")[0];
+
+      const { data } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(path, { transform: { quality: 80, format: "webp" as any } });
       if (data && data.publicUrl) {
         resultUrl = data.publicUrl;
       }
     }
   } else if (key && imageMap[key]) {
-      resultUrl = imageMap[key];
+    resultUrl = imageMap[key];
   }
-  
-  if (updatedAt && resultUrl.includes('supabase.co')) {
-      const ts = new Date(updatedAt).getTime();
-      if (!isNaN(ts)) {
-          const separator = resultUrl.includes('?') ? '&' : '?';
-          resultUrl += `${separator}v=${ts}`;
-      }
+
+  if (updatedAt && resultUrl.includes("supabase.co")) {
+    const ts = new Date(updatedAt).getTime();
+    if (!isNaN(ts)) {
+      const separator = resultUrl.includes("?") ? "&" : "?";
+      resultUrl += `${separator}v=${ts}`;
+    }
   }
-  
+
   return resultUrl;
 }
 
@@ -113,27 +117,33 @@ export function resolveImage(
  * 3. Converts a Storage path to the correct public URL exactly once.
  * 4. Never uses local fallback when a valid image_url exists.
  */
-export function getCategoryImageUrl(category: { image_url?: string | null, slug?: string, updated_at?: string | null }): string | null {
+export function getCategoryImageUrl(category: {
+  image_url?: string | null;
+  slug?: string;
+  updated_at?: string | null;
+}): string | null {
   if (!category || !category.image_url) {
     return null;
   }
-  
+
   const cleanUrl = category.image_url.trim();
   if (!cleanUrl) return null;
 
   let resultUrl = cleanUrl;
 
-  if (cleanUrl.includes('res.cloudinary.com')) {
-    resultUrl = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, '')}`;
+  if (cleanUrl.includes("res.cloudinary.com")) {
+    resultUrl = cleanUrl.startsWith("http") ? cleanUrl : `https://${cleanUrl.replace(/^\/+/, "")}`;
   } else if (!/^https?:\/\//i.test(cleanUrl)) {
-    let path = cleanUrl.replace(/^\/+/, '');
-    if (path.startsWith('media/')) {
+    let path = cleanUrl.replace(/^\/+/, "");
+    if (path.startsWith("media/")) {
       path = path.substring(6);
     }
-    
-    path = path.split('?')[0].split('#')[0]; // remove accidental query strings
 
-    const { data } = supabase.storage.from("media").getPublicUrl(path, { transform: { quality: 80, format: 'webp' as any } });
+    path = path.split("?")[0].split("#")[0]; // remove accidental query strings
+
+    const { data } = supabase.storage
+      .from("media")
+      .getPublicUrl(path, { transform: { quality: 80, format: "webp" as any } });
     if (data && data.publicUrl) {
       resultUrl = data.publicUrl;
     } else {
@@ -142,14 +152,13 @@ export function getCategoryImageUrl(category: { image_url?: string | null, slug?
   }
 
   // Cache busting
-  if (category.updated_at && resultUrl.includes('supabase.co')) {
+  if (category.updated_at && resultUrl.includes("supabase.co")) {
     const ts = new Date(category.updated_at).getTime();
     if (!isNaN(ts)) {
-      const separator = resultUrl.includes('?') ? '&' : '?';
+      const separator = resultUrl.includes("?") ? "&" : "?";
       resultUrl += `${separator}v=${ts}`;
     }
   }
 
   return resultUrl;
 }
-

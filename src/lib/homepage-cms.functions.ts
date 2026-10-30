@@ -27,7 +27,6 @@ export type HomepageCustomerStory = {
   sort_order: number;
 };
 
-
 export type HomepageCategorySelection = {
   id: string;
   category_slug: string;
@@ -155,12 +154,12 @@ export async function fetchPublicSiteSettings(): Promise<Record<string, any>> {
     .eq("is_public", true);
 
   if (error) {
-    if (error.code !== '42501') {
+    if (error.code !== "42501") {
       console.error("Error fetching site settings:", error);
     }
     return {};
   }
-  
+
   const settings: Record<string, any> = {};
   for (const row of data || []) {
     settings[row.key] = row.value;
@@ -175,7 +174,7 @@ export async function fetchPublicSiteSettings(): Promise<Record<string, any>> {
 export async function updateSectionOrder(updates: { id: string; sort_order: number }[]) {
   // Using Promise.all for simple sequential updates instead of RPC for simplicity
   const promises = updates.map((u) =>
-    supabase.from("homepage_sections").update({ sort_order: u.sort_order }).eq("id", u.id)
+    supabase.from("homepage_sections").update({ sort_order: u.sort_order }).eq("id", u.id),
   );
   await Promise.all(promises);
 }
@@ -217,7 +216,7 @@ export async function fetchAllAnnouncements(): Promise<AnnouncementItem[]> {
 
 export async function updateAnnouncementOrder(updates: { id: string; sort_order: number }[]) {
   const promises = updates.map((u) =>
-    supabase.from("announcement_items").update({ sort_order: u.sort_order }).eq("id", u.id)
+    supabase.from("announcement_items").update({ sort_order: u.sort_order }).eq("id", u.id),
   );
   await Promise.all(promises);
 }
@@ -234,14 +233,20 @@ export async function deleteHomepageCategory(id: string) {
 }
 
 export async function fetchAllHomepageCategories(): Promise<HomepageCategorySelection[]> {
-  const { data, error } = await supabase.from("homepage_category_selection").select("*").order("sort_order");
+  const { data, error } = await supabase
+    .from("homepage_category_selection")
+    .select("*")
+    .order("sort_order");
   if (error) throw error;
   return data as HomepageCategorySelection[];
 }
 
 export async function updateHomepageCategoryOrder(updates: { id: string; sort_order: number }[]) {
   const promises = updates.map((u) =>
-    supabase.from("homepage_category_selection").update({ sort_order: u.sort_order }).eq("id", u.id)
+    supabase
+      .from("homepage_category_selection")
+      .update({ sort_order: u.sort_order })
+      .eq("id", u.id),
   );
   await Promise.all(promises);
 }
@@ -258,14 +263,19 @@ export async function deleteHomepageFeaturedProduct(id: string) {
 }
 
 export async function fetchAllHomepageFeaturedProducts(): Promise<HomepageFeaturedProduct[]> {
-  const { data, error } = await supabase.from("homepage_featured_products").select("*").order("sort_order");
+  const { data, error } = await supabase
+    .from("homepage_featured_products")
+    .select("*")
+    .order("sort_order");
   if (error) throw error;
   return data as HomepageFeaturedProduct[];
 }
 
-export async function updateHomepageFeaturedProductOrder(updates: { id: string; sort_order: number }[]) {
+export async function updateHomepageFeaturedProductOrder(
+  updates: { id: string; sort_order: number }[],
+) {
   const promises = updates.map((u) =>
-    supabase.from("homepage_featured_products").update({ sort_order: u.sort_order }).eq("id", u.id)
+    supabase.from("homepage_featured_products").update({ sort_order: u.sort_order }).eq("id", u.id),
   );
   await Promise.all(promises);
 }
@@ -289,22 +299,50 @@ export async function deleteHomepageTrustItem(id: string) {
 export async function fetchAllHomepageTrustItems(): Promise<HomepageTrustItem[]> {
   let { data, error } = await supabase.from("homepage_trust_items").select("*").order("sort_order");
   if (error) throw error;
-  
+
   if (!data || data.length === 0) {
     try {
       const defaults = [
-        { title: "Pure No Additives", icon: "/images/trust/pure_no_additives.png", enabled: true, sort_order: 1 },
-        { title: "Raw & Unprocessed", icon: "/images/trust/raw_unprocessed.png", enabled: true, sort_order: 2 },
-        { title: "Natural Floral Sources", icon: "/images/trust/natural_floral.png", enabled: true, sort_order: 3 },
-        { title: "Rich in Nutrients", icon: "/images/trust/rich_nutrients.png", enabled: true, sort_order: 4 },
+        {
+          title: "Pure No Additives",
+          icon: "/images/trust/pure_no_additives.png",
+          enabled: true,
+          sort_order: 1,
+        },
+        {
+          title: "Raw & Unprocessed",
+          icon: "/images/trust/raw_unprocessed.png",
+          enabled: true,
+          sort_order: 2,
+        },
+        {
+          title: "Natural Floral Sources",
+          icon: "/images/trust/natural_floral.png",
+          enabled: true,
+          sort_order: 3,
+        },
+        {
+          title: "Rich in Nutrients",
+          icon: "/images/trust/rich_nutrients.png",
+          enabled: true,
+          sort_order: 4,
+        },
         { title: "Lab Tested", icon: "/images/trust/lab_tested.png", enabled: true, sort_order: 5 },
-        { title: "Ethical Beekeeping", icon: "/images/trust/ethical_beekeeping.png", enabled: true, sort_order: 6 },
+        {
+          title: "Ethical Beekeeping",
+          icon: "/images/trust/ethical_beekeeping.png",
+          enabled: true,
+          sort_order: 6,
+        },
       ];
       const insertRes = await supabase.from("homepage_trust_items").insert(defaults);
       if (insertRes.error) {
         console.error("Failed to insert default trust items:", insertRes.error);
       } else {
-        const { data: refetched } = await supabase.from("homepage_trust_items").select("*").order("sort_order");
+        const { data: refetched } = await supabase
+          .from("homepage_trust_items")
+          .select("*")
+          .order("sort_order");
         if (refetched) {
           data = refetched;
         }
@@ -313,36 +351,41 @@ export async function fetchAllHomepageTrustItems(): Promise<HomepageTrustItem[]>
       console.error("Exception during trust items seeding:", err);
     }
   }
-  
+
   return (data || []) as HomepageTrustItem[];
 }
 
 export async function updateHomepageTrustItemOrder(updates: { id: string; sort_order: number }[]) {
   const promises = updates.map((u) =>
-    supabase.from("homepage_trust_items").update({ sort_order: u.sort_order }).eq("id", u.id)
+    supabase.from("homepage_trust_items").update({ sort_order: u.sort_order }).eq("id", u.id),
   );
   await Promise.all(promises);
 }
 
 // Homepage Customer Stories CRUD
 export async function createHomepageCustomerStory(data: Omit<HomepageCustomerStory, "id">) {
-  const { error } = await supabase.from("homepage_videos").insert([{
-    title: data.customer_name,
-    subtitle: [data.customer_city, data.customer_state].filter(Boolean).join(", "),
-    badge: data.review_text,
-    video_url: data.media_url,
-    thumbnail_url: data.poster_image,
-    product_slug: data.product_slug,
-    link_url: String(data.rating || 5),
-    status: data.published ? "published" : "draft",
-    is_featured: data.verified,
-    display_order: data.sort_order,
-    placement: "testimonial"
-  }]);
+  const { error } = await supabase.from("homepage_videos").insert([
+    {
+      title: data.customer_name,
+      subtitle: [data.customer_city, data.customer_state].filter(Boolean).join(", "),
+      badge: data.review_text,
+      video_url: data.media_url,
+      thumbnail_url: data.poster_image,
+      product_slug: data.product_slug,
+      link_url: String(data.rating || 5),
+      status: data.published ? "published" : "draft",
+      is_featured: data.verified,
+      display_order: data.sort_order,
+      placement: "testimonial",
+    },
+  ]);
   if (error) throw error;
 }
 
-export async function updateHomepageCustomerStory(id: string, data: Partial<HomepageCustomerStory>) {
+export async function updateHomepageCustomerStory(
+  id: string,
+  data: Partial<HomepageCustomerStory>,
+) {
   const updates: any = {};
   if (data.customer_name !== undefined) updates.title = data.customer_name;
   if (data.customer_city !== undefined || data.customer_state !== undefined) {
@@ -357,12 +400,20 @@ export async function updateHomepageCustomerStory(id: string, data: Partial<Home
   if (data.verified !== undefined) updates.is_featured = data.verified;
   if (data.sort_order !== undefined) updates.display_order = data.sort_order;
 
-  const { error } = await supabase.from("homepage_videos").update(updates).eq("id", id).eq("placement", "testimonial");
+  const { error } = await supabase
+    .from("homepage_videos")
+    .update(updates)
+    .eq("id", id)
+    .eq("placement", "testimonial");
   if (error) throw error;
 }
 
 export async function deleteHomepageCustomerStory(id: string) {
-  const { error } = await supabase.from("homepage_videos").delete().eq("id", id).eq("placement", "testimonial");
+  const { error } = await supabase
+    .from("homepage_videos")
+    .delete()
+    .eq("id", id)
+    .eq("placement", "testimonial");
   if (error) throw error;
 }
 
@@ -372,9 +423,9 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
     .select("*")
     .eq("placement", "testimonial")
     .order("display_order");
-    
+
   if (error) throw error;
-  
+
   if (!data || data.length === 0) {
     // Return initial DEMO content as requested
     return [
@@ -389,7 +440,7 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         poster_image: "",
         verified: true,
         published: true,
-        sort_order: 1
+        sort_order: 1,
       },
       {
         id: "demo-2",
@@ -397,12 +448,13 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         customer_name: "Pooja Desai",
         customer_city: "Mumbai",
         customer_state: "Maharashtra",
-        review_text: "I use this honey every morning in my tea. It's incredibly pure and has a very rich texture. Highly recommended!",
+        review_text:
+          "I use this honey every morning in my tea. It's incredibly pure and has a very rich texture. Highly recommended!",
         rating: 5,
         poster_image: "",
         verified: true,
         published: true,
-        sort_order: 2
+        sort_order: 2,
       },
       {
         id: "demo-3",
@@ -410,17 +462,18 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
         customer_name: "Rahul Singh",
         customer_city: "Pune",
         customer_state: "Maharashtra",
-        review_text: "I was skeptical about buying honey online, but Saurashtra Honey proved me wrong. Authentic and fresh.",
+        review_text:
+          "I was skeptical about buying honey online, but Saurashtra Honey proved me wrong. Authentic and fresh.",
         rating: 5,
         poster_image: "",
         verified: true,
         published: true,
-        sort_order: 3
-      }
+        sort_order: 3,
+      },
     ];
   }
-  
-  return (data || []).map(row => ({
+
+  return (data || []).map((row) => ({
     id: row.id,
     type: "photo",
     customer_name: row.title || "",
@@ -433,13 +486,19 @@ export async function fetchAllHomepageCustomerStories(): Promise<HomepageCustome
     product_slug: row.product_slug,
     verified: row.is_featured,
     published: row.status === "published",
-    sort_order: row.display_order
+    sort_order: row.display_order,
   }));
 }
 
-export async function updateHomepageCustomerStoryOrder(updates: { id: string; sort_order: number }[]) {
+export async function updateHomepageCustomerStoryOrder(
+  updates: { id: string; sort_order: number }[],
+) {
   const promises = updates.map((u) =>
-    supabase.from("homepage_videos").update({ display_order: u.sort_order }).eq("id", u.id).eq("placement", "testimonial")
+    supabase
+      .from("homepage_videos")
+      .update({ display_order: u.sort_order })
+      .eq("id", u.id)
+      .eq("placement", "testimonial"),
   );
   await Promise.all(promises);
 }

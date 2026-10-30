@@ -10,9 +10,7 @@ const fallbackMessages = [
   </span>,
   <span key="2" className="inline-flex items-center gap-2">
     <span className="shrink-0">🍯</span>
-    <span className="text-white font-bold">
-      Up to 24% OFF All Honey + Up to 10% Off on Prepaid
-    </span>
+    <span className="text-white font-bold">Up to 24% OFF All Honey + Up to 10% Off on Prepaid</span>
   </span>,
 ];
 
@@ -29,7 +27,10 @@ export function TopBar() {
 
   const renderMessage = (item: AnnouncementItem, idx: number) => {
     const content = (
-      <span key={`db-${item.id}-${idx}`} className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+      <span
+        key={`db-${item.id}-${idx}`}
+        className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity"
+      >
         {item.icon && <span className="shrink-0">{item.icon}</span>}
         <span className="text-white font-bold">{item.text}</span>
       </span>
@@ -37,16 +38,36 @@ export function TopBar() {
 
     if (item.link) {
       if (item.link.startsWith("http")) {
-        return <a href={item.link} target={item.open_in_new_tab ? "_blank" : "_self"} rel="noreferrer" key={`db-link-${item.id}-${idx}`}>{content}</a>;
+        return (
+          <a
+            href={item.link}
+            target={item.open_in_new_tab ? "_blank" : "_self"}
+            rel="noreferrer"
+            key={`db-link-${item.id}-${idx}`}
+          >
+            {content}
+          </a>
+        );
       }
-      return <Link to={item.link as any} target={item.open_in_new_tab ? "_blank" : undefined} key={`db-link-${item.id}-${idx}`}>{content}</Link>;
+      return (
+        <Link
+          to={item.link as any}
+          target={item.open_in_new_tab ? "_blank" : undefined}
+          key={`db-link-${item.id}-${idx}`}
+        >
+          {content}
+        </Link>
+      );
     }
     return content;
   };
 
-  const activeMessages = items.length > 0 
-    ? items.map((item, idx) => renderMessage(item, idx))
-    : loading ? [] : fallbackMessages;
+  const activeMessages =
+    items.length > 0
+      ? items.map((item, idx) => renderMessage(item, idx))
+      : loading
+        ? []
+        : fallbackMessages;
 
   // We duplicate the message group multiple times per half (12 times)
   // to ensure there is never any empty/blank area even on ultra-wide monitors or when content is very short,
@@ -61,7 +82,7 @@ export function TopBar() {
       role="region"
       aria-label="Announcement bar"
     >
-      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: '300s' }}>
+      <div className="flex w-max items-center animate-ticker" style={{ animationDuration: "300s" }}>
         {/* First Half (0% to -50% translation area) */}
         <div className="flex items-center shrink-0">
           {loopGroup.map((msg, idx) => (

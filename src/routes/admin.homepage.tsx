@@ -10,7 +10,16 @@ import {
   logAudit,
   type HomepageSection,
 } from "@/lib/homepage-cms.functions";
-import { Card, PageHeader, StatusPill, BtnPrimary, BtnGhost, Field, inp, ImageUpload } from "@/components/admin/ui";
+import {
+  Card,
+  PageHeader,
+  StatusPill,
+  BtnPrimary,
+  BtnGhost,
+  Field,
+  inp,
+  ImageUpload,
+} from "@/components/admin/ui";
 import {
   ArrowUp,
   ArrowDown,
@@ -61,7 +70,12 @@ const SECTION_CONFIG: Record<
       { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "DISCOVER" },
       { type: "text", key: "heading", label: "Heading", placeholder: "Explore Our World" },
       { type: "textarea", key: "description", label: "Description" },
-      { type: "text", key: "cta_text", label: "CTA Button Text", placeholder: "VIEW ALL CATEGORIES" },
+      {
+        type: "text",
+        key: "cta_text",
+        label: "CTA Button Text",
+        placeholder: "VIEW ALL CATEGORIES",
+      },
       { type: "text", key: "cta_url", label: "CTA URL", placeholder: "/shop" },
     ],
   },
@@ -82,7 +96,12 @@ const SECTION_CONFIG: Record<
     desc: "9:16 vertical video reels from the hive.",
     link: "/admin/stories",
     fields: [
-      { type: "text", key: "marquee_text", label: "Marquee Strip Text", placeholder: "FROM THE HIVE • PURE BY NATURE" },
+      {
+        type: "text",
+        key: "marquee_text",
+        label: "Marquee Strip Text",
+        placeholder: "FROM THE HIVE • PURE BY NATURE",
+      },
       { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "FROM THE HIVE" },
       { type: "text", key: "heading", label: "Heading", placeholder: "Stories from the Hive" },
       { type: "textarea", key: "description", label: "Description" },
@@ -95,11 +114,36 @@ const SECTION_CONFIG: Record<
     fields: [
       { type: "text", key: "eyebrow", label: "Video Eyebrow text", placeholder: "OUR HERITAGE" },
       { type: "text", key: "heading", label: "Video Heading", placeholder: "Where Purity Begins" },
-      { type: "text", key: "illus_eyebrow", label: "Illustration Eyebrow", placeholder: "FROM THE HIVE" },
-      { type: "text", key: "illus_cta_text", label: "Illustration CTA Text", placeholder: "Explore our story ->" },
-      { type: "text", key: "illus_cta_url", label: "Illustration CTA URL", placeholder: "/our-story" },
-      { type: "image", key: "illus_left_img", label: "Left Illustration (Beekeeper)", folder: "homepage" },
-      { type: "image", key: "illus_right_img", label: "Right Illustration (Flowers)", folder: "homepage" },
+      {
+        type: "text",
+        key: "illus_eyebrow",
+        label: "Illustration Eyebrow",
+        placeholder: "FROM THE HIVE",
+      },
+      {
+        type: "text",
+        key: "illus_cta_text",
+        label: "Illustration CTA Text",
+        placeholder: "Explore our story ->",
+      },
+      {
+        type: "text",
+        key: "illus_cta_url",
+        label: "Illustration CTA URL",
+        placeholder: "/our-story",
+      },
+      {
+        type: "image",
+        key: "illus_left_img",
+        label: "Left Illustration (Beekeeper)",
+        folder: "homepage",
+      },
+      {
+        type: "image",
+        key: "illus_right_img",
+        label: "Right Illustration (Flowers)",
+        folder: "homepage",
+      },
     ],
   },
   farm_banner: {
@@ -107,12 +151,27 @@ const SECTION_CONFIG: Record<
     desc: "The main journey section showing the beekeeper and story illustrations.",
     fields: [
       { type: "text", key: "eyebrow", label: "Eyebrow text", placeholder: "OUR JOURNEY" },
-      { type: "text", key: "heading", label: "Heading", placeholder: "The Journey Behind Every Drop" },
+      {
+        type: "text",
+        key: "heading",
+        label: "Heading",
+        placeholder: "The Journey Behind Every Drop",
+      },
       { type: "textarea", key: "description", label: "Description" },
-      { type: "text", key: "cta_text", label: "CTA Button Text", placeholder: "LEARN ABOUT OUR FARMS" },
+      {
+        type: "text",
+        key: "cta_text",
+        label: "CTA Button Text",
+        placeholder: "LEARN ABOUT OUR FARMS",
+      },
       { type: "text", key: "cta_url", label: "CTA URL", placeholder: "/bee-farming" },
       { type: "image", key: "cinematic_image", label: "Main Cinematic Image", folder: "homepage" },
-      { type: "text", key: "point1_title", label: "Story Point 1 - Title", placeholder: "From Hive to Home" },
+      {
+        type: "text",
+        key: "point1_title",
+        label: "Story Point 1 - Title",
+        placeholder: "From Hive to Home",
+      },
       { type: "textarea", key: "point1_desc", label: "Story Point 1 - Description" },
       { type: "image", key: "point1_icon", label: "Story Point 1 - Icon", folder: "homepage" },
       { type: "text", key: "point2_title", label: "Story Point 2 - Title" },
@@ -243,10 +302,7 @@ function SectionSettingsPanel({
   };
 
   return (
-    <form
-      onSubmit={handleSave}
-      className="mt-4 pt-4 border-t border-border/60 space-y-3"
-    >
+    <form onSubmit={handleSave} className="mt-4 pt-4 border-t border-border/60 space-y-3">
       <h4 className="text-xs font-bold text-forest-dark tracking-wider uppercase">
         Section Content Settings
       </h4>
@@ -288,7 +344,7 @@ function SectionSettingsPanel({
               <div key={f.key} className="md:col-span-2">
                 <Field label={f.label}>
                   <ImageUpload
-                    value={form[f.key] as string || null}
+                    value={(form[f.key] as string) || null}
                     onChange={(url) => setForm({ ...form, [f.key]: url })}
                     bucket={f.bucket}
                     folder={f.folder}
@@ -336,7 +392,7 @@ function HomepageManagement() {
     setLoading(true);
     try {
       let data = await fetchHomepageSections();
-      
+
       const CANONICAL_SECTIONS = [
         "hero",
         "trust_strip",
@@ -348,26 +404,26 @@ function HomepageManagement() {
         "testimonials",
         "journal",
       ];
-      const existingKeys = new Set(data.map(d => d.section_key));
-      const missingSections = CANONICAL_SECTIONS.filter(k => !existingKeys.has(k));
-      
+      const existingKeys = new Set(data.map((d) => d.section_key));
+      const missingSections = CANONICAL_SECTIONS.filter((k) => !existingKeys.has(k));
+
       if (missingSections.length > 0) {
         let order = data.length;
-        const inserts = missingSections.map(k => {
+        const inserts = missingSections.map((k) => {
           order++;
           return {
             section_key: k,
             enabled: true,
             sort_order: order,
-            settings: {}
+            settings: {},
           };
         });
-        
-        await supabase.from('homepage_sections').insert(inserts);
+
+        await supabase.from("homepage_sections").insert(inserts);
         // re-fetch after inserting
         data = await fetchHomepageSections();
       }
-      
+
       setSections(data);
     } catch (e) {
       toast.error("Failed to load homepage sections");
@@ -383,9 +439,7 @@ function HomepageManagement() {
   const handleToggle = async (id: string, current: boolean, key: string) => {
     try {
       await toggleSectionVisibility(id, !current);
-      setSections((prev) =>
-        prev.map((s) => (s.id === id ? { ...s, enabled: !current } : s))
-      );
+      setSections((prev) => prev.map((s) => (s.id === id ? { ...s, enabled: !current } : s)));
       toast.success(`Section ${!current ? "enabled" : "hidden"} successfully`);
       await logAudit({
         data: {
@@ -436,9 +490,7 @@ function HomepageManagement() {
   };
 
   const handleSettingsSaved = (id: string, settings: Record<string, any>) => {
-    setSections((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, settings } : s))
-    );
+    setSections((prev) => prev.map((s) => (s.id === id ? { ...s, settings } : s)));
     router.invalidate();
   };
 
@@ -542,9 +594,13 @@ function HomepageManagement() {
                     }`}
                   >
                     {sec.enabled ? (
-                      <><EyeOff className="size-3.5" /> Hide</>
+                      <>
+                        <EyeOff className="size-3.5" /> Hide
+                      </>
                     ) : (
-                      <><Eye className="size-3.5" /> Show</>
+                      <>
+                        <Eye className="size-3.5" /> Show
+                      </>
                     )}
                   </button>
 

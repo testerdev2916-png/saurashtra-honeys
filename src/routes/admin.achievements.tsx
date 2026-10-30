@@ -1,15 +1,37 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { 
-  listAchievements, 
-  upsertAchievement, 
-  deleteAchievement, 
-  reorderAchievements 
+import {
+  listAchievements,
+  upsertAchievement,
+  deleteAchievement,
+  reorderAchievements,
 } from "@/lib/admin-achievements.functions";
-import { BtnGhost, BtnPrimary, Card, Field, inp, PageHeader, StatusPill, TableWrap, Td, Th } from "@/components/admin/ui";
-import { ArrowUp, ArrowDown, ImageOff, Plus, RefreshCcw, Trash2, Video, Pencil, Play, Pause } from "lucide-react";
+import {
+  BtnGhost,
+  BtnPrimary,
+  Card,
+  Field,
+  inp,
+  PageHeader,
+  StatusPill,
+  TableWrap,
+  Td,
+  Th,
+} from "@/components/admin/ui";
+import {
+  ArrowUp,
+  ArrowDown,
+  ImageOff,
+  Plus,
+  RefreshCcw,
+  Trash2,
+  Video,
+  Pencil,
+  Play,
+  Pause,
+} from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
 
 export const Route = createFileRoute("/admin/achievements")({ component: AchievementsPage });
@@ -47,7 +69,7 @@ function AchievementsPage() {
     setLoading(true);
     try {
       const r = await listFn({});
-      setRows((r.rows as unknown) as AchievementRow[]);
+      setRows(r.rows as unknown as AchievementRow[]);
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -132,7 +154,9 @@ function AchievementsPage() {
           )}
           {!loading && rows.length === 0 && (
             <tr>
-              <Td className="text-center py-12 text-muted-foreground">No achievements found. Click "New Achievement" to create one.</Td>
+              <Td className="text-center py-12 text-muted-foreground">
+                No achievements found. Click "New Achievement" to create one.
+              </Td>
             </tr>
           )}
           {!loading &&
@@ -146,7 +170,11 @@ function AchievementsPage() {
                     ) : r.media_type === "video" && (r.thumbnail_url || r.media_url) ? (
                       <>
                         {r.thumbnail_url ? (
-                          <img src={r.thumbnail_url} className="w-full h-full object-cover" alt="" />
+                          <img
+                            src={r.thumbnail_url}
+                            className="w-full h-full object-cover"
+                            alt=""
+                          />
                         ) : (
                           <video src={r.media_url} className="w-full h-full object-cover" />
                         )}
@@ -160,12 +188,24 @@ function AchievementsPage() {
                   </div>
                 </Td>
                 <Td>
-                  <div className="font-medium text-foreground">{r.title || <span className="text-muted-foreground italic">Untitled</span>}</div>
-                  {r.description && <div className="text-xs text-muted-foreground truncate max-w-[250px]">{r.description}</div>}
+                  <div className="font-medium text-foreground">
+                    {r.title || <span className="text-muted-foreground italic">Untitled</span>}
+                  </div>
+                  {r.description && (
+                    <div className="text-xs text-muted-foreground truncate max-w-[250px]">
+                      {r.description}
+                    </div>
+                  )}
                 </Td>
                 <Td>
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider ${r.media_type === 'video' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                    {r.media_type === 'video' ? <Video className="w-3 h-3 mr-1" /> : <ImageOff className="w-3 h-3 mr-1" />}
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium uppercase tracking-wider ${r.media_type === "video" ? "bg-purple-100 text-purple-800" : "bg-blue-100 text-blue-800"}`}
+                  >
+                    {r.media_type === "video" ? (
+                      <Video className="w-3 h-3 mr-1" />
+                    ) : (
+                      <ImageOff className="w-3 h-3 mr-1" />
+                    )}
                     {r.media_type}
                   </span>
                 </Td>
@@ -257,7 +297,7 @@ function Editor({
           description: form.description || undefined,
           display_order: form.display_order,
           is_active: form.is_active,
-        } as any
+        } as any,
       });
       toast.success("Saved successfully");
       onSaved();
@@ -271,7 +311,9 @@ function Editor({
   return (
     <div className="max-w-3xl animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="font-serif text-2xl text-forest-dark">{form.id ? "Edit Achievement" : "New Achievement"}</h2>
+        <h2 className="font-serif text-2xl text-forest-dark">
+          {form.id ? "Edit Achievement" : "New Achievement"}
+        </h2>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-6">
@@ -334,7 +376,7 @@ function Editor({
                 placeholder="e.g. Best Honey Award 2026"
               />
             </Field>
-            
+
             <Field label="Description (Optional)">
               <textarea
                 className={`${inp} min-h-[100px] py-2`}
@@ -347,7 +389,9 @@ function Editor({
             <div className="flex items-center justify-between p-4 bg-muted/20 rounded-lg border border-border">
               <div>
                 <div className="font-semibold text-sm">Active Status</div>
-                <div className="text-xs text-muted-foreground mt-1">If disabled, it will be hidden from the public gallery.</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  If disabled, it will be hidden from the public gallery.
+                </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input

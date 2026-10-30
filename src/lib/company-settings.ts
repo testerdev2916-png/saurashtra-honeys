@@ -21,7 +21,8 @@ export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
   name: "Saurashtra Honey",
   tagline: "Pure • Traceable • Lab-tested",
   logo_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
-  favicon_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/fevicon_for_bees_9AwWZ6YRm.png",
+  favicon_url:
+    "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/fevicon_for_bees_9AwWZ6YRm.png",
 };
 
 export const companySettingsQueryOptions = {
@@ -68,12 +69,13 @@ export function useCompanyLogoUrl(): string {
 
 /** Central helper for getting the cache-busted favicon URL */
 export function getFaviconUrl(settings?: CompanySettings | null): string {
-  let rawUrl = settings?.favicon_url?.trim() || DEFAULT_COMPANY_SETTINGS.favicon_url || "/favicon-v2.ico";
+  let rawUrl =
+    settings?.favicon_url?.trim() || DEFAULT_COMPANY_SETTINGS.favicon_url || "/favicon-v2.ico";
   if (rawUrl.includes("res.cloudinary.com/yzmffalu/")) {
     rawUrl = DEFAULT_COMPANY_SETTINGS.favicon_url || "/favicon-v2.ico";
   }
   if (rawUrl === "/favicon-v2.ico") return rawUrl;
-  
+
   const sep = rawUrl.includes("?") ? "&" : "?";
   const ts = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
   return `${rawUrl}${sep}v=${ts}`;

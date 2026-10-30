@@ -186,19 +186,11 @@ function HeroPage() {
           )}
           {!loading &&
             filteredRows.map((r) => {
-              const previewImg = resolveImage(
-                r.image_key,
-                r.image_url,
-                FALLBACK_IMAGE
-              );
+              const previewImg = resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE);
               return (
                 <tr key={r.id} className="hover:bg-cream/40">
-                  <Td className="text-xs font-bold uppercase text-brand-orange">
-                    {r.page}
-                  </Td>
-                  <Td className="text-xs text-muted-foreground font-mono">
-                    {r.sort_order}
-                  </Td>
+                  <Td className="text-xs font-bold uppercase text-brand-orange">{r.page}</Td>
+                  <Td className="text-xs text-muted-foreground font-mono">{r.sort_order}</Td>
                   <Td>
                     <div className="flex items-center gap-3">
                       <div className="size-12 rounded-lg overflow-hidden border border-border bg-cream shrink-0">
@@ -299,15 +291,18 @@ function Editor({
               <ul className="list-disc pl-5 space-y-1 mt-1 text-espresso/90">
                 <li>
                   <strong>For Desktop Banners:</strong> Recommended size →{" "}
-                  <span className="font-mono font-bold">1920 × 700 px</span> (Home) or <span className="font-mono font-bold">1920 × 600 px</span> (Inner pages).
+                  <span className="font-mono font-bold">1920 × 700 px</span> (Home) or{" "}
+                  <span className="font-mono font-bold">1920 × 600 px</span> (Inner pages).
                 </li>
                 <li>
                   <strong>For Mobile Banners:</strong> Recommended size →{" "}
-                  <span className="font-mono font-bold">1080 × 1080 px</span> (Square 1:1 Aspect Ratio).
+                  <span className="font-mono font-bold">1080 × 1080 px</span> (Square 1:1 Aspect
+                  Ratio).
                 </li>
               </ul>
               <p className="mt-2 text-[11px] text-espresso/70 italic font-medium">
-                Warning: The container will enforce these aspect ratios. If an uploaded image has a different ratio, it will be automatically center-cropped.
+                Warning: The container will enforce these aspect ratios. If an uploaded image has a
+                different ratio, it will be automatically center-cropped.
               </p>
             </div>
 
@@ -336,14 +331,11 @@ function Editor({
                 />
               </Field>
 
-
               <Field label="Sort Order">
                 <input
                   type="number"
                   value={f.sort_order ?? 0}
-                  onChange={(e) =>
-                    setF({ ...f, sort_order: Number(e.target.value) })
-                  }
+                  onChange={(e) => setF({ ...f, sort_order: Number(e.target.value) })}
                   className={inp}
                 />
               </Field>
@@ -360,7 +352,7 @@ function Editor({
                   />
                 </Field>
               </div>
-              
+
               {/* Mobile Image URL */}
               <div className="md:col-span-2 pt-2 border-t border-border">
                 <Field label="Mobile Banner Image URL (Optional, falls back to desktop)">
@@ -373,7 +365,6 @@ function Editor({
                   />
                 </Field>
               </div>
-
 
               <div className="md:col-span-2 pt-2">
                 <label className="inline-flex items-center gap-2 text-sm font-bold text-forest-dark cursor-pointer">
@@ -402,16 +393,16 @@ function Editor({
 
                   // Auto-resolve relative Supabase paths to public HTTPS URLs
                   if (finalImageUrl && !/^https?:\/\//i.test(finalImageUrl)) {
-                      const resolved = resolveImage(null, finalImageUrl, "");
-                      if (resolved && /^https?:\/\//i.test(resolved)) {
-                          finalImageUrl = resolved;
-                      }
+                    const resolved = resolveImage(null, finalImageUrl, "");
+                    if (resolved && /^https?:\/\//i.test(resolved)) {
+                      finalImageUrl = resolved;
+                    }
                   }
                   if (finalMobileUrl && !/^https?:\/\//i.test(finalMobileUrl)) {
-                      const resolved = resolveImage(null, finalMobileUrl, "");
-                      if (resolved && /^https?:\/\//i.test(resolved)) {
-                          finalMobileUrl = resolved;
-                      }
+                    const resolved = resolveImage(null, finalMobileUrl, "");
+                    if (resolved && /^https?:\/\//i.test(resolved)) {
+                      finalMobileUrl = resolved;
+                    }
                   }
 
                   const hasValidHttpsUrl = finalImageUrl && /^https?:\/\//i.test(finalImageUrl);
@@ -425,27 +416,34 @@ function Editor({
                     toast.error("Please provide a valid HTTPS URL for the mobile banner image");
                     return;
                   }
-                  
+
                   setBusy(true);
                   try {
                     // Diagnostic Auth Check Before Save
-                    const { data: { session } } = await supabase.auth.getSession();
-                    console.log('Hero Slide Auth Debug', {
+                    const {
+                      data: { session },
+                    } = await supabase.auth.getSession();
+                    console.log("Hero Slide Auth Debug", {
                       hasSession: !!session,
                       userId: session?.user?.id,
                       email: session?.user?.email,
-                      accessTokenExists: !!session?.access_token
+                      accessTokenExists: !!session?.access_token,
                     });
 
-                    const { data: { user }, error: userError } = await supabase.auth.getUser();
-                    console.log('Hero Slide Current User', {
+                    const {
+                      data: { user },
+                      error: userError,
+                    } = await supabase.auth.getUser();
+                    console.log("Hero Slide Current User", {
                       userId: user?.id,
                       email: user?.email,
-                      error: userError
+                      error: userError,
                     });
 
                     if (!session || !user) {
-                      toast.error("Admin authentication error: No active session. Please sign in again.");
+                      toast.error(
+                        "Admin authentication error: No active session. Please sign in again.",
+                      );
                       window.location.href = "/auth?redirect=/admin/hero";
                       return;
                     }
@@ -497,7 +495,9 @@ function Editor({
             <div className="space-y-6">
               {/* Desktop Preview */}
               <div>
-                <div className="text-[11px] font-bold text-forest-dark uppercase tracking-wider mb-2">Desktop View</div>
+                <div className="text-[11px] font-bold text-forest-dark uppercase tracking-wider mb-2">
+                  Desktop View
+                </div>
                 <div
                   className={`relative rounded-2xl overflow-hidden shadow-lg border border-border bg-espresso w-full ${
                     isHome ? "aspect-[1920/700]" : "aspect-[1920/600]"
@@ -508,13 +508,14 @@ function Editor({
                     alt="Desktop Preview"
                     className="w-full h-full object-cover"
                   />
-
                 </div>
               </div>
 
               {/* Mobile Preview */}
               <div>
-                <div className="text-[11px] font-bold text-forest-dark uppercase tracking-wider mb-2">Mobile View</div>
+                <div className="text-[11px] font-bold text-forest-dark uppercase tracking-wider mb-2">
+                  Mobile View
+                </div>
                 <div
                   className="relative rounded-[2rem] overflow-hidden shadow-lg border-4 border-espresso/20 bg-espresso mx-auto"
                   style={{ width: "240px", aspectRatio: "1080/1080" }}
@@ -524,7 +525,6 @@ function Editor({
                     alt="Mobile Preview"
                     className="w-full h-full object-cover"
                   />
-
                 </div>
               </div>
             </div>

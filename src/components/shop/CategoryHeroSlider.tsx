@@ -48,15 +48,14 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
         setLoading(false);
       }
     }
-    
+
     void loadSlides();
   }, [categorySlug]);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start", duration: 50 },
-    [Autoplay({ delay: 5000, stopOnInteraction: false })]
-  );
-  
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start", duration: 50 }, [
+    Autoplay({ delay: 5000, stopOnInteraction: false }),
+  ]);
+
   const [selectedIndex, setSelectedIndex] = useState(0);
   const paused = useRef(false);
 
@@ -68,9 +67,12 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
     if (emblaApi) emblaApi.scrollNext();
   }, [emblaApi]);
 
-  const scrollTo = useCallback((index: number) => {
-    if (emblaApi) emblaApi.scrollTo(index);
-  }, [emblaApi]);
+  const scrollTo = useCallback(
+    (index: number) => {
+      if (emblaApi) emblaApi.scrollTo(index);
+    },
+    [emblaApi],
+  );
 
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
@@ -91,7 +93,8 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
       <section className="relative bg-cream-deep/40 py-16 sm:py-24 overflow-hidden">
         <div className="container-page relative z-10 text-center flex flex-col items-center">
           <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-espresso font-medium mb-4">
-            {categoryName || categorySlug.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase())}
+            {categoryName ||
+              categorySlug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())}
           </h1>
         </div>
       </section>
@@ -99,7 +102,7 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
   }
 
   return (
-    <section 
+    <section
       className="relative w-full max-w-[100vw] overflow-hidden bg-[#FDFBF7] group/section"
       onMouseEnter={() => {
         paused.current = true;
@@ -118,19 +121,21 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
           {slides.map((s, idx) => {
             const hasText = Boolean(s.title || s.subtitle || s.cta_label);
             const slideEl = (
-              <div 
-                key={s.id || idx} 
+              <div
+                key={s.id || idx}
                 className={`relative flex-none w-full min-w-0 ${
-                  s.mobile_image_url ? "aspect-[4/5] md:aspect-[1920/600]" : "aspect-[16/9] sm:aspect-[21/9] md:aspect-[1920/600]"
+                  s.mobile_image_url
+                    ? "aspect-[4/5] md:aspect-[1920/600]"
+                    : "aspect-[16/9] sm:aspect-[21/9] md:aspect-[1920/600]"
                 }`}
-                role="group" 
+                role="group"
                 aria-roledescription="slide"
               >
                 <picture className="w-full h-full block">
                   {s.mobile_image_url && (
-                    <source 
-                      media="(max-width: 767px)" 
-                      srcSet={s.mobile_image_url} 
+                    <source
+                      media="(max-width: 767px)"
+                      srcSet={s.mobile_image_url}
                       // @ts-ignore
                       fetchpriority={idx === 0 ? "high" : "auto"}
                     />
@@ -159,8 +164,8 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
                       </p>
                     )}
                     {s.cta_label && s.cta_href && (
-                      <Link 
-                        to={s.cta_href} 
+                      <Link
+                        to={s.cta_href}
                         className="bg-brand-orange text-white px-8 py-3 rounded-full text-sm font-bold tracking-widest hover:bg-white hover:text-brand-orange transition-all duration-300 shadow-lg"
                       >
                         {s.cta_label}
@@ -192,8 +197,8 @@ export function CategoryHeroSlider({ categorySlug, categoryName }: Props) {
               key={idx}
               onClick={() => scrollTo(idx)}
               className={`transition-all duration-300 rounded-full ${
-                idx === selectedIndex 
-                  ? "w-8 h-2 bg-brand-orange" 
+                idx === selectedIndex
+                  ? "w-8 h-2 bg-brand-orange"
                   : "w-2 h-2 bg-white/50 hover:bg-white"
               }`}
               aria-label={`Go to slide ${idx + 1}`}

@@ -2,7 +2,11 @@
 // a real dictionary loader (react-i18next / react-intl) without touching UI.
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-type Ctx = { locale: string; setLocale: (l: string) => void; t: (key: string, fallback?: string) => string };
+type Ctx = {
+  locale: string;
+  setLocale: (l: string) => void;
+  t: (key: string, fallback?: string) => string;
+};
 
 const I18nCtx = createContext<Ctx>({ locale: "en", setLocale: () => {}, t: (_, f) => f ?? "" });
 
@@ -18,7 +22,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, []);
   function set(l: string) {
     setLocale(l);
-    try { window.localStorage.setItem(KEY, l); } catch { /* noop */ }
+    try {
+      window.localStorage.setItem(KEY, l);
+    } catch {
+      /* noop */
+    }
     if (typeof document !== "undefined") document.documentElement.lang = l;
   }
   const t = (_key: string, fallback?: string) => fallback ?? _key;

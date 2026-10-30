@@ -12,7 +12,11 @@ export const Route = createFileRoute("/wishlist")({
   head: () => ({
     meta: [
       { title: "My Wishlist — Saurashtra Honey" },
-      { name: "description", content: "View and manage your saved raw honey varieties, gift sets, and single-flora reserves." },
+      {
+        name: "description",
+        content:
+          "View and manage your saved raw honey varieties, gift sets, and single-flora reserves.",
+      },
       { property: "og:title", content: "My Wishlist — Saurashtra Honey" },
       { property: "og:description", content: "Your saved honeys from Saurashtra Honey Bee Farm." },
       { property: "og:type", content: "website" },
@@ -57,7 +61,10 @@ function WishlistPage() {
           <div>
             <SectionEyebrow>Favorites</SectionEyebrow>
             <h1 className="mt-2 font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-espresso tracking-tight">
-              Saved for Later <span className="text-burnt-orange font-normal text-2xl sm:text-3xl">({items.length})</span>
+              Saved for Later{" "}
+              <span className="text-burnt-orange font-normal text-2xl sm:text-3xl">
+                ({items.length})
+              </span>
             </h1>
           </div>
           {items.length > 0 && (
@@ -75,9 +82,12 @@ function WishlistPage() {
             <div className="mx-auto size-20 rounded-full bg-cream border border-border/80 flex items-center justify-center text-burnt-orange mb-6 shadow-xs">
               <Heart className="size-8" />
             </div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-espresso">Your Wishlist is Empty</h2>
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-espresso">
+              Your Wishlist is Empty
+            </h2>
             <p className="mt-3 text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
-              Save your favorite raw forest honeys, gift sets, and single-flora reserves to keep track of what you love and order anytime.
+              Save your favorite raw forest honeys, gift sets, and single-flora reserves to keep
+              track of what you love and order anytime.
             </p>
             <div className="mt-8">
               <Link
@@ -92,7 +102,8 @@ function WishlistPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 sm:gap-8">
             {items.map((p) => {
-              const discount = p.mrp && p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
+              const discount =
+                p.mrp && p.mrp > p.price ? Math.round(((p.mrp - p.price) / p.mrp) * 100) : 0;
               return (
                 <div
                   key={p.slug}
@@ -123,7 +134,11 @@ function WishlistPage() {
                     >
                       <Trash2 className="size-4" />
                     </button>
-                    <Link to="/product/$slug" params={{ slug: p.slug }} className="block w-full h-full">
+                    <Link
+                      to="/product/$slug"
+                      params={{ slug: p.slug }}
+                      className="block w-full h-full"
+                    >
                       <img
                         src={p.image}
                         alt={p.name}
@@ -147,7 +162,9 @@ function WishlistPage() {
                       {p.name}
                     </Link>
                     {p.tagline && (
-                      <div className="text-xs text-muted-foreground mt-1 line-clamp-1">{p.tagline}</div>
+                      <div className="text-xs text-muted-foreground mt-1 line-clamp-1">
+                        {p.tagline}
+                      </div>
                     )}
 
                     <div className="mt-auto pt-4 flex items-center justify-between gap-3 border-t border-border/50">

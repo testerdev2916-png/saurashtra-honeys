@@ -1,6 +1,12 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet, Link, createRootRouteWithContext, useRouter, HeadContent, Scripts, ScrollRestoration
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  useRouter,
+  HeadContent,
+  Scripts,
+  ScrollRestoration,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
@@ -26,9 +32,16 @@ function NotFoundComponent() {
       <div className="max-w-md text-center">
         <h1 className="text-7xl font-bold text-foreground">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">The page you're looking for doesn't exist or has been moved.</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
         <div className="mt-6">
-          <Link to="/" className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">Go home</Link>
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
+            Go home
+          </Link>
         </div>
       </div>
     </div>
@@ -38,15 +51,32 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   console.error(error);
   const router = useRouter();
-  useEffect(() => { reportLovableError(error, { boundary: "tanstack_root_error_component" }); }, [error]);
+  useEffect(() => {
+    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+  }, [error]);
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">This page didn't load</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-foreground">
+          This page didn't load
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">Something went wrong on our end.</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">Try again</button>
-          <a href="/" className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent">Go home</a>
+          <button
+            onClick={() => {
+              router.invalidate();
+              reset();
+            }}
+            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            Try again
+          </button>
+          <a
+            href="/"
+            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground hover:bg-accent"
+          >
+            Go home
+          </a>
         </div>
       </div>
     </div>
@@ -80,44 +110,57 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       ],
       links: [
         { rel: "stylesheet", href: appCss },
-        { 
-          rel: "icon", 
-          href: versionedUrl, 
-          type: rawUrl.split('?')[0].toLowerCase().endsWith(".svg") 
-            ? "image/svg+xml" 
-            : rawUrl.split('?')[0].toLowerCase().endsWith(".png") 
-              ? "image/png" 
+        {
+          rel: "icon",
+          href: versionedUrl,
+          type: rawUrl.split("?")[0].toLowerCase().endsWith(".svg")
+            ? "image/svg+xml"
+            : rawUrl.split("?")[0].toLowerCase().endsWith(".png")
+              ? "image/png"
               : "image/x-icon",
         },
         {
           rel: "preload",
           as: "image",
-          href: loaderData?.settings?.logo_url || "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+          href:
+            loaderData?.settings?.logo_url ||
+            "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
         },
         { rel: "manifest", href: "/manifest.webmanifest" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-        { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" },
+        {
+          rel: "stylesheet",
+          href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+        },
       ],
-    scripts: [
-      {
-        type: "application/ld+json",
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "Organization",
-          name: "Saurashtra Honey",
-          url: "https://saurastrahoney.com",
-          logo: loaderData?.settings?.logo_url || "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-          description: "Raw, unfiltered honey from the wildflower farms of Saurashtra.",
-          contactPoint: { "@type": "ContactPoint", telephone: "+91-96646-37665", contactType: "customer service", email: "hello@saurastrahoney.com", areaServed: "IN" },
-          sameAs: [
-            "https://www.instagram.com/saurashtra_honey",
-            "https://www.facebook.com/Saurashtrahoneybeefarm/",
-            "https://www.youtube.com/@saurashtrahoney2059"
-          ],
-        }),
-      },
-    ],
+      scripts: [
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            name: "Saurashtra Honey",
+            url: "https://saurastrahoney.com",
+            logo:
+              loaderData?.settings?.logo_url ||
+              "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+            description: "Raw, unfiltered honey from the wildflower farms of Saurashtra.",
+            contactPoint: {
+              "@type": "ContactPoint",
+              telephone: "+91-96646-37665",
+              contactType: "customer service",
+              email: "hello@saurastrahoney.com",
+              areaServed: "IN",
+            },
+            sameAs: [
+              "https://www.instagram.com/saurashtra_honey",
+              "https://www.facebook.com/Saurashtrahoneybeefarm/",
+              "https://www.youtube.com/@saurashtrahoney2059",
+            ],
+          }),
+        },
+      ],
     };
   },
   shellComponent: RootShell,
@@ -128,8 +171,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   const envScript = `window.__ENV = { 
-    SUPABASE_URL: ${JSON.stringify(typeof process !== 'undefined' ? process.env.SUPABASE_URL : "")}, 
-    SUPABASE_PUBLISHABLE_KEY: ${JSON.stringify(typeof process !== 'undefined' ? process.env.SUPABASE_PUBLISHABLE_KEY : "")} 
+    SUPABASE_URL: ${JSON.stringify(typeof process !== "undefined" ? process.env.SUPABASE_URL : "")}, 
+    SUPABASE_PUBLISHABLE_KEY: ${JSON.stringify(typeof process !== "undefined" ? process.env.SUPABASE_PUBLISHABLE_KEY : "")} 
   };`;
 
   return (
@@ -137,7 +180,9 @@ function RootShell({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: envScript }} />
         <HeadContent />
-        <script dangerouslySetInnerHTML={{ __html: `!function(f,b,e,v,n,t,s)
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `!function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
@@ -146,15 +191,24 @@ t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '28667428549582029');
-fbq('track', 'PageView');` }} />
+fbq('track', 'PageView');`,
+          }}
+        />
         <noscript>
-          <img height="1" width="1" style={{ display: "none" }} src="https://www.facebook.com/tr?id=28667428549582029&ev=PageView&noscript=1" />
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=28667428549582029&ev=PageView&noscript=1"
+          />
         </noscript>
       </head>
       <body>
         {children}
         <Scripts />
-        <script dangerouslySetInnerHTML={{ __html: `
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
           if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
               for(let registration of registrations) {
@@ -171,7 +225,9 @@ fbq('track', 'PageView');` }} />
               }
             });
           }
-        `}} />
+        `,
+          }}
+        />
       </body>
     </html>
   );

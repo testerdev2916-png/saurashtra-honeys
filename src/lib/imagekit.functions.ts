@@ -21,14 +21,19 @@ export const getImageKitAuthParams = createServerFn({ method: "POST" })
 
     const pubKey = process.env.IMAGEKIT_PUBLIC_KEY || process.env.VITE_IMAGEKIT_PUBLIC_KEY;
     const privKey = process.env.IMAGEKIT_PRIVATE_KEY;
-    const urlEp = process.env.IMAGEKIT_URL_ENDPOINT || process.env.VITE_IMAGEKIT_URL_ENDPOINT || 'https://ik.imagekit.io/fqbnkx3tz';
+    const urlEp =
+      process.env.IMAGEKIT_URL_ENDPOINT ||
+      process.env.VITE_IMAGEKIT_URL_ENDPOINT ||
+      "https://ik.imagekit.io/fqbnkx3tz";
 
-    if (!pubKey) console.error("[ImageKit API] Error: Missing IMAGEKIT_PUBLIC_KEY in environment variables");
-    if (!privKey) console.error("[ImageKit API] Error: Missing IMAGEKIT_PRIVATE_KEY in environment variables");
+    if (!pubKey)
+      console.error("[ImageKit API] Error: Missing IMAGEKIT_PUBLIC_KEY in environment variables");
+    if (!privKey)
+      console.error("[ImageKit API] Error: Missing IMAGEKIT_PRIVATE_KEY in environment variables");
 
     const imagekit = new ImageKit({
-      publicKey: pubKey || '',
-      privateKey: privKey || '',
+      publicKey: pubKey || "",
+      privateKey: privKey || "",
       urlEndpoint: urlEp,
     });
 
