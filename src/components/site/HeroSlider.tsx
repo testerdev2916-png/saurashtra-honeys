@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { optimizeImage } from "@/lib/product-images";
 
 export type HeroSlide = {
   image: string;
@@ -161,17 +162,18 @@ export function HeroSlider({
                       <source
                         key={`mob-${s.updatedAt || s.mobileImage}`}
                         media="(max-width: 767px)"
-                        srcSet={s.mobileImage}
+                        srcSet={optimizeImage(s.mobileImage, { width: 800, quality: 80 })}
                         // @ts-ignore: fetchpriority is valid in newer React versions
                         fetchpriority={idx === 0 ? "high" : "auto"}
                       />
                     )}
                     <img
                       key={`desk-${s.updatedAt || s.image}`}
-                      src={s.image}
+                      src={optimizeImage(s.image, { width: 1800, quality: 80 })}
                       alt={s.title}
                       className="w-full h-full object-cover object-center"
                       loading={idx === 0 ? "eager" : "lazy"}
+                      decoding="async"
                       // @ts-ignore: fetchpriority is valid in newer React versions
                       fetchpriority={idx === 0 ? "high" : "auto"}
                     />

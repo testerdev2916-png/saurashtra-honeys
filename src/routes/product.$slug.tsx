@@ -50,6 +50,7 @@ import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
 import { getCategoryShopSlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
+import { optimizeImage } from "@/lib/product-images";
 import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -480,9 +481,10 @@ function ProductPage() {
                   }`}
                 >
                   <img
-                    src={src}
+                    src={optimizeImage(src, { width: 180, quality: 80 })}
                     alt={`${p.name} view ${i + 1}`}
                     loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-contain bg-white object-center aspect-square"
                   />
                 </button>
@@ -511,8 +513,10 @@ function ProductPage() {
               <ZoomIn className="size-4 text-burnt-orange" />
             </button>
             <img
-              src={gallery[heroIdx] || gallery[0]}
+              src={optimizeImage(gallery[heroIdx] || gallery[0], { width: 1000, quality: 85 })}
               alt={p.name}
+              fetchPriority="high"
+              decoding="async"
               className="w-full h-full object-contain aspect-square cursor-zoom-in transition-transform duration-500"
               onClick={() => setZoom(true)}
             />
@@ -1118,13 +1122,20 @@ function ProductPage() {
                   onClick={() => setHeroIdx(i)}
                   className={`bg-cream/10 rounded-lg overflow-hidden aspect-square border ${i === heroIdx ? "border-gold" : "border-transparent"}`}
                 >
-                  <img src={src} alt="" className="w-full h-full object-cover" />
+                  <img
+                    src={optimizeImage(src, { width: 160, quality: 75 })}
+                    alt=""
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
             <img
-              src={gallery[heroIdx] || gallery[0]}
+              src={optimizeImage(gallery[heroIdx] || gallery[0], { width: 1400, quality: 85 })}
               alt={p.name}
+              decoding="async"
               className="w-full h-auto max-h-[85vh] object-contain"
             />
           </div>
@@ -1210,9 +1221,11 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
           {images.map((src, idx) => (
             <div key={idx} className="flex-[0_0_100%] min-w-0 aspect-square relative">
               <img
-                src={src}
+                src={optimizeImage(src, { width: 750, quality: 80 })}
                 alt={`${name} view ${idx + 1}`}
-                loading="lazy"
+                loading={idx === 0 ? "eager" : "lazy"}
+                fetchPriority={idx === 0 ? "high" : "auto"}
+                decoding="async"
                 className="w-full max-w-full h-full object-contain bg-white object-center pointer-events-none"
               />
             </div>
@@ -1247,8 +1260,10 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
               }`}
             >
               <img
-                src={src}
+                src={optimizeImage(src, { width: 160, quality: 75 })}
                 alt={`${name} thumb ${idx + 1}`}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-contain bg-white"
               />
             </button>

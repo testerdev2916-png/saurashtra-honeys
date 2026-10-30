@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { useLocation } from "@tanstack/react-router";
 import { useSiteSettings } from "@/lib/site-settings";
 
 declare global {
@@ -29,6 +30,13 @@ function injectInline(code: string, id: string) {
 export function AnalyticsScripts() {
   const { analytics } = useSiteSettings();
   const { ga4_measurement_id: ga, clarity_id: cl, gsc_verification: gsc } = analytics;
+  const location = useLocation();
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.fbq) {
+      window.fbq("track", "PageView");
+    }
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     if (ga) {
@@ -70,16 +78,7 @@ export function AnalyticsScripts() {
       view_item_list: "ViewCategory",
     };
 
-    // Listen to route changes to fire PageView on SPA navigations
-    let lastUrl = window.location.href;
-    const observer = new MutationObserver(() => {
-      if (lastUrl !== window.location.href) {
-        lastUrl = window.location.href;
-        if (window.fbq) window.fbq("track", "PageView");
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-
+    // Fanout GA4 dataLayer events to Meta Pixel + Clarity
     const handler = (event: Event) => {
       const e = event as CustomEvent<Record<string, unknown>>;
       const name = e.type.replace(/^analytics:/, "");

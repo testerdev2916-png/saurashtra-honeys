@@ -8,6 +8,7 @@ import {
   normalizeSizeKey,
   type Product,
 } from "@/lib/products";
+import { optimizeImage } from "@/lib/product-images";
 import { useCart } from "@/lib/cart";
 import { Link } from "@tanstack/react-router";
 import { Leaf, ShoppingCart, Star, X } from "lucide-react";
@@ -85,7 +86,8 @@ export function QuickView({
               <img
                 key={activeImage}
                 loading="lazy"
-                src={activeImage}
+                decoding="async"
+                src={optimizeImage(activeImage, { width: 600, quality: 80 })}
                 alt={displayName}
                 className="w-full h-full object-cover"
               />

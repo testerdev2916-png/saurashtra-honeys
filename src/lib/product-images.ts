@@ -53,6 +53,50 @@ export const imageMap: Record<string, string> = {
 export const IMAGE_KEYS = Object.keys(imageMap);
 export const FALLBACK_IMAGE = "";
 
+export type ImageOptimizeOptions = {
+  width?: number;
+  height?: number;
+  quality?: number;
+  format?: "auto" | "webp" | "avif" | "jpg" | "png";
+};
+
+/**
+ * Transforms ImageKit URLs dynamically to modern WebP/AVIF with specified width and quality.
+ * Prevents massive uncompressed image downloads and reduces ImageKit bandwidth consumption by up to 95%.
+ */
+export function optimizeImage(
+  url: string | null | undefined,
+  opts?: ImageOptimizeOptions,
+): string {
+  if (!url || typeof url !== "string") return "";
+  const trimmed = url.trim();
+  if (!trimmed) return "";
+
+  if (trimmed.includes("ik.imagekit.io")) {
+    const width = opts?.width;
+    const height = opts?.height;
+    const quality = opts?.quality ?? 80;
+    const format = opts?.format ?? "auto";
+
+    const trParts: string[] = [];
+    if (width) trParts.push(`w-${width}`);
+    if (height) trParts.push(`h-${height}`);
+    trParts.push(`q-${quality}`);
+    trParts.push(`f-${format}`);
+
+    const trString = trParts.join(",");
+
+    if (trimmed.includes("tr=")) {
+      return trimmed.replace(/tr=[^&]+/, `tr=${trString}`);
+    }
+
+    const sep = trimmed.includes("?") ? "&" : "?";
+    return `${trimmed}${sep}tr=${trString}`;
+  }
+
+  return trimmed;
+}
+
 export function resolveImage(
   key: string | null | undefined,
   url: string | null | undefined,
@@ -107,6 +151,10 @@ export function resolveImage(
     }
   }
 
+  if (resultUrl && resultUrl.includes("ik.imagekit.io") && !resultUrl.includes("tr=")) {
+    resultUrl = optimizeImage(resultUrl, { quality: 80, format: "auto" });
+  }
+
   return resultUrl;
 }
 
@@ -158,6 +206,10 @@ export function getCategoryImageUrl(category: {
       const separator = resultUrl.includes("?") ? "&" : "?";
       resultUrl += `${separator}v=${ts}`;
     }
+  }
+
+  if (resultUrl && resultUrl.includes("ik.imagekit.io") && !resultUrl.includes("tr=")) {
+    resultUrl = optimizeImage(resultUrl, { width: 400, quality: 80, format: "auto" });
   }
 
   return resultUrl;

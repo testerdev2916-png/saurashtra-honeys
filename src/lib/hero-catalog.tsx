@@ -1,6 +1,6 @@
 import React from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveImage, FALLBACK_IMAGE } from "@/lib/product-images";
+import { resolveImage, FALLBACK_IMAGE, optimizeImage } from "@/lib/product-images";
 import type { HeroSlide } from "@/components/site/HeroSlider";
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
@@ -68,13 +68,17 @@ export type HeroRow = {
 };
 
 export function heroRowToSlide(r: HeroRow): HeroSlide {
+  const resolved = resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE, r.updated_at);
   return {
     eyebrow: r.eyebrow || undefined,
     title: r.title || "Promotional Banner",
     description: r.subtitle || undefined,
-    image: resolveImage(r.image_key, r.image_url, FALLBACK_IMAGE, r.updated_at),
+    image: optimizeImage(resolved, { width: 1800, quality: 80 }),
     mobileImage: r.mobile_image_url
-      ? `${r.mobile_image_url}${r.mobile_image_url.includes("?") ? "&" : "?"}v=${new Date(r.updated_at).getTime()}`
+      ? optimizeImage(
+          `${r.mobile_image_url}${r.mobile_image_url.includes("?") ? "&" : "?"}v=${new Date(r.updated_at).getTime()}`,
+          { width: 800, quality: 80 },
+        )
       : undefined,
     ctaText: r.cta_label || undefined,
     ctaTo: r.cta_href || "/shop",

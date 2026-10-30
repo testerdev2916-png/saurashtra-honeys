@@ -15,6 +15,7 @@ import { useWishlist } from "@/lib/wishlist";
 import { useCompare } from "@/lib/compare";
 import { toast } from "sonner";
 import { track, toItem } from "@/lib/analytics";
+import { optimizeImage } from "@/lib/product-images";
 
 export function ProductCard({
   p,
@@ -138,9 +139,10 @@ export function ProductCard({
         >
           <img
             key={activeImage}
-            src={activeImage}
+            src={optimizeImage(activeImage, { width: 500, quality: 80 })}
             alt={displayName}
             loading="lazy"
+            decoding="async"
             className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out"
           />
         </Link>

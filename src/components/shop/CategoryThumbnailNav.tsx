@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { type ShopCategory } from "@/lib/category-catalog";
+import { optimizeImage } from "@/lib/product-images";
 import heroProductsImg from "@/assets/hero-products.jpg"; // Fallback image for All Honey
 
 interface CategoryThumbnailNavProps {
@@ -58,8 +59,10 @@ export function CategoryThumbnailNav({
                 >
                   <img
                     key={`${cat.slug}-${cat.updated_at ?? cat.image_url ?? "fallback"}`}
-                    src={cat.image_url || undefined}
+                    src={optimizeImage(cat.image_url, { width: 260, quality: 80 }) || undefined}
                     alt={cat.name}
+                    loading="lazy"
+                    decoding="async"
                     className={`w-full h-full object-cover transition-transform duration-500 ${
                       isSelected ? "scale-105" : "group-hover:scale-105"
                     }`}

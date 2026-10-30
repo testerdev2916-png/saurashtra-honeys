@@ -22,6 +22,7 @@ import { AnalyticsScripts } from "@/components/site/AnalyticsScripts";
 import { WhatsAppFloat } from "@/components/site/WhatsAppFloat";
 
 import { companySettingsQueryOptions } from "@/lib/company-settings";
+import { optimizeImage } from "@/lib/product-images";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -96,7 +97,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: ({ loaderData }) => {
     const rawUrl = loaderData?.settings?.favicon_url?.trim() || "/favicon-v2.ico";
     const sep = rawUrl.includes("?") ? "&" : "?";
-    const versionedUrl = `${rawUrl}${sep}v=${Date.now()}`;
+    const versionedUrl = `${rawUrl}${sep}v=2`;
 
     return {
       meta: [
@@ -110,6 +111,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       ],
       links: [
         { rel: "stylesheet", href: appCss },
+        { rel: "preconnect", href: "https://ik.imagekit.io", crossOrigin: "anonymous" },
+        { rel: "dns-prefetch", href: "https://ik.imagekit.io" },
         {
           rel: "icon",
           href: versionedUrl,
@@ -122,9 +125,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         {
           rel: "preload",
           as: "image",
-          href:
+          href: optimizeImage(
             loaderData?.settings?.logo_url ||
-            "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+              "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
+            { width: 300, quality: 80, format: "auto" },
+          ),
         },
         { rel: "manifest", href: "/manifest.webmanifest" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -216,13 +221,6 @@ fbq('track', 'PageView');`,
               }
             }).catch(function(err) {
               console.error('Service Worker unregistration failed: ', err);
-            });
-          }
-          if (window.caches) {
-            caches.keys().then(function(names) {
-              for (let name of names) {
-                caches.delete(name);
-              }
             });
           }
         `,

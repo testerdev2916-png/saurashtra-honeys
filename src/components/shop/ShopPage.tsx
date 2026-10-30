@@ -28,6 +28,7 @@ import {
 } from "@/lib/category-catalog";
 import { track, toItem } from "@/lib/analytics";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
+import { optimizeImage } from "@/lib/product-images";
 import { IllustratedBrandSection } from "@/components/site/IllustratedBrandSection";
 import { AiHoneyFinder } from "@/components/site/AiHoneyFinder";
 
@@ -410,10 +411,11 @@ export function ShopPage({
                       className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
                     >
                       <img
-                        src={c.image_url || undefined}
+                        src={optimizeImage(c.image_url, { width: 400, quality: 80 }) || undefined}
                         alt={c.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
                         loading="lazy"
+                        decoding="async"
                         onError={(event) => {
                           console.error("[CATEGORY IMAGE FAILED]", {
                             slug: c.slug,
@@ -431,10 +433,11 @@ export function ShopPage({
                       className="group relative block bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-500 aspect-square snap-start"
                     >
                       <img
-                        src={c.image_url || undefined}
+                        src={optimizeImage(c.image_url, { width: 400, quality: 80 }) || undefined}
                         alt={c.name}
                         className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.04] transition-transform duration-700 ease-out"
                         loading="lazy"
+                        decoding="async"
                         onError={(event) => {
                           console.error("[CATEGORY IMAGE FAILED]", {
                             slug: c.slug,

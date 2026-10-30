@@ -25,9 +25,9 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
-import { getCategoryImageUrl } from "@/lib/product-images";
+import { getCategoryImageUrl, optimizeImage } from "@/lib/product-images";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
-import { fetchPublicHeroRows, heroRowToSlide } from "@/lib/hero-catalog";
+import { fetchPublicHeroRows, heroRowToSlide, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import { useServerFn } from "@tanstack/react-start";
 import { type Product } from "@/lib/products";
 import { type ShopCategory, fetchShopCategories } from "@/lib/category-catalog";
@@ -59,8 +59,10 @@ import prodLiquidImg from "@/assets/prod-liquid.jpg";
 /* =========================================================================
    1. HERO SECTION (Reference: Top Left text + CTA + Trust Badges, Right Image)
    ========================================================================= */
-export function HomeHero() {
-  const [slides, setSlides] = React.useState<HeroSlide[]>([]);
+export function HomeHero({ initialSlides }: { initialSlides?: HeroSlide[] }) {
+  const [slides, setSlides] = React.useState<HeroSlide[]>(() =>
+    initialSlides && initialSlides.length > 0 ? initialSlides : getDefaultHeroSlides("home"),
+  );
   const getRows = useServerFn(fetchPublicHeroRows);
 
   React.useEffect(() => {
@@ -78,16 +80,6 @@ export function HomeHero() {
    2. MAIN TRUST STRIP (Horizontal 6-card row with thin orange icons)
    ========================================================================= */
 export function HomeTrustStrip({ settings }: { settings?: Record<string, any> }) {
-  const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>([]);
-  const [loading, setLoading] = React.useState(true);
-
-  React.useEffect(() => {
-    fetchAllHomepageTrustItems()
-      .then((data) => setDbItems(data))
-      .catch((err) => console.warn("Failed to fetch trust items, using fallback", err))
-      .finally(() => setLoading(false));
-  }, []);
-
   const fallbackItems = [
     { label: "Pure No Additives", img: "/images/trust/pure_no_additives.png" },
     { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.png" },
@@ -96,6 +88,16 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
     { label: "Lab Tested", img: "/images/trust/lab_tested.png" },
     { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.png" },
   ];
+
+  const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>([]);
+
+  React.useEffect(() => {
+    fetchAllHomepageTrustItems()
+      .then((data) => {
+        if (data && data.length > 0) setDbItems(data);
+      })
+      .catch((err) => console.warn("Failed to fetch trust items, using fallback", err));
+  }, []);
 
   const items =
     dbItems.length > 0
@@ -110,23 +112,22 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
         })
       : fallbackItems;
 
-  if (loading) return null;
-
   return (
     <section className="bg-cream-deep/40 border-y border-border/80 py-8 sm:py-10">
       <div className="container-page">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8">
           {items.map(({ label, img }, idx) => (
             <div key={idx} className="flex flex-col items-center text-center p-2 group">
-              <div className="size-28 sm:size-36 lg:size-40 mb-5 flex items-center justify-center transition-transform duration-500 group-hover:scale-105 group-hover:-translate-y-1">
+              <div className="size-16 sm:size-20 rounded-full bg-cream flex items-center justify-center p-3 mb-3 border border-border shadow-xs group-hover:scale-105 transition-transform duration-300">
                 <img
-                  src={img}
+                  src={optimizeImage(img, { width: 160, quality: 80 })}
                   alt={label}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain filter drop-shadow-xs"
                   loading="lazy"
+                  decoding="async"
                 />
               </div>
-              <span className="text-xs sm:text-[13px] font-bold text-espresso leading-snug group-hover:text-brand-orange transition-colors">
+              <span className="font-serif text-sm sm:text-base font-semibold text-espresso">
                 {label}
               </span>
             </div>
@@ -187,6 +188,27 @@ export function HomeMarqueeStrip({ settings }: { settings?: Record<string, any> 
 /* =========================================================================
    3. SHOP BY CATEGORY (6 circular cards with images)
    ========================================================================= */
+const FALLBACK_CATEGORY_IMAGE_BY_SLUG: Record<string, string> = {
+  honey: heroHoneyImg,
+  beeswax: prodHoneycombImg,
+  "bee-pollen": beeFarmImg,
+  "beeswax-candle": honeycombBeesImg,
+  "beeswax-products": prodGiftpackImg,
+  "beauty-products": prodLycheeImg,
+  "all-products": heroProductsImg,
+};
+
+function formatHomepageCategories(allCats: any[]) {
+  const baseCats = allCats.map((cat) => ({
+    name: cat.name,
+    img: getCategoryImageUrl(cat) || FALLBACK_CATEGORY_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
+    filter: cat.name,
+    slug: cat.slug,
+    updatedAt: cat.updatedAt,
+  }));
+  return [...baseCats, ...baseCats, ...baseCats];
+}
+
 export function HomeShopByCategory({
   settings,
   initialCategories,
@@ -194,8 +216,12 @@ export function HomeShopByCategory({
   settings?: Record<string, any>;
   initialCategories?: any[];
 }) {
-  const [displayCats, setDisplayCats] = React.useState<any[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const [displayCats, setDisplayCats] = React.useState<any[]>(() =>
+    initialCategories && initialCategories.length > 0 ? formatHomepageCategories(initialCategories) : [],
+  );
+  const [loading, setLoading] = React.useState(
+    () => !initialCategories || initialCategories.length === 0,
+  );
 
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, dragFree: true, align: "start" }, [
     Autoplay({ delay: 2500, stopOnInteraction: false, stopOnMouseEnter: true }),
@@ -210,40 +236,24 @@ export function HomeShopByCategory({
   }, [emblaApi]);
 
   React.useEffect(() => {
-    const processCategories = (allCats: any[]) => {
-      const FALLBACK_IMAGE_BY_SLUG: Record<string, string> = {
-        honey: heroHoneyImg,
-        beeswax: prodHoneycombImg,
-        "bee-pollen": beeFarmImg,
-        "beeswax-candle": honeycombBeesImg,
-        "beeswax-products": prodGiftpackImg,
-        "beauty-products": prodLycheeImg,
-        "all-products": heroProductsImg,
-      };
-      const baseCats = allCats.map((cat) => ({
-        name: cat.name,
-        img: getCategoryImageUrl(cat) || FALLBACK_IMAGE_BY_SLUG[cat.slug] || heroHoneyImg,
-        filter: cat.name,
-        slug: cat.slug,
-        updatedAt: cat.updatedAt,
-      }));
-      setDisplayCats([...baseCats, ...baseCats, ...baseCats]);
-      setLoading(false);
-    };
-
     if (initialCategories && initialCategories.length > 0) {
-      processCategories(initialCategories);
-    } else {
-      fetchShopCategories()
-        .then(processCategories)
-        .catch((err) => {
-          console.error("Failed to load categories on homepage:", err);
-          setLoading(false);
-        });
+      setDisplayCats(formatHomepageCategories(initialCategories));
+      setLoading(false);
+      return;
     }
+
+    fetchShopCategories()
+      .then((allCats) => {
+        setDisplayCats(formatHomepageCategories(allCats));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to load categories on homepage:", err);
+        setLoading(false);
+      });
   }, [initialCategories]);
 
-  if (loading) return null;
+  if (loading && displayCats.length === 0) return null;
 
   const s_eyebrow = settings?.eyebrow ?? "DISCOVER";
   const s_heading = settings?.heading ?? "Explore Our World";
@@ -356,9 +366,10 @@ export function HomeShopByCategory({
                     <div className="absolute inset-0 w-full h-full bg-[#F8F5EF]/50 overflow-hidden">
                       <img
                         key={cat.updatedAt || cat.img}
-                        src={cat.img}
+                        src={optimizeImage(cat.img, { width: 450, quality: 80 })}
                         alt={cat.name}
                         loading="lazy"
+                        decoding="async"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = prodLiquidImg;
                         }}

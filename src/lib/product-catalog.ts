@@ -317,7 +317,19 @@ async function fetchAllVariantsMap(
   return undefined;
 }
 
-export async function fetchProducts(): Promise<Product[]> {
+let cachedProducts: Product[] | null = null;
+let lastProductsFetchTime = 0;
+const PRODUCTS_CACHE_TTL = 120_000; // 2 minutes in-memory cache
+
+export function invalidateProductsCache() {
+  cachedProducts = null;
+  lastProductsFetchTime = 0;
+}
+
+export async function fetchProducts(options?: { bypassCache?: boolean }): Promise<Product[]> {
+  if (!options?.bypassCache && cachedProducts && Date.now() - lastProductsFetchTime < PRODUCTS_CACHE_TTL) {
+    return cachedProducts;
+  }
   try {
     const { data, error } = await supabase
       .from("products")
@@ -377,11 +389,15 @@ export async function fetchProducts(): Promise<Product[]> {
 
     const productIds = canonicalRows.map((r) => r.id).filter(Boolean);
     const varMap = await fetchAllVariantsMap(productIds);
-    return canonicalRows.map((r) => {
+    const result = canonicalRows.map((r) => {
       const pSlug = find250GmVariantSlug(r);
       const parentRow = pSlug ? parent250Map.get(pSlug.toLowerCase()) : null;
       return toProduct(r, varMap, undefined, parentRow);
     });
+
+    cachedProducts = result;
+    lastProductsFetchTime = Date.now();
+    return result;
   } catch (err) {
     console.error("[fetchProducts] Exception:", err);
     throw err;
