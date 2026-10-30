@@ -20,9 +20,8 @@ export type CompanySettings = {
 export const DEFAULT_COMPANY_SETTINGS: CompanySettings = {
   name: "Saurashtra Honey",
   tagline: "Pure • Traceable • Lab-tested",
-  logo_url: "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png",
-  favicon_url:
-    "https://ik.imagekit.io/fqbnkx3tz/saurashtra-honey/logos/fevicon_for_bees_9AwWZ6YRm.png",
+  logo_url: "/saurashtra-honey-logo-complete.png",
+  favicon_url: "/favicon-v2.ico",
 };
 
 export const companySettingsQueryOptions = {
@@ -77,6 +76,6 @@ export function getFaviconUrl(settings?: CompanySettings | null): string {
   if (rawUrl === "/favicon-v2.ico") return rawUrl;
 
   const sep = rawUrl.includes("?") ? "&" : "?";
-  const ts = settings?.updated_at ? new Date(settings.updated_at).getTime() : Date.now();
+  const ts = settings?.updated_at ? new Date(settings.updated_at).getTime() : 2;
   return `${rawUrl}${sep}v=${ts}`;
 }

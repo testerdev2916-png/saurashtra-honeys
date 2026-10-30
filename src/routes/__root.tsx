@@ -214,13 +214,9 @@ fbq('track', 'PageView');`,
         <script
           dangerouslySetInnerHTML={{
             __html: `
-          if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then(function(registrations) {
-              for(let registration of registrations) {
-                registration.unregister();
-              }
-            }).catch(function(err) {
-              console.error('Service Worker unregistration failed: ', err);
+          if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/service-worker.js').catch(function() {});
             });
           }
         `,
