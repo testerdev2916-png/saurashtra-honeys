@@ -4,6 +4,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { toast } from "sonner";
 import { listAdminSlides, upsertSlide, deleteSlide } from "@/lib/admin-catalog.functions";
 import { IMAGE_KEYS, resolveImage, FALLBACK_IMAGE } from "@/lib/product-images";
+import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { supabase } from "@/integrations/supabase/client";
 import {
   BtnGhost,
@@ -255,6 +256,8 @@ function Editor({
   const [f, setF] = useState<Partial<Slide>>({ ...initial });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadingDesktop, setUploadingDesktop] = useState(false);
+  const [uploadingMobile, setUploadingMobile] = useState(false);
   const save = useServerFn(upsertSlide);
 
   // Image uploading temporarily removed as requested by user.
@@ -343,26 +346,84 @@ function Editor({
               {/* Desktop Image URL */}
               <div className="md:col-span-2 pt-2 border-t border-border">
                 <Field label="Desktop Banner Image URL * (Required)">
-                  <input
-                    type="url"
-                    value={f.image_url ?? ""}
-                    onChange={(e) => setF({ ...f, image_url: e.target.value, image_key: null })}
-                    placeholder="https://..."
-                    className={inp}
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="url"
+                      value={f.image_url ?? ""}
+                      onChange={(e) => setF({ ...f, image_url: e.target.value, image_key: null })}
+                      placeholder="https://ik.imagekit.io/spuuavgve/..."
+                      className={`${inp} flex-1`}
+                    />
+                    <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-cream-deep border border-border rounded-lg text-xs font-bold text-forest-dark hover:bg-gold/20 cursor-pointer shrink-0 transition-colors">
+                      <Upload className="size-3.5 text-brand-orange" />
+                      <span>{uploadingDesktop ? "Uploading..." : "Upload File"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingDesktop}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            setUploadingDesktop(true);
+                            const url = await uploadToImageKit(file, "general");
+                            if (url) {
+                              setF((prev) => ({ ...prev, image_url: url, image_key: null }));
+                              toast.success("Desktop banner uploaded to new ImageKit account!");
+                            }
+                          } catch (err: any) {
+                            toast.error(err.message || "Failed to upload banner");
+                          } finally {
+                            setUploadingDesktop(false);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </Field>
               </div>
 
               {/* Mobile Image URL */}
               <div className="md:col-span-2 pt-2 border-t border-border">
                 <Field label="Mobile Banner Image URL (Optional, falls back to desktop)">
-                  <input
-                    type="url"
-                    value={f.mobile_image_url ?? ""}
-                    onChange={(e) => setF({ ...f, mobile_image_url: e.target.value })}
-                    placeholder="https://..."
-                    className={inp}
-                  />
+                  <div className="flex gap-2 items-center">
+                    <input
+                      type="url"
+                      value={f.mobile_image_url ?? ""}
+                      onChange={(e) => setF({ ...f, mobile_image_url: e.target.value })}
+                      placeholder="https://ik.imagekit.io/spuuavgve/..."
+                      className={`${inp} flex-1`}
+                    />
+                    <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-cream-deep border border-border rounded-lg text-xs font-bold text-forest-dark hover:bg-gold/20 cursor-pointer shrink-0 transition-colors">
+                      <Upload className="size-3.5 text-brand-orange" />
+                      <span>{uploadingMobile ? "Uploading..." : "Upload File"}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingMobile}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          try {
+                            setUploadingMobile(true);
+                            const url = await uploadToImageKit(file, "banners");
+                            if (url) {
+                              setF((prev) => ({ ...prev, mobile_image_url: url }));
+                              toast.success("Mobile banner uploaded to new ImageKit account!");
+                            }
+                          } catch (err: any) {
+                            toast.error(err.message || "Failed to upload banner");
+                          } finally {
+                            setUploadingMobile(false);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </Field>
               </div>
 
@@ -381,7 +442,7 @@ function Editor({
 
             <div className="mt-6 flex gap-3">
               <BtnPrimary
-                disabled={busy || uploading}
+                disabled={busy || uploading || uploadingDesktop || uploadingMobile}
                 onClick={async () => {
                   if (!f.title) {
                     toast.error("Please provide a Slide Title.");
