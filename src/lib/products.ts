@@ -17,6 +17,7 @@ import honeyDrizzle from "@/assets/honey-drizzle.jpg";
 import honeycombBees from "@/assets/honeycomb-bees.jpg";
 import prodLiquid from "@/assets/prod-liquid.jpg";
 import teamBeekeepers from "@/assets/team-beekeepers.jpg";
+import { rewriteImageKitUrl } from "./product-images";
 
 export const localImageMap: Record<string, string> = {
   "prod-ajwain": ajwain,
@@ -1102,53 +1103,56 @@ export function getVariantByLabel(product: Product, label?: string): ProductVari
 }
 
 export function resolveActiveImage(product: Product, variant?: ProductVariant): string {
-  const isSupabase = (url: string) => url.includes("supabase.co");
+  const isLegacyFqbn = (url?: string | null) =>
+    !url || url.includes("fqbnkx3tz") || url.includes("supabase.co");
 
   const p = product as any;
 
   if (variant) {
-    if (variant.image_url && variant.image_url.trim().length > 0 && !isSupabase(variant.image_url))
-      return variant.image_url;
-    if (variant.image && variant.image.trim().length > 0 && !isSupabase(variant.image))
-      return variant.image;
+    if (variant.image_url && variant.image_url.trim().length > 0 && !isLegacyFqbn(variant.image_url))
+      return rewriteImageKitUrl(variant.image_url);
+    if (variant.image && variant.image.trim().length > 0 && !isLegacyFqbn(variant.image))
+      return rewriteImageKitUrl(variant.image);
     if (
       variant.images &&
       variant.images.length > 0 &&
       variant.images[0].trim().length > 0 &&
-      !isSupabase(variant.images[0])
+      !isLegacyFqbn(variant.images[0])
     )
-      return variant.images[0];
+      return rewriteImageKitUrl(variant.images[0]);
   }
 
-  if (p.image_url && p.image_url.trim().length > 0 && !isSupabase(p.image_url)) return p.image_url;
+  if (p.image_url && p.image_url.trim().length > 0 && !isLegacyFqbn(p.image_url))
+    return rewriteImageKitUrl(p.image_url);
   if (
     p.images &&
     p.images.length > 0 &&
     typeof p.images[0] === "string" &&
     p.images[0].trim().length > 0 &&
-    !isSupabase(p.images[0])
+    !isLegacyFqbn(p.images[0])
   )
-    return p.images[0];
+    return rewriteImageKitUrl(p.images[0]);
   if (
     p.additionalImages &&
     p.additionalImages.length > 0 &&
     typeof p.additionalImages[0] === "string" &&
     p.additionalImages[0].trim().length > 0 &&
-    !isSupabase(p.additionalImages[0])
+    !isLegacyFqbn(p.additionalImages[0])
   )
-    return p.additionalImages[0];
+    return rewriteImageKitUrl(p.additionalImages[0]);
   if (
     p.additional_images &&
     Array.isArray(p.additional_images) &&
     p.additional_images.length > 0 &&
     typeof p.additional_images[0] === "string" &&
     p.additional_images[0].trim().length > 0 &&
-    !isSupabase(p.additional_images[0])
+    !isLegacyFqbn(p.additional_images[0])
   )
-    return p.additional_images[0];
-  if (p.image && p.image.trim().length > 0 && !isSupabase(p.image)) return p.image;
+    return rewriteImageKitUrl(p.additional_images[0]);
+  if (p.image && p.image.trim().length > 0 && !isLegacyFqbn(p.image))
+    return rewriteImageKitUrl(p.image);
 
-  return p.image || "";
+  return p.image ? rewriteImageKitUrl(p.image) : "";
 }
 
 /**

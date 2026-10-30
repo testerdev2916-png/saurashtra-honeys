@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
 import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
+import { rewriteImageKitUrl } from "@/lib/product-images";
 import { SectionEyebrow } from "@/components/site/Layout";
 import { ShoppableReelViewer } from "./ShoppableReelViewer";
 
@@ -127,6 +128,13 @@ function ShoppableVideoCard({
   const displayTitle = item.title || product?.name || "Saurashtra Honey";
   const displaySubtitle = item.subtitle || product?.tagline || product?.category || "";
 
+  const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
+  const posterSrc =
+    (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
+    (videoUrl && videoUrl.includes("ik.imagekit.io")
+      ? `${videoUrl}/ik-thumbnail.jpg`
+      : item.fallbackImage || "/saurashtra-honey-logo-complete.png");
+
   // The required Custom transition
   const customBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
   const customDuration = "350ms";
@@ -185,26 +193,28 @@ function ShoppableVideoCard({
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {item.video_url && isNearViewport ? (
+        {videoUrl && isNearViewport ? (
           <video
             ref={videoRef}
-            src={item.video_url}
-            poster={item.thumbnail_url || item.fallbackImage || undefined}
+            poster={posterSrc}
             autoPlay
             playsInline
             muted={isMuted}
             loop
+            preload="metadata"
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
             }}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
             style={{ transition: `transform ${customDuration} ${customBezier}` }}
-          />
+          >
+            <source src={videoUrl} type="video/mp4" />
+          </video>
         ) : (
           <img
             loading="lazy"
-            src={item.thumbnail_url || item.fallbackImage}
-            alt=""
+            src={posterSrc}
+            alt={displayTitle}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
             style={{ transition: `transform ${customDuration} ${customBezier}` }}
           />

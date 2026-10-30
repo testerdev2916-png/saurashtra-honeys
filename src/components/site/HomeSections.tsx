@@ -25,7 +25,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
-import { getCategoryImageUrl, optimizeImage } from "@/lib/product-images";
+import { getCategoryImageUrl, optimizeImage, rewriteImageKitUrl } from "@/lib/product-images";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
 import { fetchPublicHeroRows, heroRowToSlide, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import { useServerFn } from "@tanstack/react-start";
@@ -1032,6 +1032,11 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
   const [showFallbackPlay, setShowFallbackPlay] = React.useState(false);
   const [isHovering, setIsHovering] = React.useState(false);
 
+  const cleanSrc = rewriteImageKitUrl(src);
+  const cleanPoster =
+    (poster ? rewriteImageKitUrl(poster) : undefined) ||
+    (cleanSrc.includes("ik.imagekit.io") ? `${cleanSrc}/ik-thumbnail.jpg` : undefined);
+
   React.useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -1129,14 +1134,15 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
     >
       <video
         ref={videoRef}
-        src={src}
-        poster={poster}
+        poster={cleanPoster}
         preload="metadata"
         playsInline
         muted={isMuted}
         loop
         className="w-full h-full object-cover"
-      />
+      >
+        <source src={cleanSrc} type="video/mp4" />
+      </video>
 
       {showFallbackPlay && !isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-10 transition-opacity">

@@ -15,6 +15,7 @@ import type { HomepageVideoItem } from "@/lib/homepage-videos";
 import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
+import { rewriteImageKitUrl } from "@/lib/product-images";
 
 interface ShoppableReelViewerProps {
   videos: HomepageVideoItem[];
@@ -274,20 +275,30 @@ function ReelSection({
           className="relative w-full h-[100dvh] md:h-[80vh] md:w-auto md:aspect-[9/16] bg-espresso md:rounded-[32px] overflow-hidden shadow-2xl flex-shrink-0 flex items-center justify-center group"
           onClick={togglePlay}
         >
-          {item.video_url && !isFailed ? (
-            <video
-              ref={videoRef}
-              src={item.video_url}
-              poster={item.thumbnail_url || item.fallbackImage}
-              playsInline
-              loop
-              muted={isMuted}
-              onTimeUpdate={handleTimeUpdate}
-              onLoadedMetadata={handleLoadedMetadata}
-              onError={() => setIsFailed(true)}
-              className="absolute inset-0 w-full h-full object-cover cursor-pointer"
-            />
-          ) : (
+          {(() => {
+            const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
+            const posterSrc =
+              (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
+              (videoUrl && videoUrl.includes("ik.imagekit.io")
+                ? `${videoUrl}/ik-thumbnail.jpg`
+                : item.fallbackImage || undefined);
+
+            return videoUrl && !isFailed ? (
+              <video
+                ref={videoRef}
+                poster={posterSrc}
+                playsInline
+                loop
+                muted={isMuted}
+                preload="metadata"
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
+                onError={() => setIsFailed(true)}
+                className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+              >
+                <source src={videoUrl} type="video/mp4" />
+              </video>
+            ) : (
             <div className="absolute inset-0 w-full h-full bg-[#F8F5EF] overflow-hidden">
               {product ? (
                 (() => {
@@ -320,7 +331,8 @@ function ReelSection({
                 </div>
               )}
             </div>
-          )}
+          );
+        })()}
 
           {/* Desktop Progress Bar */}
           <div className="absolute bottom-4 left-4 right-4 hidden md:block z-30 px-4 bg-black/40 backdrop-blur-md rounded-xl py-2">

@@ -143,6 +143,14 @@ export function ProductCard({
             alt={displayName}
             loading="lazy"
             decoding="async"
+            onError={(e) => {
+              const target = e.currentTarget;
+              if (p.image_url && target.src !== p.image_url) {
+                target.src = p.image_url;
+              } else {
+                target.src = "/saurashtra-honey-logo-complete.png";
+              }
+            }}
             className="w-full h-full object-cover object-center md:group-hover:scale-108 transition-transform duration-700 ease-out"
           />
         </Link>

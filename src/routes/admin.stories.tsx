@@ -330,7 +330,13 @@ function Editor({
       const url = await uploadToImageKit(file, "stories_videos");
       setVideoProgress(90);
 
-      setF((prev) => ({ ...prev, video_url: url }));
+      setF((prev) => ({
+        ...prev,
+        video_url: url,
+        thumbnail_url:
+          prev.thumbnail_url ||
+          (url.includes("ik.imagekit.io") ? `${url}/ik-thumbnail.jpg` : prev.thumbnail_url),
+      }));
       setVideoProgress(100);
       toast.success("9:16 Video uploaded successfully");
     } catch (e) {
@@ -601,25 +607,33 @@ function Editor({
             </span>
 
             <div className="relative w-48 aspect-[9/16] rounded-2xl overflow-hidden bg-forest-dark shadow-lift border border-border">
-              {f.video_url && previewPlaying ? (
-                <video
-                  ref={previewVideoRef}
-                  src={f.video_url}
-                  poster={f.thumbnail_url || undefined}
-                  playsInline
-                  muted
-                  loop
-                  autoPlay
-                  className="w-full h-full object-cover"
-                />
-              ) : f.thumbnail_url ? (
-                <img src={f.thumbnail_url} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full flex flex-col items-center justify-center text-cream/50 text-xs p-4 text-center">
-                  <Video className="size-8 mb-2 opacity-40" />
-                  No Thumbnail/Video Set
-                </div>
-              )}
+              {(() => {
+                const previewPoster =
+                  f.thumbnail_url ||
+                  (f.video_url && f.video_url.includes("ik.imagekit.io")
+                    ? `${f.video_url}/ik-thumbnail.jpg`
+                    : undefined);
+
+                return f.video_url && previewPlaying ? (
+                  <video
+                    ref={previewVideoRef}
+                    src={f.video_url}
+                    poster={previewPoster}
+                    playsInline
+                    muted
+                    loop
+                    autoPlay
+                    className="w-full h-full object-cover"
+                  />
+                ) : previewPoster ? (
+                  <img src={previewPoster} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center text-cream/50 text-xs p-4 text-center">
+                    <Video className="size-8 mb-2 opacity-40" />
+                    No Thumbnail/Video Set
+                  </div>
+                );
+              })()}
 
               <div className="absolute inset-0 bg-gradient-to-t from-forest-dark/85 via-forest-dark/20 to-transparent pointer-events-none" />
 
