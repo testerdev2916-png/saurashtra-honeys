@@ -8,7 +8,12 @@ import {
   deleteHomepageVideo,
   reorderHomepageVideos,
 } from "@/lib/admin-cms.functions";
-import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
+import {
+  isYouTubeUrl,
+  getYouTubeThumbnail,
+  getYouTubeEmbedUrl,
+  extractYouTubeId,
+} from "@/lib/video-helpers";
 import {
   BtnGhost,
   BtnPrimary,
@@ -34,6 +39,8 @@ import {
   Video,
   Play,
   Pause,
+  Youtube,
+  Sparkles,
 } from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { type Product } from "@/lib/products";
@@ -206,8 +213,19 @@ function StoriesPage() {
                       <ImageOff className="size-5 text-muted-foreground/50" />
                     )}
                     {r.video_url && (
-                      <span className="absolute bottom-1 right-1 rounded-full bg-forest-dark/80 text-gold p-1 shadow">
-                        <Video className="size-3" />
+                      <span
+                        className={`absolute bottom-1 right-1 rounded-full p-1 shadow ${
+                          isYouTubeUrl(r.video_url)
+                            ? "bg-red-600 text-white"
+                            : "bg-forest-dark/80 text-gold"
+                        }`}
+                        title={isYouTubeUrl(r.video_url) ? "YouTube Video" : "MP4 Video"}
+                      >
+                        {isYouTubeUrl(r.video_url) ? (
+                          <Youtube className="size-3 fill-current" />
+                        ) : (
+                          <Video className="size-3" />
+                        )}
                       </span>
                     )}
                   </div>
@@ -299,6 +317,9 @@ function Editor({
   onSaved: () => Promise<void> | void;
 }) {
   const [f, setF] = useState<Partial<StoryRow>>({ ...initial });
+  const [videoSourceType, setVideoSourceType] = useState<"youtube" | "file">(
+    isYouTubeUrl(initial.video_url) ? "youtube" : "youtube",
+  );
   const [busy, setBusy] = useState(false);
   const [videoUploading, setVideoUploading] = useState(false);
   const [videoProgress, setVideoProgress] = useState(0);
@@ -544,61 +565,168 @@ function Editor({
               </div>
             </Field>
 
-            {/* 9:16 Video Upload */}
-            <Field label="2. 9:16 Vertical Video (MP4 / WebM / QuickTime, Max 200 MB)">
-              <div className="space-y-2">
-                <input
-                  ref={videoRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) void onUploadVideo(file);
-                    e.target.value = "";
-                  }}
-                />
-                <div className="flex gap-2">
-                  <BtnGhost
-                    type="button"
-                    disabled={videoUploading}
-                    onClick={() => videoRef.current?.click()}
-                  >
-                    <Video className="size-3.5" />
-                    {videoUploading
-                      ? `UPLOADING (${videoProgress}%)...`
-                      : f.video_url
-                        ? "REPLACE VIDEO (MAX 200MB)"
-                        : "UPLOAD 9:16 VIDEO (MAX 200MB)"}
-                  </BtnGhost>
-                  {f.video_url && (
-                    <BtnGhost type="button" onClick={() => setF({ ...f, video_url: "" })}>
-                      <Trash2 className="size-3.5" /> REMOVE
-                    </BtnGhost>
-                  )}
-                </div>
-
-                {videoUploading && (
-                  <div className="w-full bg-cream-deep h-2 rounded-full overflow-hidden">
-                    <div
-                      className="bg-gold-deep h-full transition-all duration-300"
-                      style={{ width: `${videoProgress}%` }}
-                    />
-                  </div>
+            {/* 2. 9:16 Video Source */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-serif font-bold uppercase tracking-wider text-forest-dark block">
+                  2. 9:16 Video Source
+                </label>
+                {isYouTubeUrl(f.video_url) && (
+                  <span className="text-[10px] font-bold text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Youtube className="size-3 fill-current" /> YouTube Connected
+                  </span>
                 )}
-
-                <input
-                  value={f.video_url ?? ""}
-                  onChange={(e) => setF({ ...f, video_url: e.target.value })}
-                  className={inp}
-                  placeholder="Or paste video URL (https://...)"
-                />
-                <p className="text-[11px] text-muted-foreground">
-                  Vertical 9:16 video (1080 × 1920 recommended). Replaces static image when customer
-                  clicks play.
-                </p>
               </div>
-            </Field>
+
+              {/* Segmented control buttons */}
+              <div className="flex rounded-xl bg-cream-deep p-1 gap-1 border border-border">
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType("youtube")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                    videoSourceType === "youtube"
+                      ? "bg-[#D97706] text-white shadow-sm"
+                      : "text-forest-dark hover:bg-cream"
+                  }`}
+                >
+                  <Youtube className="size-3.5" />
+                  YouTube Link (Recommended)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVideoSourceType("file")}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition-all ${
+                    videoSourceType === "file"
+                      ? "bg-[#D97706] text-white shadow-sm"
+                      : "text-forest-dark hover:bg-cream"
+                  }`}
+                >
+                  <Video className="size-3.5" />
+                  Direct Video File (MP4)
+                </button>
+              </div>
+
+              {videoSourceType === "youtube" ? (
+                <div className="p-4 bg-amber-500/5 rounded-xl border border-amber-500/20 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#D97706] flex items-center gap-1.5">
+                      <Youtube className="size-4 text-red-600 fill-current" />
+                      Paste YouTube Shorts or Video URL
+                    </span>
+                    {isYouTubeUrl(f.video_url) && (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                        ✓ Valid Link
+                      </span>
+                    )}
+                  </div>
+
+                  <input
+                    value={f.video_url ?? ""}
+                    onChange={(e) => {
+                      const val = e.target.value.trim();
+                      const ytId = extractYouTubeId(val);
+                      setF((prev) => ({
+                        ...prev,
+                        video_url: val,
+                        // Auto-fill thumbnail from YouTube if current thumbnail is empty or user wants it
+                        thumbnail_url:
+                          !prev.thumbnail_url && ytId
+                            ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`
+                            : prev.thumbnail_url,
+                      }));
+                    }}
+                    className={inp}
+                    placeholder="https://youtube.com/shorts/... or https://youtu.be/..."
+                  />
+
+                  {extractYouTubeId(f.video_url) && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <BtnGhost
+                        type="button"
+                        onClick={() => {
+                          const ytId = extractYouTubeId(f.video_url);
+                          if (ytId) {
+                            setF((prev) => ({
+                              ...prev,
+                              thumbnail_url: `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`,
+                            }));
+                            toast.success("YouTube thumbnail applied as poster!");
+                          }
+                        }}
+                        className="text-[11px]"
+                      >
+                        <Sparkles className="size-3 text-[#D97706]" />
+                        Use YouTube Thumbnail as Poster
+                      </BtnGhost>
+                      <BtnGhost
+                        type="button"
+                        onClick={() => setF((prev) => ({ ...prev, video_url: "" }))}
+                        className="text-[11px] text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="size-3" /> Clear Link
+                      </BtnGhost>
+                    </div>
+                  )}
+
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    💡 <strong>Zero Bandwidth Cost:</strong> Playing from YouTube uses 0 KB ImageKit bandwidth, never hits 403 limits, and streams in high definition!
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <input
+                    ref={videoRef}
+                    type="file"
+                    accept="video/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) void onUploadVideo(file);
+                      e.target.value = "";
+                    }}
+                  />
+                  <div className="flex gap-2">
+                    <BtnGhost
+                      type="button"
+                      disabled={videoUploading}
+                      onClick={() => videoRef.current?.click()}
+                    >
+                      <Video className="size-3.5" />
+                      {videoUploading
+                        ? `UPLOADING (${videoProgress}%)...`
+                        : f.video_url
+                          ? "REPLACE VIDEO (MAX 200MB)"
+                          : "UPLOAD 9:16 VIDEO (MAX 200MB)"}
+                    </BtnGhost>
+                    {f.video_url && (
+                      <BtnGhost type="button" onClick={() => setF({ ...f, video_url: "" })}>
+                        <Trash2 className="size-3.5" /> REMOVE
+                      </BtnGhost>
+                    )}
+                  </div>
+
+                  {videoUploading && (
+                    <div className="w-full bg-cream-deep h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-gold-deep h-full transition-all duration-300"
+                        style={{ width: `${videoProgress}%` }}
+                      />
+                    </div>
+                  )}
+
+                  <input
+                    value={f.video_url ?? ""}
+                    onChange={(e) => setF({ ...f, video_url: e.target.value })}
+                    className={inp}
+                    placeholder="Or paste direct video file URL (https://...)"
+                  />
+                  <p className="text-[11px] text-muted-foreground">
+                    Vertical 9:16 video (1080 × 1920 recommended). Replaces static image when customer
+                    clicks play.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Right: Live 9:16 Preview Card */}

@@ -12,10 +12,17 @@ import {
   Play,
   CheckCircle2,
   ImageOff,
+  Youtube,
+  Sparkles,
 } from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { fetchAdminHeritageVideo, upsertHeritageVideo, type HeritageVideo } from "@/lib/heritage";
-import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
+import {
+  isYouTubeUrl,
+  getYouTubeThumbnail,
+  getYouTubeEmbedUrl,
+  extractYouTubeId,
+} from "@/lib/video-helpers";
 import {
   BtnGhost,
   BtnPrimary,
@@ -313,23 +320,99 @@ function HeritageManager() {
                       )}
                     </BtnGhost>
                   </div>
+
+                  {/* YouTube or Video URL Input */}
+                  <div className="pt-4 border-t border-border space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-serif font-bold text-forest-dark uppercase tracking-wider flex items-center gap-1.5">
+                        <Youtube className="size-4 text-red-600 fill-current" />
+                        YouTube Video URL or Direct Video Link:
+                      </label>
+                      {isYouTubeUrl(section.video_url) && (
+                        <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                          ✓ YouTube Active
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <input
+                        value={section.video_url ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
+                          const ytId = extractYouTubeId(val);
+                          const next = {
+                            ...section,
+                            video_url: val,
+                            poster_url:
+                              !section.poster_url && ytId
+                                ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`
+                                : section.poster_url,
+                          };
+                          setSection(next);
+                        }}
+                        className={inp}
+                        placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/..."
+                      />
+                      <BtnPrimary onClick={() => handleSave(section)}>
+                        <Save className="size-3.5" /> SAVE
+                      </BtnPrimary>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground">
+                      💡 <strong>Tip:</strong> Paste a YouTube link here to stream in full HD/4K without consuming any ImageKit bandwidth.
+                    </p>
+                  </div>
                 </div>
               ) : (
-                <div className="py-12 flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-2xl bg-cream/30">
-                  <div className="size-16 rounded-full bg-cream-deep flex items-center justify-center text-muted-foreground mb-4">
+                <div className="py-10 px-6 flex flex-col items-center justify-center text-center border-2 border-dashed border-border rounded-2xl bg-cream/30 space-y-4">
+                  <div className="size-16 rounded-full bg-cream-deep flex items-center justify-center text-muted-foreground">
                     <Video className="size-8" />
                   </div>
-                  <h4 className="font-serif text-xl font-bold text-forest-dark mb-2">
-                    No Heritage Video Added
-                  </h4>
-                  <p className="text-sm text-muted-foreground max-w-sm mb-6">
-                    Upload a high-quality 16:9 documentary video to activate this section on the
-                    Home Page.
-                  </p>
-                  <BtnPrimary disabled={videoUploading} onClick={() => videoRef.current?.click()}>
+                  <div>
+                    <h4 className="font-serif text-xl font-bold text-forest-dark mb-1">
+                      No Heritage Video Added
+                    </h4>
+                    <p className="text-xs text-muted-foreground max-w-sm">
+                      Paste a YouTube video link or upload a 16:9 documentary video to activate this section.
+                    </p>
+                  </div>
+
+                  <div className="w-full max-w-md space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        value={section.video_url ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value.trim();
+                          const ytId = extractYouTubeId(val);
+                          const next = {
+                            ...section,
+                            video_url: val,
+                            poster_url: ytId
+                              ? `https://img.youtube.com/vi/${ytId}/maxresdefault.jpg`
+                              : section.poster_url,
+                          };
+                          setSection(next);
+                        }}
+                        className={inp}
+                        placeholder="Paste YouTube Video URL (https://...)"
+                      />
+                      <BtnPrimary onClick={() => handleSave(section)}>
+                        <Save className="size-3.5" /> SAVE
+                      </BtnPrimary>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full max-w-xs">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">
+                      OR
+                    </span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+
+                  <BtnGhost disabled={videoUploading} onClick={() => videoRef.current?.click()}>
                     <Upload className="size-4" />
-                    {videoUploading ? "UPLOADING VIDEO..." : "UPLOAD DOCUMENTARY VIDEO"}
-                  </BtnPrimary>
+                    {videoUploading ? "UPLOADING VIDEO..." : "UPLOAD DIRECT VIDEO FILE"}
+                  </BtnGhost>
                 </div>
               )}
             </div>
