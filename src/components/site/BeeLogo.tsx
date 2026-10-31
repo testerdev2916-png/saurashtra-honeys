@@ -8,15 +8,14 @@ const DEFAULT_IMAGEKIT_LOGO =
 const LOCAL_FALLBACK_LOGO = "/saurashtra-honey-logo-complete.png";
 
 function resolveLogoSources(customUrl?: string): string[] {
-  const list: string[] = [];
+  const list: string[] = [LOCAL_FALLBACK_LOGO];
   if (customUrl && typeof customUrl === "string" && customUrl.trim()) {
     const trimmed = customUrl.trim();
-    if (!trimmed.includes("res.cloudinary.com/yzmffalu/")) {
+    if (!trimmed.includes("res.cloudinary.com/yzmffalu/") && !trimmed.includes("fqbnkx3tz")) {
       list.push(trimmed);
     }
   }
   list.push(DEFAULT_IMAGEKIT_LOGO);
-  list.push(LOCAL_FALLBACK_LOGO);
   return Array.from(new Set(list));
 }
 

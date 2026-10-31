@@ -156,7 +156,7 @@ function baseLayout({
           <tr>
             <td style="background-color: #FAF8F5; padding: 24px 28px; text-align: center; border-top: 1px solid #EBE5D8; font-size: 12px; color: #736B63;">
               <p style="margin: 0 0 8px 0; font-weight: 600; color: #1C3B2B;">Saurashtra Honey — Artisanal Apiaries of Gujarat</p>
-              <p style="margin: 0 0 12px 0;">Mahuva, Bhavnagar District, Gujarat 364290 • <a href="mailto:hello@saurastrahoney.com" style="color: #D4AF37; text-decoration: none;">hello@saurastrahoney.com</a></p>
+              <p style="margin: 0 0 12px 0;">Mahuva, Bhavnagar District, Gujarat 364290 • <a href="mailto:hello@saurashtrahoney.com" style="color: #D4AF37; text-decoration: none;">hello@saurashtrahoney.com</a></p>
               <p style="margin: 0; font-size: 11px; color: #9E968D;">
                 You received this transactional service email regarding your order with Saurashtra Honey.
               </p>

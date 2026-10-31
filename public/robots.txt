@@ -51,6 +51,6 @@ Disallow: /order
 
 # Machine-Readable AI Context
 # Standard: https://llmstxt.org
-# Documentation: https://saurastrahoney.com/llms.txt
+# Documentation: https://saurashtrahoney.com/llms.txt
 
-Sitemap: https://saurastrahoney.com/sitemap.xml
+Sitemap: https://saurashtrahoney.com/sitemap.xml

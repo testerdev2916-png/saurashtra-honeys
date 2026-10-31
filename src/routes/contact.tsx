@@ -15,6 +15,7 @@ import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
 import { useSiteSettings } from "@/lib/site-settings";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { toast } from "sonner";
 import { submitForm } from "@/lib/submit";
 import { z } from "zod";
@@ -25,39 +26,21 @@ import faqSupportImg from "@/assets/faq-support.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      {
-        title: "Contact Us — We'd Love to Hear From You | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Have a question, feedback or a special request? Reach out to Saurashtra Honey Bee Farm in Gujarat. Call, email, WhatsApp or send us a message — we are here to help.",
-      },
-      {
-        property: "og:title",
-        content: "Contact Us — Saurashtra Honey Bee Farm",
-      },
-      {
-        property: "og:description",
-        content:
-          "We're Here for You. Let's Connect. Have a question, feedback or special request? We'd love to hear from you.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/contact" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/contact" }],
-  }),
+  loader: async () => {
+    try {
+      const sections = await fetchPageSections("contact");
+      return { sections };
+    } catch {
+      return { sections: [] };
+    }
+  },
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData?.sections, {
+      title: "Contact Us — We'd Love to Hear From You | Saurashtra Honey",
+      description:
+        "Have a question, feedback or a special request? Reach out to Saurashtra Honey Bee Farm in Gujarat. Call, email, WhatsApp or send us a message — we are here to help.",
+      canonical: "https://saurashtrahoney.com/contact",
+    }),
   component: ContactPage,
 });
 
@@ -120,10 +103,10 @@ function ContactPage() {
     },
     {
       title: "Email Us",
-      value: settings.contact?.email || "hello@saurastrahoney.com",
+      value: settings.contact?.email || "hello@saurashtrahoney.com",
       subtext: "We reply within 24 hours",
       Icon: Mail,
-      href: `mailto:${settings.contact?.email || "hello@saurastrahoney.com"}`,
+      href: `mailto:${settings.contact?.email || "hello@saurashtrahoney.com"}`,
     },
     {
       title: "Visit Us",

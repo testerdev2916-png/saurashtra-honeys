@@ -10,7 +10,7 @@ export function StructuredData({ data }: { data: unknown }) {
 
 export function breadcrumbLd(
   items: { name: string; url: string }[],
-  origin = "https://saurastrahoney.com",
+  origin = "https://saurashtrahoney.com",
 ) {
   return {
     "@context": "https://schema.org",
@@ -39,7 +39,7 @@ export function productLd(
     rating?: number;
     reviews?: number;
   },
-  origin = "https://saurastrahoney.com",
+  origin = "https://saurashtrahoney.com",
 ) {
   const fullImage = p.image?.startsWith("http")
     ? p.image
@@ -78,8 +78,8 @@ export function productLd(
 }
 
 export function organizationLd(
-  origin = "https://saurastrahoney.com",
-  logoUrl = "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+  origin = "https://saurashtrahoney.com",
+  logoUrl = "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
 ) {
   return {
     "@context": "https://schema.org",
@@ -94,7 +94,7 @@ export function organizationLd(
       "@type": "ContactPoint",
       telephone: "+91 9664637665",
       contactType: "customer service",
-      email: "hello@saurastrahoney.com",
+      email: "hello@saurashtrahoney.com",
       areaServed: "IN",
       availableLanguage: ["English", "Hindi", "Gujarati"],
     },

@@ -22,7 +22,7 @@ export const Route = createFileRoute("/blog/$slug")({
     const imageSrc = post
       ? resolvePostImage(post.cover_image_url, post.category_name || post.slug)
       : "";
-    const canonicalUrl = post ? `https://saurastrahoney.com/blog/${post.slug}` : "";
+    const canonicalUrl = post ? `https://saurashtrahoney.com/blog/${post.slug}` : "";
     return {
       meta: post
         ? [
@@ -126,7 +126,7 @@ function BlogPost() {
       name: "Saurashtra Honey",
       logo: { "@type": "ImageObject", url: faviconUrl },
     },
-    mainEntityOfPage: `https://saurastrahoney.com/blog/${post.slug}`,
+    mainEntityOfPage: `https://saurashtrahoney.com/blog/${post.slug}`,
   };
 
   const handleShare = (type: string) => {

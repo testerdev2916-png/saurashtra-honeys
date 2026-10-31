@@ -20,9 +20,11 @@ export const Route = createFileRoute("/track-order")({
         property: "og:description",
         content: "Check the status and delivery timeline of your Saurashtra Honey order.",
       },
-      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurashtrahoney.com/track-order" },
+      { property: "og:image", content: "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png" },
       { name: "twitter:card", content: "summary" },
     ],
+    links: [{ rel: "canonical", href: "https://saurashtrahoney.com/track-order" }],
   }),
   component: TrackOrder,
 });
@@ -134,7 +136,7 @@ function TrackOrder() {
         {notFound && (
           <div className="mt-6 bg-destructive/10 border border-destructive/30 rounded-2xl p-5 text-sm text-destructive">
             We couldn't find that order. Double-check the order number and email — or{" "}
-            <a href="mailto:hello@saurastrahoney.com" className="underline font-semibold">
+            <a href="mailto:hello@saurashtrahoney.com" className="underline font-semibold">
               write to us
             </a>
             .

@@ -15,7 +15,7 @@ import {
   HeartHandshake,
   Award,
 } from "lucide-react";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 
 // Photographic assets
 import heroProductsImg from "@/assets/hero-products.jpg";
@@ -25,33 +25,14 @@ import ajwainImg from "@/assets/prod-ajwain.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 
 export const Route = createFileRoute("/bulk-gifting")({
-  head: () => ({
-    meta: [
-      {
-        title: "B2B Ecosystem — Wholesale, Corporate Gifts & Private Label | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Discover our premium B2B services: Wholesale Bulk Orders, Corporate Gifting, Luxury Hampers, and White Label Manufacturing of pure natural honey.",
-      },
-      { property: "og:title", content: "B2B Ecosystem — Saurashtra Honey" },
-      { property: "og:description", content: "Partner with a trusted premium honey manufacturer." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/bulk-gifting" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/bulk-gifting" }],
-  }),
   loader: () => fetchPageSections("bulk-gifting"),
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData, {
+      title: "B2B Ecosystem — Wholesale, Corporate Gifts & Private Label | Saurashtra Honey",
+      description:
+        "Discover our premium B2B services: Wholesale Bulk Orders, Corporate Gifting, Luxury Hampers, and White Label Manufacturing of pure natural honey.",
+      canonical: "https://saurashtrahoney.com/bulk-gifting",
+    }),
   component: BulkGiftingHubPage,
 });
 

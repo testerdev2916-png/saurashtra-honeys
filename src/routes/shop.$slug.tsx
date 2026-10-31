@@ -26,15 +26,27 @@ export const Route = createFileRoute("/shop/$slug")({
     return { categories, products };
   },
   head: ({ params }) => {
-    const title = `${params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} | Saurashtra Honey`;
+    const rawName = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+    const title = `${rawName} | Saurashtra Honey`;
+    const canonical = `https://saurashtrahoney.com/shop/${params.slug}`;
+    const description = `Shop authentic ${rawName} from Saurashtra Honey. 100% pure, raw, and farm-fresh.`;
     return {
       meta: [
         { title },
+        { name: "description", content: description },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: canonical },
         {
-          name: "description",
-          content: `Explore our premium selection of ${title}. Pure, natural, and ethically sourced.`,
+          property: "og:image",
+          content: "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
         },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
       ],
+      links: [{ rel: "canonical", href: canonical }],
     };
   },
   component: () => {

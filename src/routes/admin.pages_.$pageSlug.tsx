@@ -37,6 +37,18 @@ type SectionConfig = {
   fields: FieldDef[];
 };
 
+const COMMON_SEO_SECTION: SectionConfig = {
+  title: "SEO & Social Sharing",
+  description: "Configure the meta title, description, keywords, canonical URL, and social share image for Google and social media.",
+  fields: [
+    { type: "text", key: "meta_title", label: "Page Meta Title", placeholder: "e.g. Our Story — Saurashtra Honey" },
+    { type: "textarea", key: "meta_description", label: "Page Meta Description", placeholder: "Enter a compelling 150-160 character description for search engines..." },
+    { type: "text", key: "meta_keywords", label: "Meta Keywords (comma-separated)", placeholder: "e.g. pure honey, raw honey, organic honey, saurashtra" },
+    { type: "text", key: "canonical_url", label: "Canonical URL", placeholder: "https://saurashtrahoney.com/..." },
+    { type: "image", key: "og_image", label: "Social Sharing Image (OG Image)", folder: "seo" },
+  ],
+};
+
 // Configuration of all sections for all generic pages
 const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, SectionConfig> }> = {
   "our-story": {
@@ -539,7 +551,16 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
 
 function PageEditor() {
   const { pageSlug } = Route.useParams();
-  const config = PAGE_CONFIGS[pageSlug];
+  const rawConfig = PAGE_CONFIGS[pageSlug];
+  const config = rawConfig
+    ? {
+        ...rawConfig,
+        sections: {
+          seo: COMMON_SEO_SECTION,
+          ...rawConfig.sections,
+        },
+      }
+    : null;
 
   const [sections, setSections] = useState<PageSection[]>([]);
   const [loading, setLoading] = useState(true);

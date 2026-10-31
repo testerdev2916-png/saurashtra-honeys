@@ -22,40 +22,18 @@ import ajwainImg from "@/assets/prod-ajwain.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 import honeycombBeesImg from "@/assets/honeycomb-bees.jpg";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/private-label")({
-  head: () => ({
-    meta: [
-      {
-        title: "Private Label Honey Manufacturing | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Start your own honey brand with our end-to-end white label manufacturing. From raw honey sourcing to lab testing, bottle selection, and custom labeling.",
-      },
-      { property: "og:title", content: "Private Label Honey Manufacturing — Saurashtra Honey" },
-      {
-        property: "og:description",
-        content: "Your Brand, Our Pure Honey. Complete OEM Solutions.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/private-label" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/private-label" }],
-  }),
   loader: () => fetchPageSections("private-label"),
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData, {
+      title: "Private Label Honey Manufacturing | Saurashtra Honey",
+      description:
+        "Start your own honey brand with our end-to-end white label manufacturing. From raw honey sourcing to lab testing, bottle selection, and custom labeling.",
+      canonical: "https://saurashtrahoney.com/private-label",
+    }),
   component: PrivateLabelPage,
 });
 

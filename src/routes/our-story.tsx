@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/Layout";
 import { StructuredData, breadcrumbLd, organizationLd } from "@/components/site/StructuredData";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { supabase } from "@/integrations/supabase/client";
 import { AchievementsGallery, type Achievement } from "@/components/site/AchievementsGallery";
@@ -233,30 +233,6 @@ const ResponsibleIcon = ({
 );
 
 export const Route = createFileRoute("/our-story")({
-  head: () => ({
-    meta: [
-      { title: "Our Story — Saurashtra Honey" },
-      {
-        name: "description",
-        content:
-          "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
-      },
-      { property: "og:title", content: "Our Story — Saurashtra Honey" },
-      {
-        property: "og:description",
-        content:
-          "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/our-story" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/our-story" }],
-  }),
   loader: async () => {
     const sections = await fetchPageSections("our-story");
     let achievements: Achievement[] = [];
@@ -268,13 +244,20 @@ export const Route = createFileRoute("/our-story")({
         .order("display_order", { ascending: true })
         .order("created_at", { ascending: false });
       if (!error && data) {
-        achievements = data as any as Achievement[];
+        achievements = data;
       }
     } catch (e) {
-      console.warn("Could not fetch achievements gallery (table might not exist yet):", e);
+      console.error("Failed to load achievements", e);
     }
     return { sections, achievements };
   },
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData?.sections, {
+      title: "Our Story — Saurashtra Honey",
+      description:
+        "From the heart of Saurashtra to your home. Discover our ethical beekeeping and natural farms.",
+      canonical: "https://saurashtrahoney.com/our-story",
+    }),
   component: OurStory,
 });
 

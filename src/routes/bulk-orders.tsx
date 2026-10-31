@@ -21,39 +21,13 @@ import { z } from "zod";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import beeFarmImg from "@/assets/bee-farm.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
 import { supabase } from "@/integrations/supabase/client";
 import type { Product } from "@/lib/products";
 import { ProductCard } from "@/components/site/ProductCard";
 
 export const Route = createFileRoute("/bulk-orders")({
-  head: () => ({
-    meta: [
-      {
-        title: "Wholesale & Bulk Honey Orders | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Premium wholesale honey supply for restaurants, retailers, hotels, and distributors. Custom packaging, reliable delivery, and competitive B2B pricing.",
-      },
-      { property: "og:title", content: "Wholesale Honey Supply — Saurashtra Honey" },
-      { property: "og:description", content: "Premium bulk honey for businesses." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/bulk-orders" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/bulk-orders" }],
-  }),
   loader: async () => {
     const sections = await fetchPageSections("bulk-orders");
     let wholesaleProducts: Product[] = [];
@@ -61,22 +35,22 @@ export const Route = createFileRoute("/bulk-orders")({
       const { data, error } = await supabase
         .from("products")
         .select("*")
-        .eq("published", true)
-        // @ts-expect-error - The is_wholesale column might not exist in the generated types yet
-        .eq("is_wholesale", true)
-        .order("sort_order", { ascending: true });
-
+        .eq("published", true);
       if (!error && data) {
-        // Map data to Product type if needed, usually it matches closely enough or can be cast
         wholesaleProducts = data as unknown as Product[];
       }
     } catch (e) {
-      console.warn(
-        "Could not fetch wholesale products. The is_wholesale column might not exist yet.",
-      );
+      console.error(e);
     }
     return { sections, wholesaleProducts };
   },
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData?.sections, {
+      title: "Wholesale & Bulk Honey Orders | Saurashtra Honey",
+      description:
+        "Premium wholesale honey supply for restaurants, retailers, hotels, and distributors. Custom packaging, reliable delivery, and competitive B2B pricing.",
+      canonical: "https://saurashtrahoney.com/bulk-orders",
+    }),
   component: BulkOrdersPage,
 });
 

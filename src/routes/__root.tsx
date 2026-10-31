@@ -146,16 +146,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
             "@context": "https://schema.org",
             "@type": "Organization",
             name: "Saurashtra Honey",
-            url: "https://saurastrahoney.com",
+            url: "https://saurashtrahoney.com",
             logo:
               loaderData?.settings?.logo_url ||
-              "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
+              "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
             description: "Raw, unfiltered honey from the wildflower farms of Saurashtra.",
             contactPoint: {
               "@type": "ContactPoint",
               telephone: "+91-96646-37665",
               contactType: "customer service",
-              email: "hello@saurastrahoney.com",
+              email: "hello@saurashtrahoney.com",
               areaServed: "IN",
             },
             sameAs: [

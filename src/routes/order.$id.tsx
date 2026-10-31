@@ -230,7 +230,7 @@ function OrderDetail() {
             <div>
               <div className="font-serif text-2xl text-forest-dark">Saurashtra Honey</div>
               <div className="text-xs text-muted-foreground">
-                Raw, unfiltered honey from Saurashtra • hello@saurastrahoney.com
+                Raw, unfiltered honey from Saurashtra • hello@saurashtrahoney.com
               </div>
             </div>
             <div className="text-right text-xs">

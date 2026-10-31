@@ -114,14 +114,35 @@ export const Route = createFileRoute("/blog")({
         content:
           "Discover helpful tips, inspiring stories and the latest updates from Saurashtra Honey Bee Farm. Read articles on bees, health, sustainability and natural living.",
       },
+      {
+        name: "keywords",
+        content:
+          "honey blog, raw honey benefits, honey recipes, beekeeping stories, natural health, saurashtra honey",
+      },
       { property: "og:title", content: "Journal — Saurashtra Honey" },
       {
         property: "og:description",
         content: "Stories from Our Hive to Yours. Honey. Knowledge. Inspiration.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://saurashtrahoney.com/blog" },
+      {
+        property: "og:image",
+        content: "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
+      },
+      { property: "og:site_name", content: "Saurashtra Honey" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Journal — Saurashtra Honey" },
+      {
+        name: "twitter:description",
+        content: "Stories from Our Hive to Yours. Honey. Knowledge. Inspiration.",
+      },
+      {
+        name: "twitter:image",
+        content: "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
+      },
     ],
+    links: [{ rel: "canonical", href: "https://saurashtrahoney.com/blog" }],
   }),
   component: BlogPage,
 });

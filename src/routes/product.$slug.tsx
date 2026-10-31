@@ -65,27 +65,37 @@ export const Route = createFileRoute("/product/$slug")({
   },
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [] };
-    const image = loaderData.product.image;
+    const p = loaderData.product;
+    const title = p.meta_title || `${p.name} | Saurashtra Honey`;
+    const description =
+      p.meta_description ||
+      p.tagline ||
+      (p.description ? p.description.slice(0, 160) : "100% Pure Raw Honey from Saurashtra Honey.");
+    const canonical =
+      p.canonical_url || `https://saurashtrahoney.com/product/${p.slug}`;
+    const image =
+      p.image_url || p.image || "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
+    const keywords =
+      p.meta_keywords ||
+      `${p.name}, raw honey, pure honey, natural honey, buy honey online, saurashtra honey`;
+
     return {
       meta: [
-        { title: `${loaderData.product.name} — Saurashtra Honey` },
-        { name: "description", content: loaderData.product.description.slice(0, 155) },
-        { property: "og:title", content: `${loaderData.product.name} — Saurashtra Honey` },
-        { property: "og:description", content: loaderData.product.tagline },
+        { title },
+        { name: "description", content: description },
+        { name: "keywords", content: keywords },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
         { property: "og:type", content: "product" },
-        {
-          property: "og:url",
-          content: `https://saurastrahoney.com/product/${loaderData.product.slug}`,
-        },
+        { property: "og:url", content: canonical },
         { property: "og:image", content: image },
+        { property: "og:site_name", content: "Saurashtra Honey" },
         { name: "twitter:card", content: "summary_large_image" },
-        { name: "twitter:title", content: `${loaderData.product.name} — Saurashtra Honey` },
-        { name: "twitter:description", content: loaderData.product.tagline },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
         { name: "twitter:image", content: image },
       ],
-      links: [
-        { rel: "canonical", href: `https://saurastrahoney.com/product/${loaderData.product.slug}` },
-      ],
+      links: [{ rel: "canonical", href: canonical }],
     };
   },
   notFoundComponent: () => (

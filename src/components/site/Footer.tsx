@@ -374,11 +374,11 @@ export function Footer() {
                     </li>
                     <li>
                       <a
-                        href={`mailto:${settings?.contact?.email || "hello@saurastrahoney.com"}`}
+                        href={`mailto:${settings?.contact?.email || "hello@saurashtrahoney.com"}`}
                         className="flex items-start gap-3 hover:text-[#C57A1C] transition-colors duration-300"
                       >
                         <Mail className="size-4 text-[#C57A1C] shrink-0 mt-0.5" />
-                        <span>{settings?.contact?.email || "hello@saurastrahoney.com"}</span>
+                        <span>{settings?.contact?.email || "hello@saurashtrahoney.com"}</span>
                       </a>
                     </li>
                     <li>

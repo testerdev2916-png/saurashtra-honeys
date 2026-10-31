@@ -36,41 +36,56 @@ import {
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [categories, products] = await Promise.all([fetchShopCategories(), fetchProducts()]);
-    return { categories, products };
+    const [categories, products, seoRes] = await Promise.all([
+      fetchShopCategories(),
+      fetchProducts(),
+      supabase.from("site_settings").select("value").eq("key", "seo").maybeSingle(),
+    ]);
+    return {
+      categories,
+      products,
+      seo: (seoRes.data?.value || null) as {
+        default_title?: string;
+        default_description?: string;
+        og_image?: string;
+      } | null,
+    };
   },
-  head: () => ({
-    meta: [
-      { title: "Saurashtra Honey — Pure, Raw & Unfiltered Honey from Saurashtra" },
-      {
-        name: "description",
-        content:
-          "Raw, unfiltered honey straight from the floral farms of Saurashtra. Lab-tested for purity in every batch, ethically harvested for family wellness.",
-      },
-      { property: "og:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
-      {
-        property: "og:description",
-        content: "Raw. Natural. Unfiltered. From our farms to your home, with care.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Saurashtra Honey — Pure Honey. Proven Purity." },
-      {
-        name: "twitter:description",
-        content: "Raw. Natural. Unfiltered. From our farms to your home, with care.",
-      },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/" }],
-  }),
+  head: ({ loaderData }) => {
+    const s = loaderData?.seo;
+    const title =
+      s?.default_title?.trim() ||
+      "Saurashtra Honey — Pure, Raw & Unfiltered Honey from Saurashtra";
+    const description =
+      s?.default_description?.trim() ||
+      "Raw, unfiltered honey straight from the floral farms of Saurashtra. Lab-tested for purity in every batch, ethically harvested for family wellness.";
+    const ogImage =
+      s?.og_image?.trim() ||
+      "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
+
+    return {
+      meta: [
+        { title },
+        { name: "description", content: description },
+        {
+          name: "keywords",
+          content:
+            "saurashtra honey, pure raw honey, organic honey gujarat, buy honey online india",
+        },
+        { property: "og:title", content: title },
+        { property: "og:description", content: description },
+        { property: "og:type", content: "website" },
+        { property: "og:url", content: "https://saurashtrahoney.com/" },
+        { property: "og:image", content: ogImage },
+        { property: "og:site_name", content: "Saurashtra Honey" },
+        { name: "twitter:card", content: "summary_large_image" },
+        { name: "twitter:title", content: title },
+        { name: "twitter:description", content: description },
+        { name: "twitter:image", content: ogImage },
+      ],
+      links: [{ rel: "canonical", href: "https://saurashtrahoney.com/" }],
+    };
+  },
   component: Home,
 });
 

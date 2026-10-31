@@ -12,37 +12,18 @@ import { z } from "zod";
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroHoneyImg from "@/assets/hero-honey.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/gift-hampers")({
-  head: () => ({
-    meta: [
-      {
-        title: "Luxury Honey Gift Hampers | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Curated premium honey gift hampers for weddings, birthdays, return gifts, and festivals. Beautiful packaging with personalized notes and custom ribbons.",
-      },
-      { property: "og:title", content: "Luxury Honey Gift Hampers — Saurashtra Honey" },
-      { property: "og:description", content: "The perfect sweet gift for your loved ones." },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/gift-hampers" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/gift-hampers" }],
-  }),
   loader: () => fetchPageSections("gift-hampers"),
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData, {
+      title: "Luxury Honey Gift Hampers | Saurashtra Honey",
+      description:
+        "Curated premium honey gift hampers for weddings, birthdays, return gifts, and festivals. Beautiful packaging with personalized notes and custom ribbons.",
+      canonical: "https://saurashtrahoney.com/gift-hampers",
+    }),
   component: GiftHampersPage,
 });
 

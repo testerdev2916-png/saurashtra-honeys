@@ -20,39 +20,18 @@ import { z } from "zod";
 import giftPackImg from "@/assets/prod-giftpack.jpg";
 import heroProductsImg from "@/assets/hero-products.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
-import { fetchPageSections } from "@/lib/page-cms.functions";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
 
 export const Route = createFileRoute("/corporate-gifting")({
-  head: () => ({
-    meta: [
-      {
-        title: "Corporate Gifting & Luxury Honey Hampers | Saurashtra Honey",
-      },
-      {
-        name: "description",
-        content:
-          "Elevate your corporate gifting with premium natural honey hampers. Custom branding, greeting cards, and bulk delivery for clients and employees.",
-      },
-      { property: "og:title", content: "Corporate Gifting & Luxury Hampers — Saurashtra Honey" },
-      {
-        property: "og:description",
-        content: "Thoughtful luxury honey gifts that leave a sweet impression.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/corporate-gifting" },
-      {
-        property: "og:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:image",
-        content: "https://saurastrahoney.com/saurashtra-honey-logo-complete.png",
-      },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/corporate-gifting" }],
-  }),
+  loader: () => fetchPageSections("corporate-gifting"),
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData, {
+      title: "Corporate Gifting & Luxury Honey Hampers | Saurashtra Honey",
+      description:
+        "Elevate your corporate gifting with premium natural honey hampers. Custom branding, greeting cards, and bulk delivery for clients and employees.",
+      canonical: "https://saurashtrahoney.com/corporate-gifting",
+    }),
   loader: () => fetchPageSections("corporate-gifting"),
   component: CorporateGiftingPage,
 });

@@ -27,27 +27,17 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { submitForm } from "@/lib/submit";
 import { z } from "zod";
+import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 
 export const Route = createFileRoute("/become-a-partner")({
-  head: () => ({
-    meta: [
-      { title: "Become a Partner — Let's Grow Naturally, Together | Saurashtra Honey" },
-      {
-        name: "description",
-        content:
-          "Join hands with Saurashtra Honey — retailers, distributors, wholesalers and online sellers. High margins, marketing support and reliable supply.",
-      },
-      { property: "og:title", content: "Become a Partner — Saurashtra Honey" },
-      {
-        property: "og:description",
-        content: "Let's grow naturally, together. Build a business rooted in purity and trust.",
-      },
-      { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://saurastrahoney.com/become-a-partner" },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [{ rel: "canonical", href: "https://saurastrahoney.com/become-a-partner" }],
-  }),
+  loader: () => fetchPageSections("become-a-partner"),
+  head: ({ loaderData }) =>
+    extractPageSeo(loaderData, {
+      title: "Become a Partner — Let's Grow Naturally, Together | Saurashtra Honey",
+      description:
+        "Join hands with Saurashtra Honey — retailers, distributors, wholesalers and online sellers. High margins, marketing support and reliable supply.",
+      canonical: "https://saurashtrahoney.com/become-a-partner",
+    }),
   component: Partner,
 });
 

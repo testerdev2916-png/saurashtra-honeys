@@ -12,12 +12,17 @@ export const Route = createFileRoute("/sitemap.xml")({
         const staticEntries: Entry[] = [
           { path: "/", changefreq: "weekly", priority: "1.0" },
           { path: "/shop", changefreq: "daily", priority: "0.9" },
-          { path: "/our-story", changefreq: "monthly", priority: "0.6" },
+          { path: "/our-story", changefreq: "monthly", priority: "0.7" },
           { path: "/bee-farming", changefreq: "monthly", priority: "0.6" },
+          { path: "/bulk-gifting", changefreq: "monthly", priority: "0.6" },
+          { path: "/bulk-orders", changefreq: "monthly", priority: "0.6" },
+          { path: "/corporate-gifting", changefreq: "monthly", priority: "0.6" },
+          { path: "/gift-hampers", changefreq: "monthly", priority: "0.6" },
+          { path: "/private-label", changefreq: "monthly", priority: "0.6" },
           { path: "/become-a-partner", changefreq: "monthly", priority: "0.5" },
-          { path: "/bulk-orders", changefreq: "monthly", priority: "0.5" },
           { path: "/contact", changefreq: "monthly", priority: "0.5" },
           { path: "/blog", changefreq: "weekly", priority: "0.7" },
+          { path: "/track-order", changefreq: "monthly", priority: "0.4" },
           { path: "/auth", changefreq: "yearly", priority: "0.3" },
         ];
 
