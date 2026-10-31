@@ -159,15 +159,13 @@ export function HeroSlider({
               >
                 {loaded.has(idx) && (
                   <picture className="w-full h-full block">
-                    {s.mobileImage && (
-                      <source
-                        key={`mob-${s.updatedAt || s.mobileImage}`}
-                        media="(max-width: 767px)"
-                        srcSet={optimizeImage(s.mobileImage, { width: 800, quality: 80 })}
-                        // @ts-ignore: fetchpriority is valid in newer React versions
-                        fetchpriority={idx === 0 ? "high" : "auto"}
-                      />
-                    )}
+                    <source
+                      key={`mob-${s.updatedAt || s.mobileImage || s.image}`}
+                      media="(max-width: 767px)"
+                      srcSet={optimizeImage(s.mobileImage || s.image, { width: 750, quality: 80 })}
+                      // @ts-ignore: fetchpriority is valid in newer React versions
+                      fetchpriority={idx === 0 ? "high" : "auto"}
+                    />
                     <img
                       key={`desk-${s.updatedAt || s.image}`}
                       src={optimizeImage(s.image, { width: 1800, quality: 80 })}
@@ -201,14 +199,20 @@ export function HeroSlider({
             >
               <ChevronRight className="size-5 md:size-5" />
             </button>
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1">
               {slides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => go(idx, idx > i ? 1 : -1)}
                   aria-label={`Go to slide ${idx + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === i ? "w-6 bg-burnt-orange" : "w-1.5 bg-cream/40 hover:bg-cream/70"}`}
-                />
+                  className="p-2 flex items-center justify-center min-w-[28px] min-h-[28px] focus:outline-none"
+                >
+                  <span
+                    className={`block h-1.5 rounded-full transition-all duration-300 ${
+                      idx === i ? "w-6 bg-burnt-orange" : "w-1.5 bg-cream/40 hover:bg-cream/70"
+                    }`}
+                  />
+                </button>
               ))}
             </div>
           </>
