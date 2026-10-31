@@ -13,7 +13,12 @@ import {
 } from "lucide-react";
 import { SiteLayout } from "@/components/site/Layout";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
-import { StructuredData, breadcrumbLd } from "@/components/site/StructuredData";
+import {
+  StructuredData,
+  breadcrumbLd,
+  localBusinessLd,
+  faqLd,
+} from "@/components/site/StructuredData";
 import { useSiteSettings } from "@/lib/site-settings";
 import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { toast } from "sonner";
@@ -153,6 +158,10 @@ function ContactPage() {
           { name: "Home", url: "/" },
           { name: "Contact", url: "/contact" },
         ])}
+      />
+      <StructuredData data={localBusinessLd()} />
+      <StructuredData
+        data={faqLd(faqs.map((f) => ({ question: f.q, answer: f.a })))}
       />
 
       {/* =========================================================================

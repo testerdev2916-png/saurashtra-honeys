@@ -104,6 +104,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#2B1B14" },
+        {
+          name: "robots",
+          content:
+            "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+        },
+        {
+          name: "googlebot",
+          content:
+            "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1",
+        },
         { name: "facebook-domain-verification", content: "9a9drbvcvp9cvyy0p1z5s4i9aycwud" },
         { property: "og:site_name", content: "Saurashtra Honey" },
         { property: "og:locale", content: "en_IN" },
@@ -163,6 +173,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               "https://www.facebook.com/Saurashtrahoneybeefarm/",
               "https://www.youtube.com/@saurashtrahoney2059",
             ],
+          }),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            name: "Saurashtra Honey",
+            url: "https://saurashtrahoney.com",
+            potentialAction: {
+              "@type": "SearchAction",
+              target: "https://saurashtrahoney.com/shop?q={search_term_string}",
+              "query-input": "required name=search_term_string",
+            },
           }),
         },
       ],

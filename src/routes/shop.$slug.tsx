@@ -25,26 +25,37 @@ export const Route = createFileRoute("/shop/$slug")({
     const [categories, products] = await Promise.all([fetchShopCategories(), fetchProducts()]);
     return { categories, products };
   },
-  head: ({ params }) => {
-    const rawName = params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    const title = `${rawName} | Saurashtra Honey`;
+  head: ({ params, loaderData }) => {
+    const cat = loaderData?.categories?.find((c: any) => c.slug === params.slug);
+    const rawName =
+      cat?.name ||
+      params.slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase());
+    const title = cat?.seo_title || `${rawName} | Saurashtra Honey`;
     const canonical = `https://saurashtrahoney.com/shop/${params.slug}`;
-    const description = `Shop authentic ${rawName} from Saurashtra Honey. 100% pure, raw, and farm-fresh.`;
+    const description =
+      cat?.seo_description ||
+      `Shop authentic pure ${rawName} from Saurashtra Honey. 100% natural, raw, lab-tested, and farm fresh.`;
+    const image =
+      cat?.image_url || "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
+
     return {
       meta: [
         { title },
         { name: "description", content: description },
+        {
+          name: "keywords",
+          content: `${rawName}, pure ${rawName}, buy ${rawName} online, saurashtra honey, natural honey`,
+        },
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "website" },
         { property: "og:url", content: canonical },
-        {
-          property: "og:image",
-          content: "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png",
-        },
+        { property: "og:image", content: image },
+        { property: "og:site_name", content: "Saurashtra Honey" },
         { name: "twitter:card", content: "summary_large_image" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
+        { name: "twitter:image", content: image },
       ],
       links: [{ rel: "canonical", href: canonical }],
     };
