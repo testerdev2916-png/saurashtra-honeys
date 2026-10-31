@@ -50,7 +50,7 @@ import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { StructuredData, breadcrumbLd, productLd } from "@/components/site/StructuredData";
 import { getCategoryShopSlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
-import { optimizeImage } from "@/lib/product-images";
+import { optimizeImage, rewriteImageKitUrl } from "@/lib/product-images";
 import honeyProcessImg from "@/assets/honey-process-infographic.png";
 
 export const Route = createFileRoute("/product/$slug")({
@@ -269,6 +269,32 @@ function ProductPage() {
       }
     }
 
+    // 1.1 Sibling product fallback if variant has no explicit image
+    if (variantImages.length === 0 && allProducts.length > 0 && activeVariant) {
+      const activeSizeKey = normalizeSizeKey(activeVariant.label || size);
+      const cat = (p.category || "").toLowerCase();
+      const base = cleanProductName(p.name).toLowerCase();
+
+      const sibling = allProducts.find((other) => {
+        if (other.id === p.id) return false;
+        const otherBase = cleanProductName(other.name).toLowerCase();
+        const otherCat = (other.category || "").toLowerCase();
+        const matchesName = otherBase.includes(base) || base.includes(otherBase);
+        const matchesCat = otherCat === cat;
+        if (!matchesName && !matchesCat) return false;
+
+        const otherNameHasSize =
+          normalizeSizeKey(other.name).includes(activeSizeKey) ||
+          normalizeSizeKey(other.slug).includes(activeSizeKey);
+        return otherNameHasSize;
+      });
+
+      if (sibling) {
+        if (sibling.image) variantImages.push(sibling.image);
+        if (sibling.images && Array.isArray(sibling.images)) variantImages.push(...sibling.images);
+      }
+    }
+
     // Set of URLs belonging exclusively to other variants so their packaging doesn't leak into this variant's gallery
     const otherVariantsImages = new Set<string>();
     if (p.variants && p.variants.length > 0) {
@@ -291,7 +317,7 @@ function ProductPage() {
 
     // 2. Gather candidate common / additional images from all product sources
     const candidateCommonImages: string[] = [];
-    if (p.image) candidateCommonImages.push(p.image);
+    if (variantImages.length === 0 && p.image) candidateCommonImages.push(p.image);
     if (Array.isArray(p.images)) candidateCommonImages.push(...p.images);
     if (Array.isArray(p.additionalImages)) candidateCommonImages.push(...p.additionalImages);
     if (p.sharedContent?.infographics) {
@@ -305,11 +331,12 @@ function ProductPage() {
     const finalGallery: string[] = [];
 
     const pushImg = (url: string) => {
-      if (!url || !url.trim() || url.includes("supabase.co")) return;
-      const norm = normalize(url);
+      if (!url || !url.trim() || url.includes("supabase.co") || url.includes("fqbnkx3tz")) return;
+      const clean = rewriteImageKitUrl(url);
+      const norm = normalize(clean);
       if (!norm || seen.has(norm)) return;
       seen.add(norm);
-      finalGallery.push(url);
+      finalGallery.push(clean);
     };
 
     // First: Active variant packaging images come first
@@ -325,8 +352,9 @@ function ProductPage() {
       }
     }
 
-    return finalGallery.length > 0 ? finalGallery : [p.image].filter((x): x is string => Boolean(x));
-  }, [p, activeVariant]);
+    const fallbackUrl = (p as any).image_url || p.image || "/saurashtra-honey-logo-complete.png";
+    return finalGallery.length > 0 ? finalGallery : [fallbackUrl];
+  }, [p, activeVariant, allProducts, size]);
 
   useEffect(() => {
     setHeroIdx(0);
@@ -485,6 +513,9 @@ function ProductPage() {
                     alt={`${p.name} view ${i + 1}`}
                     loading="lazy"
                     decoding="async"
+                    onError={(e) => {
+                      (e.currentTarget.parentElement as HTMLElement)?.classList.add("hidden");
+                    }}
                     className="w-full h-full object-contain bg-white object-center aspect-square"
                   />
                 </button>
@@ -517,6 +548,15 @@ function ProductPage() {
               alt={p.name}
               fetchPriority="high"
               decoding="async"
+              onError={(e) => {
+                const target = e.currentTarget;
+                const fallback = (p as any).image_url || p.image;
+                if (fallback && target.src !== fallback) {
+                  target.src = fallback;
+                } else {
+                  target.src = "/saurashtra-honey-logo-complete.png";
+                }
+              }}
               className="w-full h-full object-contain aspect-square cursor-zoom-in transition-transform duration-500"
               onClick={() => setZoom(true)}
             />
@@ -1226,6 +1266,9 @@ function MobileProductGallery({ images, name }: { images: string[]; name: string
                 loading={idx === 0 ? "eager" : "lazy"}
                 fetchPriority={idx === 0 ? "high" : "auto"}
                 decoding="async"
+                onError={(e) => {
+                  (e.currentTarget.parentElement as HTMLElement)?.classList.add("hidden");
+                }}
                 className="w-full max-w-full h-full object-contain bg-white object-center pointer-events-none"
               />
             </div>
