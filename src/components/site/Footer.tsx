@@ -110,6 +110,8 @@ const FooterDecorativeBackground = () => (
     <img
       src="/images/footer-botanical-left.jpg"
       alt=""
+      loading="lazy"
+      decoding="async"
       className="absolute bottom-[-10px] left-[-30px] w-[300px] md:w-[450px] lg:w-[600px] h-auto mix-blend-darken brightness-[1.05] contrast-[1.05] opacity-40 object-contain origin-bottom-left"
       style={{
         WebkitMaskImage: "radial-gradient(110% 110% at 0% 100%, black 75%, transparent 100%)",
@@ -119,6 +121,8 @@ const FooterDecorativeBackground = () => (
     <img
       src="/images/footer-botanical-right.jpg"
       alt=""
+      loading="lazy"
+      decoding="async"
       className="absolute bottom-[-10px] right-[-30px] w-[300px] md:w-[450px] lg:w-[600px] h-auto mix-blend-darken brightness-[1.05] contrast-[1.05] opacity-40 object-contain origin-bottom-right"
       style={{
         WebkitMaskImage: "radial-gradient(110% 110% at 100% 100%, black 75%, transparent 100%)",

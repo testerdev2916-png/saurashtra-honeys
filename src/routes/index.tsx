@@ -29,6 +29,8 @@ import {
 } from "@/components/site/HomeSections";
 
 import { fetchShopCategories } from "@/lib/category-catalog";
+import { fetchHeroSlides } from "@/lib/hero-catalog";
+import { optimizeImage } from "@/lib/product-images";
 import {
   fetchAllHomepageCustomerStories,
   type HomepageCustomerStory,
@@ -36,14 +38,16 @@ import {
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [categories, products, seoRes] = await Promise.all([
+    const [categories, products, seoRes, heroSlides] = await Promise.all([
       fetchShopCategories(),
       fetchProducts(),
       supabase.from("site_settings").select("value").eq("key", "seo").maybeSingle(),
+      fetchHeroSlides("home"),
     ]);
     return {
       categories,
       products,
+      heroSlides,
       seo: (seoRes.data?.value || null) as {
         default_title?: string;
         default_description?: string;
@@ -62,6 +66,14 @@ export const Route = createFileRoute("/")({
     const ogImage =
       s?.og_image?.trim() ||
       "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
+
+    const firstHero = loaderData?.heroSlides?.[0];
+    const heroMobileImg = firstHero?.mobileImage
+      ? optimizeImage(firstHero.mobileImage, { width: 800, quality: 80, format: "auto" })
+      : undefined;
+    const heroDesktopImg = firstHero?.image
+      ? optimizeImage(firstHero.image, { width: 1800, quality: 80, format: "auto" })
+      : undefined;
 
     return {
       meta: [
@@ -83,7 +95,33 @@ export const Route = createFileRoute("/")({
         { name: "twitter:description", content: description },
         { name: "twitter:image", content: ogImage },
       ],
-      links: [{ rel: "canonical", href: "https://saurashtrahoney.com/" }],
+      links: [
+        { rel: "canonical", href: "https://saurashtrahoney.com/" },
+        ...(heroMobileImg
+          ? [
+              {
+                rel: "preload",
+                as: "image",
+                href: heroMobileImg,
+                media: "(max-width: 767px)",
+                // @ts-ignore
+                fetchpriority: "high",
+              },
+            ]
+          : []),
+        ...(heroDesktopImg
+          ? [
+              {
+                rel: "preload",
+                as: "image",
+                href: heroDesktopImg,
+                media: "(min-width: 768px)",
+                // @ts-ignore
+                fetchpriority: "high",
+              },
+            ]
+          : []),
+      ],
     };
   },
   component: Home,
@@ -328,7 +366,7 @@ function Home() {
 
     switch (key) {
       case "hero":
-        return <HomeHero key="hero" />;
+        return <HomeHero key="hero" initialSlides={data.heroSlides} />;
       case "trust_strip":
         return <HomeTrustStrip key="trust_strip" settings={settings} />;
       case "shop_by_category":

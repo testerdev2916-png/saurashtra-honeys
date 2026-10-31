@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { Link, useSearch, useNavigate } from "@tanstack/react-router";
-import { ChevronLeft, ChevronRight, ArrowRight, Star } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight, Star, Play } from "lucide-react";
 import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
-import { rewriteImageKitUrl } from "@/lib/product-images";
+import { rewriteImageKitUrl, optimizeImage } from "@/lib/product-images";
 import { SectionEyebrow } from "@/components/site/Layout";
 import { ShoppableReelViewer } from "./ShoppableReelViewer";
 
@@ -41,7 +41,10 @@ function ShoppableVideoCard({
   const [hasLoaded, setHasLoaded] = useState(false);
   const [duration, setDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(true);
-  const [isNearViewport, setIsNearViewport] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const shouldStreamVideo = isHovered || isPlaying;
 
   const formatDuration = (sec: number) => {
     if (!sec || isNaN(sec) || !isFinite(sec)) return "";
@@ -65,39 +68,6 @@ function ShoppableVideoCard({
     return () => window.removeEventListener("shoppable-video-mute-others", handleGlobalMute);
   }, [uniqueId]);
 
-  // Attempt to play when visible & lazy load when near viewport
-  useEffect(() => {
-    const el = cardRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return;
-
-    // Observer for Play/Pause
-    const obsPlay = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && videoRef.current) {
-          videoRef.current.play().catch((e) => console.error("Autoplay prevented:", e));
-        } else if (!entry.isIntersecting && videoRef.current) {
-          videoRef.current.pause();
-        }
-      },
-      { threshold: 0.1 },
-    );
-
-    // Observer for Lazy Loading / Unloading video src
-    const obsLoad = new IntersectionObserver(
-      ([entry]) => {
-        setIsNearViewport(entry.isIntersecting);
-      },
-      { rootMargin: "600px" },
-    );
-
-    obsPlay.observe(el);
-    obsLoad.observe(el);
-    return () => {
-      obsPlay.unobserve(el);
-      obsLoad.unobserve(el);
-    };
-  }, []);
-
   useEffect(() => {
     // Trigger mount animation
     const t = setTimeout(() => setHasLoaded(true), 50);
@@ -107,6 +77,19 @@ function ShoppableVideoCard({
   const handleVideoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!shouldStreamVideo) {
+      setIsPlaying(true);
+      setIsMuted(false);
+      window.dispatchEvent(
+        new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }),
+      );
+      if (videoRef.current) {
+        videoRef.current.muted = false;
+        videoRef.current.play().catch(console.error);
+      }
+      return;
+    }
 
     if (isMuted) {
       setIsMuted(false);
@@ -143,6 +126,8 @@ function ShoppableVideoCard({
     <div
       ref={cardRef}
       data-card-id={uniqueId}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={`shoppable-video-card group relative shrink-0 flex flex-col snap-center sm:snap-start
         ${className || "w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px] mr-[16px] md:mr-[20px]"}
         aspect-[9/16]
@@ -193,7 +178,7 @@ function ShoppableVideoCard({
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {videoUrl && isNearViewport ? (
+        {videoUrl && shouldStreamVideo ? (
           <video
             ref={videoRef}
             poster={posterSrc}
@@ -201,7 +186,7 @@ function ShoppableVideoCard({
             playsInline
             muted={isMuted}
             loop
-            preload="metadata"
+            preload="auto"
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
             }}
@@ -211,13 +196,19 @@ function ShoppableVideoCard({
             <source src={videoUrl} type="video/mp4" />
           </video>
         ) : (
-          <img
-            loading="lazy"
-            src={posterSrc}
-            alt={displayTitle}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
-            style={{ transition: `transform ${customDuration} ${customBezier}` }}
-          />
+          <>
+            <img
+              loading="lazy"
+              decoding="async"
+              src={optimizeImage(posterSrc, { width: 450, quality: 75, format: "auto" })}
+              alt={displayTitle}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
+              style={{ transition: `transform ${customDuration} ${customBezier}` }}
+            />
+            <div className="absolute top-3 left-3 z-30 size-7 sm:size-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white pointer-events-none transition-transform group-hover:scale-110 shadow-sm">
+              <Play className="size-3.5 fill-current ml-0.5 text-white" />
+            </div>
+          </>
         )}
       </div>
 
@@ -411,6 +402,7 @@ export function ShoppableVideoCarousel({
           <button
             type="button"
             onClick={scrollPrev}
+            aria-label="Previous reel"
             className="absolute left-[8px] sm:left-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,6 +418,7 @@ export function ShoppableVideoCarousel({
           <button
             type="button"
             onClick={scrollNext}
+            aria-label="Next reel"
             className="absolute right-[8px] sm:right-[10px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.1)] flex items-center justify-center text-[#2B2118] transition-all"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -461,9 +454,9 @@ export function ShoppableVideoCarousel({
           className="flex w-max animate-ticker hover:[animation-play-state:paused]"
           style={{ animationDuration: "600s" }}
         >
-          {/* First set of duplicated videos */}
+          {/* First set of videos */}
           <div className="flex">
-            {[...sortedVideos, ...sortedVideos].map((item, idx) => (
+            {sortedVideos.map((item, idx) => (
               <ShoppableVideoCard
                 key={`set1-${item.id}-${idx}`}
                 item={item}
@@ -476,7 +469,7 @@ export function ShoppableVideoCarousel({
           </div>
           {/* Second identical set for seamless looping */}
           <div className="flex">
-            {[...sortedVideos, ...sortedVideos].map((item, idx) => (
+            {sortedVideos.map((item, idx) => (
               <ShoppableVideoCard
                 key={`set2-${item.id}-${idx}`}
                 item={item}

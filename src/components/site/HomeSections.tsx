@@ -320,6 +320,7 @@ export function HomeShopByCategory({
           <button
             type="button"
             onClick={scrollPrev}
+            aria-label="Previous categories"
             className="absolute left-[8px] sm:left-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -335,6 +336,7 @@ export function HomeShopByCategory({
           <button
             type="button"
             onClick={scrollNext}
+            aria-label="Next categories"
             className="absolute right-[8px] sm:right-[12px] top-1/2 -translate-y-1/2 z-20 w-[36px] h-[36px] rounded-full bg-white/95 border-none shadow-[0_4px_12px_rgba(0,0,0,0.08)] flex items-center justify-center text-[#2B2118] opacity-100 transition-all duration-300 md:hidden"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1146,7 +1148,11 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
 
       {showFallbackPlay && !isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-10 transition-opacity">
-          <button className="size-20 md:size-24 bg-[#D97706] text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform">
+          <button
+            aria-label="Play heritage video"
+            onClick={togglePlay}
+            className="size-20 md:size-24 bg-[#D97706] text-white rounded-full flex items-center justify-center shadow-xl hover:scale-105 transition-transform"
+          >
             <Icons.Play className="size-8 md:size-10 ml-2" fill="currentColor" />
           </button>
         </div>
@@ -1172,6 +1178,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
               e.stopPropagation();
               togglePlay();
             }}
+            aria-label={isPlaying ? "Pause video" : "Play video"}
             className="text-white hover:text-[#D97706] transition-colors"
           >
             {isPlaying ? (
@@ -1183,6 +1190,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
           <div className="flex items-center gap-4">
             <button
               onClick={toggleMute}
+              aria-label={isMuted ? "Unmute audio" : "Mute audio"}
               className="text-white hover:text-[#D97706] transition-colors"
             >
               {isMuted ? (
@@ -1193,6 +1201,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
             </button>
             <button
               onClick={toggleFullscreen}
+              aria-label="Toggle fullscreen"
               className="text-white hover:text-[#D97706] transition-colors"
             >
               <Icons.Maximize className="size-5 md:size-6" />

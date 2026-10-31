@@ -88,15 +88,15 @@ export function HeroSlider({
 
   if (!slides || slides.length === 0) {
     return (
-      <section className="relative w-full max-w-[100vw] overflow-x-hidden bg-[#120E0C]">
-        <div className={`relative w-full ${aspectCls} animate-pulse bg-[#1A1412]`} />
+      <section className="relative w-full max-w-[100vw] overflow-x-hidden bg-cream-deep/40">
+        <div className={`relative w-full ${aspectCls} animate-pulse bg-cream-deep/60`} />
       </section>
     );
   }
 
   return (
     <section
-      className="relative w-full max-w-[100vw] overflow-x-hidden bg-[#120E0C]"
+      className="relative w-full max-w-[100vw] overflow-x-hidden bg-cream-deep/20"
       onMouseEnter={() => {
         paused.current = true;
         if (timer.current) clearTimeout(timer.current);
@@ -153,6 +153,7 @@ export function HeroSlider({
               <Link
                 to={s.ctaTo || "/"}
                 params={s.ctaParams as never}
+                tabIndex={isActive ? 0 : -1}
                 className="absolute inset-0 z-0 block cursor-pointer"
                 aria-label={`Go to ${s.ctaTo || "/"}`}
               >
