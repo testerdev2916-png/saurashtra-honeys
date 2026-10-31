@@ -24,6 +24,19 @@ export interface PublicBlogPost {
   updated_at: string;
 }
 
+function mapBlogPostRow(row: any): PublicBlogPost {
+  if (!row) return row;
+  const tags = Array.isArray(row.tags) ? row.tags : [];
+  return {
+    ...row,
+    category_name: row.blog_categories?.name || "Honey & Health",
+    author_name: row.author_name || "Saurashtra Honey Team",
+    reading_time: row.reading_time || "5 min read",
+    is_featured: !!row.is_featured || tags.includes("featured"),
+    is_popular: !!row.is_popular || tags.includes("popular"),
+  };
+}
+
 const listInputSchema = z.object({
   cat: z.string().optional(),
   q: z.string().optional(),
@@ -41,13 +54,19 @@ export const listPublicPosts = createServerFn({ method: "POST" })
 
     let query = supabase
       .from("blog_posts")
-      .select("*", { count: "exact" })
+      .select("*, blog_categories(name)", { count: "exact" })
       .eq("status", "published")
       .is("deleted_at", null);
 
     if (data.cat && data.cat !== "All Posts") {
-      // NOTE: category_name does not exist in the blog_posts table directly.
-      // If categories are needed, this should join with a categories table or use category_id.
+      const { data: catMatch } = await supabase
+        .from("blog_categories")
+        .select("id")
+        .ilike("name", data.cat.trim())
+        .maybeSingle();
+      if (catMatch) {
+        query = query.eq("category_id", catMatch.id);
+      }
     }
 
     if (data.q && data.q.trim()) {
@@ -74,7 +93,7 @@ export const listPublicPosts = createServerFn({ method: "POST" })
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
     return {
-      rows: (rows ?? []) as unknown as PublicBlogPost[],
+      rows: (rows ?? []).map(mapBlogPostRow),
       total,
       page,
       totalPages,
@@ -86,7 +105,7 @@ export const getPublicPost = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     const { data: post, error } = await supabase
       .from("blog_posts")
-      .select("*")
+      .select("*, blog_categories(name)")
       .eq("slug", data.slug)
       .eq("status", "published")
       .is("deleted_at", null)
@@ -96,12 +115,12 @@ export const getPublicPost = createServerFn({ method: "POST" })
       return { post: null, related: [] as PublicBlogPost[] };
     }
 
-    const currentPost = post as unknown as PublicBlogPost;
+    const currentPost = mapBlogPostRow(post);
 
     // Fetch up to 3 related published posts (same category first, then others)
     let relatedQuery = supabase
       .from("blog_posts")
-      .select("*")
+      .select("*, blog_categories(name)")
       .eq("status", "published")
       .is("deleted_at", null)
       .neq("slug", currentPost.slug)
@@ -109,7 +128,7 @@ export const getPublicPost = createServerFn({ method: "POST" })
       .limit(6);
 
     const { data: relatedRows } = await relatedQuery;
-    const allRelated = (relatedRows ?? []) as unknown as PublicBlogPost[];
+    const allRelated = (relatedRows ?? []).map(mapBlogPostRow);
     const sameCat = allRelated.filter(
       (r) =>
         r.category_name &&
@@ -142,20 +161,20 @@ export const getPopularPosts = createServerFn({ method: "POST" })
 
     const { data: popularRows } = await supabase
       .from("blog_posts")
-      .select("*")
+      .select("*, blog_categories(name)")
       .eq("status", "published")
       .is("deleted_at", null)
       .order("published_at", { ascending: false })
       .limit(limit);
 
-    let rows = (popularRows ?? []) as unknown as PublicBlogPost[];
+    let rows = (popularRows ?? []).map(mapBlogPostRow);
 
     // If fewer than limit marked popular, fallback to top recent published posts
     if (rows.length < limit) {
       const existingIds = rows.map((r) => r.id);
       let fallbackQuery = supabase
         .from("blog_posts")
-        .select("*")
+        .select("*, blog_categories(name)")
         .eq("status", "published")
         .is("deleted_at", null)
         .order("published_at", { ascending: false })
@@ -163,7 +182,7 @@ export const getPopularPosts = createServerFn({ method: "POST" })
 
       const { data: fallbackRows } = await fallbackQuery;
       if (fallbackRows) {
-        for (const fb of fallbackRows as unknown as PublicBlogPost[]) {
+        for (const fb of (fallbackRows ?? []).map(mapBlogPostRow)) {
           if (!existingIds.includes(fb.id)) {
             rows.push(fb);
           }
@@ -177,7 +196,7 @@ export const getPopularPosts = createServerFn({ method: "POST" })
 export const getFeaturedPost = createServerFn({ method: "POST" }).handler(async () => {
   let { data: post } = await supabase
     .from("blog_posts")
-    .select("*")
+    .select("*, blog_categories(name)")
     .eq("status", "published")
     .is("deleted_at", null)
     .order("published_at", { ascending: false })
@@ -187,7 +206,7 @@ export const getFeaturedPost = createServerFn({ method: "POST" }).handler(async 
   if (!post) {
     const { data: latest } = await supabase
       .from("blog_posts")
-      .select("*")
+      .select("*, blog_categories(name)")
       .eq("status", "published")
       .is("deleted_at", null)
       .order("published_at", { ascending: false })
@@ -196,5 +215,5 @@ export const getFeaturedPost = createServerFn({ method: "POST" }).handler(async 
     post = latest;
   }
 
-  return { post: (post ?? null) as PublicBlogPost | null };
+  return { post: post ? mapBlogPostRow(post) : null };
 });

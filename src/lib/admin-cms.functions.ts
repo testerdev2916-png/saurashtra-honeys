@@ -354,11 +354,19 @@ export const listPosts = createServerFn({ method: "POST" })
     await assertStaff(context.supabase, context.userId);
     const { data, error } = await context.supabase
       .from("blog_posts")
-      .select("*")
+      .select("*, blog_categories(name)")
       .is("deleted_at", null)
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return { rows: data ?? [] };
+    const mapped = (data ?? []).map((row: any) => ({
+      ...row,
+      category_name: row.blog_categories?.name || "Honey & Health",
+      author_name: row.author_name || "Saurashtra Honey Team",
+      reading_time: row.reading_time || "5 min read",
+      is_featured: !!row.is_featured || (Array.isArray(row.tags) && row.tags.includes("featured")),
+      is_popular: !!row.is_popular || (Array.isArray(row.tags) && row.tags.includes("popular")),
+    }));
+    return { rows: mapped };
   });
 
 export const upsertPost = createServerFn({ method: "POST" })
@@ -366,12 +374,42 @@ export const upsertPost = createServerFn({ method: "POST" })
   .inputValidator((d: z.infer<typeof postSchema>) => postSchema.parse(d))
   .handler(async ({ data, context }) => {
     await assertPerm(context.supabase, context.userId, "blog.manage");
-    const { id, ...rest } = data;
-    const payload = { ...rest, author_id: context.userId } as never;
+    const { id, category_name, author_name, reading_time, is_featured, is_popular, ...rest } = data;
+
+    // Manage featured and popular in tags array cleanly
+    const tagSet = new Set(data.tags || []);
+    if (is_featured) tagSet.add("featured");
+    else tagSet.delete("featured");
+    if (is_popular) tagSet.add("popular");
+    else tagSet.delete("popular");
+    const cleanTags = Array.from(tagSet);
+
+    // Resolve category_id if category_name is passed
+    let resolvedCategoryId = rest.category_id;
+    if (!resolvedCategoryId && category_name) {
+      const { data: cat } = await context.supabase
+        .from("blog_categories")
+        .select("id")
+        .ilike("name", category_name.trim())
+        .maybeSingle();
+      if (cat) resolvedCategoryId = cat.id;
+    }
+
+    const payload = {
+      ...rest,
+      tags: cleanTags,
+      category_id: resolvedCategoryId,
+      author_id: context.userId,
+    } as never;
+
     const q = id
       ? context.supabase
           .from("blog_posts")
-          .update(rest as never)
+          .update({
+            ...rest,
+            tags: cleanTags,
+            category_id: resolvedCategoryId,
+          } as never)
           .eq("id", id)
       : context.supabase.from("blog_posts").insert(payload);
     const { error } = await q;
