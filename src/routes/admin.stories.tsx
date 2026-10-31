@@ -8,6 +8,7 @@ import {
   deleteHomepageVideo,
   reorderHomepageVideos,
 } from "@/lib/admin-cms.functions";
+import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 import {
   BtnGhost,
   BtnPrimary,
@@ -608,11 +609,31 @@ function Editor({
 
             <div className="relative w-48 aspect-[9/16] rounded-2xl overflow-hidden bg-forest-dark shadow-lift border border-border">
               {(() => {
+                const isYt = isYouTubeUrl(f.video_url);
+                const ytPoster = isYt ? getYouTubeThumbnail(f.video_url) : null;
                 const previewPoster =
                   f.thumbnail_url ||
+                  ytPoster ||
                   (f.video_url && f.video_url.includes("ik.imagekit.io")
                     ? `${f.video_url}/ik-thumbnail.jpg`
                     : undefined);
+
+                if (isYt && f.video_url && previewPlaying) {
+                  return (
+                    <iframe
+                      src={
+                        getYouTubeEmbedUrl(f.video_url, {
+                          autoplay: true,
+                          mute: true,
+                          loop: true,
+                          controls: false,
+                        }) || ""
+                      }
+                      title="Preview"
+                      className="w-full h-full border-0 pointer-events-none"
+                    />
+                  );
+                }
 
                 return f.video_url && previewPlaying ? (
                   <video

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { fetchAdminHeritageVideo, upsertHeritageVideo, type HeritageVideo } from "@/lib/heritage";
+import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 import {
   BtnGhost,
   BtnPrimary,
@@ -197,39 +198,66 @@ function HeritageManager() {
                       Current Video:
                     </span>
                     <div className="w-full aspect-[16/9] rounded-2xl overflow-hidden bg-cream-deep border border-border relative group shadow-sm">
-                      {previewPlaying ? (
-                        <video
-                          ref={videoPreviewRef}
-                          src={section.video_url ?? undefined}
-                          poster={section.poster_url ?? undefined}
-                          className="w-full h-full object-cover"
-                          controls
-                          autoPlay
-                        />
-                      ) : (
-                        <>
-                          {section.poster_url ? (
-                            <img
-                              src={section.poster_url}
-                              alt="Poster"
+                      {(() => {
+                        const isYt = isYouTubeUrl(section.video_url);
+                        const ytPoster = isYt ? getYouTubeThumbnail(section.video_url) : null;
+                        const posterImage = section.poster_url || ytPoster;
+
+                        if (previewPlaying) {
+                          if (isYt && section.video_url) {
+                            return (
+                              <iframe
+                                src={
+                                  getYouTubeEmbedUrl(section.video_url, {
+                                    autoplay: true,
+                                    mute: false,
+                                    loop: false,
+                                    controls: true,
+                                  }) || ""
+                                }
+                                title="Heritage Video Preview"
+                                className="w-full h-full border-0"
+                                allowFullScreen
+                              />
+                            );
+                          }
+                          return (
+                            <video
+                              ref={videoPreviewRef}
+                              src={section.video_url ?? undefined}
+                              poster={posterImage ?? undefined}
                               className="w-full h-full object-cover"
+                              controls
+                              autoPlay
                             />
-                          ) : (
-                            <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-black/5">
-                              <Video className="size-8 mb-2 opacity-40" />
-                              <span className="text-xs font-medium">No Poster Image</span>
+                          );
+                        }
+
+                        return (
+                          <>
+                            {posterImage ? (
+                              <img
+                                src={posterImage}
+                                alt="Poster"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex flex-col items-center justify-center text-muted-foreground bg-black/5">
+                                <Video className="size-8 mb-2 opacity-40" />
+                                <span className="text-xs font-medium">No Poster Image</span>
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                              <button
+                                onClick={() => setPreviewPlaying(true)}
+                                className="size-14 rounded-full bg-cream/90 text-forest-dark flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
+                              >
+                                <Play className="size-6 ml-1" />
+                              </button>
                             </div>
-                          )}
-                          <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-                            <button
-                              onClick={() => setPreviewPlaying(true)}
-                              className="size-14 rounded-full bg-cream/90 text-forest-dark flex items-center justify-center shadow-lg hover:scale-110 transition-transform"
-                            >
-                              <Play className="size-6 ml-1" />
-                            </button>
-                          </div>
-                        </>
-                      )}
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
 

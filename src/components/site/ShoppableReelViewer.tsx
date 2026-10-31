@@ -16,6 +16,7 @@ import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/produ
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
 import { rewriteImageKitUrl } from "@/lib/product-images";
+import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 
 interface ShoppableReelViewerProps {
   videos: HomepageVideoItem[];
@@ -277,27 +278,49 @@ function ReelSection({
         >
           {(() => {
             const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
+            const isYt = isYouTubeUrl(videoUrl);
+            const ytPoster = isYt ? getYouTubeThumbnail(videoUrl) : null;
             const posterSrc =
               (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
+              ytPoster ||
               (videoUrl && videoUrl.includes("ik.imagekit.io")
                 ? `${videoUrl}/ik-thumbnail.jpg`
                 : item.fallbackImage || undefined);
 
+            const ytEmbed = isYt
+              ? getYouTubeEmbedUrl(videoUrl, {
+                  autoplay: true,
+                  mute: isMuted,
+                  loop: true,
+                  controls: true,
+                })
+              : null;
+
             return videoUrl && !isFailed ? (
-              <video
-                ref={videoRef}
-                poster={posterSrc}
-                playsInline
-                loop
-                muted={isMuted}
-                preload="metadata"
-                onTimeUpdate={handleTimeUpdate}
-                onLoadedMetadata={handleLoadedMetadata}
-                onError={() => setIsFailed(true)}
-                className="absolute inset-0 w-full h-full object-cover cursor-pointer"
-              >
-                <source src={videoUrl} type="video/mp4" />
-              </video>
+              isYt ? (
+                <iframe
+                  src={ytEmbed || ""}
+                  title={item.title || "Saurashtra Honey Story"}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full border-0"
+                />
+              ) : (
+                <video
+                  ref={videoRef}
+                  poster={posterSrc}
+                  playsInline
+                  loop
+                  muted={isMuted}
+                  preload="metadata"
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
+                  onError={() => setIsFailed(true)}
+                  className="absolute inset-0 w-full h-full object-cover cursor-pointer"
+                >
+                  <source src={videoUrl} type="video/mp4" />
+                </video>
+              )
             ) : (
             <div className="absolute inset-0 w-full h-full bg-[#F8F5EF] overflow-hidden">
               {product ? (

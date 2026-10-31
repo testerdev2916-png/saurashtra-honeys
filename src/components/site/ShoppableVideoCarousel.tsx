@@ -6,6 +6,7 @@ import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/produ
 import { fetchProducts } from "@/lib/product-catalog";
 import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { rewriteImageKitUrl, optimizeImage } from "@/lib/product-images";
+import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 import { SectionEyebrow } from "@/components/site/Layout";
 import { ShoppableReelViewer } from "./ShoppableReelViewer";
 
@@ -121,8 +122,11 @@ function ShoppableVideoCard({
   const displaySubtitle = item.subtitle || product?.tagline || product?.category || "";
 
   const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
+  const isYt = isYouTubeUrl(videoUrl);
+  const ytPoster = isYt ? getYouTubeThumbnail(videoUrl) : null;
   const posterSrc =
     (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
+    ytPoster ||
     (videoUrl && videoUrl.includes("ik.imagekit.io")
       ? `${videoUrl}/ik-thumbnail.jpg`
       : item.fallbackImage || "/saurashtra-honey-logo-complete.png");
@@ -191,22 +195,38 @@ function ShoppableVideoCard({
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
         {videoUrl && shouldStreamVideo ? (
-          <video
-            ref={videoRef}
-            poster={posterSrc}
-            autoPlay
-            playsInline
-            muted={isMuted}
-            loop
-            preload="metadata"
-            onLoadedMetadata={() => {
-              if (videoRef.current) setDuration(videoRef.current.duration);
-            }}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
-            style={{ transition: `transform ${customDuration} ${customBezier}` }}
-          >
-            <source src={videoUrl} type="video/mp4" />
-          </video>
+          isYt ? (
+            <iframe
+              src={
+                getYouTubeEmbedUrl(videoUrl, {
+                  autoplay: true,
+                  mute: isMuted,
+                  loop: true,
+                  controls: false,
+                }) || ""
+              }
+              title={displayTitle}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-[1.05]"
+            />
+          ) : (
+            <video
+              ref={videoRef}
+              poster={posterSrc}
+              autoPlay
+              playsInline
+              muted={isMuted}
+              loop
+              preload="metadata"
+              onLoadedMetadata={() => {
+                if (videoRef.current) setDuration(videoRef.current.duration);
+              }}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
+              style={{ transition: `transform ${customDuration} ${customBezier}` }}
+            >
+              <source src={videoUrl} type="video/mp4" />
+            </video>
+          )
         ) : (
           <>
             <img
