@@ -126,6 +126,31 @@ async function injectEnvIntoHtml(response: Response): Promise<Response> {
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const url = new URL(request.url);
+      const rawPath = url.pathname;
+      let decodedPath = rawPath;
+      try {
+        decodedPath = decodeURIComponent(rawPath);
+      } catch {}
+
+      // Automatically 301 redirect any URL with trailing spaces or %20 (e.g. /our-story%20 -> /our-story)
+      if (
+        rawPath.endsWith("%20") ||
+        rawPath.endsWith(" ") ||
+        decodedPath.endsWith(" ") ||
+        decodedPath !== decodedPath.trim()
+      ) {
+        const cleanPath = decodedPath.trim();
+        const target = `${url.origin}${cleanPath}${url.search}`;
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: target,
+            "Cache-Control": "public, max-age=31536000",
+          },
+        });
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       const safe = await normalizeCatastrophicSsrResponse(response);

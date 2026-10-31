@@ -2,20 +2,23 @@ import React, { useState, useEffect } from "react";
 import { useSiteSettings } from "@/lib/site-settings";
 import { useCompanySettings, DEFAULT_COMPANY_SETTINGS } from "@/lib/company-settings";
 
+import { rewriteImageKitUrl } from "@/lib/product-images";
+
 const DEFAULT_IMAGEKIT_LOGO =
   DEFAULT_COMPANY_SETTINGS.logo_url ||
   "https://ik.imagekit.io/spuuavgve/saurashtra-honey/logos/HONEY_BEE_FARM4_HO5d9ZgI3.png";
 const LOCAL_FALLBACK_LOGO = "/saurashtra-honey-logo-complete.webp";
 
 function resolveLogoSources(customUrl?: string): string[] {
-  const list: string[] = [LOCAL_FALLBACK_LOGO];
+  const list: string[] = [];
   if (customUrl && typeof customUrl === "string" && customUrl.trim()) {
-    const trimmed = customUrl.trim();
+    const trimmed = rewriteImageKitUrl(customUrl.trim());
     if (!trimmed.includes("res.cloudinary.com/yzmffalu/") && !trimmed.includes("fqbnkx3tz")) {
       list.push(trimmed);
     }
   }
   list.push(DEFAULT_IMAGEKIT_LOGO);
+  list.push(LOCAL_FALLBACK_LOGO);
   return Array.from(new Set(list));
 }
 
