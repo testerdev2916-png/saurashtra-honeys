@@ -39,19 +39,32 @@ export function AnalyticsScripts() {
   }, [location.pathname, location.search]);
 
   useEffect(() => {
-    if (ga) {
-      inject(`https://www.googletagmanager.com/gtag/js?id=${ga}`, "ga4-src");
-      injectInline(
-        `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga}',{send_page_view:true});`,
-        "ga4-init",
-      );
+    const init = () => {
+      if (ga) {
+        inject(`https://www.googletagmanager.com/gtag/js?id=${ga}`, "ga4-src");
+        injectInline(
+          `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${ga}',{send_page_view:true});`,
+          "ga4-init",
+        );
+      }
+      if (cl) {
+        injectInline(
+          `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${cl}");`,
+          "clarity-init",
+        );
+      }
+    };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const handle = (window as any).requestIdleCallback(init);
+      return () => (window as any).cancelIdleCallback(handle);
+    } else {
+      const timer = setTimeout(init, 1000);
+      return () => clearTimeout(timer);
     }
-    if (cl) {
-      injectInline(
-        `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y)})(window,document,"clarity","script","${cl}");`,
-        "clarity-init",
-      );
-    }
+  }, [ga, cl]);
+
+  useEffect(() => {
     if (gsc) {
       const m = document.querySelector(
         'meta[name="google-site-verification"]',
@@ -64,7 +77,7 @@ export function AnalyticsScripts() {
         document.head.appendChild(el);
       }
     }
-  }, [ga, cl, gsc]);
+  }, [gsc]);
 
   // Fanout GA4 dataLayer events to Meta Pixel + Clarity
   useEffect(() => {

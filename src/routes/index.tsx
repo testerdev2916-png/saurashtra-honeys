@@ -68,8 +68,9 @@ export const Route = createFileRoute("/")({
       "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
 
     const firstHero = loaderData?.heroSlides?.[0];
-    const heroMobileImg = firstHero?.mobileImage
-      ? optimizeImage(firstHero.mobileImage, { width: 800, quality: 80, format: "auto" })
+    const mobileSource = firstHero?.mobileImage || firstHero?.image;
+    const heroMobileImg = mobileSource
+      ? optimizeImage(mobileSource, { width: 750, quality: 80, format: "auto" })
       : undefined;
     const heroDesktopImg = firstHero?.image
       ? optimizeImage(firstHero.image, { width: 1800, quality: 80, format: "auto" })

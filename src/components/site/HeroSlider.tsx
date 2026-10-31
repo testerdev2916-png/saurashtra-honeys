@@ -162,13 +162,13 @@ export function HeroSlider({
                     <source
                       key={`mob-${s.updatedAt || s.mobileImage || s.image}`}
                       media="(max-width: 767px)"
-                      srcSet={optimizeImage(s.mobileImage || s.image, { width: 750, quality: 80 })}
+                      srcSet={optimizeImage(s.mobileImage || s.image, { width: 750, quality: 80, format: "auto" })}
                       // @ts-ignore: fetchpriority is valid in newer React versions
                       fetchpriority={idx === 0 ? "high" : "auto"}
                     />
                     <img
                       key={`desk-${s.updatedAt || s.image}`}
-                      src={optimizeImage(s.image, { width: 1800, quality: 80 })}
+                      src={optimizeImage(s.image, { width: 1800, quality: 80, format: "auto" })}
                       alt={s.title}
                       className="w-full h-full object-cover object-center"
                       loading={idx === 0 ? "eager" : "lazy"}
