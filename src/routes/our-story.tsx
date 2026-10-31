@@ -16,6 +16,8 @@ import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { PageHeroSlider } from "@/components/site/PageHeroSlider";
 import { supabase } from "@/integrations/supabase/client";
 import { AchievementsGallery, type Achievement } from "@/components/site/AchievementsGallery";
+import { fetchActiveHeritageVideo, type HeritageVideo } from "@/lib/heritage";
+import { isYouTubeUrl, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 
@@ -249,7 +251,13 @@ export const Route = createFileRoute("/our-story")({
     } catch (e) {
       console.error("Failed to load achievements", e);
     }
-    return { sections, achievements };
+    let heritageVideo: HeritageVideo | null = null;
+    try {
+      heritageVideo = await fetchActiveHeritageVideo();
+    } catch (e) {
+      console.error("Failed to load heritage video", e);
+    }
+    return { sections, achievements, heritageVideo };
   },
   head: ({ loaderData }) =>
     extractPageSeo(loaderData?.sections, {
@@ -262,7 +270,7 @@ export const Route = createFileRoute("/our-story")({
 });
 
 function OurStory() {
-  const { sections, achievements } = Route.useLoaderData();
+  const { sections, achievements, heritageVideo } = Route.useLoaderData();
   const getS = (key: string) => sections.find((s) => s.section_key === key)?.settings || {};
 
   const hero = getS("hero");
@@ -744,41 +752,46 @@ function OurStory() {
                     )}
                   </div>
                 )}
-                {storyVideoGallery.video_url ? (
-                  <div className="w-full aspect-video rounded-[24px] overflow-hidden shadow-xl reveal opacity-0 translate-y-8 transition-all duration-1000 bg-black">
-                    {storyVideoGallery.video_url.includes("youtube.com") ||
-                    storyVideoGallery.video_url.includes("youtu.be") ? (
-                      <iframe
-                        src={
-                          storyVideoGallery.video_url.includes("embed")
-                            ? storyVideoGallery.video_url
-                            : `https://www.youtube-nocookie.com/embed/${
-                                storyVideoGallery.video_url.includes("v=")
-                                  ? storyVideoGallery.video_url.split("v=")[1]?.split("&")[0]
-                                  : storyVideoGallery.video_url.split("/").pop()
-                              }?rel=0&modestbranding=1`
-                        }
-                        title="Saurashtra Honey Documentary"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        className="w-full h-full border-0"
-                      />
-                    ) : (
-                      <video
-                        src={storyVideoGallery.video_url}
-                        poster={storyVideoGallery.video_poster}
-                        controls
-                        className="w-full h-full object-cover"
-                        playsInline
-                        preload="metadata"
-                      />
-                    )}
-                  </div>
-                ) : (
-                  <div className="w-full aspect-video rounded-[24px] bg-[#EBEFE9] border-2 border-dashed border-[#3B5241]/20 flex items-center justify-center reveal opacity-0 translate-y-8 transition-all duration-1000">
-                    <span className="text-[#3B5241]/50 font-medium">Video Placeholder</span>
-                  </div>
-                )}
+                {(() => {
+                  const effectiveVideoUrl = storyVideoGallery.video_url || heritageVideo?.video_url;
+                  const effectiveVideoPoster = storyVideoGallery.video_poster || heritageVideo?.poster_url;
+                  const isYt = isYouTubeUrl(effectiveVideoUrl);
+                  const ytEmbed = isYt
+                    ? getYouTubeEmbedUrl(effectiveVideoUrl, {
+                        autoplay: false,
+                        mute: false,
+                        loop: true,
+                        controls: true,
+                      })
+                    : null;
+
+                  return effectiveVideoUrl ? (
+                    <div className="w-full aspect-video rounded-[24px] overflow-hidden shadow-xl reveal opacity-0 translate-y-8 transition-all duration-1000 bg-black">
+                      {isYt ? (
+                        <iframe
+                          src={ytEmbed || ""}
+                          title="Saurashtra Honey Documentary"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="w-full h-full border-0"
+                        />
+                      ) : (
+                        <video
+                          src={effectiveVideoUrl}
+                          poster={effectiveVideoPoster}
+                          controls
+                          className="w-full h-full object-cover"
+                          playsInline
+                          preload="metadata"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-full aspect-video rounded-[24px] bg-[#EBEFE9] border-2 border-dashed border-[#3B5241]/20 flex items-center justify-center reveal opacity-0 translate-y-8 transition-all duration-1000">
+                      <span className="text-[#3B5241]/50 font-medium">Video Placeholder</span>
+                    </div>
+                  );
+                })()}
               </div>
             ) : null
           }

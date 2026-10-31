@@ -301,7 +301,7 @@ function ReelSection({
                 <iframe
                   src={ytEmbed || ""}
                   title={item.title || "Saurashtra Honey Story"}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
                   className="absolute inset-0 w-full h-full border-0"
                 />

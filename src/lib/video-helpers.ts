@@ -50,7 +50,9 @@ export function getYouTubeEmbedUrl(
     playsinline: "1",
     rel: "0",
     modestbranding: "1",
+    iv_load_policy: "3",
+    origin: typeof window !== "undefined" ? window.location.origin : "https://saurashtrahoney.com",
   });
-  return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
+  return `https://www.youtube.com/embed/${id}?${params.toString()}`;
 }
 

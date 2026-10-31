@@ -43,6 +43,7 @@ function ShoppableVideoCard({
   onActivate,
   isSectionInView = false,
 }: ShoppableVideoCardProps) {
+  const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const [hasLoaded, setHasLoaded] = useState(false);
@@ -51,8 +52,25 @@ function ShoppableVideoCard({
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
+  const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
+  const isYt = isYouTubeUrl(videoUrl);
+  const ytPoster = isYt ? getYouTubeThumbnail(videoUrl) : null;
+  const posterSrc =
+    (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
+    ytPoster ||
+    (videoUrl && videoUrl.includes("ik.imagekit.io")
+      ? `${videoUrl}/ik-thumbnail.jpg`
+      : item.fallbackImage || "/saurashtra-honey-logo-complete.png");
+
+  const isDuplicate = uniqueId.startsWith("set2");
   const isAutoActive = activeId === item.id;
-  const shouldStreamVideo = Boolean(isSectionInView && (isHovered || isPlaying || isAutoActive));
+  // YouTube videos stream and autoplay immediately whenever the section is in view (zero bandwidth cost).
+  // MP4 files stream when active or hovered to protect ImageKit bandwidth quota.
+  const shouldStreamVideo = Boolean(
+    isSectionInView &&
+      !isDuplicate &&
+      (isYt || isHovered || isPlaying || isAutoActive),
+  );
 
   const formatDuration = (sec: number) => {
     if (!sec || isNaN(sec) || !isFinite(sec)) return "";
@@ -88,6 +106,13 @@ function ShoppableVideoCard({
 
     onActivate?.(item.id);
 
+    if (isYt) {
+      navigate({
+        search: ((prev: any) => ({ ...prev, reel: item.id })) as any,
+      });
+      return;
+    }
+
     if (!shouldStreamVideo) {
       setIsPlaying(true);
       setIsMuted(false);
@@ -120,16 +145,6 @@ function ShoppableVideoCard({
 
   const displayTitle = item.title || product?.name || "Saurashtra Honey";
   const displaySubtitle = item.subtitle || product?.tagline || product?.category || "";
-
-  const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
-  const isYt = isYouTubeUrl(videoUrl);
-  const ytPoster = isYt ? getYouTubeThumbnail(videoUrl) : null;
-  const posterSrc =
-    (item.thumbnail_url ? rewriteImageKitUrl(item.thumbnail_url) : null) ||
-    ytPoster ||
-    (videoUrl && videoUrl.includes("ik.imagekit.io")
-      ? `${videoUrl}/ik-thumbnail.jpg`
-      : item.fallbackImage || "/saurashtra-honey-logo-complete.png");
 
   // The required Custom transition
   const customBezier = "cubic-bezier(0.22, 1, 0.36, 1)";
@@ -200,14 +215,15 @@ function ShoppableVideoCard({
               src={
                 getYouTubeEmbedUrl(videoUrl, {
                   autoplay: true,
-                  mute: isMuted,
+                  mute: true,
                   loop: true,
                   controls: false,
                 }) || ""
               }
               title={displayTitle}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-[1.05]"
+              loading="eager"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-[1.25] object-cover"
             />
           ) : (
             <video
@@ -395,10 +411,27 @@ export function ShoppableVideoCarousel({
     });
   }, [activeVideos, category, currentSlug, allProducts]);
 
+  // Ensure activeId is set as soon as sortedVideos are loaded
+  useEffect(() => {
+    if (sortedVideos.length > 0 && !activeId) {
+      setActiveId(sortedVideos[0].id);
+    }
+  }, [sortedVideos, activeId]);
+
   // IntersectionObserver to detect when carousel is near viewport & control single-video autoplay
   useEffect(() => {
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
+
+    // Immediate check if section is already near viewport
+    const rect = el.getBoundingClientRect();
+    if (rect.top < window.innerHeight + 250 && rect.bottom > -250) {
+      setIsSectionInView(true);
+      setIsSectionVisible(true);
+      if (sortedVideos.length > 0) {
+        setActiveId((prev) => prev || sortedVideos[0].id);
+      }
+    }
 
     const obs = new IntersectionObserver(
       ([entry]) => {
@@ -413,7 +446,7 @@ export function ShoppableVideoCarousel({
           setActiveId(null);
         }
       },
-      { threshold: 0.2 },
+      { threshold: 0.01, rootMargin: "250px 0px 250px 0px" },
     );
 
     obs.observe(el);
