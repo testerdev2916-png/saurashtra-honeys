@@ -26,6 +26,9 @@ type ShoppableVideoCardProps = {
   isVisible: boolean;
   uniqueId: string;
   className?: string;
+  activeId?: string | null;
+  onActivate?: (id: string) => void;
+  isSectionInView?: boolean;
 };
 
 function ShoppableVideoCard({
@@ -35,6 +38,9 @@ function ShoppableVideoCard({
   isVisible,
   uniqueId,
   className,
+  activeId,
+  onActivate,
+  isSectionInView = false,
 }: ShoppableVideoCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -44,7 +50,8 @@ function ShoppableVideoCard({
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const shouldStreamVideo = isHovered || isPlaying;
+  const isAutoActive = activeId === item.id;
+  const shouldStreamVideo = Boolean(isSectionInView && (isHovered || isPlaying || isAutoActive));
 
   const formatDuration = (sec: number) => {
     if (!sec || isNaN(sec) || !isFinite(sec)) return "";
@@ -77,6 +84,8 @@ function ShoppableVideoCard({
   const handleVideoClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+
+    onActivate?.(item.id);
 
     if (!shouldStreamVideo) {
       setIsPlaying(true);
@@ -126,7 +135,10 @@ function ShoppableVideoCard({
     <div
       ref={cardRef}
       data-card-id={uniqueId}
-      onMouseEnter={() => setIsHovered(true)}
+      onMouseEnter={() => {
+        setIsHovered(true);
+        onActivate?.(item.id);
+      }}
       onMouseLeave={() => setIsHovered(false)}
       className={`shoppable-video-card group relative shrink-0 flex flex-col snap-center sm:snap-start
         ${className || "w-[70vw] sm:w-[calc(50vw-24px)] md:w-[calc(33.33vw-24px)] lg:w-[calc(20vw-24px)] xl:w-[280px] mr-[16px] md:mr-[20px]"}
@@ -186,7 +198,7 @@ function ShoppableVideoCard({
             playsInline
             muted={isMuted}
             loop
-            preload="auto"
+            preload="metadata"
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);
             }}
@@ -200,8 +212,16 @@ function ShoppableVideoCard({
             <img
               loading="lazy"
               decoding="async"
-              src={optimizeImage(posterSrc, { width: 450, quality: 75, format: "auto" })}
+              src={optimizeImage(posterSrc)}
               alt={displayTitle}
+              onError={(e) => {
+                const target = e.currentTarget;
+                if (product?.image_url && target.src !== product.image_url) {
+                  target.src = product.image_url;
+                } else if (!target.src.includes("saurashtra-honey-logo-complete")) {
+                  target.src = "/saurashtra-honey-logo-complete.webp";
+                }
+              }}
               className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
               style={{ transition: `transform ${customDuration} ${customBezier}` }}
             />
@@ -279,6 +299,8 @@ export function ShoppableVideoCarousel({
   const [videos, setVideos] = useState<HomepageVideoItem[]>([]);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [isSectionVisible, setIsSectionVisible] = useState(false);
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [isSectionInView, setIsSectionInView] = useState(false);
 
   const search = useSearch({ strict: false }) as any;
   const navigate = useNavigate({ strict: false } as any) as any;
@@ -353,24 +375,45 @@ export function ShoppableVideoCarousel({
     });
   }, [activeVideos, category, currentSlug, allProducts]);
 
-  // IntersectionObserver to detect when carousel is near viewport
+  // IntersectionObserver to detect when carousel is near viewport & control single-video autoplay
   useEffect(() => {
     const el = sectionRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
 
     const obs = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        const inView = entry.isIntersecting;
+        setIsSectionInView(inView);
+        if (inView) {
           setIsSectionVisible(true);
-          obs.disconnect(); // Only need to trigger entry animation once
+          // Automatically play the first card when scrolled into view
+          setActiveId((prev) => prev || (sortedVideos[0]?.id ?? null));
+        } else {
+          // Immediately pause/unload when user scrolls away to protect bandwidth 100%
+          setActiveId(null);
         }
       },
-      { rootMargin: "600px" }, // trigger visibility slightly before it enters viewport
+      { threshold: 0.2 },
     );
 
     obs.observe(el);
     return () => obs.unobserve(el);
-  }, []);
+  }, [sortedVideos]);
+
+  // Sync active playing video with Embla carousel snap on mobile
+  useEffect(() => {
+    if (!emblaApi) return;
+    const onSelect = () => {
+      const snap = emblaApi.selectedScrollSnap();
+      if (sortedVideos[snap]) {
+        setActiveId(sortedVideos[snap].id);
+      }
+    };
+    emblaApi.on("select", onSelect);
+    return () => {
+      emblaApi.off("select", onSelect);
+    };
+  }, [emblaApi, sortedVideos]);
 
   if (sortedVideos.length === 0) return null;
 
@@ -440,6 +483,9 @@ export function ShoppableVideoCarousel({
                     isVisible={isSectionVisible}
                     uniqueId={`mob-${item.id}-${idx}`}
                     className="w-full"
+                    activeId={activeId}
+                    onActivate={(id) => setActiveId(id)}
+                    isSectionInView={isSectionInView}
                   />
                 </div>
               ))}
@@ -464,6 +510,9 @@ export function ShoppableVideoCarousel({
                 index={idx}
                 isVisible={isSectionVisible}
                 uniqueId={`set1-${item.id}-${idx}`}
+                activeId={activeId}
+                onActivate={(id) => setActiveId(id)}
+                isSectionInView={isSectionInView}
               />
             ))}
           </div>
@@ -477,6 +526,9 @@ export function ShoppableVideoCarousel({
                 index={idx}
                 isVisible={isSectionVisible}
                 uniqueId={`set2-${item.id}-${idx}`}
+                activeId={activeId}
+                onActivate={(id) => setActiveId(id)}
+                isSectionInView={isSectionInView}
               />
             ))}
           </div>

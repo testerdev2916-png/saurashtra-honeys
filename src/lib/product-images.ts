@@ -91,6 +91,16 @@ export function optimizeImage(
 
   trimmed = rewriteImageKitUrl(trimmed);
 
+  // Video thumbnails (e.g. video.m4v/ik-thumbnail.jpg) are pre-rendered static 30KB images.
+  // Adding transformation params triggers ImageKit dynamic video transformation limits (HTTP 403 ELIMIT).
+  if (
+    trimmed.includes("ik-thumbnail.jpg") ||
+    trimmed.endsWith(".m4v") ||
+    trimmed.endsWith(".mp4")
+  ) {
+    return trimmed;
+  }
+
   if (trimmed.includes("ik.imagekit.io")) {
     const width = opts?.width;
     const height = opts?.height;
