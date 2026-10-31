@@ -305,32 +305,32 @@ export async function fetchAllHomepageTrustItems(): Promise<HomepageTrustItem[]>
       const defaults = [
         {
           title: "Pure No Additives",
-          icon: "/images/trust/pure_no_additives.png",
+          icon: "/images/trust/pure_no_additives.webp",
           enabled: true,
           sort_order: 1,
         },
         {
           title: "Raw & Unprocessed",
-          icon: "/images/trust/raw_unprocessed.png",
+          icon: "/images/trust/raw_unprocessed.webp",
           enabled: true,
           sort_order: 2,
         },
         {
           title: "Natural Floral Sources",
-          icon: "/images/trust/natural_floral.png",
+          icon: "/images/trust/natural_floral.webp",
           enabled: true,
           sort_order: 3,
         },
         {
           title: "Rich in Nutrients",
-          icon: "/images/trust/rich_nutrients.png",
+          icon: "/images/trust/rich_nutrients.webp",
           enabled: true,
           sort_order: 4,
         },
-        { title: "Lab Tested", icon: "/images/trust/lab_tested.png", enabled: true, sort_order: 5 },
+        { title: "Lab Tested", icon: "/images/trust/lab_tested.webp", enabled: true, sort_order: 5 },
         {
           title: "Ethical Beekeeping",
-          icon: "/images/trust/ethical_beekeeping.png",
+          icon: "/images/trust/ethical_beekeeping.webp",
           enabled: true,
           sort_order: 6,
         },

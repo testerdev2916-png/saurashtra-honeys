@@ -108,7 +108,7 @@ const FooterDecorativeBackground = () => (
         Scaled up significantly and positioned perfectly at the edges as shown in the mockup 
     */}
     <img
-      src="/images/footer-botanical-left.jpg"
+      src="/images/footer-botanical-left.webp"
       alt=""
       loading="lazy"
       decoding="async"
@@ -119,7 +119,7 @@ const FooterDecorativeBackground = () => (
       }}
     />
     <img
-      src="/images/footer-botanical-right.jpg"
+      src="/images/footer-botanical-right.webp"
       alt=""
       loading="lazy"
       decoding="async"

@@ -81,12 +81,12 @@ export function HomeHero({ initialSlides }: { initialSlides?: HeroSlide[] }) {
    ========================================================================= */
 export function HomeTrustStrip({ settings }: { settings?: Record<string, any> }) {
   const fallbackItems = [
-    { label: "Pure No Additives", img: "/images/trust/pure_no_additives.png" },
-    { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.png" },
-    { label: "Natural Floral Sources", img: "/images/trust/natural_floral.png" },
-    { label: "Rich in Nutrients", img: "/images/trust/rich_nutrients.png" },
-    { label: "Lab Tested", img: "/images/trust/lab_tested.png" },
-    { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.png" },
+    { label: "Pure No Additives", img: "/images/trust/pure_no_additives.webp" },
+    { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.webp" },
+    { label: "Natural Floral Sources", img: "/images/trust/natural_floral.webp" },
+    { label: "Rich in Nutrients", img: "/images/trust/rich_nutrients.webp" },
+    { label: "Lab Tested", img: "/images/trust/lab_tested.webp" },
+    { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.webp" },
   ];
 
   const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>([]);
@@ -107,7 +107,7 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
           );
           return {
             label: item.title,
-            img: item.icon || (matched ? matched.img : "/images/trust/pure_no_additives.png"), // use uploaded image or fallback
+            img: matched ? matched.img : item.icon || "/images/trust/pure_no_additives.webp",
           };
         })
       : fallbackItems;
@@ -489,14 +489,14 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
       desc:
         settings?.point1_desc ??
         "Carefully harvested honey, brought directly from nature to your home.",
-      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.png",
+      img: settings?.point1_icon ?? "/images/heritage/illus_hive_to_home.webp",
     },
     {
       title: settings?.point2_title ?? "Wildflower Richness",
       desc:
         settings?.point2_desc ??
         "Naturally influenced by the diverse flowers surrounding our hives.",
-      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.png",
+      img: settings?.point2_icon ?? "/images/heritage/illus_wildflower.webp",
     },
     {
       title: settings?.point3_title ?? "HIVE TO HOME",
@@ -519,7 +519,7 @@ export function HomeFarmBanner({ settings }: { settings?: Record<string, any> })
   const fb_desc =
     settings?.description ??
     "From the wildflowers of Saurashtra to the hands of our beekeepers, every drop follows a journey rooted in nature, care, and patience. We preserve what nature creates — pure, authentic honey, just as it was meant to be.";
-  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/journey-beekeeper.jpg";
+  const cinematicImg = settings?.cinematic_image ?? "/images/heritage/journey-beekeeper.webp";
 
   const fb_cta_text = settings?.cta_text ?? "EXPLORE OUR HIVE";
   const fb_cta_url = settings?.cta_url ?? "/bee-farming";
