@@ -1126,25 +1126,47 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
     videoRef.current.currentTime = (x / rect.width) * videoRef.current.duration;
   };
 
+  const isYouTube = cleanSrc.includes("youtube.com") || cleanSrc.includes("youtu.be");
+  const ytVideoId = isYouTube
+    ? cleanSrc.includes("v=")
+      ? cleanSrc.split("v=")[1]?.split("&")[0]
+      : cleanSrc.split("/").pop()
+    : "";
+  const ytEmbedUrl = isYouTube
+    ? cleanSrc.includes("embed")
+      ? cleanSrc
+      : `https://www.youtube-nocookie.com/embed/${ytVideoId}?autoplay=1&mute=1&loop=1&playlist=${ytVideoId}&rel=0&modestbranding=1`
+    : "";
+
   return (
     <div
       ref={containerRef}
       className="relative w-full h-full group bg-black cursor-pointer overflow-hidden rounded-[20px] sm:rounded-[24px]"
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
-      onClick={togglePlay}
+      onClick={!isYouTube ? togglePlay : undefined}
     >
-      <video
-        ref={videoRef}
-        poster={cleanPoster}
-        preload="metadata"
-        playsInline
-        muted={isMuted}
-        loop
-        className="w-full h-full object-cover"
-      >
-        <source src={cleanSrc} type="video/mp4" />
-      </video>
+      {isYouTube ? (
+        <iframe
+          src={ytEmbedUrl}
+          title="Our Heritage"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full border-0 pointer-events-auto"
+        />
+      ) : (
+        <video
+          ref={videoRef}
+          poster={cleanPoster}
+          preload="metadata"
+          playsInline
+          muted={isMuted}
+          loop
+          className="w-full h-full object-cover"
+        >
+          <source src={cleanSrc} type="video/mp4" />
+        </video>
+      )}
 
       {showFallbackPlay && !isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-10 transition-opacity">

@@ -745,14 +745,34 @@ function OurStory() {
                   </div>
                 )}
                 {storyVideoGallery.video_url ? (
-                  <div className="w-full aspect-video rounded-[24px] overflow-hidden shadow-xl reveal opacity-0 translate-y-8 transition-all duration-1000">
-                    <video
-                      src={storyVideoGallery.video_url}
-                      poster={storyVideoGallery.video_poster}
-                      controls
-                      className="w-full h-full object-cover"
-                      playsInline
-                    />
+                  <div className="w-full aspect-video rounded-[24px] overflow-hidden shadow-xl reveal opacity-0 translate-y-8 transition-all duration-1000 bg-black">
+                    {storyVideoGallery.video_url.includes("youtube.com") ||
+                    storyVideoGallery.video_url.includes("youtu.be") ? (
+                      <iframe
+                        src={
+                          storyVideoGallery.video_url.includes("embed")
+                            ? storyVideoGallery.video_url
+                            : `https://www.youtube-nocookie.com/embed/${
+                                storyVideoGallery.video_url.includes("v=")
+                                  ? storyVideoGallery.video_url.split("v=")[1]?.split("&")[0]
+                                  : storyVideoGallery.video_url.split("/").pop()
+                              }?rel=0&modestbranding=1`
+                        }
+                        title="Saurashtra Honey Documentary"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        className="w-full h-full border-0"
+                      />
+                    ) : (
+                      <video
+                        src={storyVideoGallery.video_url}
+                        poster={storyVideoGallery.video_poster}
+                        controls
+                        className="w-full h-full object-cover"
+                        playsInline
+                        preload="metadata"
+                      />
+                    )}
                   </div>
                 ) : (
                   <div className="w-full aspect-video rounded-[24px] bg-[#EBEFE9] border-2 border-dashed border-[#3B5241]/20 flex items-center justify-center reveal opacity-0 translate-y-8 transition-all duration-1000">

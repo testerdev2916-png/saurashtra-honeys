@@ -50,8 +50,8 @@ const DEFAULTS: SiteSettings = {
   company: {
     name: "Saurashtra Honey",
     tagline: "Pure • Traceable • Lab-tested",
-    logo_url: "/saurashtra-honey-logo-complete.png",
-    favicon_url: "/favicon-v2.ico",
+    logo_url: "https://ik.imagekit.io/spuuavgve/saurashtra-honey/settings/HONEY_BEE_FARM4_YYsCk0gs-.png",
+    favicon_url: "https://ik.imagekit.io/spuuavgve/saurashtra-honey/settings/fevicon_for_bees_-x3rE7x9g.png",
   },
   contact: {
     email: "saurashtra.honey@gmail.com",
