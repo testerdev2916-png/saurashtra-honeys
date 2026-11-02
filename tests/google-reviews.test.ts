@@ -9,7 +9,7 @@ import {
 describe("Google Reviews Integration Tests", () => {
   it("initial seed reviews contain verified authentic 5-star Google reviews", () => {
     assert.ok(Array.isArray(INITIAL_SEED_REVIEWS));
-    assert.strictEqual(INITIAL_SEED_REVIEWS.length, 5);
+    assert.strictEqual(INITIAL_SEED_REVIEWS.length, 10);
 
     for (const rev of INITIAL_SEED_REVIEWS) {
       assert.ok(rev.reviewer_name, "Reviewer name must be present");
@@ -56,7 +56,7 @@ describe("Google Reviews Integration Tests", () => {
     }
 
     const uniqueReviews = Array.from(reviewsMap.values());
-    assert.strictEqual(uniqueReviews.length, 6, "Must contain exactly 6 unique reviews");
+    assert.strictEqual(uniqueReviews.length, 11, "Must contain exactly 11 unique reviews");
 
     const updatedFirst = uniqueReviews.find(
       (r) => r.google_review_id === INITIAL_SEED_REVIEWS[0].google_review_id,
