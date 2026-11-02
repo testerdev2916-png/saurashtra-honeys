@@ -39,3 +39,4 @@ export const Route = createFileRoute("/api/cron/sync-google-reviews")({
     },
   },
 });
+

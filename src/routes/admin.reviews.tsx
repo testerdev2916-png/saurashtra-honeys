@@ -10,6 +10,8 @@ import {
   updateGoogleReviewsSettings,
   toggleGoogleReviewVisibility,
   getGoogleOAuthStartUrl,
+  addGoogleReviewAdmin,
+  deleteGoogleReviewAdmin,
 } from "@/lib/google-reviews.functions";
 import type {
   GoogleReviewRecord,
@@ -43,6 +45,7 @@ import {
   EyeOff,
   Loader2,
   Sparkles,
+  Plus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -115,12 +118,25 @@ function ReviewsPage() {
   const saveGoogleSettings = useServerFn(updateGoogleReviewsSettings);
   const toggleVisibilityFn = useServerFn(toggleGoogleReviewVisibility);
   const getOAuthUrlFn = useServerFn(getGoogleOAuthStartUrl);
+  const addReviewFn = useServerFn(addGoogleReviewAdmin);
+  const deleteReviewFn = useServerFn(deleteGoogleReviewAdmin);
 
   const [googleLoading, setGoogleLoading] = useState(false);
   const [syncingNow, setSyncingNow] = useState(false);
   const [googleSettings, setGoogleSettings] = useState<GoogleBusinessSettings | null>(null);
   const [googleLogs, setGoogleLogs] = useState<GoogleSyncLog[]>([]);
   const [googleReviews, setGoogleReviews] = useState<GoogleReviewRecord[]>([]);
+
+  // Add Review Modal state (100% Free manual review management)
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [savingNewReview, setSavingNewReview] = useState(false);
+  const [newReviewForm, setNewReviewForm] = useState({
+    reviewer_name: "",
+    star_rating: 5,
+    review_text: "",
+    review_date: new Date().toISOString().split("T")[0],
+    google_review_url: "",
+  });
 
   // Settings form local edit state
   const [settingsForm, setSettingsForm] = useState({
@@ -284,6 +300,55 @@ function ReviewsPage() {
     }
   };
 
+  // Add Google Review manually (100% Free, Zero Google Cloud Billing required)
+  const handleCreateReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReviewForm.reviewer_name.trim() || !newReviewForm.review_text.trim()) {
+      toast.error("Please enter reviewer name and review content.");
+      return;
+    }
+    setSavingNewReview(true);
+    try {
+      const res = await addReviewFn({
+        data: {
+          reviewer_name: newReviewForm.reviewer_name.trim(),
+          star_rating: Number(newReviewForm.star_rating) || 5,
+          review_text: newReviewForm.review_text.trim(),
+          review_date: new Date(newReviewForm.review_date).toISOString(),
+          google_review_url: newReviewForm.google_review_url.trim() || null,
+        },
+      });
+      if (res.ok) {
+        toast.success("Google review added successfully!");
+        setShowAddModal(false);
+        setNewReviewForm({
+          reviewer_name: "",
+          star_rating: 5,
+          review_text: "",
+          review_date: new Date().toISOString().split("T")[0],
+          google_review_url: "",
+        });
+        await loadGoogleReviews();
+      }
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingNewReview(false);
+    }
+  };
+
+  // Delete single review
+  const handleDeleteGoogleReview = async (reviewId: string) => {
+    if (!confirm("Delete this review from your website?")) return;
+    try {
+      await deleteReviewFn({ data: { google_review_id: reviewId } });
+      toast.success("Review deleted");
+      await loadGoogleReviews();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -292,17 +357,22 @@ function ReviewsPage() {
         actions={
           <div className="flex items-center gap-2">
             {activeTab === "google" && (
-              <BtnPrimary onClick={handleManualSync} disabled={syncingNow}>
-                {syncingNow ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin" /> SYNCING...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCcw className="size-3.5" /> SYNC GOOGLE REVIEWS
-                  </>
-                )}
-              </BtnPrimary>
+              <>
+                <BtnPrimary onClick={() => setShowAddModal(true)}>
+                  <Plus className="size-3.5" /> ADD REVIEW
+                </BtnPrimary>
+                <BtnGhost onClick={handleManualSync} disabled={syncingNow}>
+                  {syncingNow ? (
+                    <>
+                      <Loader2 className="size-3.5 animate-spin" /> SYNCING...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCcw className="size-3.5" /> SYNC API
+                    </>
+                  )}
+                </BtnGhost>
+              </>
             )}
             <BtnGhost
               onClick={() => {
@@ -884,6 +954,14 @@ function ReviewsPage() {
                             </>
                           )}
                         </button>
+
+                        <button
+                          onClick={() => handleDeleteGoogleReview(rev.google_review_id)}
+                          className="inline-flex items-center gap-1 text-destructive rounded-lg px-2 py-1.5 text-[11px] font-bold hover:bg-destructive/10 transition-colors"
+                          title="Delete review"
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
                       </div>
                     </div>
                   </Card>
@@ -937,6 +1015,120 @@ function ReviewsPage() {
                 )}
               </tbody>
             </TableWrap>
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────────────────
+          ADD GOOGLE REVIEW MODAL (100% Free, Zero Google Cloud Billing required)
+      ──────────────────────────────────────────────────────────────────────── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-border shadow-2xl max-w-lg w-full p-6">
+            <div className="flex items-center justify-between pb-3 border-b border-border mb-4">
+              <div className="flex items-center gap-2">
+                <GoogleGIcon className="size-5" />
+                <h3 className="font-serif text-lg font-medium text-forest-dark">
+                  Add Verified Google Review
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="text-muted-foreground hover:text-forest-dark"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-muted-foreground mb-4">
+              Add genuine customer reviews directly to your website. They will display with the official Google logo, star ratings, and verified badge on your homepage.
+            </p>
+
+            <form onSubmit={handleCreateReview} className="space-y-4">
+              <Field label="Customer / Reviewer Name *">
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Patel"
+                  value={newReviewForm.reviewer_name}
+                  onChange={(e) =>
+                    setNewReviewForm({ ...newReviewForm, reviewer_name: e.target.value })
+                  }
+                  className={inp}
+                />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-4">
+                <Field label="Star Rating *">
+                  <select
+                    value={newReviewForm.star_rating}
+                    onChange={(e) =>
+                      setNewReviewForm({
+                        ...newReviewForm,
+                        star_rating: parseInt(e.target.value, 10),
+                      })
+                    }
+                    className={inp}
+                  >
+                    <option value={5}>★★★★★ (5 Stars)</option>
+                    <option value={4}>★★★★☆ (4 Stars)</option>
+                    <option value={3}>★★★☆☆ (3 Stars)</option>
+                    <option value={2}>★★☆☆☆ (2 Stars)</option>
+                    <option value={1}>★☆☆☆☆ (1 Star)</option>
+                  </select>
+                </Field>
+
+                <Field label="Review Date">
+                  <input
+                    type="date"
+                    value={newReviewForm.review_date}
+                    onChange={(e) =>
+                      setNewReviewForm({ ...newReviewForm, review_date: e.target.value })
+                    }
+                    className={inp}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Review Content *">
+                <textarea
+                  required
+                  rows={4}
+                  placeholder="Paste what the customer wrote on Google..."
+                  value={newReviewForm.review_text}
+                  onChange={(e) =>
+                    setNewReviewForm({ ...newReviewForm, review_text: e.target.value })
+                  }
+                  className={inp}
+                />
+              </Field>
+
+              <Field label="Google Review Link (Optional)">
+                <input
+                  type="url"
+                  placeholder="https://maps.app.goo.gl/... (optional direct link)"
+                  value={newReviewForm.google_review_url}
+                  onChange={(e) =>
+                    setNewReviewForm({ ...newReviewForm, google_review_url: e.target.value })
+                  }
+                  className={inp}
+                />
+              </Field>
+
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
+                <BtnGhost type="button" onClick={() => setShowAddModal(false)}>
+                  Cancel
+                </BtnGhost>
+                <BtnPrimary type="submit" disabled={savingNewReview}>
+                  {savingNewReview ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Check className="size-3.5" />
+                  )}
+                  ADD TO WEBSITE
+                </BtnPrimary>
+              </div>
+            </form>
           </div>
         </div>
       )}

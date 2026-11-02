@@ -222,3 +222,133 @@ export const getGoogleOAuthStartUrl = createServerFn({ method: "POST" })
     const url = getGoogleOAuthAuthUrl(data.origin);
     return { url };
   });
+
+
+
+/**
+ * Admin: Add a Google Review manually (100% Free, Zero Google Cloud Billing required)
+ */
+export const addGoogleReviewAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(
+    z.object({
+      reviewer_name: z.string().min(1, "Reviewer name is required"),
+      star_rating: z.number().min(1).max(5),
+      review_text: z.string().min(1, "Review text is required"),
+      review_date: z.string().optional(),
+      reviewer_photo_url: z.string().url().optional().nullable(),
+      google_review_url: z.string().url().optional().nullable(),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc("is_staff", {
+      _user_id: context.userId,
+    });
+    if (!isStaff) throw new Error("Forbidden: Staff access required");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const newId = `manual-google-${Date.now()}`;
+    const newReview = {
+      id: newId,
+      google_review_id: newId,
+      reviewer_name: data.reviewer_name.trim(),
+      reviewer_photo_url: data.reviewer_photo_url || null,
+      star_rating: data.star_rating,
+      review_text: data.review_text.trim(),
+      review_date: data.review_date || new Date().toISOString(),
+      google_review_url:
+        data.google_review_url ||
+        "https://www.google.com/maps/search/?api=1&query=Saurashtra+Honey+Bee+Farm+Mahuva",
+      is_published: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    // 1. Try dedicated table
+    try {
+      await supabaseAdmin.from("google_reviews" as any).insert([newReview]);
+    } catch {
+      // fallback
+    }
+
+    // 2. Persist in app_settings cache
+    try {
+      const { data: appRow } = await supabaseAdmin
+        .from("app_settings")
+        .select("data")
+        .eq("id", 1)
+        .maybeSingle();
+
+      const appData = (appRow?.data as any) || {};
+      const cache: any[] = appData.google_reviews_cache || [];
+      const updatedCache = [newReview, ...cache.filter((r) => r.google_review_id !== newId)];
+
+      await supabaseAdmin.from("app_settings").upsert({
+        id: 1,
+        data: {
+          ...appData,
+          google_reviews_cache: updatedCache,
+        },
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.error("[GoogleReviews] Failed to insert in app_settings cache:", e);
+    }
+
+    return { ok: true, review: newReview };
+  });
+
+/**
+ * Admin: Delete a Google Review
+ */
+export const deleteGoogleReviewAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator(
+    z.object({
+      google_review_id: z.string(),
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: isStaff } = await context.supabase.rpc("is_staff", {
+      _user_id: context.userId,
+    });
+    if (!isStaff) throw new Error("Forbidden: Staff access required");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 1. Try dedicated table
+    try {
+      await supabaseAdmin
+        .from("google_reviews" as any)
+        .delete()
+        .eq("google_review_id", data.google_review_id);
+    } catch {
+      // fallback
+    }
+
+    // 2. Remove from app_settings cache
+    try {
+      const { data: appRow } = await supabaseAdmin
+        .from("app_settings")
+        .select("data")
+        .eq("id", 1)
+        .maybeSingle();
+
+      const appData = (appRow?.data as any) || {};
+      const cache: any[] = appData.google_reviews_cache || [];
+      const updatedCache = cache.filter((r) => r.google_review_id !== data.google_review_id);
+
+      await supabaseAdmin.from("app_settings").upsert({
+        id: 1,
+        data: {
+          ...appData,
+          google_reviews_cache: updatedCache,
+        },
+        updated_at: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.error("[GoogleReviews] Failed to delete in app_settings cache:", e);
+    }
+
+    return { ok: true };
+  });
