@@ -32,7 +32,7 @@ export function ShoppableReelViewer({
   onClose,
 }: ShoppableReelViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [activeReelId, setActiveReelId] = useState<string>(initialReelId);
   const navigate = useNavigate();
 
@@ -292,19 +292,29 @@ function ReelSection({
                   autoplay: true,
                   mute: isMuted,
                   loop: true,
-                  controls: true,
+                  controls: false,
                 })
               : null;
 
             return videoUrl && !isFailed ? (
               isYt ? (
-                <iframe
-                  src={ytEmbed || ""}
-                  title={item.title || "Saurashtra Honey Story"}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full border-0"
-                />
+                isActive ? (
+                  <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none bg-black">
+                    <iframe
+                      src={ytEmbed || ""}
+                      title={item.title || "Saurashtra Honey Story"}
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      className="absolute -top-[14%] -left-[20%] w-[140%] h-[128%] border-0 pointer-events-none"
+                    />
+                  </div>
+                ) : (
+                  <img
+                    src={posterSrc}
+                    alt={item.title || "Reel"}
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                )
               ) : (
                 <video
                   ref={videoRef}

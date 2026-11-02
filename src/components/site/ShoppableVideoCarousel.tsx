@@ -51,6 +51,29 @@ function ShoppableVideoCard({
   const [isMuted, setIsMuted] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isCardInView, setIsCardInView] = useState(false);
+
+  // IntersectionObserver on each card so ONLY cards currently visible on screen autoplay
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setIsCardInView(true);
+      return;
+    }
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        setIsCardInView(entry.isIntersecting);
+      },
+      {
+        threshold: 0.05,
+        rootMargin: "150px 50px 150px 50px",
+      },
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const videoUrl = item.video_url ? rewriteImageKitUrl(item.video_url) : null;
   const isYt = isYouTubeUrl(videoUrl);
@@ -64,12 +87,12 @@ function ShoppableVideoCard({
 
   const isDuplicate = uniqueId.startsWith("set2");
   const isAutoActive = activeId === item.id;
-  // YouTube and MP4 videos stream when hovered, playing, or when specifically active.
-  // Never stream all videos simultaneously in the marquee, as Safari and mobile block concurrent media streams and stall buffering.
+  // Autoplay all cards in the viewport when the section is in view.
+  // Set2 duplicate cards stream when hovered.
   const shouldStreamVideo = Boolean(
     isSectionInView &&
-      !isDuplicate &&
-      (isHovered || isPlaying || isAutoActive),
+      (!isDuplicate || isHovered) &&
+      (isCardInView || isHovered || isPlaying || isAutoActive),
   );
 
   const formatDuration = (sec: number) => {
@@ -106,41 +129,10 @@ function ShoppableVideoCard({
 
     onActivate?.(item.id);
 
-    if (isYt) {
-      navigate({
-        search: ((prev: any) => ({ ...prev, reel: item.id })) as any,
-      });
-      return;
-    }
-
-    if (!shouldStreamVideo) {
-      setIsPlaying(true);
-      setIsMuted(false);
-      window.dispatchEvent(
-        new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }),
-      );
-      if (videoRef.current) {
-        videoRef.current.muted = false;
-        videoRef.current.play().catch(console.error);
-      }
-      return;
-    }
-
-    if (isMuted) {
-      setIsMuted(false);
-      window.dispatchEvent(
-        new CustomEvent("shoppable-video-mute-others", { detail: { id: uniqueId } }),
-      );
-      if (videoRef.current) {
-        videoRef.current.muted = false;
-        videoRef.current.play().catch(console.error);
-      }
-    } else {
-      setIsMuted(true);
-      if (videoRef.current) {
-        videoRef.current.muted = true;
-      }
-    }
+    // Open fullscreen shoppable reel viewer immediately for this specific video
+    navigate({
+      search: ((prev: any) => ({ ...prev, reel: item.id })) as any,
+    });
   };
 
   const displayTitle = item.title || product?.name || "Saurashtra Honey";
@@ -209,22 +201,45 @@ function ShoppableVideoCard({
         className="absolute inset-0 w-full h-full group-hover:scale-[1.03] origin-center bg-[#2B2118]"
         style={{ transition: `transform ${customDuration} ${customBezier}` }}
       >
-        {videoUrl && shouldStreamVideo ? (
+        {/* Base Poster Image: Always rendered so card never flashes black */}
+        <img
+          loading="lazy"
+          decoding="async"
+          src={optimizeImage(posterSrc)}
+          alt={displayTitle}
+          onError={(e) => {
+            const target = e.currentTarget;
+            if (product?.image && target.src !== product.image) {
+              target.src = product.image;
+            } else if (product?.image_url && target.src !== product.image_url) {
+              target.src = product.image_url;
+            } else if (!target.src.includes("saurashtra-honey-logo-complete")) {
+              target.src = "/saurashtra-honey-logo-complete.webp";
+            }
+          }}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
+          style={{ transition: `transform ${customDuration} ${customBezier}` }}
+        />
+
+        {/* Video Stream Layer: Autoplays cleanly over poster when visible */}
+        {videoUrl && shouldStreamVideo && (
           isYt ? (
-            <iframe
-              src={
-                getYouTubeEmbedUrl(videoUrl, {
-                  autoplay: true,
-                  mute: true,
-                  loop: true,
-                  controls: false,
-                }) || ""
-              }
-              title={displayTitle}
-              loading="eager"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              className="absolute inset-0 w-full h-full border-0 pointer-events-none scale-[1.25] object-cover"
-            />
+            <div className="absolute inset-0 w-full h-full overflow-hidden pointer-events-none bg-black">
+              <iframe
+                src={
+                  getYouTubeEmbedUrl(videoUrl, {
+                    autoplay: true,
+                    mute: true,
+                    loop: true,
+                    controls: false,
+                  }) || ""
+                }
+                title={displayTitle}
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                className="absolute -top-[14%] -left-[20%] w-[140%] h-[128%] border-0 pointer-events-none object-cover"
+              />
+            </div>
           ) : (
             <video
               ref={videoRef}
@@ -243,30 +258,13 @@ function ShoppableVideoCard({
               <source src={videoUrl} type="video/mp4" />
             </video>
           )
-        ) : (
-          <>
-            <img
-              loading="lazy"
-              decoding="async"
-              src={optimizeImage(posterSrc)}
-              alt={displayTitle}
-              onError={(e) => {
-                const target = e.currentTarget;
-                if (product?.image && target.src !== product.image) {
-                  target.src = product.image;
-                } else if (product?.image_url && target.src !== product.image_url) {
-                  target.src = product.image_url;
-                } else if (!target.src.includes("saurashtra-honey-logo-complete")) {
-                  target.src = "/saurashtra-honey-logo-complete.webp";
-                }
-              }}
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05]"
-              style={{ transition: `transform ${customDuration} ${customBezier}` }}
-            />
-            <div className="absolute top-3 left-3 z-30 size-7 sm:size-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white pointer-events-none transition-transform group-hover:scale-110 shadow-sm">
-              <Play className="size-3.5 fill-current ml-0.5 text-white" />
-            </div>
-          </>
+        )}
+
+        {/* Play badge shown when video is not actively streaming */}
+        {(!videoUrl || !shouldStreamVideo) && (
+          <div className="absolute top-3 left-3 z-30 size-7 sm:size-8 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white pointer-events-none transition-transform group-hover:scale-110 shadow-sm">
+            <Play className="size-3.5 fill-current ml-0.5 text-white" />
+          </div>
         )}
       </div>
 

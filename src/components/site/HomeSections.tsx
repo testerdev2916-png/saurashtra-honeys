@@ -1146,13 +1146,21 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
       onMouseLeave={() => setIsHovering(false)}
       onClick={!isYouTube ? togglePlay : undefined}
     >
+      {cleanPoster && (
+        <img
+          src={cleanPoster}
+          alt="Our Heritage"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+      )}
+
       {isYouTube ? (
         <iframe
           src={ytEmbedUrl}
           title="Our Heritage"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
-          className="w-full h-full border-0 pointer-events-auto"
+          className="relative z-10 w-full h-full border-0 pointer-events-auto"
         />
       ) : (
         <video
