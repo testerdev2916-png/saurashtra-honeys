@@ -5,7 +5,12 @@ import { SiteLayout, SectionEyebrow } from "@/components/site/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { safeRedirectPath, getURL, createOAuthIntent } from "@/lib/oauth-flow";
 import { useAuth } from "@/lib/auth";
-import { requestMobileSignupOtp, verifyMobileSignupOtp } from "@/lib/auth-otp.functions";
+import {
+  requestMobileSignupOtp,
+  verifyMobileSignupOtp,
+  requestEmailSignupOtp,
+  completeEmailSignupProfile,
+} from "@/lib/auth-otp.functions";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Phone, Mail, CheckCircle2 } from "lucide-react";
@@ -38,9 +43,97 @@ function AuthPage() {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [authMethod, setAuthMethod] = useState<"phone" | "email">("phone");
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [form, setForm] = useState({ email: "", password: "", full_name: "" });
   const [busy, setBusy] = useState(false);
+
+  // Email / Gmail OTP States
+  const reqEmailOtpFn = useServerFn(requestEmailSignupOtp);
+  const compEmailProfileFn = useServerFn(completeEmailSignupProfile);
+  const [emailForm, setEmailForm] = useState({ email: "", otp: "", full_name: "" });
+  const [emailOtpSent, setEmailOtpSent] = useState(false);
+  const [emailCooldown, setEmailCooldown] = useState(0);
+  const [showPasswordFallback, setShowPasswordFallback] = useState(false);
+
+  useEffect(() => {
+    if (emailCooldown <= 0) return;
+    const t = setInterval(() => setEmailCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [emailCooldown]);
+
+  async function onSendEmailOtp(e?: React.FormEvent) {
+    if (e) e.preventDefault();
+    const cleanEmail = emailForm.email.trim().toLowerCase();
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      toast.error("Please enter a valid Gmail / Email address");
+      return;
+    }
+    if (mode === "signup" && !emailForm.full_name.trim()) {
+      toast.error("Please enter your full name");
+      return;
+    }
+    setBusy(true);
+    try {
+      const res = await reqEmailOtpFn({
+        data: {
+          email: cleanEmail,
+          full_name: emailForm.full_name.trim() || undefined,
+          purpose: mode === "signup" ? "signup" : "login",
+        },
+      });
+      toast.success(`Verification code sent to ${res.email}! Check your Gmail.`);
+      setEmailOtpSent(true);
+      setEmailCooldown(res.cooldownSeconds || 60);
+    } catch (err) {
+      toast.error((err as Error).message || "Could not send verification code");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onVerifyEmailOtp(e: React.FormEvent) {
+    e.preventDefault();
+    const cleanOtp = emailForm.otp.trim().replace(/\D/g, "");
+    if (!cleanOtp || cleanOtp.length < 6) {
+      toast.error("Please enter the 6-digit verification code received on your Gmail");
+      return;
+    }
+    setBusy(true);
+    try {
+      const { data: verifyData, error: verifyErr } = await supabase.auth.verifyOtp({
+        email: emailForm.email.trim().toLowerCase(),
+        token: cleanOtp,
+        type: "email",
+      });
+
+      if (verifyErr) {
+        throw verifyErr;
+      }
+
+      if (verifyData.session) {
+        if (emailForm.full_name.trim()) {
+          try {
+            await compEmailProfileFn({
+              data: { fullName: emailForm.full_name.trim() },
+            });
+          } catch (profileErr) {
+            console.warn("Profile update note:", profileErr);
+          }
+        }
+
+        toast.success(mode === "signup" ? "Account created and verified!" : "Signed in successfully!");
+        const searchParams = new URLSearchParams(window.location.search);
+        const intended = safeRedirectPath(searchParams.get("redirect") || "/account");
+        navigate({ to: intended as never });
+      } else {
+        toast.error("Verification failed. Please request a new code.");
+      }
+    } catch (err) {
+      toast.error((err as Error).message || "Invalid or expired verification code");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   // Phone OTP States
   const reqMobileOtpFn = useServerFn(requestMobileSignupOtp);
@@ -289,6 +382,21 @@ function AuthPage() {
           <button
             type="button"
             onClick={() => {
+              setAuthMethod("email");
+              setEmailOtpSent(false);
+              setShowPasswordFallback(false);
+            }}
+            className={`py-2 rounded-lg transition-all ${
+              authMethod === "email"
+                ? "bg-white text-forest-dark shadow-xs"
+                : "text-muted-foreground hover:text-forest-dark"
+            }`}
+          >
+            ✉️ Gmail / Email OTP
+          </button>
+          <button
+            type="button"
+            onClick={() => {
               setAuthMethod("phone");
               setPhoneOtpSent(false);
             }}
@@ -300,20 +408,163 @@ function AuthPage() {
           >
             📱 Mobile OTP
           </button>
-          <button
-            type="button"
-            onClick={() => setAuthMethod("email")}
-            className={`py-2 rounded-lg transition-all ${
-              authMethod === "email"
-                ? "bg-white text-forest-dark shadow-xs"
-                : "text-muted-foreground hover:text-forest-dark"
-            }`}
-          >
-            ✉️ Email & Password
-          </button>
         </div>
 
-        {authMethod === "phone" ? (
+        {authMethod === "email" ? (
+          showPasswordFallback ? (
+            <form onSubmit={onSubmit} className="space-y-3">
+              <div className="flex items-center justify-between pb-1">
+                <span className="text-xs text-muted-foreground font-semibold">Sign in with Password</span>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordFallback(false)}
+                  className="text-xs text-gold-deep font-bold hover:underline"
+                >
+                  ← Use Gmail OTP Code
+                </button>
+              </div>
+              {mode === "signup" && (
+                <input
+                  required
+                  placeholder="Full name"
+                  value={form.full_name}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                  className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+                />
+              )}
+              <input
+                required
+                type="email"
+                placeholder="Email address"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+              />
+              <input
+                required
+                type="password"
+                placeholder="Password"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+              />
+              <button
+                disabled={busy}
+                className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60"
+              >
+                {busy ? "PLEASE WAIT…" : mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={emailOtpSent ? onVerifyEmailOtp : onSendEmailOtp} className="space-y-3">
+              {!emailOtpSent ? (
+                <>
+                  {mode === "signup" && (
+                    <input
+                      required
+                      placeholder="Full name *"
+                      value={emailForm.full_name}
+                      onChange={(e) => setEmailForm({ ...emailForm, full_name: e.target.value })}
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+                    />
+                  )}
+                  <div className="relative">
+                    <input
+                      required
+                      type="email"
+                      autoComplete="email"
+                      placeholder="Gmail / Email address (e.g. name@gmail.com) *"
+                      value={emailForm.email}
+                      onChange={(e) => setEmailForm({ ...emailForm, email: e.target.value })}
+                      className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={busy}
+                    className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60 transition-colors"
+                  >
+                    {busy ? "SENDING CODE TO GMAIL…" : "SEND VERIFICATION CODE"}
+                  </button>
+                  <div className="text-center pt-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowPasswordFallback(true)}
+                      className="text-xs text-muted-foreground hover:text-gold-deep transition-colors"
+                    >
+                      Prefer password? Sign in with password →
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="bg-cream/90 border border-burnt-orange/30 rounded-xl p-3 text-xs text-forest-dark flex items-center justify-between">
+                    <span>
+                      Code sent to <b>{emailForm.email}</b>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEmailOtpSent(false);
+                        setEmailForm((f) => ({ ...f, otp: "" }));
+                      }}
+                      className="text-gold-deep font-bold hover:underline"
+                    >
+                      Change
+                    </button>
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold text-forest-dark mb-1">
+                      ENTER VERIFICATION CODE
+                    </label>
+                    <p className="text-[11px] text-muted-foreground mb-1.5">
+                      Check your Gmail inbox for your 6-digit Saurashtra Honey OTP code.
+                    </p>
+                    <input
+                      required
+                      type="text"
+                      inputMode="numeric"
+                      autoFocus
+                      maxLength={8}
+                      placeholder="• • • • • •"
+                      value={emailForm.otp}
+                      onChange={(e) =>
+                        setEmailForm({
+                          ...emailForm,
+                          otp: e.target.value.replace(/\D/g, "").slice(0, 8),
+                        })
+                      }
+                      className="w-full text-center tracking-[0.4em] text-xl font-mono py-3 bg-background border border-border rounded-lg focus:outline-none focus:border-gold-deep"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={busy || emailForm.otp.length < 6}
+                    className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60 transition-colors"
+                  >
+                    {busy
+                      ? "VERIFYING…"
+                      : mode === "signup"
+                        ? "VERIFY & CREATE ACCOUNT"
+                        : "VERIFY & SIGN IN"}
+                  </button>
+                  <div className="text-center pt-1">
+                    <button
+                      type="button"
+                      disabled={emailCooldown > 0 || busy}
+                      onClick={() => onSendEmailOtp()}
+                      className="text-xs text-gold-deep font-semibold hover:underline disabled:opacity-50"
+                    >
+                      {emailCooldown > 0
+                        ? `Resend code in ${emailCooldown}s`
+                        : "Resend Verification Code"}
+                    </button>
+                  </div>
+                </>
+              )}
+            </form>
+          )
+        ) : (
           <form onSubmit={phoneOtpSent ? onVerifyPhoneOtp : onSendPhoneOtp} className="space-y-3">
             {!phoneOtpSent ? (
               <>
@@ -402,40 +653,6 @@ function AuthPage() {
                 </div>
               </>
             )}
-          </form>
-        ) : (
-          <form onSubmit={onSubmit} className="space-y-3">
-            {mode === "signup" && (
-              <input
-                required
-                placeholder="Full name"
-                value={form.full_name}
-                onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
-              />
-            )}
-            <input
-              required
-              type="email"
-              placeholder="Email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
-            />
-            <input
-              required
-              type="password"
-              placeholder="Password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-gold-deep"
-            />
-            <button
-              disabled={busy}
-              className="w-full bg-forest-dark text-cream rounded-lg py-3 text-xs font-bold tracking-widest hover:bg-forest disabled:opacity-60"
-            >
-              {busy ? "PLEASE WAIT…" : mode === "signin" ? "SIGN IN" : "CREATE ACCOUNT"}
-            </button>
           </form>
         )}
 

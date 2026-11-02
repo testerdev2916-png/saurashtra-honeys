@@ -19,6 +19,7 @@ import {
   logSecurityEvent,
   getBlockedEntities,
 } from "./security/fake-order-detector";
+import { sendAuthOtpEmail } from "./email/email-service";
 
 // In-memory verification fallback store if DB table is syncing
 interface FallbackVerifRecord {
@@ -715,4 +716,129 @@ export const checkPhoneVerificationStatus = createServerFn({ method: "POST" })
       verified: profileVerified,
       phone: profilePhone,
     };
+  });
+
+// ============================================================================
+// 7. EMAIL OTP FOR GMAIL / EMAIL LOGIN & SIGNUP
+// ============================================================================
+const requestEmailOtpSchema = z.object({
+  email: z.string().trim().email("Please enter a valid Gmail / Email address").max(255),
+  full_name: z.string().trim().min(2, "Enter your name").max(120).optional(),
+  purpose: z.enum(["login", "signup"]).default("login"),
+});
+
+export const requestEmailSignupOtp = createServerFn({ method: "POST" })
+  .inputValidator((d: z.infer<typeof requestEmailOtpSchema>) => requestEmailOtpSchema.parse(d))
+  .handler(async ({ data }) => {
+    const email = data.email.trim().toLowerCase();
+
+    // Check rate limit (Max 5 requests per 15 minutes per email)
+    const rateCheck = checkRateLimit(`email_otp:${email}`, 5, 15 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      const waitMinutes = Math.ceil(rateCheck.resetMs / 60000);
+      throw new Error(`Too many verification requests. Please wait ${waitMinutes} minute(s) before requesting another code.`);
+    }
+
+    // Check if user exists in auth.users
+    let existingUser: any = null;
+    try {
+      const { data: userList } = await supabase.auth.admin.listUsers();
+      existingUser = (userList?.users || []).find((u) => u.email?.toLowerCase() === email);
+    } catch (e) {
+      console.warn("[Email OTP] List users check error:", e);
+    }
+
+    // If user does not exist yet, automatically provision their account
+    if (!existingUser) {
+      const tempPassword = `SH_Email_${Date.now()}!${Math.random().toString(36).slice(2, 8)}`;
+      const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
+        email,
+        email_confirm: false,
+        password: tempPassword,
+        user_metadata: {
+          full_name: data.full_name || "Customer",
+          auth_provider: "email_otp",
+        },
+      });
+
+      if (createErr && !createErr.message.toLowerCase().includes("already registered")) {
+        console.error("[Email OTP] Create user error:", createErr);
+        throw new Error(createErr.message || "Failed to initialize account");
+      }
+      existingUser = newUser?.user;
+    } else if (data.full_name && (!existingUser.user_metadata?.full_name || existingUser.user_metadata?.full_name === "Customer")) {
+      try {
+        await supabase.auth.admin.updateUserById(existingUser.id, {
+          user_metadata: { ...existingUser.user_metadata, full_name: data.full_name },
+        });
+      } catch (err) {
+        console.warn("[Email OTP] Update metadata note:", err);
+      }
+    }
+
+    // Generate Supabase Email OTP token
+    const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
+      type: "magiclink",
+      email,
+    });
+
+    if (linkErr) {
+      console.error("[Email OTP] Generate link error:", linkErr);
+      throw new Error(linkErr.message || "Unable to generate verification code");
+    }
+
+    const otp = linkData?.properties?.email_otp;
+    if (!otp) {
+      throw new Error("Unable to generate verification OTP code");
+    }
+
+    // Send verification code via Resend with branded template
+    const recipientName = data.full_name || existingUser?.user_metadata?.full_name || "Valued Customer";
+    const sendResult = await sendAuthOtpEmail({
+      email,
+      otp,
+      fullName: recipientName,
+    });
+
+    if (!sendResult.ok) {
+      console.warn("[Email OTP] Resend transmission note:", sendResult.error);
+    }
+
+    await logSecurityEvent(supabase, {
+      eventType: "otp.sent",
+      actorId: existingUser?.id || null,
+      metadata: { email, purpose: data.purpose, provider: "email" },
+    });
+
+    return {
+      ok: true,
+      email,
+      cooldownSeconds: 60,
+      isNewUser: !existingUser,
+      message: `Verification code sent to ${email}`,
+    };
+  });
+
+export const completeEmailSignupProfile = createServerFn({ method: "POST" })
+  .inputValidator((d: { fullName?: string }) =>
+    z.object({ fullName: z.string().trim().min(2).max(120).optional() }).parse(d),
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }) => {
+    const userId = context.userId;
+    const userEmail = context.userEmail;
+    if (!userId) return { ok: false };
+    const nameToSet = data.fullName?.trim() || "Customer";
+    try {
+      await supabase.from("profiles").upsert({
+        id: userId,
+        email: userEmail,
+        full_name: nameToSet,
+        status: "active",
+        updated_at: new Date().toISOString(),
+      } as never);
+    } catch (err) {
+      console.warn("[Profile Upsert Note]:", err);
+    }
+    return { ok: true };
   });

@@ -923,3 +923,59 @@ Admin Manager: ${adminOrderUrl}
 
   return { subject, html, text };
 }
+
+export function authEmailOtpTemplate({
+  otp,
+  fullName,
+  siteUrl = "https://saurashtrahoney.com",
+}: {
+  otp: string;
+  fullName?: string;
+  siteUrl?: string;
+}): RenderedEmail {
+  const subject = `Your Saurashtra Honey Verification Code: ${otp}`;
+  const previewText = `Your Saurashtra Honey verification code is ${otp}. Valid for 10 minutes.`;
+  const nameStr = fullName?.trim() || "Valued Customer";
+
+  const content = `
+    <div style="text-align: center; margin-bottom: 24px;">
+      <span style="display: inline-block; background-color: #FAF6ED; color: #D4AF37; padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border: 1px solid #EBE5D8;">
+        Account Verification
+      </span>
+      <h1 style="font-family: Georgia, serif; font-size: 26px; color: #1C3B2B; margin: 16px 0 8px 0; font-weight: 600;">
+        Your Login Verification Code
+      </h1>
+      <p style="font-size: 14px; color: #736B63; margin: 0;">
+        Hello <strong style="color: #1C3B2B;">${nameStr}</strong>, enter the code below to complete your sign in or account creation at Saurashtra Honey.
+      </p>
+    </div>
+
+    <!-- OTP Display Box -->
+    <div style="background-color: #FAF8F5; border: 2px dashed #D4AF37; border-radius: 12px; padding: 24px 16px; text-align: center; margin: 28px 0;">
+      <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #736B63; display: block; margin-bottom: 8px;">
+        One-Time Verification Code
+      </span>
+      <span style="font-family: 'Courier New', Courier, monospace, sans-serif; font-size: 38px; font-weight: bold; letter-spacing: 8px; color: #1C3B2B; display: inline-block; background: #FFFFFF; padding: 10px 24px; border-radius: 8px; border: 1px solid #EBE5D8; box-shadow: 0 2px 6px rgba(0,0,0,0.05);">
+        ${otp}
+      </span>
+      <span style="display: block; font-size: 12px; color: #9E968D; margin-top: 12px;">
+        ⏱ Valid for the next 10 minutes. Please do not share this code with anyone.
+      </span>
+    </div>
+
+    <p style="font-size: 13px; color: #736B63; line-height: 1.6; margin: 20px 0 0 0; text-align: center;">
+      If you did not request this verification code, please ignore this email — your account remains safe.
+    </p>
+  `;
+
+  const html = baseLayout({
+    title: subject,
+    previewText,
+    content,
+    siteUrl,
+  });
+
+  const text = `Your Saurashtra Honey verification code is: ${otp}\n\nValid for 10 minutes.\n\nIf you did not request this code, please ignore this email.`;
+
+  return { subject, html, text };
+}

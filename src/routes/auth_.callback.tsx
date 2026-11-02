@@ -30,23 +30,41 @@ function AuthCallback() {
 
     intended = intended || "/";
 
-    const go = () => {
+    const go = async (sessionUser?: any) => {
       if (cancelled) return;
-      // Navigate to intended route
-      // TanStack router replace: true clears the hash naturally from the URL history
+      if (sessionUser) {
+        try {
+          await supabase.from("profiles").upsert({
+            id: sessionUser.id,
+            email: sessionUser.email,
+            full_name:
+              sessionUser.user_metadata?.full_name ||
+              sessionUser.user_metadata?.name ||
+              "Customer",
+            avatar_url:
+              sessionUser.user_metadata?.avatar_url ||
+              sessionUser.user_metadata?.picture ||
+              null,
+            status: "active",
+            updated_at: new Date().toISOString(),
+          } as never);
+        } catch {
+          // ignore profile sync note
+        }
+      }
       navigate({ to: intended as never, replace: true });
     };
 
     // Listen for the signed in event.
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" || session) {
-        go();
+        go(session?.user);
       }
     });
 
     // Also check current session just in case it already processed it
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) go();
+      if (data.session) go(data.session.user);
     });
 
     // Timeout fallback just in case

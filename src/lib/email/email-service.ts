@@ -11,6 +11,7 @@ import {
   customerRefundProcessedTemplate,
   ownerNewOrderAlertTemplate,
   ownerOrderCancelledAlertTemplate,
+  authEmailOtpTemplate,
   type EmailOrderData,
   type RenderedEmail,
 } from "./templates";
@@ -506,5 +507,66 @@ export async function retryFailedEmailNotifications(limit = 20): Promise<{
   } catch (e) {
     console.error("[Email Retry Exception]:", e);
     return { retried: 0, succeeded: 0, failed: 0 };
+  }
+}
+
+/**
+ * Send authentication / sign-in verification code email with Resend.
+ */
+export async function sendAuthOtpEmail({
+  email,
+  otp,
+  fullName,
+}: {
+  email: string;
+  otp: string;
+  fullName?: string;
+}): Promise<SendEmailResult> {
+  const config = getEmailConfig();
+  const normalizedEmail = email.trim().toLowerCase();
+  const template = authEmailOtpTemplate({
+    otp,
+    fullName,
+    siteUrl: config.siteUrl,
+  });
+
+  if (config.isMockMode || !config.isConfigured) {
+    console.log(`[Email Mock] Sent OTP ${otp} to ${normalizedEmail}`);
+    recordMockSentEmail({
+      from: config.fromAddress,
+      to: normalizedEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+      template: "auth_otp",
+      timestamp: new Date().toISOString(),
+    });
+    return { ok: true, id: `mock-otp-${Date.now()}`, mock: true };
+  }
+
+  const resend = getResendClient();
+  if (!resend) {
+    return { ok: false, error: "Resend client not initialized" };
+  }
+
+  try {
+    const { data: resendData, error: resendError } = await resend.emails.send({
+      from: config.fromAddress,
+      to: normalizedEmail,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
+    });
+
+    if (resendError) {
+      console.error(`[Email Error] Failed to send OTP to ${normalizedEmail}:`, resendError);
+      return { ok: false, error: resendError.message };
+    }
+
+    console.log(`[Email Sent] Auth OTP -> ${normalizedEmail} (ID: ${resendData?.id})`);
+    return { ok: true, id: resendData?.id };
+  } catch (err) {
+    console.error(`[Email Exception] Failed to send OTP to ${normalizedEmail}:`, err);
+    return { ok: false, error: (err as Error).message };
   }
 }
