@@ -26,6 +26,7 @@ import Autoplay from "embla-carousel-autoplay";
 import { PremiumMobileCarousel } from "@/components/site/PremiumMobileCarousel";
 import { ProductCard } from "@/components/site/ProductCard";
 import { getCategoryImageUrl, optimizeImage, rewriteImageKitUrl } from "@/lib/product-images";
+import { isYouTubeUrl, extractYouTubeId, getYouTubeThumbnail } from "@/lib/video-helpers";
 import { HeroSlider, type HeroSlide } from "@/components/site/HeroSlider";
 import { fetchPublicHeroRows, heroRowToSlide, getDefaultHeroSlides } from "@/lib/hero-catalog";
 import { useServerFn } from "@tanstack/react-start";
@@ -1035,11 +1036,16 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
   const [isHovering, setIsHovering] = React.useState(false);
 
   const cleanSrc = rewriteImageKitUrl(src);
+  const isYouTube = isYouTubeUrl(cleanSrc);
+  const ytVideoId = extractYouTubeId(cleanSrc);
+  const ytPoster = isYouTube ? getYouTubeThumbnail(cleanSrc) : null;
   const cleanPoster =
     (poster ? rewriteImageKitUrl(poster) : undefined) ||
+    ytPoster ||
     (cleanSrc.includes("ik.imagekit.io") ? `${cleanSrc}/ik-thumbnail.jpg` : undefined);
 
   React.useEffect(() => {
+    if (isYouTube) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -1071,9 +1077,10 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
     if (containerRef.current) observer.observe(containerRef.current);
 
     return () => observer.disconnect();
-  }, []);
+  }, [isYouTube]);
 
   React.useEffect(() => {
+    if (isYouTube) return;
     const video = videoRef.current;
     if (!video) return;
 
@@ -1090,7 +1097,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
     };
-  }, []);
+  }, [isYouTube]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;
@@ -1126,17 +1133,10 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
     videoRef.current.currentTime = (x / rect.width) * videoRef.current.duration;
   };
 
-  const isYouTube = cleanSrc.includes("youtube.com") || cleanSrc.includes("youtu.be");
-  const ytVideoId = isYouTube
-    ? cleanSrc.includes("v=")
-      ? cleanSrc.split("v=")[1]?.split("&")[0]
-      : cleanSrc.split("/").pop()
-    : "";
-  const ytEmbedUrl = isYouTube
-    ? cleanSrc.includes("embed")
-      ? cleanSrc
-      : `https://www.youtube-nocookie.com/embed/${ytVideoId}?autoplay=1&mute=1&loop=1&playlist=${ytVideoId}&rel=0&modestbranding=1`
-    : "";
+  const ytEmbedUrl =
+    isYouTube && ytVideoId
+      ? `https://www.youtube-nocookie.com/embed/${ytVideoId}?autoplay=1&mute=1&loop=1&playlist=${ytVideoId}&controls=1&rel=0&playsinline=1&modestbranding=1`
+      : "";
 
   return (
     <div
@@ -1150,7 +1150,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
         <iframe
           src={ytEmbedUrl}
           title="Our Heritage"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           className="w-full h-full border-0 pointer-events-auto"
         />
@@ -1168,7 +1168,7 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
         </video>
       )}
 
-      {showFallbackPlay && !isPlaying && (
+      {!isYouTube && showFallbackPlay && !isPlaying && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-10 transition-opacity">
           <button
             aria-label="Play heritage video"
@@ -1180,57 +1180,59 @@ function HeritageVideoPlayer({ src, poster }: { src: string; poster?: string }) 
         </div>
       )}
 
-      <div
-        className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 z-20 flex flex-col justify-end gap-3 md:gap-4
-          ${isHovering || !isPlaying ? "opacity-100" : "opacity-0"}`}
-      >
+      {!isYouTube && (
         <div
-          className="w-full h-1.5 md:h-2 bg-white/30 rounded-full cursor-pointer overflow-hidden group/progress"
-          onClick={handleProgressBarClick}
+          className={`absolute bottom-0 left-0 right-0 p-4 md:p-6 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300 z-20 flex flex-col justify-end gap-3 md:gap-4
+            ${isHovering || !isPlaying ? "opacity-100" : "opacity-0"}`}
         >
           <div
-            className="h-full bg-[#D97706] transition-all duration-100"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              togglePlay();
-            }}
-            aria-label={isPlaying ? "Pause video" : "Play video"}
-            className="text-white hover:text-[#D97706] transition-colors"
+            className="w-full h-1.5 md:h-2 bg-white/30 rounded-full cursor-pointer overflow-hidden group/progress"
+            onClick={handleProgressBarClick}
           >
-            {isPlaying ? (
-              <Icons.Pause className="size-5 md:size-6" fill="currentColor" />
-            ) : (
-              <Icons.Play className="size-5 md:size-6" fill="currentColor" />
-            )}
-          </button>
-          <div className="flex items-center gap-4">
+            <div
+              className="h-full bg-[#D97706] transition-all duration-100"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
             <button
-              onClick={toggleMute}
-              aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePlay();
+              }}
+              aria-label={isPlaying ? "Pause video" : "Play video"}
               className="text-white hover:text-[#D97706] transition-colors"
             >
-              {isMuted ? (
-                <Icons.VolumeX className="size-5 md:size-6" />
+              {isPlaying ? (
+                <Icons.Pause className="size-5 md:size-6" fill="currentColor" />
               ) : (
-                <Icons.Volume2 className="size-5 md:size-6" />
+                <Icons.Play className="size-5 md:size-6" fill="currentColor" />
               )}
             </button>
-            <button
-              onClick={toggleFullscreen}
-              aria-label="Toggle fullscreen"
-              className="text-white hover:text-[#D97706] transition-colors"
-            >
-              <Icons.Maximize className="size-5 md:size-6" />
-            </button>
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleMute}
+                aria-label={isMuted ? "Unmute audio" : "Mute audio"}
+                className="text-white hover:text-[#D97706] transition-colors"
+              >
+                {isMuted ? (
+                  <Icons.VolumeX className="size-5 md:size-6" />
+                ) : (
+                  <Icons.Volume2 className="size-5 md:size-6" />
+                )}
+              </button>
+              <button
+                onClick={toggleFullscreen}
+                aria-label="Toggle fullscreen"
+                className="text-white hover:text-[#D97706] transition-colors"
+              >
+                <Icons.Maximize className="size-5 md:size-6" />
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

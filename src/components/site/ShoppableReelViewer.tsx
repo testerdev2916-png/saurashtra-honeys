@@ -11,7 +11,7 @@ import {
   ExternalLink,
   ChevronDown,
 } from "lucide-react";
-import type { HomepageVideoItem } from "@/lib/homepage-videos";
+import { findStoryProduct, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { useWishlist } from "@/lib/wishlist";
 import { useCart } from "@/lib/cart";
@@ -128,7 +128,7 @@ export function ShoppableReelViewer({
             key={item.id}
             item={item}
             index={idx}
-            product={allProducts.find((p) => p.slug === item.product_slug)}
+            product={findStoryProduct(item, allProducts)}
             isActive={item.id === activeReelId}
             setActiveReelId={setActiveReelId}
             isMuted={isMuted}

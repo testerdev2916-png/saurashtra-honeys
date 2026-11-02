@@ -4,7 +4,7 @@ import { Link, useSearch, useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ArrowRight, Star, Play } from "lucide-react";
 import { type Product, getDefaultVariant, resolveActiveImage } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
-import { fetchHomepageVideos, type HomepageVideoItem } from "@/lib/homepage-videos";
+import { fetchHomepageVideos, findStoryProduct, type HomepageVideoItem } from "@/lib/homepage-videos";
 import { rewriteImageKitUrl, optimizeImage } from "@/lib/product-images";
 import { isYouTubeUrl, getYouTubeThumbnail, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 import { SectionEyebrow } from "@/components/site/Layout";
@@ -60,16 +60,16 @@ function ShoppableVideoCard({
     ytPoster ||
     (videoUrl && videoUrl.includes("ik.imagekit.io")
       ? `${videoUrl}/ik-thumbnail.jpg`
-      : item.fallbackImage || "/saurashtra-honey-logo-complete.png");
+      : product?.image || product?.image_url || item.fallbackImage || "/saurashtra-honey-logo-complete.png");
 
   const isDuplicate = uniqueId.startsWith("set2");
   const isAutoActive = activeId === item.id;
-  // YouTube videos stream and autoplay immediately whenever the section is in view (zero bandwidth cost).
-  // MP4 files stream when active or hovered to protect ImageKit bandwidth quota.
+  // YouTube and MP4 videos stream when hovered, playing, or when specifically active.
+  // Never stream all videos simultaneously in the marquee, as Safari and mobile block concurrent media streams and stall buffering.
   const shouldStreamVideo = Boolean(
     isSectionInView &&
       !isDuplicate &&
-      (isYt || isHovered || isPlaying || isAutoActive),
+      (isHovered || isPlaying || isAutoActive),
   );
 
   const formatDuration = (sec: number) => {
@@ -252,7 +252,9 @@ function ShoppableVideoCard({
               alt={displayTitle}
               onError={(e) => {
                 const target = e.currentTarget;
-                if (product?.image_url && target.src !== product.image_url) {
+                if (product?.image && target.src !== product.image) {
+                  target.src = product.image;
+                } else if (product?.image_url && target.src !== product.image_url) {
                   target.src = product.image_url;
                 } else if (!target.src.includes("saurashtra-honey-logo-complete")) {
                   target.src = "/saurashtra-honey-logo-complete.webp";
@@ -386,8 +388,7 @@ export function ShoppableVideoCarousel({
 
     const catLower = category?.toLowerCase() ?? "";
     const matchesCat = (v: HomepageVideoItem) => {
-      if (!v.product_slug) return false;
-      const prod = allProducts.find((p) => p.slug === v.product_slug);
+      const prod = findStoryProduct(v, allProducts);
       if (!prod) return false;
       return (
         prod.category?.toLowerCase() === catLower ||
@@ -398,8 +399,10 @@ export function ShoppableVideoCarousel({
     };
 
     return [...activeVideos].sort((a, b) => {
-      const aIsCurrent = a.product_slug === currentSlug;
-      const bIsCurrent = b.product_slug === currentSlug;
+      const aProd = findStoryProduct(a, allProducts);
+      const bProd = findStoryProduct(b, allProducts);
+      const aIsCurrent = a.product_slug === currentSlug || aProd?.slug === currentSlug;
+      const bIsCurrent = b.product_slug === currentSlug || bProd?.slug === currentSlug;
       if (aIsCurrent && !bIsCurrent) return 1;
       if (!aIsCurrent && bIsCurrent) return -1;
 
@@ -531,7 +534,7 @@ export function ShoppableVideoCarousel({
                 >
                   <ShoppableVideoCard
                     item={item}
-                    product={allProducts.find((p) => p.slug === item.product_slug)}
+                    product={findStoryProduct(item, allProducts)}
                     index={idx}
                     isVisible={isSectionVisible}
                     uniqueId={`mob-${item.id}-${idx}`}
@@ -559,7 +562,7 @@ export function ShoppableVideoCarousel({
               <ShoppableVideoCard
                 key={`set1-${item.id}-${idx}`}
                 item={item}
-                product={allProducts.find((p) => p.slug === item.product_slug)}
+                product={findStoryProduct(item, allProducts)}
                 index={idx}
                 isVisible={isSectionVisible}
                 uniqueId={`set1-${item.id}-${idx}`}
@@ -575,7 +578,7 @@ export function ShoppableVideoCarousel({
               <ShoppableVideoCard
                 key={`set2-${item.id}-${idx}`}
                 item={item}
-                product={allProducts.find((p) => p.slug === item.product_slug)}
+                product={findStoryProduct(item, allProducts)}
                 index={idx}
                 isVisible={isSectionVisible}
                 uniqueId={`set2-${item.id}-${idx}`}

@@ -1,4 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
+import { type Product } from "@/lib/products";
+import { aliasMap } from "@/lib/product-catalog";
+
 export type HomepageVideoItem = {
   id: string;
   title: string;
@@ -15,6 +18,85 @@ export type HomepageVideoItem = {
   display_order: number;
   fallbackImage: string;
 };
+
+/**
+ * Robust helper to resolve a linked product for a story card or reel.
+ * Handles direct slug, case variations, aliasMap targets (e.g. ajwain-honey -> ajwain-honey-500),
+ * product id matches, link_url paths, and fallback title/subtitle matching.
+ */
+export function findStoryProduct(
+  item: {
+    product_slug?: string | null;
+    link_url?: string | null;
+    title?: string | null;
+    subtitle?: string | null;
+  },
+  allProducts: Product[],
+): Product | undefined {
+  if (!allProducts || allProducts.length === 0) return undefined;
+
+  // 1. Direct or aliased product_slug match
+  if (item.product_slug) {
+    const raw = item.product_slug.trim();
+    // Direct exact match
+    const direct = allProducts.find((p) => p.slug === raw);
+    if (direct) return direct;
+
+    const lower = raw.toLowerCase();
+    // Case-insensitive match
+    const caseMatch = allProducts.find((p) => p.slug.toLowerCase() === lower);
+    if (caseMatch) return caseMatch;
+
+    // Check aliasMap (e.g., "ajwain-honey" -> "ajwain-honey-500", "multiflora-honey" -> "multiflora-honey-250GM")
+    const aliased = aliasMap[lower];
+    if (aliased) {
+      const aliasMatch = allProducts.find(
+        (p) => p.slug.toLowerCase() === aliased.toLowerCase(),
+      );
+      if (aliasMatch) return aliasMatch;
+    }
+
+    // Match by ID
+    const idMatch = allProducts.find((p) => p.id === raw);
+    if (idMatch) return idMatch;
+  }
+
+  // 2. Extract slug from link_url (e.g. "/product/ajwain-honey" or "https://saurashtrahoney.com/product/fennel-honey-250GM")
+  if (item.link_url) {
+    const cleanUrl = item.link_url.split("?")[0].split("#")[0].trim();
+    const slugMatch = cleanUrl.match(/\/product\/([a-zA-Z0-9_\-%]+)/i);
+    if (slugMatch && slugMatch[1]) {
+      const urlSlug = decodeURIComponent(slugMatch[1]).toLowerCase();
+      const directUrl = allProducts.find((p) => p.slug.toLowerCase() === urlSlug);
+      if (directUrl) return directUrl;
+
+      const aliasedUrl = aliasMap[urlSlug];
+      if (aliasedUrl) {
+        const aliasMatch = allProducts.find(
+          (p) => p.slug.toLowerCase() === aliasedUrl.toLowerCase(),
+        );
+        if (aliasMatch) return aliasMatch;
+      }
+    }
+  }
+
+  // 3. Fallback: match by title or subtitle against product name/category
+  const subLower = (item.subtitle || "").toLowerCase().trim();
+  const titleLower = (item.title || "").toLowerCase().trim();
+
+  if (subLower || titleLower) {
+    const nameMatch = allProducts.find((p) => {
+      const pName = p.name.toLowerCase();
+      return (
+        (subLower && (pName === subLower || pName.includes(subLower) || subLower.includes(pName))) ||
+        (titleLower && (pName === titleLower || pName.includes(titleLower) || titleLower.includes(pName)))
+      );
+    });
+    if (nameMatch) return nameMatch;
+  }
+
+  return undefined;
+}
 
 type Row = {
   id: string;

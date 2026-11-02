@@ -45,6 +45,7 @@ import {
 import { uploadToImageKit } from "@/lib/imagekit-upload";
 import { type Product } from "@/lib/products";
 import { fetchProducts } from "@/lib/product-catalog";
+import { findStoryProduct } from "@/lib/homepage-videos";
 
 export const Route = createFileRoute("/admin/stories")({ component: StoriesPage });
 
@@ -243,7 +244,32 @@ function StoriesPage() {
                     "—”"
                   )}
                 </Td>
-                <Td className="text-xs font-mono">{r.product_slug || r.link_url || "—"}</Td>
+                <Td className="text-xs">
+                  {(() => {
+                    const matchedProd = findStoryProduct(
+                      {
+                        product_slug: r.product_slug,
+                        link_url: r.link_url,
+                        title: r.title,
+                        subtitle: r.subtitle,
+                      },
+                      allProducts,
+                    );
+                    if (matchedProd) {
+                      return (
+                        <div className="flex items-center gap-1.5 font-medium text-forest-dark">
+                          <span className="size-2 rounded-full bg-emerald-500 inline-block shrink-0" />
+                          <span className="truncate max-w-[140px]">{matchedProd.name}</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <span className="font-mono text-muted-foreground text-[11px]">
+                        {r.product_slug || r.link_url || "—"}
+                      </span>
+                    );
+                  })()}
+                </Td>
                 <Td>
                   <div className="flex flex-col gap-1">
                     <StatusPill s={r.status === "published" ? "active" : "disabled"} />
@@ -434,25 +460,40 @@ function Editor({
             />
           </Field>
           <Field label="Linked Product">
-            <select
-              value={f.product_slug ?? ""}
-              onChange={(e) => {
-                const slug = e.target.value || null;
-                setF({
-                  ...f,
-                  product_slug: slug,
-                  link_url: slug ? `/product/${slug}` : f.link_url,
-                });
-              }}
-              className={inp}
-            >
-              <option value="">— No product link / custom URL —</option>
-              {allProducts.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.name} ({p.category}) — ₹{p.price}
-                </option>
-              ))}
-            </select>
+            {(() => {
+              const matchedProd = findStoryProduct(
+                {
+                  product_slug: f.product_slug,
+                  link_url: f.link_url,
+                  title: f.title,
+                  subtitle: f.subtitle,
+                },
+                allProducts,
+              );
+              const selectedValue = matchedProd ? matchedProd.slug : (f.product_slug ?? "");
+
+              return (
+                <select
+                  value={selectedValue}
+                  onChange={(e) => {
+                    const slug = e.target.value || null;
+                    setF({
+                      ...f,
+                      product_slug: slug,
+                      link_url: slug ? `/product/${slug}` : f.link_url,
+                    });
+                  }}
+                  className={inp}
+                >
+                  <option value="">— No product link / custom URL —</option>
+                  {allProducts.map((p) => (
+                    <option key={p.slug} value={p.slug}>
+                      {p.name} ({p.category}) — ₹{p.price}
+                    </option>
+                  ))}
+                </select>
+              );
+            })()}
           </Field>
           <Field label="Custom URL / Product Path">
             <input
@@ -812,7 +853,15 @@ function Editor({
 
               <div className="absolute bottom-0 inset-x-0 p-2.5 bg-gradient-to-t from-black/90 via-black/60 to-transparent pt-10 text-cream z-10">
                 {(() => {
-                  const p = allProducts.find((item) => item.slug === f.product_slug);
+                  const p = findStoryProduct(
+                    {
+                      product_slug: f.product_slug,
+                      link_url: f.link_url,
+                      title: f.title,
+                      subtitle: f.subtitle,
+                    },
+                    allProducts,
+                  );
                   if (p) {
                     return (
                       <div className="flex items-center gap-2 bg-white/10 backdrop-blur-md p-1.5 rounded-xl border border-white/15">
