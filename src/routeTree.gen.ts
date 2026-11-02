@@ -76,6 +76,8 @@ import { Route as AdminHomepageProductsRouteImport } from './routes/admin.homepa
 import { Route as AdminHomepageStoriesRouteImport } from './routes/admin.homepage_.stories'
 import { Route as AdminHomepageTrustRouteImport } from './routes/admin.homepage_.trust'
 import { Route as AdminPagesPageSlugRouteImport } from './routes/admin.pages_.$pageSlug'
+import { Route as ApiCronSyncGoogleReviewsRouteImport } from './routes/api/cron/sync-google-reviews'
+import { Route as ApiGoogleCallbackRouteImport } from './routes/api/google/callback'
 import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as ApiPublicSubmissionsRouteImport } from './routes/api/public/submissions'
 import { Route as NewsletterConfirmTokenRouteImport } from './routes/newsletter.confirm.$token'
@@ -417,6 +419,17 @@ const AdminPagesPageSlugRoute = AdminPagesPageSlugRouteImport.update({
   path: '/pages/$pageSlug',
   getParentRoute: () => AdminRoute,
 } as any)
+const ApiCronSyncGoogleReviewsRoute =
+  ApiCronSyncGoogleReviewsRouteImport.update({
+    id: '/api/cron/sync-google-reviews',
+    path: '/api/cron/sync-google-reviews',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiGoogleCallbackRoute = ApiGoogleCallbackRouteImport.update({
+  id: '/api/google/callback',
+  path: '/api/google/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
   id: '/api/public/health',
   path: '/api/public/health',
@@ -507,6 +520,8 @@ export interface FileRoutesByFullPath {
   '/admin/homepage/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage/trust': typeof AdminHomepageTrustRoute
   '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
+  '/api/cron/sync-google-reviews': typeof ApiCronSyncGoogleReviewsRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -578,6 +593,8 @@ export interface FileRoutesByTo {
   '/admin/homepage/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage/trust': typeof AdminHomepageTrustRoute
   '/admin/pages/$pageSlug': typeof AdminPagesPageSlugRoute
+  '/api/cron/sync-google-reviews': typeof ApiCronSyncGoogleReviewsRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -652,6 +669,8 @@ export interface FileRoutesById {
   '/admin/homepage_/stories': typeof AdminHomepageStoriesRoute
   '/admin/homepage_/trust': typeof AdminHomepageTrustRoute
   '/admin/pages_/$pageSlug': typeof AdminPagesPageSlugRoute
+  '/api/cron/sync-google-reviews': typeof ApiCronSyncGoogleReviewsRoute
+  '/api/google/callback': typeof ApiGoogleCallbackRoute
   '/api/public/health': typeof ApiPublicHealthRoute
   '/api/public/submissions': typeof ApiPublicSubmissionsRoute
   '/newsletter/confirm/$token': typeof NewsletterConfirmTokenRoute
@@ -727,6 +746,8 @@ export interface FileRouteTypes {
     | '/admin/homepage/stories'
     | '/admin/homepage/trust'
     | '/admin/pages/$pageSlug'
+    | '/api/cron/sync-google-reviews'
+    | '/api/google/callback'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -798,6 +819,8 @@ export interface FileRouteTypes {
     | '/admin/homepage/stories'
     | '/admin/homepage/trust'
     | '/admin/pages/$pageSlug'
+    | '/api/cron/sync-google-reviews'
+    | '/api/google/callback'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -871,6 +894,8 @@ export interface FileRouteTypes {
     | '/admin/homepage_/stories'
     | '/admin/homepage_/trust'
     | '/admin/pages_/$pageSlug'
+    | '/api/cron/sync-google-reviews'
+    | '/api/google/callback'
     | '/api/public/health'
     | '/api/public/submissions'
     | '/newsletter/confirm/$token'
@@ -907,6 +932,8 @@ export interface RootRouteChildren {
   OrderIdRoute: typeof OrderIdRoute
   ProductSlugRoute: typeof ProductSlugRoute
   CollectionsIndexRoute: typeof CollectionsIndexRoute
+  ApiCronSyncGoogleReviewsRoute: typeof ApiCronSyncGoogleReviewsRoute
+  ApiGoogleCallbackRoute: typeof ApiGoogleCallbackRoute
   ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicSubmissionsRoute: typeof ApiPublicSubmissionsRoute
   NewsletterConfirmTokenRoute: typeof NewsletterConfirmTokenRoute
@@ -1384,6 +1411,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPagesPageSlugRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/api/cron/sync-google-reviews': {
+      id: '/api/cron/sync-google-reviews'
+      path: '/api/cron/sync-google-reviews'
+      fullPath: '/api/cron/sync-google-reviews'
+      preLoaderRoute: typeof ApiCronSyncGoogleReviewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/google/callback': {
+      id: '/api/google/callback'
+      path: '/api/google/callback'
+      fullPath: '/api/google/callback'
+      preLoaderRoute: typeof ApiGoogleCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/health': {
       id: '/api/public/health'
       path: '/api/public/health'
@@ -1545,6 +1586,8 @@ const rootRouteChildren: RootRouteChildren = {
   OrderIdRoute: OrderIdRoute,
   ProductSlugRoute: ProductSlugRoute,
   CollectionsIndexRoute: CollectionsIndexRoute,
+  ApiCronSyncGoogleReviewsRoute: ApiCronSyncGoogleReviewsRoute,
+  ApiGoogleCallbackRoute: ApiGoogleCallbackRoute,
   ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicSubmissionsRoute: ApiPublicSubmissionsRoute,
   NewsletterConfirmTokenRoute: NewsletterConfirmTokenRoute,

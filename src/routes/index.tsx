@@ -27,6 +27,8 @@ import {
   HomeInstagramPreview,
   HomeMarqueeStrip,
 } from "@/components/site/HomeSections";
+import { GoogleReviewsSection } from "@/components/site/GoogleReviewsSection";
+import { getPublicGoogleReviews } from "@/lib/google-reviews.functions";
 
 import { fetchShopCategories } from "@/lib/category-catalog";
 import { fetchHeroSlides } from "@/lib/hero-catalog";
@@ -155,8 +157,13 @@ function Home() {
   const [cmsLoaded, setCmsLoaded] = useState(false);
   const [homePosts, setHomePosts] = useState<any[]>([]);
   const [instaFeed, setInstaFeed] = useState<any>(null);
+  const [googleReviewsData, setGoogleReviewsData] = useState<{
+    reviews: any[];
+    settings: any;
+  } | null>(null);
   const fetchPostsFn = useServerFn(listPublicPosts);
   const fetchInstaFn = useServerFn(getPublicInstagramFeed);
+  const fetchGoogleReviewsFn = useServerFn(getPublicGoogleReviews);
 
   useEffect(() => {
     // Fetch CMS sections — failure is safe, just means no CMS overrides
@@ -321,6 +328,17 @@ function Home() {
       void fetchInstaFn().then((res) => {
         setInstaFeed(res);
       });
+
+      // Fetch Verified Google Reviews
+      void fetchGoogleReviewsFn()
+        .then((res) => {
+          if (res && res.reviews && res.reviews.length > 0) {
+            setGoogleReviewsData(res);
+          }
+        })
+        .catch((err) => {
+          console.warn("[Homepage] Google reviews fetch note:", err);
+        });
     }, 300);
 
     return () => clearTimeout(nonCriticalTimer);
@@ -400,6 +418,18 @@ function Home() {
         return <HomeHeritageVideo key="heritage_video" settings={settings} />;
 
       case "testimonials":
+        if (googleReviewsData && googleReviewsData.reviews && googleReviewsData.reviews.length > 0) {
+          return (
+            <GoogleReviewsSection
+              key="testimonials"
+              reviews={googleReviewsData.reviews}
+              settings={{
+                ...settings,
+                ...googleReviewsData.settings,
+              }}
+            />
+          );
+        }
         return <HomeCustomerStories key="testimonials" stories={stories} settings={settings} />;
       case "journal":
         if (instaFeed?.settings?.is_enabled) {
