@@ -384,7 +384,7 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
             itemFields: [
               { type: "text", key: "title", label: "Title" },
               { type: "textarea", key: "desc", label: "Description" },
-              { type: "image", key: "img", label: "Image", folder: "pages/b2b" },
+              { type: "image", key: "img", label: "Image (Square 1080 × 1080 px recommended)", folder: "pages/b2b" },
               { type: "text", key: "cta", label: "CTA Text" },
               { type: "text", key: "href", label: "Link URL" },
               { type: "text", key: "iconName", label: "Icon Name (Package, Gift, Sparkles, Tag)" },

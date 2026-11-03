@@ -155,7 +155,7 @@ function GiftHampersPage() {
               ))}
             </ul>
           </div>
-          <div className="flex-1 w-full relative aspect-[4/5] rounded-[24px] overflow-hidden shadow-lg">
+          <div className="flex-1 w-full relative aspect-square rounded-[24px] overflow-hidden shadow-lg">
             <img
               src={introSettings.image || heroHoneyImg}
               alt="Luxury Honey Hamper"

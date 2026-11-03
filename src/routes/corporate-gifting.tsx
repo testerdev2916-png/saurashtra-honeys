@@ -272,7 +272,7 @@ function CorporateGiftingPage() {
               gallerySettings.gallery_img_2 || giftPackImg,
               gallerySettings.gallery_img_3 || familyHoneyImg,
             ].map((img, idx) => (
-              <div key={idx} className="aspect-[4/5] overflow-hidden rounded-[16px]">
+              <div key={idx} className="aspect-square overflow-hidden rounded-[16px]">
                 <img
                   src={img}
                   alt="Corporate Gifting"

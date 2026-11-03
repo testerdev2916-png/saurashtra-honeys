@@ -184,7 +184,7 @@ function BulkGiftingHubPage() {
                     to={card.href}
                     className="group flex flex-col rounded-[26px] overflow-hidden bg-white border border-[#2B2118]/5 shadow-[0_4px_24px_rgba(43,33,24,0.04)] active:shadow-[0_12px_40px_rgba(43,33,24,0.08)] transition-all duration-[300ms] ease-out active:scale-[1.02] h-auto"
                   >
-                    <div className="h-[230px] w-full overflow-hidden relative shrink-0 bg-[#FDFBF7]">
+                    <div className="w-full aspect-square overflow-hidden relative shrink-0 bg-[#FDFBF7]">
                       <img
                         src={card.img}
                         alt={card.title}
@@ -235,9 +235,9 @@ function BulkGiftingHubPage() {
               <Link
                 key={card.title}
                 to={card.href}
-                className="group flex flex-col rounded-[26px] overflow-hidden bg-white border border-[#2B2118]/5 shadow-[0_4px_24px_rgba(43,33,24,0.04)] hover:shadow-[0_12px_40px_rgba(43,33,24,0.08)] transition-all duration-[300ms] ease-out hover:-translate-y-2 lg:h-[480px]"
+                className="group flex flex-col rounded-[26px] overflow-hidden bg-white border border-[#2B2118]/5 shadow-[0_4px_24px_rgba(43,33,24,0.04)] hover:shadow-[0_12px_40px_rgba(43,33,24,0.08)] transition-all duration-[300ms] ease-out hover:-translate-y-2 h-full"
               >
-                <div className="h-[220px] w-full overflow-hidden relative shrink-0 bg-[#FDFBF7]">
+                <div className="w-full aspect-square overflow-hidden relative shrink-0 bg-[#FDFBF7]">
                   <img
                     src={card.img}
                     alt={card.title}

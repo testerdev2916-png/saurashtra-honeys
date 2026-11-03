@@ -162,7 +162,7 @@ function PrivateLabelPage() {
               ))}
             </ul>
           </div>
-          <div className="flex-1 w-full relative aspect-[4/5] rounded-[24px] overflow-hidden shadow-lg border border-[#D97706]/10">
+          <div className="flex-1 w-full relative aspect-square rounded-[24px] overflow-hidden shadow-lg border border-[#D97706]/10">
             <img
               src={introSettings.image || heroProductsImg}
               alt="Private Label Manufacturing"
