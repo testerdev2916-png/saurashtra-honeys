@@ -100,6 +100,7 @@ export type Product = {
   benefits: string[];
   description: string;
   is_wholesale?: boolean;
+  is_gift_hamper?: boolean;
   flora?: string;
   attributes?: Record<string, string | string[]>;
   showOnHomepage?: boolean;

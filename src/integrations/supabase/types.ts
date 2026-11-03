@@ -1146,6 +1146,7 @@ export type Database = {
           sort_order: number;
           show_on_homepage: boolean | null;
           is_wholesale: boolean | null;
+          is_gift_hamper: boolean | null;
           home_sort_order: number | null;
           status: string;
           stock_quantity: number;
@@ -1198,6 +1199,7 @@ export type Database = {
           sort_order?: number;
           show_on_homepage?: boolean | null;
           is_wholesale?: boolean | null;
+          is_gift_hamper?: boolean | null;
           home_sort_order?: number | null;
           status?: string;
           stock_quantity?: number;
@@ -1250,6 +1252,7 @@ export type Database = {
           sort_order?: number;
           show_on_homepage?: boolean | null;
           is_wholesale?: boolean | null;
+          is_gift_hamper?: boolean | null;
           home_sort_order?: number | null;
           status?: string;
           stock_quantity?: number;

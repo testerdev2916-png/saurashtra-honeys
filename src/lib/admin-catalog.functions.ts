@@ -25,6 +25,10 @@ export const listAdminProducts = createServerFn({ method: "POST" })
       return {
         ...row,
         additional_images: Array.isArray(attrs.additional_images) ? attrs.additional_images : [],
+        is_gift_hamper:
+          row.is_gift_hamper !== undefined && row.is_gift_hamper !== null
+            ? !!row.is_gift_hamper
+            : !!attrs.is_gift_hamper,
       };
     });
     return { rows };
@@ -73,6 +77,7 @@ const productSchema = z.object({
   is_new_arrival: z.boolean().default(false),
   show_on_homepage: z.boolean().default(false),
   is_wholesale: z.boolean().default(false),
+  is_gift_hamper: z.boolean().default(false),
   home_sort_order: z.number().int().default(0),
   story_description: z.string().nullable().optional(),
   what_makes_special: z.array(z.string()).nullable().optional(),
@@ -102,8 +107,10 @@ export const upsertProduct = createServerFn({ method: "POST" })
     if (rest.additional_images) {
       attrs.additional_images = rest.additional_images;
     }
+    attrs.is_gift_hamper = !!rest.is_gift_hamper;
     rest.attributes = attrs as never;
     delete (rest as Record<string, unknown>).additional_images;
+    delete (rest as Record<string, unknown>).is_gift_hamper;
 
     console.log(
       "Saving product payload:",

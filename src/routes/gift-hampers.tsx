@@ -14,11 +14,23 @@ import heroHoneyImg from "@/assets/hero-honey.jpg";
 import beeFlowerImg from "@/assets/bee-flower.jpg";
 import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
+import { fetchGiftHamperProducts } from "@/lib/product-catalog";
+import type { Product } from "@/lib/products";
+import { ProductCard } from "@/components/site/ProductCard";
 
 export const Route = createFileRoute("/gift-hampers")({
-  loader: () => fetchPageSections("gift-hampers"),
+  loader: async () => {
+    const sections = await fetchPageSections("gift-hampers");
+    let hamperProducts: Product[] = [];
+    try {
+      hamperProducts = await fetchGiftHamperProducts();
+    } catch (e) {
+      console.error("[gift-hampers] Failed to load hamper products:", e);
+    }
+    return { sections, hamperProducts };
+  },
   head: ({ loaderData }) =>
-    extractPageSeo(loaderData, {
+    extractPageSeo(loaderData?.sections, {
       title: "Luxury Honey Gift Hampers | Saurashtra Honey",
       description:
         "Curated premium honey gift hampers for weddings, birthdays, return gifts, and festivals. Beautiful packaging with personalized notes and custom ribbons.",
@@ -38,7 +50,7 @@ const schema = z.object({
 });
 
 function GiftHampersPage() {
-  const sections = Route.useLoaderData();
+  const { sections, hamperProducts } = Route.useLoaderData();
   const introSettings = sections.find((s) => s.section_key === "intro")?.settings || {};
   const gallerySettings = sections.find((s) => s.section_key === "gallery")?.settings || {};
 
@@ -164,6 +176,30 @@ function GiftHampersPage() {
           </div>
         </div>
       </section>
+
+      {/* 2.5 Gift Hampers Collection */}
+      {hamperProducts && hamperProducts.length > 0 && (
+        <section className="py-20 bg-white">
+          <div className="container-page max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <span className="text-[11px] uppercase tracking-[0.25em] text-[#D97706] font-bold block mb-4">
+                CURATED GIFTING COLLECTIONS
+              </span>
+              <h2 className="font-serif text-[36px] sm:text-[44px] text-[#2B2118] leading-tight mb-4">
+                Explore Our Gift Hampers
+              </h2>
+              <p className="text-[#6B6257] max-w-2xl mx-auto">
+                Handcrafted luxury honey hampers paired with artisanal presentation for weddings, festivals, and special celebrations.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {hamperProducts.map((p) => (
+                <ProductCard key={p.slug} p={{ ...p, badge: p.badge || "GIFT HAMPER" } as any} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 3. Benefits Section */}
       <section className="py-20 bg-white">

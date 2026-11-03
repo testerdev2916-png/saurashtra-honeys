@@ -86,6 +86,7 @@ type P = {
   is_bestseller: boolean;
   is_new_arrival: boolean;
   is_wholesale: boolean;
+  is_gift_hamper: boolean;
   video_url: string | null;
   meta_title: string | null;
   meta_description: string | null;
@@ -130,6 +131,7 @@ const EMPTY: Partial<P> = {
   is_bestseller: false,
   is_new_arrival: false,
   is_wholesale: false,
+  is_gift_hamper: false,
   video_url: "",
   attributes: {},
   show_on_homepage: false,
@@ -230,6 +232,7 @@ function ProductsPage() {
         is_bestseller: !!p.is_bestseller,
         is_new_arrival: !!p.is_new_arrival,
         is_wholesale: !!p.is_wholesale,
+        is_gift_hamper: !!p.is_gift_hamper,
         show_on_homepage: !!p.show_on_homepage,
         story_description: p.story_description || null,
         what_makes_special: p.what_makes_special || null,
@@ -972,6 +975,14 @@ const ProductForm = forwardRef<
                 onChange={(e) => setF({ ...f, is_wholesale: e.target.checked })}
               />{" "}
               Wholesale Product
+            </label>
+            <label className="flex items-center gap-2 text-xs font-medium text-[#8B5E3C]">
+              <input
+                type="checkbox"
+                checked={!!f.is_gift_hamper}
+                onChange={(e) => setF({ ...f, is_gift_hamper: e.target.checked })}
+              />{" "}
+              Gift Hamper (Show on Gift Hampers page)
             </label>
           </div>
         )}
