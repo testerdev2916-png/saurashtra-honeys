@@ -91,6 +91,22 @@ const productSchema = z.object({
   canonical_url: z.string().max(2000).nullable().optional(),
 });
 
+function sortFrontFirst(imgs: string[]): string[] {
+  return [...imgs].sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+    const aIsFront = aLower.includes("front");
+    const bIsFront = bLower.includes("front");
+    const aIsBack = aLower.includes("back");
+    const bIsBack = bLower.includes("back");
+    if (aIsFront && !bIsFront) return -1;
+    if (!aIsFront && bIsFront) return 1;
+    if (aIsBack && !bIsBack) return 1;
+    if (!aIsBack && bIsBack) return -1;
+    return 0;
+  });
+}
+
 export const upsertProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: z.infer<typeof productSchema>) => productSchema.parse(d))
@@ -98,9 +114,13 @@ export const upsertProduct = createServerFn({ method: "POST" })
     await assertAdmin(context.supabase, context.userId);
     const { id, ...rest } = data;
     if (rest.images && Array.isArray(rest.images) && rest.images.length > 0) {
-      const validPrimary = rest.images.find((img) => typeof img === "string" && img.trim() !== "");
-      if (validPrimary) {
-        rest.image_url = validPrimary;
+      const validImages = rest.images.filter(
+        (img): img is string => typeof img === "string" && img.trim() !== "",
+      );
+      const sorted = sortFrontFirst(validImages);
+      rest.images = sorted;
+      if (sorted.length > 0) {
+        rest.image_url = sorted[0];
       }
     }
     const attrs = { ...(rest.attributes || {}) } as Record<string, unknown>;
@@ -117,6 +137,7 @@ export const upsertProduct = createServerFn({ method: "POST" })
       JSON.stringify({ images: rest.images, attrs: rest.attributes }),
     );
 
+    let savedId = id;
     if (id) {
       const { data: updated, error } = await context.supabase
         .from("products")
@@ -128,15 +149,104 @@ export const upsertProduct = createServerFn({ method: "POST" })
         console.error("Supabase update error:", error);
         throw new Error(error.message);
       }
-      return { ok: true, id: updated?.id || id };
+      savedId = updated?.id || id;
+    } else {
+      const { data: inserted, error } = await context.supabase
+        .from("products")
+        .insert(rest as never)
+        .select("id")
+        .single();
+      if (error) throw new Error(error.message);
+      savedId = inserted?.id;
     }
-    const { data: inserted, error } = await context.supabase
-      .from("products")
-      .insert(rest as never)
-      .select("id")
-      .single();
-    if (error) throw new Error(error.message);
-    return { ok: true, id: inserted?.id };
+
+    // Sibling variant sync: When packaging images are updated for a specific size,
+    // sync those images to the corresponding product_variants entry so that
+    // the storefront (which queries the canonical parent product's variants)
+    // always renders the newly uploaded bottle packaging images immediately.
+    if (rest.images && Array.isArray(rest.images) && rest.images.length > 0 && rest.slug) {
+      try {
+        const slug = rest.slug.toLowerCase();
+        const name = (rest.name || "").toLowerCase();
+
+        const sizeKeywords = [
+          { key: "28kg", match: ["28kg", "28 kg", "28-kg"] },
+          { key: "10kg", match: ["10kg", "10 kg", "10-kg"] },
+          { key: "1kg", match: ["1kg", "1 kg", "1-kg", "1_kg"] },
+          { key: "500g", match: ["500gm", "500g", "500 gm", "500-gm"] },
+          { key: "250g", match: ["250gm", "250g", "250 gm", "250-gm", "250"] },
+          { key: "50g", match: ["50gm", "50g", "50 gm", "50-g"] },
+        ];
+
+        let detectedSize: string | null = null;
+        for (const item of sizeKeywords) {
+          if (item.match.some((m) => slug.includes(m) || name.includes(m))) {
+            detectedSize = item.key;
+            break;
+          }
+        }
+
+        const targetParentSlugs: string[] = [];
+        if (slug.includes("multiflora") || name.includes("multiflora")) {
+          targetParentSlugs.push("multiflora-honey-250GM");
+        } else if (slug.includes("ajwain") || name.includes("ajwain")) {
+          targetParentSlugs.push("ajwain-honey-500", "ajwain-honey");
+        } else if (slug.includes("fennel") || name.includes("fennel")) {
+          targetParentSlugs.push("fennel-honey-250GM");
+        }
+
+        if (detectedSize) {
+          const parentIds: string[] = [];
+          if (targetParentSlugs.length > 0) {
+            const { data: parentRows } = await context.supabase
+              .from("products")
+              .select("id, slug")
+              .in("slug", targetParentSlugs);
+            if (parentRows) {
+              parentIds.push(...parentRows.map((r: { id: string }) => r.id));
+            }
+          }
+          if (savedId && !parentIds.includes(savedId)) {
+            parentIds.push(savedId);
+          }
+
+          if (parentIds.length > 0) {
+            const { data: matchedVariants } = await context.supabase
+              .from("product_variants")
+              .select("id, label, product_id")
+              .in("product_id", parentIds);
+
+            if (matchedVariants && matchedVariants.length > 0) {
+              const variantIdsToUpdate = matchedVariants
+                .filter((v: { label: string }) => {
+                  const l = v.label.toLowerCase().replace(/\s+/g, "");
+                  return (
+                    l.includes(detectedSize!) ||
+                    (detectedSize === "500g" && l.includes("500")) ||
+                    (detectedSize === "250g" && l.includes("250")) ||
+                    (detectedSize === "1kg" && l.includes("1kg"))
+                  );
+                })
+                .map((v: { id: string }) => v.id);
+
+              if (variantIdsToUpdate.length > 0) {
+                await context.supabase
+                  .from("product_variants")
+                  .update({
+                    image_url: rest.image_url,
+                    images: rest.images,
+                  } as never)
+                  .in("id", variantIdsToUpdate);
+              }
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.warn("Variant sync warning:", syncErr);
+      }
+    }
+
+    return { ok: true, id: savedId };
   });
 
 export const deleteProduct = createServerFn({ method: "POST" })
@@ -266,7 +376,18 @@ export const saveProductVariants = createServerFn({ method: "POST" })
         if (hasDefault) isDefault = false;
         else hasDefault = true;
       }
-      return { ...v, is_default: isDefault, sort_order: i };
+      const rawImgs = Array.isArray(v.images)
+        ? (v.images as string[]).filter((x) => typeof x === "string" && x.trim() !== "")
+        : [];
+      const sortedImgs = sortFrontFirst(rawImgs);
+      const primaryUrl = sortedImgs[0] || v.image_url || null;
+      return {
+        ...v,
+        images: sortedImgs,
+        image_url: primaryUrl,
+        is_default: isDefault,
+        sort_order: i,
+      };
     });
     if (!hasDefault && normalized.length > 0) {
       normalized[0].is_default = true;

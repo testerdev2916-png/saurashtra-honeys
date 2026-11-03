@@ -142,6 +142,22 @@ const EMPTY: Partial<P> = {
   purity_lab_test: "",
 };
 
+function sortFrontFirst(imgs: string[]): string[] {
+  return [...imgs].sort((a, b) => {
+    const aLower = a.toLowerCase();
+    const bLower = b.toLowerCase();
+    const aIsFront = aLower.includes("front");
+    const bIsFront = bLower.includes("front");
+    const aIsBack = aLower.includes("back");
+    const bIsBack = bLower.includes("back");
+    if (aIsFront && !bIsFront) return -1;
+    if (!aIsFront && bIsFront) return 1;
+    if (aIsBack && !bIsBack) return 1;
+    if (!aIsBack && bIsBack) return -1;
+    return 0;
+  });
+}
+
 function ProductsPage() {
   const list = useServerFn(listAdminProducts);
   const save = useServerFn(upsertProduct);
@@ -190,6 +206,11 @@ function ProductsPage() {
 
   async function onSave(p: Partial<P>, variants?: VariantItem[]) {
     console.log("UI onSave triggered with images:", p.images);
+    const cleanedImages = (p.images ?? []).filter(
+      (u): u is string => typeof u === "string" && u.trim().length > 0,
+    );
+    const sortedImages = sortFrontFirst(cleanedImages);
+    const primaryImgUrl = sortedImages[0] || p.image_url || null;
     const res = await save({
       data: {
         id: p.id,
@@ -208,8 +229,8 @@ function ProductsPage() {
         sizes: p.sizes ?? [],
         benefits: p.benefits ?? [],
         image_key: p.image_key || null,
-        image_url: p.image_url || null,
-        images: p.images ?? [],
+        image_url: primaryImgUrl,
+        images: sortedImages,
         additional_images: p.additional_images ?? [],
         stock_quantity: Number(p.stock_quantity ?? 100),
         in_stock: !!p.in_stock,
@@ -1059,13 +1080,28 @@ const ProductForm = forwardRef<
           <div className="space-y-8 text-sm">
             {/* A. PRODUCT GALLERY IMAGES */}
             <div className="p-5 rounded-2xl bg-cream/40 border border-border/80 space-y-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-espresso">
-                  Common Product Images
-                </h3>
-                <p className="text-xs text-muted-foreground">
-                  Upload common product images. Recommended size: 1080 × 1080 px.
-                </p>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-espresso">
+                    Common Product Images
+                  </h3>
+                  <p className="text-xs text-muted-foreground">
+                    Upload common product images. Recommended size: 1080 × 1080 px.
+                  </p>
+                </div>
+                {f.images && f.images.filter(Boolean).length > 1 && (
+                  <BtnGhost
+                    type="button"
+                    onClick={() => {
+                      const sorted = sortFrontFirst(f.images || []);
+                      setF({ ...f, images: sorted, image_url: sorted[0] || null });
+                      toast.success("Sorted: Front packaging is now Primary!");
+                    }}
+                    className="text-xs border-burnt-orange text-burnt-orange hover:bg-burnt-orange/10 font-medium py-1.5 px-3"
+                  >
+                    Auto-Sort Front First
+                  </BtnGhost>
+                )}
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -1156,7 +1192,8 @@ const ProductForm = forwardRef<
                   value={(f.images ?? []).join("\n")}
                   onChange={(e) => {
                     const lines = e.target.value.split("\n").map((s) => s.trim());
-                    setF({ ...f, images: lines, image_url: lines[0] || null });
+                    const sorted = sortFrontFirst(lines);
+                    setF({ ...f, images: sorted, image_url: sorted[0] || null });
                   }}
                   className={`${inp} font-mono text-xs`}
                   placeholder="Paste image URLs, one per line"

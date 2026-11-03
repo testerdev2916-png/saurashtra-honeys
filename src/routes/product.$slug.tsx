@@ -373,21 +373,42 @@ function ProductPage() {
       finalGallery.push(clean);
     };
 
-    // First: Active variant packaging images come first
-    for (const url of variantImages) {
+    // Helper to sort images so FRONT packaging is always prioritized before BACK
+    const sortFrontFirst = (imgs: string[]) => {
+      return [...imgs].sort((a, b) => {
+        const aLower = a.toLowerCase();
+        const bLower = b.toLowerCase();
+        const aIsFront = aLower.includes("front");
+        const bIsFront = bLower.includes("front");
+        const aIsBack = aLower.includes("back");
+        const bIsBack = bLower.includes("back");
+        if (aIsFront && !bIsFront) return -1;
+        if (!aIsFront && bIsFront) return 1;
+        if (aIsBack && !bIsBack) return 1;
+        if (!aIsBack && bIsBack) return -1;
+        return 0;
+      });
+    };
+
+    // First: Active variant packaging images come first (FRONT prioritized over BACK)
+    const sortedVariantImages = sortFrontFirst(variantImages);
+    for (const url of sortedVariantImages) {
       pushImg(url);
     }
 
     // Second: Common product images (excluding images belonging exclusively to other variants)
-    for (const url of candidateCommonImages) {
+    const sortedCommonImages = sortFrontFirst(candidateCommonImages);
+    for (const url of sortedCommonImages) {
       const norm = normalize(url);
       if (!otherVariantsImages.has(norm)) {
         pushImg(url);
       }
     }
 
+    // Sort final gallery ensuring FRONT packaging is always at the top (index 0) and BACK is after
+    const sortedFinal = sortFrontFirst(finalGallery);
     const fallbackUrl = (p as any).image_url || p.image || "/saurashtra-honey-logo-complete.png";
-    return finalGallery.length > 0 ? finalGallery : [fallbackUrl];
+    return sortedFinal.length > 0 ? sortedFinal : [fallbackUrl];
   }, [p, activeVariant, allProducts, size]);
 
   useEffect(() => {
