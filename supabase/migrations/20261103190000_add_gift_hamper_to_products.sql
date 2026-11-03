@@ -6,3 +6,4 @@ ADD COLUMN IF NOT EXISTS is_gift_hamper boolean NOT NULL DEFAULT false;
 UPDATE public.products 
 SET is_gift_hamper = true 
 WHERE (attributes->>'is_gift_hamper')::boolean = true;
+

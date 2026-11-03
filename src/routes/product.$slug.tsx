@@ -66,7 +66,8 @@ export const Route = createFileRoute("/product/$slug")({
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [] };
     const p = loaderData.product;
-    const title = p.meta_title || `${p.name} | Saurashtra Honey`;
+    const baseName = cleanProductName(p.name);
+    const title = p.meta_title || `${baseName} | Saurashtra Honey`;
     const description =
       p.meta_description ||
       p.tagline ||
@@ -77,7 +78,7 @@ export const Route = createFileRoute("/product/$slug")({
       p.image_url || p.image || "https://saurashtrahoney.com/saurashtra-honey-logo-complete.png";
     const keywords =
       p.meta_keywords ||
-      `${p.name}, raw honey, pure honey, natural honey, buy honey online, saurashtra honey`;
+      `${baseName}, raw honey, pure honey, natural honey, buy honey online, saurashtra honey`;
 
     return {
       meta: [
@@ -252,6 +253,29 @@ function ProductPage() {
 
   const activeVariant = useMemo(() => getVariantByLabel(p, size), [p, size]);
 
+  const availableSizes = useMemo(() => {
+    if (p.sizes && p.sizes.length > 0) return p.sizes;
+    if (p.variants && p.variants.length > 0) return p.variants.map((v) => v.label);
+    return [];
+  }, [p.sizes, p.variants]);
+
+  const hasMultipleVariants =
+    (p.variants && p.variants.length > 1) || (availableSizes && availableSizes.length > 1);
+
+  const baseName = useMemo(() => cleanProductName(p.name), [p.name]);
+  const currentVariantLabel = activeVariant?.label || size;
+  const displayName = useMemo(() => {
+    return hasMultipleVariants && currentVariantLabel
+      ? `${baseName} – ${formatSizeDisplay(currentVariantLabel)}`
+      : baseName;
+  }, [hasMultipleVariants, currentVariantLabel, baseName]);
+
+  useEffect(() => {
+    if (displayName && typeof document !== "undefined") {
+      document.title = `${displayName} | Saurashtra Honey`;
+    }
+  }, [displayName]);
+
   useEffect(() => {
     if (activeVariant && activeVariant.id && activeVariant.id !== search.variant) {
       navigate({ search: { variant: activeVariant.id }, replace: true });
@@ -407,7 +431,7 @@ function ProductPage() {
         items: [toItem(p, { size, qty })],
       }),
     );
-    toast.success(`Added ${p.name} (${size}) to cart`);
+    toast.success(`Added ${displayName} to cart`);
   };
   const handleBuy = () => {
     if (!inStock) {
@@ -456,7 +480,7 @@ function ProductPage() {
   };
 
   const waMsg = encodeURIComponent(
-    `Hi! I'd like to know more about ${p.name} (${size}) — ${typeof window !== "undefined" ? window.location.href : ""}`,
+    `Hi! I'd like to know more about ${displayName} — ${typeof window !== "undefined" ? window.location.href : ""}`,
   );
   const deliveryDate = useMemo(() => {
     const d = new Date();
@@ -484,7 +508,7 @@ function ProductPage() {
           {p.category}
         </Link>{" "}
         <ChevronRight className="size-3" />
-        <span className="text-forest-dark truncate">{p.name}</span>
+        <span className="text-forest-dark truncate">{displayName}</span>
       </div>
 
       {/* MAIN */}
@@ -583,7 +607,7 @@ function ProductPage() {
             </div>
           )}
           <h1 className="font-serif text-3xl md:text-5xl lg:text-6xl font-bold text-espresso leading-tight">
-            {p.name}
+            {displayName}
           </h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground font-normal leading-relaxed">
             {p.tagline}
@@ -1067,11 +1091,11 @@ function ProductPage() {
 
       <StructuredData
         data={productLd({
-          name: p.name,
+          name: displayName,
           description: p.description,
           image: p.image,
           slug: p.slug,
-          price: p.price,
+          price: activePrice,
           rating: p.rating,
           reviews: p.reviews,
         })}
@@ -1081,7 +1105,7 @@ function ProductPage() {
           { name: "Home", url: "/" },
           { name: "Shop", url: "/shop" },
           { name: p.category, url: `/shop/${getCategoryShopSlug(p.category)}` },
-          { name: p.name, url: `/product/${p.slug}` },
+          { name: displayName, url: `/product/${p.slug}` },
         ])}
       />
       <StructuredData
