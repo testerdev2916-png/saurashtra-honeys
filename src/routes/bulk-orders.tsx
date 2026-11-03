@@ -23,7 +23,7 @@ import beeFarmImg from "@/assets/bee-farm.jpg";
 import familyHoneyImg from "@/assets/family-honey.jpg";
 import { fetchPageSections, extractPageSeo } from "@/lib/page-cms.functions";
 import { useSiteSettings } from "@/lib/site-settings";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchWholesaleProducts } from "@/lib/product-catalog";
 import type { Product } from "@/lib/products";
 import { ProductCard } from "@/components/site/ProductCard";
 
@@ -32,15 +32,9 @@ export const Route = createFileRoute("/bulk-orders")({
     const sections = await fetchPageSections("bulk-orders");
     let wholesaleProducts: Product[] = [];
     try {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("published", true);
-      if (!error && data) {
-        wholesaleProducts = data as unknown as Product[];
-      }
+      wholesaleProducts = await fetchWholesaleProducts();
     } catch (e) {
-      console.error(e);
+      console.error("[bulk-orders] Failed to load wholesale products:", e);
     }
     return { sections, wholesaleProducts };
   },

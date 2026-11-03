@@ -34,6 +34,7 @@ type Row = {
   additional_images?: unknown;
   show_on_homepage: boolean | null;
   home_sort_order: number | null;
+  is_wholesale?: boolean | null;
   story_description: string | null;
   what_makes_special: unknown;
   floral_source_notes: string | null;
@@ -273,6 +274,7 @@ function toProduct(
         : undefined,
     showOnHomepage: !!r.show_on_homepage,
     homeSortOrder: r.home_sort_order ?? undefined,
+    is_wholesale: !!r.is_wholesale,
     story_description: contentSource.story_description ?? r.story_description ?? undefined,
     what_makes_special: Array.isArray(contentSource.what_makes_special)
       ? (contentSource.what_makes_special as string[])
@@ -342,6 +344,7 @@ export async function fetchProducts(options?: { bypassCache?: boolean }): Promis
         attributes,
         show_on_homepage,
         home_sort_order,
+        is_wholesale,
         story_description,
         what_makes_special,
         floral_source_notes,
@@ -404,6 +407,52 @@ export async function fetchProducts(options?: { bypassCache?: boolean }): Promis
   }
 }
 
+export async function fetchWholesaleProducts(): Promise<Product[]> {
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select(
+        `
+        id,slug,name,tagline,description,category,flora,badge,price,price_max,mrp,rating,reviews_count,sizes,benefits,
+        image_key,
+        image_url,
+        images,
+        attributes,
+        show_on_homepage,
+        home_sort_order,
+        is_wholesale,
+        story_description,
+        what_makes_special,
+        floral_source_notes,
+        storage_usage,
+        purity_lab_test,
+        updated_at
+      `,
+      )
+      .eq("status", "published")
+      .eq("is_wholesale", true)
+      .order("sort_order", { ascending: true });
+
+    if (error) {
+      console.error("[fetchWholesaleProducts] Supabase error:", error);
+      throw error;
+    }
+
+    if (!data || data.length === 0) {
+      return [];
+    }
+
+    const rows = data as unknown as Row[];
+    const productIds = rows.map((r) => r.id);
+    const varMap = await fetchAllVariantsMap(productIds);
+
+    return rows.map((r) => toProduct(r, varMap));
+  } catch (err) {
+    console.error("[fetchWholesaleProducts] Exception:", err);
+    return [];
+  }
+}
+
 export async function fetchProduct(rawSlug: string): Promise<Product | null> {
   const slug = decodeURIComponent(rawSlug).trim().replace(/\/+$/, "");
   try {
@@ -429,6 +478,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
         attributes,
         show_on_homepage,
         home_sort_order,
+        is_wholesale,
         story_description,
         what_makes_special,
         floral_source_notes,
@@ -459,6 +509,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
           attributes,
           show_on_homepage,
           home_sort_order,
+          is_wholesale,
           story_description,
           what_makes_special,
           floral_source_notes,
@@ -495,6 +546,7 @@ export async function fetchProduct(rawSlug: string): Promise<Product | null> {
           attributes,
           show_on_homepage,
           home_sort_order,
+          is_wholesale,
           story_description,
           what_makes_special,
           floral_source_notes,
