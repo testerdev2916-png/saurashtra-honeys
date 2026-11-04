@@ -373,15 +373,38 @@ function ProductPage() {
       finalGallery.push(clean);
     };
 
+    // Helper to identify if an image is front packaging
+    const isFrontPkg = (url: string) => {
+      const u = url.toLowerCase();
+      // Special asset fix: 1KG Multiflora asset named "...BACK_amuO4xnk4.jpg" is actually the FRONT packaging photo
+      if (u.includes("1kg_multi_flora_honey_back") || u.includes("amuo4xnk4") || u.includes("amu04xnk4")) {
+        return true;
+      }
+      // The asset named "...FRONT_EahXaKa6U.jpg" is actually the BACK nutritional info photo
+      if (u.includes("1kg_multi_flora_honey_front") || u.includes("eahxaka6u")) {
+        return false;
+      }
+      return u.includes("front") || u.includes("fornt");
+    };
+
+    const isBackPkg = (url: string) => {
+      const u = url.toLowerCase();
+      if (u.includes("1kg_multi_flora_honey_front") || u.includes("eahxaka6u")) {
+        return true;
+      }
+      if (u.includes("1kg_multi_flora_honey_back") || u.includes("amuo4xnk4") || u.includes("amu04xnk4")) {
+        return false;
+      }
+      return u.includes("back");
+    };
+
     // Helper to sort images so FRONT packaging is always prioritized before BACK
     const sortFrontFirst = (imgs: string[]) => {
       return [...imgs].sort((a, b) => {
-        const aLower = a.toLowerCase();
-        const bLower = b.toLowerCase();
-        const aIsFront = aLower.includes("front");
-        const bIsFront = bLower.includes("front");
-        const aIsBack = aLower.includes("back");
-        const bIsBack = bLower.includes("back");
+        const aIsFront = isFrontPkg(a);
+        const bIsFront = isFrontPkg(b);
+        const aIsBack = isBackPkg(a);
+        const bIsBack = isBackPkg(b);
         if (aIsFront && !bIsFront) return -1;
         if (!aIsFront && bIsFront) return 1;
         if (aIsBack && !bIsBack) return 1;
