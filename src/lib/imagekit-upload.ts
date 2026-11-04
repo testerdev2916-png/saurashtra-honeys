@@ -41,12 +41,19 @@ const getIkConfig = async () => {
 export async function uploadToImageKit(file: File, folder: string): Promise<string> {
   let fileToUpload = file;
 
-  // Compress images larger than 400KB before uploading to keep ImageKit storage & bandwidth ultra-lean
-  if (file.type.startsWith("image/") && file.size > 400 * 1024) {
+  // Do NOT compress or downscale banners, hero sliders, or page headers.
+  // Full-width banners need 1920px (or 3840px for 2x Retina) uncompromised resolution.
+  const isBanner =
+    folder.includes("banner") ||
+    folder.includes("general") ||
+    folder.includes("hero") ||
+    folder.includes("page");
+
+  if (!isBanner && file.type.startsWith("image/") && file.size > 2 * 1024 * 1024) {
     try {
       const options = {
-        maxSizeMB: 0.6,
-        maxWidthOrHeight: 1600,
+        maxSizeMB: 2,
+        maxWidthOrHeight: 2560,
         useWebWorker: true,
       };
       const compressedBlob = await imageCompression(file, options);

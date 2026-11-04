@@ -169,8 +169,8 @@ export function HeroSlider({
                     />
                     <img
                       key={`desk-${s.updatedAt || s.image}`}
-                      src={optimizeImage(s.image, { width: 1920, quality: 90, format: "auto" })}
-                      srcSet={`${optimizeImage(s.image, { width: 1920, quality: 90, format: "auto" })} 1x, ${optimizeImage(s.image, { width: 2560, quality: 90, format: "auto" })} 2x`}
+                      src={optimizeImage(s.image, { width: 1920, quality: 95, format: "auto" })}
+                      srcSet={`${optimizeImage(s.image, { width: 1920, quality: 95, format: "auto" })} 1x, ${optimizeImage(s.image, { width: 2560, quality: 95, format: "auto" })} 2x`}
                       alt={s.title}
                       className="w-full h-full object-cover object-center"
                       loading={idx === 0 ? "eager" : "lazy"}
