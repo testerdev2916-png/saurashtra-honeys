@@ -65,7 +65,7 @@ const PAGE_OPTIONS = [
   { value: "home", label: "Home Page (1920×700)" },
   { value: "shop", label: "Shop (1920×600)" },
   { value: "our-story", label: "Our Story (1920×700)" },
-  { value: "journal", label: "Journal (1920×600)" },
+  { value: "journal", label: "Journal (1920×700)" },
   { value: "bulk-gifting", label: "Bulk & Gifting (1920×600)" },
   { value: "contact", label: "Contact (1920×600)" },
 ];
@@ -266,7 +266,7 @@ function Editor({
   const previewMobileImage = f.mobile_image_url || previewImage;
   const pageStr = (f.page || "home").toLowerCase();
   const isHome = pageStr === "home";
-  const is700h = isHome || pageStr === "our-story";
+  const is700h = isHome || pageStr === "our-story" || pageStr === "journal";
   const hideTextOverlay = is700h || pageStr === "shop";
 
   return (
@@ -295,8 +295,8 @@ function Editor({
               <ul className="list-disc pl-5 space-y-1 mt-1 text-espresso/90">
                 <li>
                   <strong>For Desktop Banners:</strong> Recommended size →{" "}
-                  <span className="font-mono font-bold">1920 × 700 px</span> (Home & Our Story) or{" "}
-                  <span className="font-mono font-bold">1920 × 600 px</span> (Shop, Journal, etc.).
+                  <span className="font-mono font-bold">1920 × 700 px</span> (Home, Our Story, Journal) or{" "}
+                  <span className="font-mono font-bold">1920 × 600 px</span> (Shop, etc.).
                 </li>
                 <li>
                   <strong>For Mobile Banners:</strong> Recommended size →{" "}
@@ -550,7 +550,7 @@ function Editor({
                 <Eye className="size-4 text-brand-orange" /> LIVE BANNER PREVIEW
               </span>
               <span className="text-[11px] font-mono font-bold text-muted-foreground bg-cream px-2 py-0.5 rounded border border-border">
-                {is700h ? "1920 × 700 px (Home & Story)" : "1920 × 600 px (Inner)"}
+                {is700h ? "1920 × 700 px (Home, Story, Journal)" : "1920 × 600 px (Inner)"}
               </span>
             </div>
 

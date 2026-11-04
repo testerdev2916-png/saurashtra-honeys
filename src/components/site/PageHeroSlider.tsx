@@ -18,8 +18,9 @@ export function PageHeroSlider({
   const isHome = page.toLowerCase() === "home";
   const isShop = page.toLowerCase() === "shop";
   const isStory = page.toLowerCase() === "our-story";
-  const is1920x700 = isHome || isStory;
-  const isTextBakedIn = isHome || isShop || isStory;
+  const isJournal = page.toLowerCase() === "journal" || page.toLowerCase() === "blog";
+  const is1920x700 = isHome || isStory || isJournal;
+  const isTextBakedIn = isHome || isShop || isStory || isJournal;
 
   return (
     <HeroSlider

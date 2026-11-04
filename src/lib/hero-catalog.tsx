@@ -73,12 +73,9 @@ export function heroRowToSlide(r: HeroRow): HeroSlide {
     eyebrow: r.eyebrow || undefined,
     title: r.title || "Promotional Banner",
     description: r.subtitle || undefined,
-    image: optimizeImage(resolved, { width: 1800, quality: 80 }),
+    image: resolved,
     mobileImage: r.mobile_image_url
-      ? optimizeImage(
-          `${r.mobile_image_url}${r.mobile_image_url.includes("?") ? "&" : "?"}v=${new Date(r.updated_at).getTime()}`,
-          { width: 800, quality: 80 },
-        )
+      ? `${r.mobile_image_url}${r.mobile_image_url.includes("?") ? "&" : "?"}v=${new Date(r.updated_at).getTime()}`
       : undefined,
     ctaText: r.cta_label || undefined,
     ctaTo: r.cta_href || "/shop",
