@@ -17,13 +17,15 @@ export function PageHeroSlider({
 
   const isHome = page.toLowerCase() === "home";
   const isShop = page.toLowerCase() === "shop";
-  const isTextBakedIn = isHome || isShop;
+  const isStory = page.toLowerCase() === "our-story";
+  const is1920x700 = isHome || isStory;
+  const isTextBakedIn = isHome || isShop || isStory;
 
   return (
     <HeroSlider
       slides={slides}
       interval={interval}
-      size={isTextBakedIn ? "home" : "inner"}
+      size={is1920x700 ? "home" : "inner"}
       variant={isTextBakedIn ? "home" : "inner"}
     />
   );
