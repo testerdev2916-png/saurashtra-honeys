@@ -29,6 +29,7 @@ import {
 } from "@/components/admin/ui";
 import {
   ArrowLeft,
+  ArrowRight,
   ArrowLeftRight,
   ArrowUp,
   ArrowDown,
@@ -166,16 +167,16 @@ function isBackPackagingImage(url: string): boolean {
   return u.includes("back");
 }
 
+function getImageSortRank(url: string): number {
+  if (isFrontPackagingImage(url)) return 1;
+  if (isBackPackagingImage(url)) return 2;
+  return 3;
+}
+
 function sortFrontFirst(imgs: string[]): string[] {
   return [...imgs].sort((a, b) => {
-    const aIsFront = isFrontPackagingImage(a);
-    const bIsFront = isFrontPackagingImage(b);
-    const aIsBack = isBackPackagingImage(a);
-    const bIsBack = isBackPackagingImage(b);
-    if (aIsFront && !bIsFront) return -1;
-    if (!aIsFront && bIsFront) return 1;
-    if (aIsBack && !bIsBack) return 1;
-    if (!aIsBack && bIsBack) return -1;
+    const rankDiff = getImageSortRank(a) - getImageSortRank(b);
+    if (rankDiff !== 0) return rankDiff;
     return 0;
   });
 }
@@ -1142,19 +1143,53 @@ const ProductForm = forwardRef<
                         >
                           {idx === 0 ? "Primary (Main)" : `Gallery ${idx + 1}`}
                         </span>
-                        {u && (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const cur = [...(f.images || [])];
-                              cur.splice(idx, 1);
-                              setF({ ...f, images: cur, image_url: cur[0] || null });
-                            }}
-                            className="text-destructive text-[10px] hover:underline font-semibold"
-                          >
-                            Remove
-                          </button>
-                        )}
+                        <div className="flex items-center gap-1">
+                          {idx > 0 && u && (
+                            <button
+                              type="button"
+                              title="Move Left"
+                              onClick={() => {
+                                const cur = [...(f.images || [])];
+                                const temp = cur[idx];
+                                cur[idx] = cur[idx - 1];
+                                cur[idx - 1] = temp;
+                                setF({ ...f, images: cur, image_url: cur[0] || null });
+                              }}
+                              className="text-forest-dark hover:text-brand-orange p-0.5 rounded hover:bg-cream"
+                            >
+                              <ArrowLeft className="size-3" />
+                            </button>
+                          )}
+                          {idx < (f.images?.length || 0) - 1 && u && (
+                            <button
+                              type="button"
+                              title="Move Right"
+                              onClick={() => {
+                                const cur = [...(f.images || [])];
+                                const temp = cur[idx];
+                                cur[idx] = cur[idx + 1];
+                                cur[idx + 1] = temp;
+                                setF({ ...f, images: cur, image_url: cur[0] || null });
+                              }}
+                              className="text-forest-dark hover:text-brand-orange p-0.5 rounded hover:bg-cream"
+                            >
+                              <ArrowRight className="size-3" />
+                            </button>
+                          )}
+                          {u && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const cur = [...(f.images || [])];
+                                cur.splice(idx, 1);
+                                setF({ ...f, images: cur, image_url: cur[0] || null });
+                              }}
+                              className="text-destructive text-[10px] hover:underline font-semibold ml-0.5"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       <div className="aspect-square rounded-xl overflow-hidden bg-cream-deep/30 border border-border/40 grid place-items-center relative">

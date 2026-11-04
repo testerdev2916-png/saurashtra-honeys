@@ -398,17 +398,17 @@ function ProductPage() {
       return u.includes("back");
     };
 
-    // Helper to sort images so FRONT packaging is always prioritized before BACK
+    const getPkgRank = (url: string) => {
+      if (isFrontPkg(url)) return 1;
+      if (isBackPkg(url)) return 2;
+      return 3;
+    };
+
+    // Helper to sort images so FRONT bottle is #1, BACK bottle is #2, and infographics come after
     const sortFrontFirst = (imgs: string[]) => {
       return [...imgs].sort((a, b) => {
-        const aIsFront = isFrontPkg(a);
-        const bIsFront = isFrontPkg(b);
-        const aIsBack = isBackPkg(a);
-        const bIsBack = isBackPkg(b);
-        if (aIsFront && !bIsFront) return -1;
-        if (!aIsFront && bIsFront) return 1;
-        if (aIsBack && !bIsBack) return 1;
-        if (!aIsBack && bIsBack) return -1;
+        const diff = getPkgRank(a) - getPkgRank(b);
+        if (diff !== 0) return diff;
         return 0;
       });
     };

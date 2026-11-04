@@ -115,16 +115,16 @@ function isBackPackagingImage(url: string): boolean {
   return u.includes("back");
 }
 
+function getImageSortRank(url: string): number {
+  if (isFrontPackagingImage(url)) return 1;
+  if (isBackPackagingImage(url)) return 2;
+  return 3;
+}
+
 function sortFrontFirst(imgs: string[]): string[] {
   return [...imgs].sort((a, b) => {
-    const aIsFront = isFrontPackagingImage(a);
-    const bIsFront = isFrontPackagingImage(b);
-    const aIsBack = isBackPackagingImage(a);
-    const bIsBack = isBackPackagingImage(b);
-    if (aIsFront && !bIsFront) return -1;
-    if (!aIsFront && bIsFront) return 1;
-    if (aIsBack && !bIsBack) return 1;
-    if (!aIsBack && bIsBack) return -1;
+    const rankDiff = getImageSortRank(a) - getImageSortRank(b);
+    if (rankDiff !== 0) return rankDiff;
     return 0;
   });
 }
