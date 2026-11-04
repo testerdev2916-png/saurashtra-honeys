@@ -11,7 +11,8 @@ import {
   inp,
   ImageUpload,
 } from "@/components/admin/ui";
-import { ArrowLeft, Save, Sparkles, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Save, Sparkles, Image as ImageIcon, Youtube, CheckCircle2 } from "lucide-react";
+import { isYouTubeUrl } from "@/lib/video-helpers";
 import {
   fetchPageSections,
   updatePageSectionSettings,
@@ -235,7 +236,7 @@ const PAGE_CONFIGS: Record<string, { title: string; sections: Record<string, Sec
           { type: "text", key: "eyebrow", label: "Eyebrow Text" },
           { type: "text", key: "heading", label: "Heading" },
           { type: "textarea", key: "description", label: "Description" },
-          { type: "video", key: "video_url", label: "Video File", folder: "pages/our-story/video" },
+          { type: "video", key: "video_url", label: "Video (YouTube URL or File Upload)", folder: "pages/our-story/video" },
           {
             type: "image",
             key: "video_poster",
@@ -446,8 +447,37 @@ function renderField(field: FieldDef, value: any, onChange: (val: any) => void) 
     );
   }
   if (field.type === "video") {
+    const isYt = isYouTubeUrl(value);
     return (
-      <div className="p-4 rounded-xl border border-border/60 bg-white">
+      <div className="p-4 rounded-xl border border-border/60 bg-white space-y-3">
+        <div>
+          <label className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5 mb-1.5">
+            <Youtube className="w-3.5 h-3.5 text-red-600" />
+            Paste YouTube Video URL (e.g. from YouTube Studio / Share link)
+          </label>
+          <input
+            className={inp}
+            placeholder="e.g. https://youtu.be/6EFfy_XYApw or https://www.youtube.com/watch?v=..."
+            value={value || ""}
+            onChange={(e) => onChange(e.target.value.trim())}
+          />
+          {isYt && (
+            <div className="mt-2 flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+              Valid YouTube Video linked — will embed directly on the page!
+            </div>
+          )}
+        </div>
+
+        <div className="relative py-1">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border/60" />
+          </div>
+          <div className="relative flex justify-center text-[11px] uppercase tracking-wider text-muted-foreground bg-white px-2">
+            Or upload video file directly
+          </div>
+        </div>
+
         <ImageUpload
           bucket={field.bucket || "media"}
           folder={field.folder || "pages/generic"}

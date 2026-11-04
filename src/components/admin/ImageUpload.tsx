@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Upload, X, Loader2, Image as ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { uploadToImageKit } from "@/lib/imagekit-upload";
+import { isYouTubeUrl, getYouTubeEmbedUrl } from "@/lib/video-helpers";
 
 export function ImageUpload({
   value,
@@ -47,13 +48,22 @@ export function ImageUpload({
       {value ? (
         <div className="relative group rounded-md overflow-hidden border border-border/50 bg-muted/20 flex items-center justify-center">
           {mediaType === "video" ? (
-            <video
-              src={value}
-              autoPlay
-              muted
-              loop
-              className="w-full h-auto max-h-[200px] object-contain"
-            />
+            isYouTubeUrl(value) ? (
+              <iframe
+                src={getYouTubeEmbedUrl(value, { autoplay: false, controls: true }) || ""}
+                title="Video preview"
+                className="w-full h-[200px] border-0"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={value}
+                autoPlay
+                muted
+                loop
+                className="w-full h-auto max-h-[200px] object-contain"
+              />
+            )
           ) : (
             <img
               src={value}

@@ -51,8 +51,8 @@ export function getYouTubeEmbedUrl(
     rel: "0",
     modestbranding: "1",
     iv_load_policy: "3",
-    disablekb: "1",
-    fs: "0",
+    disablekb: controls ? "0" : "1",
+    fs: controls ? "1" : "0",
   });
   return `https://www.youtube-nocookie.com/embed/${id}?${params.toString()}`;
 }
