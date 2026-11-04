@@ -19,7 +19,8 @@ export function PageHeroSlider({
   const isShop = page.toLowerCase() === "shop";
   const isStory = page.toLowerCase() === "our-story";
   const isJournal = page.toLowerCase() === "journal" || page.toLowerCase() === "blog";
-  const is1920x700 = isHome || isStory || isJournal;
+  // Home is 1920x700. Journal, Our Story, and Shop use 1920x600 (16/5 aspect ratio)
+  const is1920x700 = isHome;
   const isTextBakedIn = isHome || isShop || isStory || isJournal;
 
   return (

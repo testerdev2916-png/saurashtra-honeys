@@ -82,9 +82,10 @@ export function HeroSlider({
     });
   }, [i, slides?.length]);
 
-  const effVariant = variant === "home" || size === "home" || size === "md" ? "home" : "inner";
-  const aspectCls =
-    effVariant === "home" ? "aspect-square md:aspect-[192/70]" : "aspect-square md:aspect-[16/5]";
+  const is1920x700 = size === "home";
+  const aspectCls = is1920x700
+    ? "aspect-square md:aspect-[192/70]"
+    : "aspect-square md:aspect-[192/60]";
 
   if (!slides || slides.length === 0) {
     return (
@@ -162,13 +163,14 @@ export function HeroSlider({
                     <source
                       key={`mob-${s.updatedAt || s.mobileImage || s.image}`}
                       media="(max-width: 767px)"
-                      srcSet={optimizeImage(s.mobileImage || s.image, { width: 1080, quality: 85, format: "auto" })}
+                      srcSet={optimizeImage(s.mobileImage || s.image, { width: 1080, quality: 90, format: "auto" })}
                       // @ts-ignore: fetchpriority is valid in newer React versions
                       fetchpriority={idx === 0 ? "high" : "auto"}
                     />
                     <img
                       key={`desk-${s.updatedAt || s.image}`}
-                      src={optimizeImage(s.image, { width: 1920, quality: 85, format: "auto" })}
+                      src={optimizeImage(s.image, { width: 1920, quality: 90, format: "auto" })}
+                      srcSet={`${optimizeImage(s.image, { width: 1920, quality: 90, format: "auto" })} 1x, ${optimizeImage(s.image, { width: 2560, quality: 90, format: "auto" })} 2x`}
                       alt={s.title}
                       className="w-full h-full object-cover object-center"
                       loading={idx === 0 ? "eager" : "lazy"}
