@@ -138,9 +138,9 @@ export function HomeTrustStrip({
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6 sm:gap-8 lg:gap-10">
           {items.map(({ label, img }, idx) => (
             <div key={idx} className="flex flex-col items-center text-center p-2 group">
-              <div className="size-24 sm:size-28 lg:size-32 rounded-full bg-white flex items-center justify-center p-2.5 sm:p-3 mb-3.5 border border-[#E8DFC8] shadow-[0_4px_16px_rgba(0,0,0,0.05)] group-hover:shadow-[0_8px_24px_rgba(217,119,6,0.18)] group-hover:scale-108 group-hover:border-brand-orange/40 transition-all duration-300">
+              <div className="size-24 sm:size-28 lg:size-32 flex items-center justify-center p-1 sm:p-2 mb-3.5 group-hover:scale-110 transition-transform duration-300">
                 <img
-                  src={optimizeImage(img, { width: 384, quality: 90 })}
+                  src={optimizeImage(img, { width: 384, quality: 95, format: "auto" })}
                   alt={label}
                   className="w-full h-full object-contain filter drop-shadow-sm group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"

@@ -189,7 +189,7 @@ function AdminTrustItems() {
                 className={`p-4 flex items-center justify-between ${editingId === item.id ? "border-gold-deep" : ""}`}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-cream border border-border flex items-center justify-center text-brand-orange overflow-hidden p-2">
+                  <div className="w-16 h-16 flex items-center justify-center text-brand-orange overflow-hidden p-1">
                     {item.icon &&
                     (item.icon.startsWith("http") ||
                       item.icon.startsWith("/") ||
