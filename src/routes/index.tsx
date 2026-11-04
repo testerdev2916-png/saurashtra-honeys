@@ -35,21 +35,25 @@ import { fetchHeroSlides } from "@/lib/hero-catalog";
 import { optimizeImage } from "@/lib/product-images";
 import {
   fetchAllHomepageCustomerStories,
+  fetchAllHomepageTrustItems,
   type HomepageCustomerStory,
+  type HomepageTrustItem,
 } from "@/lib/homepage-cms.functions";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [categories, products, seoRes, heroSlides] = await Promise.all([
+    const [categories, products, seoRes, heroSlides, trustItems] = await Promise.all([
       fetchShopCategories(),
       fetchProducts(),
       supabase.from("site_settings").select("value").eq("key", "seo").maybeSingle(),
       fetchHeroSlides("home"),
+      fetchAllHomepageTrustItems().catch(() => []),
     ]);
     return {
       categories,
       products,
       heroSlides,
+      trustItems,
       seo: (seoRes.data?.value || null) as {
         default_title?: string;
         default_description?: string;
@@ -387,7 +391,13 @@ function Home() {
       case "hero":
         return <HomeHero key="hero" initialSlides={data.heroSlides} />;
       case "trust_strip":
-        return <HomeTrustStrip key="trust_strip" settings={settings} />;
+        return (
+          <HomeTrustStrip
+            key="trust_strip"
+            settings={settings}
+            initialItems={data.trustItems}
+          />
+        );
       case "shop_by_category":
         return (
           <HomeShopByCategory

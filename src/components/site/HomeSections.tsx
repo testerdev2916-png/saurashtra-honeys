@@ -80,7 +80,13 @@ export function HomeHero({ initialSlides }: { initialSlides?: HeroSlide[] }) {
 /* =========================================================================
    2. MAIN TRUST STRIP (Horizontal 6-card row with thin orange icons)
    ========================================================================= */
-export function HomeTrustStrip({ settings }: { settings?: Record<string, any> }) {
+export function HomeTrustStrip({
+  settings,
+  initialItems,
+}: {
+  settings?: Record<string, any>;
+  initialItems?: HomepageTrustItem[];
+}) {
   const fallbackItems = [
     { label: "Pure No Additives", img: "/images/trust/pure_no_additives.webp" },
     { label: "Raw & Unprocessed", img: "/images/trust/raw_unprocessed.webp" },
@@ -90,25 +96,38 @@ export function HomeTrustStrip({ settings }: { settings?: Record<string, any> })
     { label: "Ethical Beekeeping", img: "/images/trust/ethical_beekeeping.webp" },
   ];
 
-  const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>([]);
+  const [dbItems, setDbItems] = React.useState<HomepageTrustItem[]>(initialItems || []);
 
   React.useEffect(() => {
+    if (initialItems && initialItems.length > 0) {
+      setDbItems(initialItems);
+    }
     fetchAllHomepageTrustItems()
       .then((data) => {
         if (data && data.length > 0) setDbItems(data);
       })
       .catch((err) => console.warn("Failed to fetch trust items, using fallback", err));
-  }, []);
+  }, [initialItems]);
+
+  const activeItems = dbItems.filter((item) => item.enabled !== false);
 
   const items =
-    dbItems.length > 0
-      ? dbItems.map((item) => {
+    activeItems.length > 0
+      ? activeItems.map((item) => {
           const matched = fallbackItems.find(
             (f) => f.label.toLowerCase() === item.title.toLowerCase(),
           );
+          // Prioritize custom uploaded icon from Admin/DB; fallback only if icon is empty
+          const resolvedImg =
+            item.icon && item.icon.trim() !== ""
+              ? item.icon
+              : matched
+                ? matched.img
+                : "/images/trust/pure_no_additives.webp";
+
           return {
             label: item.title,
-            img: matched ? matched.img : item.icon || "/images/trust/pure_no_additives.webp",
+            img: resolvedImg,
           };
         })
       : fallbackItems;
