@@ -51,7 +51,7 @@ import { StructuredData, breadcrumbLd, productLd } from "@/components/site/Struc
 import { getCategoryShopSlug } from "@/lib/collection-helpers";
 import { ShoppableVideoCarousel } from "@/components/site/ShoppableVideoCarousel";
 import { optimizeImage, rewriteImageKitUrl } from "@/lib/product-images";
-import honeyProcessImg from "@/assets/honey-process-infographic.png";
+import honeyProcessImg from "@/assets/honey-process-infographic.jpg";
 
 export const Route = createFileRoute("/product/$slug")({
   validateSearch: (search: Record<string, unknown>): { variant?: string } => ({
