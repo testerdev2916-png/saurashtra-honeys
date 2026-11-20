@@ -74,7 +74,7 @@ export function HomeHero({ initialSlides }: { initialSlides?: HeroSlide[] }) {
     });
   }, [getRows]);
 
-  return <HeroSlider slides={slides} size="home" interval={5000} />;
+  return <HeroSlider slides={slides} size="home" interval={1000} />;
 }
 
 /* =========================================================================

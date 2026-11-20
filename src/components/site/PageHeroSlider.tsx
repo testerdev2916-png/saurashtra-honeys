@@ -4,7 +4,7 @@ import { fetchHeroSlides, getDefaultHeroSlides } from "@/lib/hero-catalog";
 
 export function PageHeroSlider({
   page,
-  interval = 6000,
+  interval = 1000,
 }: {
   page: "home" | "shop" | "our-story" | "journal" | "bulk-gifting" | "contact" | string;
   interval?: number;

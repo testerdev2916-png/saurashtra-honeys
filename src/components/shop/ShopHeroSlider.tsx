@@ -21,8 +21,8 @@ export function ShopHeroSlider({ initialSlides }: { initialSlides?: HeroSlide[] 
     }
   }, [initialSlides]);
 
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start", duration: 50 }, [
-    Autoplay({ delay: 5000, stopOnInteraction: false }),
+  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true, align: "start", duration: 30 }, [
+    Autoplay({ delay: 1000, stopOnInteraction: false }),
   ]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);

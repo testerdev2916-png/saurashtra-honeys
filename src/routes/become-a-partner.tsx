@@ -127,6 +127,7 @@ function Partner() {
       <HeroSlider
         variant="inner"
         size="sm"
+        interval={1000}
         slides={[
           { image: handshake, title: "Let's Grow Together.", ctaTo: "/become-a-partner" },
           { image: drizzle, title: "Stock a Brand Customers Love.", ctaTo: "/become-a-partner" },

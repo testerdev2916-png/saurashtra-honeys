@@ -18,7 +18,7 @@ export type HeroSlide = {
 
 export function HeroSlider({
   slides,
-  interval = 6000,
+  interval = 1000,
   size = "md",
   variant,
 }: {
@@ -35,12 +35,10 @@ export function HeroSlider({
   const touchX = useRef<number | null>(null);
   const isAnimating = useRef(false);
 
+  // Preload all slides immediately for fast 1s rotation without image flicker
   const [loaded, setLoaded] = useState<Set<number>>(() => {
-    const s = new Set([0]);
-    if (slides && slides.length > 1) {
-      s.add(1);
-      s.add(slides.length - 1);
-    }
+    const s = new Set<number>();
+    (slides || []).forEach((_, idx) => s.add(idx));
     return s;
   });
 
@@ -51,7 +49,7 @@ export function HeroSlider({
     isAnimating.current = true;
     setTimeout(() => {
       isAnimating.current = false;
-    }, 800);
+    }, 500);
 
     setDir(d);
     setPrevI(i);
@@ -142,7 +140,7 @@ export function HeroSlider({
 
           const transitionCls =
             isActive || isPrev
-              ? "transition-transform duration-[800ms] ease-[cubic-bezier(0.22,1,0.36,1)]"
+              ? "transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
               : "transition-none";
 
           return (
